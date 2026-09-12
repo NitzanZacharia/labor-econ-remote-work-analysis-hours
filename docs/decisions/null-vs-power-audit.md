@@ -4,7 +4,10 @@
 which identifies *why* this design was underpowered (WFH_Exposure aliased with its own
 cell_fe_vars/controls) and fixes it (a finer exposure-cell partition). The numbers below describe
 the pre-fix design and are left unchanged as a historical record — they are not the current state
-of `main.R`.
+of `main.R`. Extending this chain one more hop: `docs/decisions/hours-ddd-pivot.md` is the
+ultimate resolution — the extensive-margin DDD's power problem, diagnosed here and partially
+fixed by the granularity fix, is what motivated moving the primary specification to an
+hours-outcome DDD, which is not underpowered.
 
 **Status: VERIFIED AGAINST REAL DATA, NOT YET COMMITTED.** The two diagnostics below
 (`scripts/wfh_first_stage_check.R`, `scripts/ddd_mde_diagnostics.R`) are built, unit-tested, and

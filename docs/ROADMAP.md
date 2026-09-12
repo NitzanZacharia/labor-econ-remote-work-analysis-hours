@@ -2,6 +2,8 @@
 
 Sequential, actionable checkpoints from the current codebase to the full empirical strategy in [`motherhood_penalty_wfh_research.md`](../motherhood_penalty_wfh_research.md), built on the gap analysis and proposed signatures in [`docs/LLD.md`](LLD.md). Each checkpoint is meant to be implemented and verified independently, in order — later checkpoints depend on earlier ones being done first (dependencies noted per checkpoint).
 
+Checkpoints 1-10 predate a later pivot: weekly work hours (the intensive margin) is now the project's **primary** dependent variable, and the binary employment indicator used as `Y_{it}` throughout Checkpoints 4/5/7 below is now the **secondary** specification. See Checkpoint 11 and [`docs/decisions/hours-ddd-pivot.md`](decisions/hours-ddd-pivot.md) for the pivot itself; the checkpoint write-ups below are left as historically accurate records of what was originally built; and are cross-referenced forward where relevant.
+
 Not covered here: general test-suite construction (unit/integration tests for the *existing* functions) — the live `tests/testthat/` suite (run via `Rscript run_tests.R`) is the source of truth for that; [`archive/TESTING_BLUEPRINT.md`](archive/TESTING_BLUEPRINT.md) is the original (now superseded) planning doc, kept for history.
 
 ---
@@ -60,7 +62,7 @@ Diff the printed `etable()` coefficients/SEs for `basic_reg()` against a saved c
 
 ## Checkpoint 4 — Intensive-Margin Regression
 
-**Objective:** Implement the second dependent-variable regression (weekly work hours) required by the research doc's core DiD specification (Part 2 §1 / Part 4 §2), which today only models the employment margin.
+**Objective:** Implement the weekly-work-hours regression required by the research doc's core DiD specification (Part 2 §1 / Part 4 §2), alongside the employment-margin regression already in place. (Note: this hours regression has since become the project's *primary* specification, per Checkpoint 11 — at the time this checkpoint was written, it was the newly-added second regression.)
 
 **Implementation Tasks:**
 - New file `intensive_margin_regression.R`, function `run_intensive_margin_reg(cleaned_df, controls = DEFAULT_CONTROLS)` per the signature in `docs/LLD.md`.
@@ -71,7 +73,7 @@ Diff the printed `etable()` coefficients/SEs for `basic_reg()` against a saved c
 ```r
 Rscript main.R
 ```
-Confirm the new regression prints without error. Check `nobs(model)` equals `sum(cleaned_df$Employed == 1 & !is.na(cleaned_df$WorkHoursCont))` (accounting for any additional listwise deletion on the controls). Sanity-check the `Mother:Post` coefficient is within a plausible range (single-digit to low-double-digit hours, not e.g. >40 or highly implausible in sign given the extensive-margin result from Checkpoint 3's baseline).
+Confirm the new regression prints without error. Check `nobs(model)` equals `sum(cleaned_df$Employed == 1 & !is.na(cleaned_df$WorkHoursCont))` (accounting for any additional listwise deletion on the controls). Sanity-check the `Mother:Post` coefficient is within a plausible range (single-digit to low-double-digit hours, not e.g. >40 or highly implausible in sign given the extensive-margin result from Checkpoint 3's baseline). (This hours regression's DDD generalization later became the project's primary specification — see Checkpoint 11.)
 
 ---
 
@@ -89,6 +91,8 @@ Confirm the new regression prints without error. Check `nobs(model)` equals `sum
 Rscript -e 'source("main.R"); run_gender_placebo("G:/My Drive/Uni/econ/csv_data")'
 ```
 Confirm the model fits without a `fixest` collinearity/singularity error. Per the research doc's own success criterion, an **insignificant** `Mother:Post` coefficient (relabelled conceptually as the father-treatment interaction) supports the motherhood-specific interpretation — record the coefficient and p-value alongside the primary model's for direct comparison.
+
+Note: this placebo is built on `basic_reg()` (the now-secondary, employment-outcome regression). No hours-based placebo analog exists yet — a gap worth flagging rather than silently implying it's covered.
 
 ---
 
@@ -115,7 +119,7 @@ Inspect `idx` manually: confirm no `NA` exposure values silently propagate for o
 
 **Implementation Tasks:**
 - New file `ddd_regression.R`, function `run_ddd_regression(cleaned_df, exposure_index, controls = DEFAULT_CONTROLS)` per the `docs/LLD.md` signature.
-- Model 1 (triple interaction): `Employed ~ Mother*Post*WFH_Exposure + controls`, joined to `exposure_index` by occupation code.
+- Model 1 (triple interaction): `Employed ~ Mother*Post*WFH_Exposure + controls`, joined to `exposure_index` by occupation code. (This `Employed`-outcome DDD is now the **secondary** DDD specification — superseded in primacy by the hours-outcome DDD added in Checkpoint 11; see `docs/decisions/hours-ddd-pivot.md`.)
 - Model 2 (second-stage mechanism): extract per-occupation `Mother:Post` estimates (β_j) from occupation-stratified runs of `basic_reg()`, then regress `β_j ~ γ_0 + γ_1·WFH_Exposure_j`.
 - Depends on Checkpoint 6's `exposure_index`.
 
@@ -168,3 +172,15 @@ Confirm `outputs/` contains one file per regression table (e.g. `basic_reg_table
 Rscript main.R
 ```
 Must exit with status 0, no hard-fail validation errors, and produce the full set of `outputs/` artifacts from Checkpoint 9. Then manually tick every row of `docs/LLD.md`'s "HLD Gap Analysis" table against what now runs — every row should resolve to either "implemented" (Checkpoints 3–7) or "explicitly deferred with a recorded reason" (Checkpoint 8's age/age² decision, Checkpoint 9's optional formatted-report dependency).
+
+---
+
+## Checkpoint 11 — Hours-Worked DDD Pivot (Intensive Margin Becomes Primary)
+
+**Objective:** Pivot the project's primary dependent variable from the extensive margin (`Employed`) to the intensive margin (`WorkHoursCont`, weekly work hours), generalizing Checkpoint 7's DDD mechanism regression and Checkpoint 4's intensive-margin regression to a single hours-outcome triple-interaction model with pure occupation-level WFH exposure and a generalized Lee-bounds selection correction.
+
+**Status:** Implemented (`scripts/hours_ddd_regression.R`, `scripts/hours_ddd_lee_bounds.R`, `scripts/imbens_manski_ci.R`), wired into `main.R` §8g. **Designated primary** by decision recorded 2026-09-12. The code has not yet caught up: `RUN_HOURS_DDD_PIVOT <- FALSE` and the surrounding comments still read as exploratory/non-primary — flipping the default is a separate, not-yet-scheduled follow-up code task.
+
+Full motivation, design, and real-data results are recorded in [`docs/decisions/hours-ddd-pivot.md`](decisions/hours-ddd-pivot.md) — not duplicated here. In brief: the Checkpoint 7 `Employed`-outcome DDD remained underpowered (MDE ~4x the point estimate) even after Checkpoint 6/7's exposure-measure refinements; the hours-outcome DDD unlocks a more precise occupation-level exposure regressor (unavailable to the employment-outcome DDD because occupation is undefined for the non-employed) and yields a statistically significant, Lee-bounds-robust result well outside its own MDE.
+
+**Verification Step:** See `docs/decisions/hours-ddd-pivot.md`'s "Real-data results" section for the confirmed point estimate, MDE, and Lee-bounds/Imbens-Manski CI values.

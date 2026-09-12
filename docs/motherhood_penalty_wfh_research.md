@@ -12,9 +12,9 @@
 * **Economic & Policy Significance:** The Israeli market features high productivity alongside birth rates that are exceptionally high compared to the OECD, meaning changes to this penalty carry substantial economic weight. The findings aim to inform local policy debates on gender equality, maternity leave, and flexible work arrangements.
 
 ### II. Understanding the "Motherhood Penalty"
-* **Definition:** A negative impact on women's wages and employment rates following the birth of their first child, which establishes a persistent gap between mothers and both men and childless women.
+* **Definition:** A negative impact on women's wages and weekly work hours following the birth of their first child, which establishes a persistent gap between mothers and both men and childless women.
 * **Scope:** Long-term wage penalties generally range from 20% to 40%.
-* **Measurement:** It is estimated by evaluating the gaps in employment rates, weekly work hours, and income between mothers and childless women with similar characteristics.
+* **Measurement:** It is estimated by evaluating the gaps in weekly work hours, employment rates, and income between mothers and childless women with similar characteristics.
 * **Driving Mechanisms:**
   * **Reduced Capacity:** Mothers frequently shift to part-time roles or the less-demanding "mommy track".
   * **Care Constraints:** Driven by the unequal distribution of invisible household labor and childcare duties.
@@ -40,7 +40,7 @@
 * **Sample Definition:** The study focuses on women aged 25 to 59, defining a "Mother" as a woman with children up to 17 years of age.
 * **Empirical Strategy (DiD Model):** The primary methodology is an individual-level Difference-in-Differences (DiD) model.
   * **Populations:** The treatment group consists of mothers, while the control group consists of women without children.
-  * **Dependent Variables:** The model explains two variables: an employment indicator (1/0) and weekly work hours.
+  * **Dependent Variables:** The model explains two margins of labor supply: weekly work hours (the **primary** dependent variable, conditional on employment) and a binary employment indicator (1/0, retained as a secondary specification).
 * **Descriptive & Robustness Analysis:**
   * **Trend Analysis:** Comparing pre- and post-COVID employment trends between mothers and childless women, assessing sensitivity to the youngest child's age, and analyzing broader gender/parental employment gaps.
   * **Remote Work Potential:** Evaluating if professions with a naturally high potential for remote work (e.g., tech vs. cleaning/services) experienced a more significant reduction in the penalty.
@@ -62,11 +62,11 @@ The primary empirical strategy relies on an individual-level DiD model to isolat
 $$Y_{it} = \beta_0 + \beta_1 \cdot \text{Mother}_i + \beta_2 \cdot \text{Post}_t + \beta_3 \cdot (\text{Mother}_i \times \text{Post}_t) + \mathbf{X}'_{it}\gamma + \varepsilon_{it}$$
 
 * **$Y_{it}$ (Dependent Variables):** The model evaluates two distinct margins of labor supply:
-  * **Extensive Margin:** A binary employment indicator ($1$ if employed, $0$ otherwise).
-  * **Intensive Margin:** A continuous variable measuring weekly work hours.
+  * **Intensive Margin (primary):** A continuous variable measuring weekly work hours (`WorkHoursCont`), conditional on employment.
+  * **Extensive Margin (secondary):** A binary employment indicator ($1$ if employed, $0$ otherwise).
 * **$\text{Mother}_i$ (Treatment Group):** A dummy variable equal to $1$ for women with children up to age 17, and $0$ for the control group consisting of women without children.
 * **$\text{Post}_t$ (Time Period):** A dummy variable capturing the structural shift toward remote work, equal to $1$ for the post-pandemic period (2021-2023) and $0$ for the pre-pandemic baseline (2017-2019). The transitional year of 2020 is explicitly excluded from the data.
-* **$\beta_3$ (Parameter of Interest):** The DiD estimator. It isolates the differential change in employment outcomes for mothers relative to childless women after the widespread adoption of remote work. A statistically significant, positive $\beta_3$ would indicate a reduction in the motherhood penalty.
+* **$\beta_3$ (Parameter of Interest):** The DiD estimator. For the primary (hours) specification, it isolates the differential change in weekly work hours for mothers relative to childless women after the widespread adoption of remote work; a statistically significant, positive $\beta_3$ indicates a narrowing of the motherhood penalty on the intensive margin. The same estimator, applied to the secondary (employment) specification, isolates the differential change in employment outcomes instead.
 * **$\mathbf{X}'_{it}$ (Controls & Fixed Effects):** A vector used to partial out unobserved heterogeneity and individual-level characteristics.
 * **$\varepsilon_{it}$ (Error Term):** Unobserved idiosyncratic shocks. For individual-level labor surveys over time, cluster-robust standard errors are typically applied here to account for group-level dependencies.
 
@@ -74,13 +74,13 @@ $$Y_{it} = \beta_0 + \beta_1 \cdot \text{Mother}_i + \beta_2 \cdot \text{Post}_t
 To verify that remote work is the actual mechanism driving the results, the analysis extends beyond the basic DiD to examine occupational heterogeneity.
 
 * **Mechanism Test:** The model investigates whether professions with a high inherent capacity for remote work (e.g., high-tech sectors) experienced a sharper decline in the motherhood penalty compared to location-bound professions (e.g., service and cleaning sectors).
-* **Econometric Expansion:** This naturally extends the architecture into a Triple Differences (DDD) framework. By introducing an occupational "WFH-ability" index as a third interaction tier ($\text{Mother}_i \times \text{Post}_t \times \text{WFH\_Potential}_j$), the model can mathematically isolate whether the narrowing of the penalty is strictly driven by the feasibility of working from home.
+* **Econometric Expansion:** This naturally extends the architecture into a Triple Differences (DDD) framework. By introducing an occupational "WFH-ability" index as a third interaction tier ($\text{Mother}_i \times \text{Post}_t \times \text{WFH\_Potential}_j$), the model can mathematically isolate whether the narrowing of the penalty is strictly driven by the feasibility of working from home. The primary implementation of this DDD uses weekly work hours as $Y_{it}$ (see `docs/decisions/hours-ddd-pivot.md`); a secondary DDD using the binary employment indicator as $Y_{it}$ is also estimated (see `docs/decisions/calibrated-exposure-and-cell-ddd.md`).
 
 ### 3. Identifying Assumptions and Robustness Checks
 To validate the causal interpretation of the DiD estimator, the research design incorporates several critical diagnostic steps:
 
 * **Parallel Trends Assumption:** The fundamental identifying assumption of any DiD model. The current phase of the research includes running descriptive statistics and testing pre-treatment trends (2017-2019) to verify that employment trajectories for mothers and childless women were parallel prior to the exogenous shock of the pandemic.
-* **Child Age Sensitivity Analysis:** A heterogeneity check that breaks down the treatment group based on the age of the youngest child, testing how employment rates fluctuate for mothers of infants versus older children.
+* **Child Age Sensitivity Analysis:** A heterogeneity check that breaks down the treatment group based on the age of the youngest child, testing how weekly work hours (primary) and employment rates (secondary) fluctuate for mothers of infants versus older children.
 * **Gender Placebo Test:** The empirical strategy is replicated entirely for men, utilizing fathers as the treatment group and childless men as the control. This balance test ensures the observed dynamics in the primary model are uniquely tied to the motherhood penalty, rather than a broader macroeconomic shift affecting all parents.
 
 ---
@@ -93,10 +93,10 @@ To validate the causal interpretation of the DiD estimator, the research design 
 * **Variables to Exclude:** Drop the "work mobility" and "work status" variables.
 
 ### 2. Dependent Variables Definition
-* **Extensive Margin (Employment Indicator):** Use the survey question regarding whether the individual "worked last week." Code as `1` for employed and `0` for all others (combining both unemployed and not in the labor force). This serves as the primary dependent variable.
-* **Intensive Margin (Work Hours):** Based on "hours worked last week / usually" (total across all jobs or main job). Since this data is provided as a categorical range, recode the values to the continuous midpoint (median) of each respective range.
+* **Intensive Margin (Work Hours):** Based on "hours worked last week / usually" (total across all jobs or main job). Since this data is provided as a categorical range, recode the values to the continuous midpoint (median) of each respective range. **This serves as the primary dependent variable** (`WorkHoursCont`), conditional on employment; see `docs/decisions/hours-ddd-pivot.md` and `docs/decisions/intensive-margin-lee-bounds.md` for the selection-correction machinery this requires.
   * Review codes `11` and `12` to determine whether to merge them into existing categories or drop them entirely.
   * Drop observations with code `99`.
+* **Extensive Margin (Employment Indicator):** Use the survey question regarding whether the individual "worked last week." Code as `1` for employed and `0` for all others (combining both unemployed and not in the labor force). Retained as the secondary dependent variable, and as the selection variable underlying the intensive-margin Lee-bounds correction.
 
 ### 3. Explanatory Variables & Controls
 * **Categorical Collapsing:** Collapse sparse categories to ensure robust group sizes. Check for underlying correlations between independent variables (e.g., origin/ethnicity and the number of children) to avoid multicollinearity.
@@ -107,7 +107,7 @@ To validate the causal interpretation of the DiD estimator, the research design 
 
 ### 4. Descriptive Statistics
 * Calculate the means of all variables to observe their distribution across different demographic and treatment groups.
-* Specifically isolate and highlight the mean of the dependent variables (e.g., baseline employment rates).
+* Specifically isolate and highlight the mean of the dependent variables (e.g., baseline weekly work hours, and baseline employment rates as the secondary margin).
 
 ### 5. Modeling Strategy
 * **Demographic Stratification:** Initially estimate the regression model in R separately for Jewish and Arab women. Based on these isolated results, make an informed decision on whether to proceed with a unified model or keep the analysis stratified.
@@ -124,8 +124,8 @@ To validate the causal interpretation of the DiD estimator, the research design 
 
 ### 2. Variable Construction
 * **Outcome Variables ($Y_{it}$):**
-  * Employment status (Binary: 1 if employed, 0 otherwise).
-  * Weekly working hours (Continuous).
+  * Weekly working hours (Continuous) — primary.
+  * Employment status (Binary: 1 if employed, 0 otherwise) — secondary.
 * **Treatment Variable ($Mother_i$):** A dummy variable equal to 1 if the individual is female and has at least one child up to age 17 in the household.
 * **Time Variable ($Post_t$):** A dummy variable equal to 1 for the post-COVID period (2021–2023).
 * **Control Variables ($X'_{it}$):** Years of education, age group (`GilNK`, categorical — no continuous age or birth-year variable exists in the raw CBS extract; see `docs/decisions/checkpoint8-age-age2-controls.md`), marital status, religion/level of religiosity, and district of residence.
@@ -134,14 +134,17 @@ To validate the causal interpretation of the DiD estimator, the research design 
 The core analysis utilizes a Difference-in-Differences model to estimate the impact of the transition to remote work on the motherhood penalty. The baseline regression for each occupational group is:
 $$Y_{it} = \beta_0 + \beta_1 Mother_i + \beta_2 Post_t + \beta_3 (Mother_i \times Post_t) + X'_{it}\gamma + \epsilon_{it}$$
 
+Per §2 above, $Y_{it}$ is primarily `WorkHoursCont` (weekly work hours, conditional on employment); the same specification with $Y_{it} = $ `Employed` is retained as the secondary regression.
+
 ### 4. Remote Work Exposure (WFH) Mechanism
 To assess if the reduction in the motherhood penalty is driven by remote work, the sample will be aggregated by occupation type.
 * **WFH Exposure Index:** Occupations will be characterized by their remote work potential. This index will be constructed using the 2020 CBS work-from-home variable to measure actual "WFH Exposure" (e.g., comparing tech workers whose WFH share jumped from 10% to 50% against cleaning workers with a 0% change).
 * **Literature Anchoring:** WFH classifications will be cross-referenced with established literature, including WFH Research (Nick Bloom, Stanford) and Israeli policy papers (e.g., Cohen & Manor, 2024).
 * **Mechanism Regression:** A second-stage regression will test if occupations with high WFH exposure experienced a larger reduction in the penalty ($\beta_3$ from the primary model):
 $$\beta_j = \gamma_0 + \gamma_1 WFH\_Exposure_j + \epsilon_j$$
+The primary DDD implementation folds this into a single triple-interaction regression on weekly work hours (`Mother x Post x WFH_Exposure`, occupation-level exposure) rather than a two-stage design — see `docs/decisions/hours-ddd-pivot.md`. The two-stage sketch above and the employment-outcome DDD it originally described are retained as the secondary specification.
 
 ### 5. Diagnostics and Robustness Checks
-* **Descriptive Statistics & Parallel Trends:** Prior to running regressions, the parallel trends assumption will be visually validated by plotting employment gaps between comparison groups over time. Additional plots will map women's employment as a function of the youngest child's age.
+* **Descriptive Statistics & Parallel Trends:** Prior to running regressions, the parallel trends assumption will be visually validated by plotting weekly-work-hours gaps (primary) and employment gaps (secondary) between comparison groups over time. Additional plots will map women's work hours and employment as a function of the youngest child's age.
 * **Gender Placebo Test:** The DiD model will be replicated for men (comparing fathers to childless men). An insignificant $\beta_3$ coefficient for men will confirm that the observed effect is a specific *motherhood* penalty rather than a general *parenthood* penalty.
 * **Age of Child Sensitivity:** The analysis will be tested across different age thresholds for the youngest child (e.g., under 12), operating on the premise that younger children require more intensive care and therefore induce a higher penalty.

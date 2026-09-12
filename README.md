@@ -22,26 +22,29 @@ The core analysis is a mother/non-mother × pre/post-2021 difference-in-differen
 
 $$Y_{it} = \beta_0 + \beta_1 \cdot \text{Mother}_i + \beta_2 \cdot \text{Post}_t + \beta_3 \cdot (\text{Mother}_i \times \text{Post}_t) + X'_{it}\gamma + \varepsilon_{it}$$
 
-- **Y**: employment (extensive margin) and weekly work hours (intensive margin).
+- **Y**: weekly work hours (intensive margin, **primary**) and employment (extensive margin, secondary).
 - **Mother**: 1 for women with a child under 17 (treatment group); 0 for childless women (control group).
 - **Post**: 1 for 2021–2023 (post-shift), 0 for 2017–2019 (baseline); 2020 is excluded as a transitional year.
-- **β₃**: the DiD estimator — the differential post-shift change in outcomes for mothers vs. childless women. A significant positive β₃ (on employment) indicates a narrowing penalty.
+- **β₃**: the DiD estimator — the differential post-shift change in outcomes for mothers vs. childless women. For the primary (hours) specification, a significant positive β₃ indicates a narrowing of the penalty on the intensive margin; the same estimator on the secondary (employment) specification indicates a narrowing extensive-margin penalty.
 - **X'**: controls (education, age group, marital status, religiosity, district — see `DEFAULT_CONTROLS` below); errors are clustered by individual (`IDPUF`).
 
-The baseline employment regression is estimated on the full pooled sample and separately for Jewish and Arab women (`Leom == 1` / `Leom == 2`), to check whether the effect differs by population group.
+The secondary (employment) regression is estimated on the full pooled sample and separately for Jewish and Arab women (`Leom == 1` / `Leom == 2`), to check whether the effect differs by population group.
 
-Beyond the baseline, the project implements a fuller empirical strategy, tracked checkpoint-by-checkpoint in [`docs/ROADMAP.md`](docs/ROADMAP.md):
-- an **intensive-margin** regression on usual weekly work hours (conditional on employment), plus
+The project implements a fuller empirical strategy, tracked checkpoint-by-checkpoint in [`docs/ROADMAP.md`](docs/ROADMAP.md):
+- the **primary intensive-margin** regression on usual weekly work hours (conditional on employment), plus
   a Lee (2009) trimming-bounds correction (`intensive_margin_lee_bounds.R`) for the selection risk
   that conditioning on employment introduces (see `docs/decisions/intensive-margin-lee-bounds.md`),
-- a **gender placebo** test (fathers vs. childless men) to check the effect is motherhood-specific rather than a general parenthood/macro shift — an insignificant β₃ here supports the motherhood-specific reading,
-- an occupation-level **WFH-exposure index** and a **triple-differences (DDD) mechanism regression** (`Employed ~ Mother×Post×WFH_Exposure`) testing whether the narrowing penalty is actually driven by an occupation's remote-work exposure, cross-referenced against literature anchors (Bloom; Cohen & Manor 2024),
+- a **primary triple-differences (DDD) mechanism regression on hours** (`WorkHoursCont ~ Mother×Post×WFH_Exposure`, pure occupation-level exposure), plus a generalized Lee-bounds correction and Imbens-Manski CI, testing whether the narrowing penalty is actually driven by an occupation's remote-work exposure — see [`docs/decisions/hours-ddd-pivot.md`](docs/decisions/hours-ddd-pivot.md) (**note:** implemented but still gated off by default in `main.R` via `RUN_HOURS_DDD_PIVOT <- FALSE`; the code hasn't caught up to this doc's primacy decision yet — see that memo),
+- the same **DDD mechanism regression on employment** (`Employed ~ Mother×Post×WFH_Exposure`, cell-based exposure) as the secondary specification, cross-referenced against literature anchors (Bloom; Cohen & Manor 2024),
+- a **gender placebo** test (fathers vs. childless men) to check the effect is motherhood-specific rather than a general parenthood/macro shift — an insignificant β₃ here supports the motherhood-specific reading (currently only implemented for the secondary/employment specification),
 - a robustness check comparing the full sample against `Muasak`-observed-only rows,
 - and a set of descriptive/child-age breakdowns (employment trajectories by youngest child's age, on the premise that younger children demand more intensive care).
 
 Two methodological gaps between the original research plan and the actual CBS extract were resolved as recorded decisions rather than left ambiguous — see [`docs/decisions/`](docs/decisions/):
 - the WFH-exposure index anchors to **2021**, not the originally-planned 2020 (no 2020 raw extract exists for this project),
 - the age control is the categorical **`GilNK`** age-group code, not continuous age/age² (no continuous age or birth-year variable exists in the raw extract).
+
+A further pivot changed which margin is primary: see [`docs/decisions/hours-ddd-pivot.md`](docs/decisions/hours-ddd-pivot.md) for the decision to make weekly work hours (not binary employment) the project's primary dependent variable, and `docs/ROADMAP.md`'s Checkpoint 11.
 
 ## Data
 
@@ -68,7 +71,12 @@ source("main.R")
 
 or from a shell: `Rscript main.R`.
 
-This runs the full default pipeline — load/validate data, comparative stats, the three baseline regressions (pooled, Jewish, Arab), the intensive-margin regression plus its Lee (2009) selection-bounds correction, child-age descriptives, diagnostics, and the full WFH-exposure/DDD analysis (four exposure measures, an ISCO-masking sensitivity check, the primary cell-based DDD with a runtime collinearity diagnostic, and three occupation-level robustness DDDs) — then writes every result to `outputs/` (see below). Two pieces of the empirical strategy are deliberately **not** wired into this default run and must be invoked manually:
+This runs the full default pipeline — load/validate data, comparative stats, the primary intensive-margin regression plus its Lee (2009) selection-bounds correction, the three secondary employment regressions (pooled, Jewish, Arab), child-age descriptives, diagnostics, and the full WFH-exposure/DDD analysis (four exposure measures, an ISCO-masking sensitivity check, the secondary cell-based DDD with a runtime collinearity diagnostic, and three occupation-level robustness DDDs) — then writes every result to `outputs/` (see below). Three pieces of the empirical strategy are deliberately **not** wired into this default run and must be invoked manually:
+
+```r
+# Primary DDD on hours (implemented, but still off by default -- see docs/decisions/hours-ddd-pivot.md)
+source("main.R")  # after setting RUN_HOURS_DDD_PIVOT <- TRUE near the top of main.R
+```
 
 ```r
 # Robustness check: full sample vs. Muasak-observed-only
@@ -97,16 +105,19 @@ Runs the `testthat` suite in `tests/testthat/` (data processing, validation, sch
 | `main.R` | — | Entry point. Sources all modules from `scripts/`, loads/validates/cleans data (with caching and schema-drift checking), runs comparative stats, the baseline regressions, the intensive-margin regression, child-age descriptives, and diagnostics, then exports every result to `outputs/`. |
 | `scripts/data_processing.R` | `load_and_clean_data()` | Loads raw CSVs, filters to the analysis sample, and builds every derived variable (see below). Also defines `DEFAULT_CONTROLS`, the single source of truth for regression controls. |
 | `scripts/validation.R` | `validate_cleaned_df()`, `check_schema_drift()`, `check_idpuf_panel_structure()`, `check_wfh_refweek_avadbeshavua()` | Hard/soft-fail data-quality guards on the cleaned data; a header-only guard against CBS column-order drift breaking the positional column drops; a reporting-only check on how much `IDPUF` repeats across years/the Post divide; and a verification of the `WFH_RefWeek`/`AvadBeshavua` raw-data assumption stated in `data_processing.R`'s comments. |
-| `scripts/comparative_statistics.R` | `run_comparative_stats()` | Missingness audit, employment-variable audit (`Muasak` vs. `Employed` vs. work hours), employment rates by mother status, and a work-mobility-over-time trend plot. |
-| `scripts/basic_regression.R` | `basic_reg()` | Primary DiD regression: `Employed ~ Mother + Post + Mother:Post + controls`, clustered by `IDPUF`. |
+| `scripts/comparative_statistics.R` | `run_comparative_stats()` | Missingness audit, employment-variable audit (`Muasak` vs. `Employed` vs. work hours), `WorkHoursCont` summary stats among the employed, employment rates by mother status, and a work-mobility-over-time trend plot. |
+| `scripts/basic_regression.R` | `basic_reg()` | Secondary DiD regression: `Employed ~ Mother + Post + Mother:Post + controls`, clustered by `IDPUF`. |
 | `scripts/basic_reg_compared_data.R` | `basic_reg_comp()` | Robustness check comparing the full sample against `Muasak`-observed-only rows. Defined but **not called by default** from `main.R` — run manually if needed. |
-| `scripts/intensive_margin_regression.R` | `run_intensive_margin_reg()` | Intensive-margin counterpart to `basic_reg()`: `WorkHoursCont ~ Mother + Post + Mother:Post + controls`, estimated on `Employed == 1` only. |
+| `scripts/intensive_margin_regression.R` | `run_intensive_margin_reg()` | **Primary** DiD regression: `WorkHoursCont ~ Mother + Post + Mother:Post + controls`, estimated on `Employed == 1` only. |
 | `scripts/intensive_margin_lee_bounds.R` | `run_intensive_margin_lee_bounds()` | Lee (2009) trimming-bounds correction for the above: since `Employed` is itself a DiD outcome, conditioning the hours regression on `Employed == 1` risks selection bias if WFH differentially pulls marginal mothers into work post-2021. Reports a `[lower, upper]` bound on `Mother:Post` alongside the untrimmed point estimate — see `docs/decisions/intensive-margin-lee-bounds.md`. |
 | `scripts/gender_placebo.R` | `run_gender_placebo()` | Loads/validates the male subsample and reruns `basic_reg()` on it (fathers vs. childless men), as a placebo for the motherhood-specific interpretation. Sourced by `main.R` but **not called by default**. |
 | `scripts/wfh_exposure_index.R` | `build_wfh_exposure_index()` | Occupation-level (ISCO-08) WFH-exposure index, anchored to 2021 (see `docs/decisions/checkpoint6-wfh-anchor-year.md`). Sourced and called by default from `main.R` (one of four exposure measures — see `docs/decisions/calibrated-exposure-and-cell-ddd.md`). |
 | `scripts/isco_masking_diagnostics.R` | `check_isco_masking_sensitivity()` | Sensitivity check for CBS's ISCO-08 disclosure masking: since `wfh_exposure_index.R`/`wfh_exposure_cells.R` both drop masked-occupation rows, this compares realized WFH between masked and unmasked rows within the same coarse (`ISCO1`) occupation family, as a proxy for whether that dropped subsample is likely biasing the exposure index. |
 | `scripts/ddd_collinearity_diagnostics.R` | `check_spec1_collinearity()` | Runtime collinearity diagnostic for the primary DDD's Spec 1 (additive controls): recomputes `WFH_Exposure`'s own R²/VIF against the cell-defining controls and the Spec 1 design matrix's condition number from the live data, so these figures can't silently go stale as a hardcoded comment would. Base R only (`lm()`, `kappa()`) — deliberately avoids adding `car` as a dependency. |
-| `scripts/ddd_regression.R` | `run_ddd_regression()` | Triple-differences mechanism test: joins the exposure index onto the sample and estimates `Employed ~ Mother*Post*WFH_Exposure + controls`, plus a precision-weighted second-stage regression of per-occupation `Mother:Post` estimates on exposure (with a dropped-vs-retained-occupation exposure diagnostic). Sourced and called by default from `main.R`, three times — once each for the calibrated, external, and realized exposure measures (robustness checks; the primary DDD is the cell-based regression built directly in `main.R` §8a). |
+| `scripts/ddd_regression.R` | `run_ddd_regression()` | **Secondary** triple-differences mechanism test: joins the exposure index onto the sample and estimates `Employed ~ Mother*Post*WFH_Exposure + controls`, plus a precision-weighted second-stage regression of per-occupation `Mother:Post` estimates on exposure (with a dropped-vs-retained-occupation exposure diagnostic). Sourced and called by default from `main.R`, three times — once each for the calibrated, external, and realized exposure measures (robustness checks; the secondary DDD itself is the cell-based regression built directly in `main.R` §8a). |
+| `scripts/hours_ddd_regression.R` | `run_hours_ddd_regression()` | **Primary** triple-differences DDD on hours: `WorkHoursCont ~ Mother*Post*WFH_Exposure + controls`, pure occupation-level exposure, `Employed == 1` only. Wired into `main.R` §8g behind `RUN_HOURS_DDD_PIVOT` (default `FALSE`) — see `docs/decisions/hours-ddd-pivot.md`. |
+| `scripts/hours_ddd_lee_bounds.R` | `run_hours_ddd_lee_bounds()` | Generalized Lee (2009) bounds for the above: selection counterfactual stratified by cell-based `WFH_Exposure` quartile, outcome regression on occupation-level `WFH_Exposure`. Same `RUN_HOURS_DDD_PIVOT` gate. |
+| `scripts/imbens_manski_ci.R` | `imbens_manski_ci()` | Shared Imbens-Manski (2004) partial-identification CI solver, reused by both `intensive_margin_lee_bounds.R` and `hours_ddd_lee_bounds.R`. |
 | `scripts/israeli_market_mismatch.R` | `check_market_mismatch()` | Descriptive-only exhibit comparing theoretical (Dingel & Neiman) vs. realized (2022-23) WFH by occupation — a thin wrapper around `calibrate_isco_exposure()`. Takes an `exposure_path` parameter (default: the real, locally-supplied `israeli_cbs_wfh_2digit.csv`) so it's testable without that file. Invoked via `run_mismatch.R`, not sourced by `main.R`. |
 | `scripts/employment_by_child_age.R` | `employment_by_child_age()` | Employment rates and a controlled regression by youngest-child age bin, with raw/adjusted-rate plots. |
 | `scripts/Diagnostics.R` | `run_diagnostics()` | 2×2 DiD table, event-study pre-trend plot, and missing-value audits for the regression variables. |
@@ -117,11 +128,11 @@ Runs the `testthat` suite in `tests/testthat/` (data processing, validation, sch
 
 | Variable | Definition |
 |---|---|
-| `Employed` | `1` if `Muasak == 1` ("employed"), else `0` — unemployed and not-in-labor-force are both treated as not working. |
+| `WorkHoursCont` | **Primary dependent variable.** Continuous usual weekly work hours, derived from the binned `ShaotAvodaBederechKlalNK` (bin medians; irregular-hours codes imputed from observed medians in the matching range). Defined only for `Employed == 1`. |
+| `Employed` | Secondary dependent variable, and the selection variable for `WorkHoursCont`'s Lee-bounds correction. `1` if `Muasak == 1` ("employed"), else `0` — unemployed and not-in-labor-force are both treated as not working. |
 | `Mother` | `1` if the respondent has any children under 17 (sex-agnostic in derivation — read as "Father" for the male subsample used in the gender placebo test). |
 | `Post` | `1` for survey years ≥ 2021 (the post-WFH-shift period). |
 | `WFH` | Works-from-home indicator; only defined for 2021+ (not asked pre-COVID). Feeds the WFH-exposure index. |
-| `WorkHoursCont` | Continuous usual weekly work hours, derived from the binned `ShaotAvodaBederechKlalNK` (bin medians; irregular-hours codes imputed from observed medians in the matching range). Dependent variable of the intensive-margin regression. |
 | `TeudaGvoha` | Highest education, collapsed into 6 groups: Below High School, High School (no matriculation), Matriculation (Bagrut), Post-secondary non-academic, Academic Degree (BA/MA/PhD), Other/No Certificate. |
 | `BirthContinent` | Country of birth grouped by continent (Israel kept as its own category rather than folded into Asia); a small multi-continent CBS code is bucketed as "Other". |
 | `WorksOutsideLocality` | `1` if she commutes outside her locality of residence for work, derived from `DargatNayadut`; used in comparative statistics only, not as a regression control. |

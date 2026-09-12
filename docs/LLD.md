@@ -117,7 +117,7 @@ See the "Analysis-critical derived columns" table below for each column's exact 
 
 | Column | Type | Values / levels | NA rate | Derivation |
 |---|---|---|---|---|
-| `Employed` | integer | `{0, 1}` | **0.000%** | `1` iff `Muasak == 1`, else `0` (unemployed + not-in-labor-force both → `0`) |
+| `Employed` | integer | `{0, 1}` | **0.000%** | `1` iff `Muasak == 1`, else `0` (unemployed + not-in-labor-force both → `0`). **Secondary outcome variable** (and the selection variable for `WorkHoursCont`'s Lee-bounds correction) — see `docs/decisions/hours-ddd-pivot.md`. |
 | `Mother` | integer | `{0, 1}` | **0.000%** | `1` iff `MisparYeladimAd17MB > 0` |
 | `Post` | integer | `{0, 1}` | **0.000%** | `1` iff `ShnatSeker >= 2021` |
 | `WFH` | numeric | `{0, 1}` | 64.726% | Usual work location, from `AvodaMeHaBayit`: `1`→`1`, `2`→`0`, `9` ("unknown")→**`NA`**, blank→`NA`. Only defined for `ShnatSeker >= 2021`; `NA` for all pre-2021 rows *by design* (question wasn't asked). The NA rate rose from 63.938% when code `9` stopped being silently recoded as `0` |
@@ -127,7 +127,7 @@ See the "Analysis-critical derived columns" table below for each column's exact 
 | `WFH_Arrangement` | factor (3 levels) | `On-site` (91,480), `Hybrid` (15,685), `Fully remote` (9,655) | 68.659% | Binned from `WFH_Share`: `0` → On-site, `(0, 0.9)` → Hybrid, `>= 0.9` → Fully remote |
 | `ISCO_masked` | logical | `{TRUE, FALSE}` | **0.000%** | `TRUE` where the raw `MishlachYad_ISCO_08_2` held a CBS disclosure mask (`XX`, `7X`, …) rather than a code. 2.365% of the analysis sample; 7.5% of all employed in the raw 2021 file, since masking concentrates in thin occupation cells |
 | `ISCO1` | numeric | `[1, 9]` | 18.052% | 1-digit ISCO-08 major group, recovered from the first character of the raw code so partially-masked values (`7X` → `7`) survive. Non-`NA` for 231 employed 2021 rows that `MishlachYad_ISCO_08_2` loses entirely |
-| `WorkHoursCont` | numeric | `[0, 78.5]` | 0.001% (3 rows) | Bin-median lookup for `ShaotAvodaBederechKlalNK` codes 0–10; codes 11/12 imputed from the median of the matching bin range, computed separately within each `Post` period (not pooled across 2017–2023 — pooling would blend the pre/post hour distributions and dampen any real period-specific intensity shift); `NA` for code 99 |
+| `WorkHoursCont` | numeric | `[0, 78.5]` | 0.001% (3 rows) | Bin-median lookup for `ShaotAvodaBederechKlalNK` codes 0–10; codes 11/12 imputed from the median of the matching bin range, computed separately within each `Post` period (not pooled across 2017–2023 — pooling would blend the pre/post hour distributions and dampen any real period-specific intensity shift); `NA` for code 99. **Primary outcome variable** (project-wide, as of `docs/decisions/hours-ddd-pivot.md`) — defined only for `Employed == 1` rows. |
 | `TeudaGvoha` | factor (6 levels) | `Below High School`, `High School (no matriculation)`, `Matriculation (Bagrut)`, `Post-secondary, non-academic`, `Academic Degree (BA/MA/PhD)`, `Other/No Certificate` | 2.135% | Collapsed from 11 raw codes; `NA` reserved for raw code 99 ("unknown") |
 | `BirthContinent` | factor (6 levels) | `Africa`, `Asia`, `Europe`, `Israel`, `North America`, `Other` | 0.218% | Collapsed from 16 raw `SemelEretzLeda` codes; `NA` reserved for raw code 16 (ambiguous "unknown"/"other" in CBS's own codebook) |
 | `WorksOutsideLocality` | integer | `{0, 1}` | 16.552% | From `DargatNayadut`: `1`→`0`, `2`–`7`→`1`, `0`/`8`/`NA`→`NA` |
@@ -156,7 +156,7 @@ Regression-control columns (`MatzavMishpachti`, `Dat`, `GilNK`, `MachozMegurim`,
 
 ### Null-handling logic, by variable class
 
-1. **Derived binary outcomes** (`Employed`, `Mother`, `Post`) — never `NA` by construction; treat any `NA` as a hard failure, not data to impute.
+1. **Derived binary outcomes** (`Employed`, `Mother`, `Post`) — never `NA` by construction; treat any `NA` as a hard failure, not data to impute. `Employed` is now the secondary outcome variable; the primary outcome, `WorkHoursCont`, is continuous and handled separately (see the "Analysis-critical derived columns" table above).
 2. **Category-grouping variables** (`TeudaGvoha`, `BirthContinent`) — `NA` is reserved *specifically* for the raw "unknown" code (99 / 16 respectively), never introduced by the grouping logic itself for a valid code. `fixest::feols()` silently listwise-deletes these rows; that's acceptable given the low rates above, but should be watched if raw data quality changes.
 3. **Structurally-conditional variables** (`WFH`) — `NA` encodes "question not applicable this year," not missingness. Must never be imputed or treated as `0`.
 4. **Mobility/commute variables** (`WorksOutsideLocality`) — `NA` covers both "didn't work" and "unknown," which are semantically different but not currently distinguished; flagged as a modeling simplification, not a defect.
@@ -205,6 +205,8 @@ run_comparative_stats(cleaned_df: tibble) ->
   ))
 
 # ── basic_regression.R / basic_reg_compared_data.R ──────────────────────────
+# Secondary (extensive-margin) regressions -- see intensive_margin_regression.R below for the
+# primary (hours) regression, per docs/decisions/hours-ddd-pivot.md.
 basic_reg(cleaned_data: tibble) ->
   invisible(list(table = etable_df, models = list(employed = fixest)))
 # Employed ~ Mother + Post + Mother:Post + DEFAULT_CONTROLS, cluster = ~IDPUF.
@@ -215,6 +217,7 @@ basic_reg_comp(cleaned_data: tibble) ->
 # Not called from main.R by default.
 
 # ── intensive_margin_regression.R / intensive_margin_lee_bounds.R ──────────
+# Primary (intensive-margin, hours) regressions -- see docs/decisions/hours-ddd-pivot.md.
 run_intensive_margin_reg(cleaned_df: tibble, controls: character = DEFAULT_CONTROLS) ->
   invisible(list(table = etable_df, models = list(hours = fixest)))
 # WorkHoursCont ~ Mother + Post + Mother:Post + controls, cluster = ~IDPUF, Employed==1 only.
@@ -228,6 +231,45 @@ run_intensive_margin_lee_bounds(cleaned_df: tibble, controls: character = DEFAUL
   ))
 # Lee (2009) trimming bounds for run_intensive_margin_reg()'s Employed==1 selection risk —
 # see docs/decisions/intensive-margin-lee-bounds.md.
+
+# ── hours_ddd_regression.R / hours_ddd_lee_bounds.R / imbens_manski_ci.R ────
+# Primary DDD (intensive margin, hours) -- generalizes run_ddd_regression() (below) and
+# run_intensive_margin_lee_bounds() (above) to a single triple-interaction hours regression with
+# pure occupation-level exposure. See docs/decisions/hours-ddd-pivot.md for full design and results.
+# Wired into main.R section 8g behind RUN_HOURS_DDD_PIVOT (currently FALSE -- code/docs lag, see
+# the memo's "Resolved" section).
+run_hours_ddd_regression(cleaned_df: tibble, exposure_index: tibble,
+                          controls: character = DEFAULT_CONTROLS) ->
+  invisible(list(table = etable_df, model = fixest, n_employed = integer(1), n_matched = integer(1)))
+# WorkHoursCont ~ Mother*Post*WFH_Exposure + controls (pure occupation-level WFH_Exposure, joined
+# by MishlachYad_ISCO_08_2), cluster = ~MishlachYad_ISCO_08_2, Employed==1 only. No second-stage
+# mechanism regression (unlike run_ddd_regression() below) -- not requested for this pivot.
+
+run_hours_ddd_lee_bounds(cleaned_df: tibble, exposure_index: tibble, exposure_cells: tibble,
+                          controls: character = DEFAULT_CONTROLS) ->
+  invisible(list(
+    table = tibble,   # bound (lower/point (untrimmed)/upper), coef, se, ci_low, ci_high
+    models = list(point = fixest, lower = fixest, upper = fixest),
+    diagnostics = list(quartile_selection_rates = tibble, n_trimmed_by_quartile = tibble,
+                        n_trimmed_total = integer(1)),
+    imbens_manski_ci = list(c_alpha = numeric(1), lower = numeric(1), upper = numeric(1))
+  ))
+# Generalized Lee (2009) bounds for run_hours_ddd_regression()'s Employed==1 selection risk:
+# selection-rate counterfactual (s11_counterfactual = s10 + (s01 - s00)) stratified by quartile of
+# the cell-based WFH_Exposure (build_exposure_cells(), defined for employed and non-employed
+# alike -- reuses robustness/age_balance_robustness.R's compute_pre_period_quartile_breaks()/
+# assign_wfh_quartile()), while the outcome regression itself uses the occupation-level
+# WFH_Exposure. warning()s when a quartile's Mother==1,Post==1 cell has fewer than
+# MIN_CELL_WARN (30) rows (noisy trim_prop). See docs/decisions/hours-ddd-pivot.md.
+
+imbens_manski_ci(theta_L: numeric(1), theta_U: numeric(1), se_L: numeric(1), se_U: numeric(1),
+                  conf_level: numeric(1) = 0.95) ->
+  list(c_alpha = numeric(1), lower = numeric(1), upper = numeric(1))
+# Imbens & Manski (2004) confidence interval for a partially-identified [theta_L, theta_U] bound
+# (not just each endpoint's own sampling interval), extracted from intensive_margin_lee_bounds.R
+# so both Lee-bounds files (intensive-margin and hours-DDD) share the same closed-form solver.
+# Collapses to the ordinary +-1.96*se interval when theta_U == theta_L. See
+# docs/decisions/hours-ddd-pivot.md.
 
 # ── employment_by_child_age.R ────────────────────────────────────────────────
 employment_by_child_age(cleaned_df: tibble) ->
@@ -314,6 +356,8 @@ compute_ddd_mde(model: fixest, coef_name: character(1) = "Mother:Post:WFH_Exposu
 # see docs/decisions/null-vs-power-audit.md.
 
 # ── ddd_regression.R ──────────────────────────────────────────────────────
+# Secondary DDD (extensive margin, Employed outcome) -- superseded in primacy by
+# hours_ddd_regression.R's run_hours_ddd_regression() above. See docs/decisions/hours-ddd-pivot.md.
 run_ddd_regression(cleaned_df: tibble, exposure_index: tibble,
                     controls: character = DEFAULT_CONTROLS) ->
   invisible(list(

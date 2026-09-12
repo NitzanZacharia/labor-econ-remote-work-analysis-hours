@@ -1,8 +1,14 @@
 # Decision Memo: Hours-Worked Pivot (Intensive-Margin DDD, Pure ISCO-08 Exposure, Generalized Lee Bounds)
 
-**Status: IMPLEMENTED, off by default (`RUN_HOURS_DDD_PIVOT <- FALSE`).** Real-data results below are
-confirmed but not yet reviewed for commit per `CLAUDE.md`'s disclosure-risk policy — the regenerated
-`outputs/hours_ddd_pivot_*.csv` files are untracked and left for the user to review before staging.
+**Status: IMPLEMENTED. Designated the project's primary specification** (decided 2026-09-12; see
+"Not yet decided" below for the resolution). **The code has not yet caught up to this decision** —
+`main.R` still gates the hours DDD behind `RUN_HOURS_DDD_PIVOT <- FALSE` and its section-8g comments
+still describe it as non-primary/exploratory. Flipping that flag and rewording those comments is a
+separate, not-yet-done follow-up code task; this memo and the rest of the documentation now describe
+the intended primary specification ahead of the code's default-run wiring. Real-data results below
+are confirmed but not yet reviewed for commit per `CLAUDE.md`'s disclosure-risk policy — the
+regenerated `outputs/hours_ddd_pivot_*.csv` files are untracked and left for the user to review
+before staging.
 
 ## Motivation
 
@@ -61,8 +67,12 @@ The Imbens-Manski (2004) confidence-interval solver was extracted from
 reuse the same closed-form logic rather than duplicating it.
 
 **Wiring**: `main.R`'s new section 8g, gated by `RUN_HOURS_DDD_PIVOT <- FALSE` (same convention as
-`RUN_AGE_BALANCE_ROBUSTNESS`/`RUN_NULL_VS_POWER_AUDIT`) — diagnostic/exploratory, off by default,
-not a replacement for the primary extensive-margin DDD.
+`RUN_AGE_BALANCE_ROBUSTNESS`/`RUN_NULL_VS_POWER_AUDIT`). This flag being off is now a **code/docs
+lag, not a design statement**: as of the "Not yet decided" resolution below, this hours-outcome DDD
+is the project's primary specification, and the extensive-margin (`Employed`) DDD (`main.R` §8a) is
+now secondary. Flipping `RUN_HOURS_DDD_PIVOT` to `TRUE` (and updating this section's own comments in
+`main.R`) is tracked as a separate follow-up code change, not done as part of this documentation
+pass.
 
 ## Real-data results (confirmed, not yet committed)
 
@@ -109,10 +119,22 @@ margin from, and a materially more informative result than, the null/underpowere
 finding. This is a new, real finding for the paper to engage with, not a robustness check that
 merely fails to overturn a null.
 
-## Not yet decided
+## Resolved: hours DDD is now the primary specification
+
+**Decided 2026-09-12.** The hours-worked triple interaction (`WorkHoursCont ~
+Mother*Post*WFH_Exposure`, occupation-level exposure) is the project's **primary** DDD
+specification going forward. The extensive-margin (`Employed`) DDD (`main.R` §8a, described in
+`docs/decisions/calibrated-exposure-and-cell-ddd.md`) is retained as the **secondary**
+specification — it is still run and reported, but no longer the headline result. This reflects the
+project's broader pivot from the extensive margin to the intensive margin (hours) as the primary
+dependent variable; see `README.md`, `docs/HLD.md`, `docs/LLD.md`, and `docs/ROADMAP.md` (Checkpoint
+11) for the corresponding documentation updates.
+
+This decision is about documentation and research framing only. `main.R`'s
+`RUN_HOURS_DDD_PIVOT <- FALSE` flag has not been flipped, and its section-8g comments still read as
+if this were exploratory — reconciling the code with this decision (flipping the default and
+updating comment language) is a separate, not-yet-scheduled follow-up task.
 
 Per `CLAUDE.md`, nothing derived from real CBS microdata is committed without the user's explicit
 review — the regenerated `outputs/hours_ddd_pivot_*.csv` files sit untracked pending that review.
-Whether this becomes a second primary specification (alongside, not replacing, the extensive-margin
-DDD) or stays a flagged robustness/exploratory analysis is a separate decision for the user, not
-resolved by this memo.
+That review is unrelated to, and does not block, the primacy decision above.

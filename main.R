@@ -355,22 +355,23 @@ if (RUN_NULL_VS_POWER_AUDIT) {
 
 # ── 8g. Hours-worked pivot: intensive-margin DDD with pure ISCO-08 exposure (docs/decisions/
 # hours-ddd-pivot.md) ──────────────────────────────────────────────────────────────────────────
-# Off by default, same framing as 8e/8f -- diagnostic/exploratory, layered alongside the primary
-# extensive-margin DDD (8a), not a replacement for it. Motivation: 8a's Mother:Post:WFH_Exposure
-# remains underpowered even after the exposure-cell-granularity fixes (MDE ~26% of baseline
-# employment, docs/decisions/exposure-cell-granularity-fix.md), and cell-level WLS aggregation was
-# confirmed unable to recover further power (same memo's "Considered and rejected" section). This
-# pivots the outcome to hours worked (WorkHoursCont, defined only for Employed==1) and the exposure
-# regressor to the PURE occupation-level measure (exposure_calibrated's wfh_exposure_calibrated) --
-# safe here specifically because WorkHoursCont's own conditioning on employment is intrinsic to the
-# question, unlike 8a's Employed outcome, where an occupation-level regressor would condition the
-# DDD's own outcome on itself (see docs/decisions/exposure-cell-granularity-fix.md's rejection of
-# that approach for the extensive margin). Dropping non-employed rows to run this regression still
-# introduces a real selection-on-a-mediator problem, bounded via run_hours_ddd_lee_bounds()'s
-# generalization of intensive_margin_lee_bounds.R's Lee (2009) trimming bounds, stratified by
-# quartiles of the demographic-cell-based WFH_Exposure (defined for the full sample) -- see
-# hours_ddd_lee_bounds.R's header comment for why two different exposure measures are used.
-RUN_HOURS_DDD_PIVOT <- FALSE
+# PRIMARY DDD as of the 2026-09-12 hours pivot (docs/decisions/hours-ddd-pivot.md) -- the
+# extensive-margin DDD in 8a is now the secondary specification. Motivation: 8a's
+# Mother:Post:WFH_Exposure remains underpowered even after the exposure-cell-granularity fixes (MDE
+# ~26% of baseline employment, docs/decisions/exposure-cell-granularity-fix.md), and cell-level WLS
+# aggregation was confirmed unable to recover further power (same memo's "Considered and rejected"
+# section). This pivots the outcome to hours worked (WorkHoursCont, defined only for Employed==1)
+# and the exposure regressor to the PURE occupation-level measure (exposure_calibrated's
+# wfh_exposure_calibrated) -- safe here specifically because WorkHoursCont's own conditioning on
+# employment is intrinsic to the question, unlike 8a's Employed outcome, where an occupation-level
+# regressor would condition the DDD's own outcome on itself (see
+# docs/decisions/exposure-cell-granularity-fix.md's rejection of that approach for the extensive
+# margin). Dropping non-employed rows to run this regression still introduces a real
+# selection-on-a-mediator problem, bounded via run_hours_ddd_lee_bounds()'s generalization of
+# intensive_margin_lee_bounds.R's Lee (2009) trimming bounds, stratified by quartiles of the
+# demographic-cell-based WFH_Exposure (defined for the full sample) -- see hours_ddd_lee_bounds.R's
+# header comment for why two different exposure measures are used.
+RUN_HOURS_DDD_PIVOT <- TRUE
 if (RUN_HOURS_DDD_PIVOT) {
   message("Running hours-worked DDD (pure occupation-level exposure, Employed==1 subsample)...")
   hours_ddd <- run_hours_ddd_regression(

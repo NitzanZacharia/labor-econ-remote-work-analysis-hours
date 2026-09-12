@@ -1,6 +1,8 @@
 # Decision Memo: Age-Balance Robustness Chain (Phase 1b/1c/2)
 
-**Status: PARTIALLY DECIDED.** The balance-test/age-imbalance diagnostic chain (`robustness/balance_test.R`, `robustness/age_balance_robustness.R`, `robustness/pretrend_wald_test.R`) is verified against real data and wired into `main.R` behind an opt-in flag. Whether either comparison spec it produces (age-interacted or `GilNK`-reweighted) should *replace* `main.R`'s primary DDD is **not decided** — see "Open question" below. `robustness/phase2_robustness.R` is **not** wired in at all — see "Not wired in."
+**Status: PARTIALLY DECIDED.** The balance-test/age-imbalance diagnostic chain (`robustness/balance_test.R`, `robustness/age_balance_robustness.R`, `robustness/pretrend_wald_test.R`) is verified against real data and wired into `main.R` behind an opt-in flag. Whether either comparison spec it produces (age-interacted or `GilNK`-reweighted) should *replace* `main.R`'s (now secondary, extensive-margin) DDD is **not decided** — see "Open question" below. `robustness/phase2_robustness.R` is **not** wired in at all — see "Not wired in."
+
+**Open question added 2026-09-12:** this entire chain was built against the extensive-margin (`Employed`) DDD, which is now the project's *secondary* specification (see `docs/decisions/hours-ddd-pivot.md`). Whether the age-balance/`GilNK`-reweighting logic here needs to be ported to the new primary (hours-outcome) DDD is unresolved — `hours-ddd-pivot.md` does not address age balance at all.
 
 ## Background
 

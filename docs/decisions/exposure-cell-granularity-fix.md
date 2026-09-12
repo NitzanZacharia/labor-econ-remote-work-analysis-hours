@@ -4,6 +4,11 @@
 nothing derived from the real-data runs below — including this memo's numbers — should be
 committed until a human has explicitly reviewed it.
 
+**Forward pointer (2026-09-12):** the underpowering problem diagnosed and partially fixed here
+(the extensive-margin `Employed` DDD's exposure regressor) is what ultimately motivated
+`docs/decisions/hours-ddd-pivot.md`'s pivot to an hours-outcome DDD, now the project's primary
+specification. Treat that memo as this one's eventual resolution, not just this fix.
+
 ## Background
 
 `docs/decisions/null-vs-power-audit.md` established that the primary DDD's null

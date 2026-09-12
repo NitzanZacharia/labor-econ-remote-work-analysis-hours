@@ -2,6 +2,8 @@
 
 **Status: DECIDED — statistically-calibrated occupation exposure, swapped into a pre-period demographic-cell shift-share measure, is the primary DDD regressor.** See "Decision" at the bottom.
 
+**Update (2026-09-12):** this memo's `Employed`-outcome DDD is now the project's **secondary** DDD specification — superseded in primacy by the hours-outcome DDD in `docs/decisions/hours-ddd-pivot.md`, per the project-wide pivot to the intensive margin (weekly work hours) as the primary dependent variable. Note the two DDDs use different exposure measures: this memo's cell-based shift-share measure (4) is the regressor for the secondary (`Employed`) DDD; the primary (hours) DDD instead uses the pure occupation-level calibrated measure (2), since conditioning on `Employed==1` is no longer a concern once the outcome itself is hours. Don't conflate the two exposure measures across the two DDDs.
+
 ## The problem
 
 Checkpoint 6/7 (`docs/ROADMAP.md`) built a single realized-WFH occupation index (`wfh_exposure_index.R`'s `build_wfh_exposure_index()`, anchored to 2021 per `docs/decisions/checkpoint6-wfh-anchor-year.md`) and fed it directly into the DDD mechanism regression (`ddd_regression.R`'s `run_ddd_regression()`). Two problems surfaced with using that index — or the external Dingel & Neiman teleworkability score alone — as the *primary* DDD regressor:
