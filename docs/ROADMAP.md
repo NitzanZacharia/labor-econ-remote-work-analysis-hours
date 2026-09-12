@@ -129,6 +129,8 @@ ddd <- run_ddd_regression(cleaned_df, idx)
 ```
 Confirm both models fit without collinearity errors. Check `γ_1`'s sign matches the mechanism hypothesis (positive: higher WFH exposure associated with a larger reduction in the penalty). Cross-check the per-occupation β_j estimates feeding Model 2 are consistent in sign/magnitude with Model 1's triple-interaction coefficient.
 
+**Update (2026-09-12): `ddd_regression.R` and this Model 1/Model 2 implementation were removed** as part of deprecating the secondary DDD's occupation-level robustness variants — see `docs/decisions/employment-ddd-robustness-removal.md`. This checkpoint's write-up above is left as a historically accurate record of what was originally built; the secondary DDD itself (`main.R` §8b) is unaffected.
+
 ---
 
 ## Checkpoint 8 — Age/Age² Escalation
@@ -179,7 +181,7 @@ Must exit with status 0, no hard-fail validation errors, and produce the full se
 
 **Objective:** Pivot the project's primary dependent variable from the extensive margin (`Employed`) to the intensive margin (`WorkHoursCont`, weekly work hours), generalizing Checkpoint 7's DDD mechanism regression and Checkpoint 4's intensive-margin regression to a single hours-outcome triple-interaction model with pure occupation-level WFH exposure and a generalized Lee-bounds selection correction.
 
-**Status:** Implemented (`scripts/hours_ddd_regression.R`, `scripts/hours_ddd_lee_bounds.R`, `scripts/imbens_manski_ci.R`), wired into `main.R` §8g. **Designated primary** by decision recorded 2026-09-12. The code has not yet caught up: `RUN_HOURS_DDD_PIVOT <- FALSE` and the surrounding comments still read as exploratory/non-primary — flipping the default is a separate, not-yet-scheduled follow-up code task.
+**Status:** Implemented (`scripts/hours_ddd_regression.R`, `scripts/hours_ddd_lee_bounds.R`, `scripts/imbens_manski_ci.R`), wired into `main.R` §8a, unconditional (no feature flag). **Designated primary** by decision recorded 2026-09-12. Run three times — once each for the calibrated/external/realized occupation-level exposure measures, mirroring the pattern Checkpoint 7's now-removed occupation-level robustness variants used (see `docs/decisions/employment-ddd-robustness-removal.md`).
 
 Full motivation, design, and real-data results are recorded in [`docs/decisions/hours-ddd-pivot.md`](decisions/hours-ddd-pivot.md) — not duplicated here. In brief: the Checkpoint 7 `Employed`-outcome DDD remained underpowered (MDE ~4x the point estimate) even after Checkpoint 6/7's exposure-measure refinements; the hours-outcome DDD unlocks a more precise occupation-level exposure regressor (unavailable to the employment-outcome DDD because occupation is undefined for the non-employed) and yields a statistically significant, Lee-bounds-robust result well outside its own MDE.
 

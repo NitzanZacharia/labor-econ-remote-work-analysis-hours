@@ -8,8 +8,8 @@
   `source()`d via a root-relative, path-qualified call (`source(file.path("scripts", "foo.R"))`) —
   never a bare filename, since cwd is assumed to be the repo root wherever sourcing happens.
   `robustness/` is the one exception to "one function per file": it holds the multi-function
-  robustness-chain scripts (`balance_test.R`, `age_balance_robustness.R`, `phase2_robustness.R`,
-  `pretrend_wald_test.R`), sourced the same cwd-relative, path-qualified way
+  robustness-chain scripts (`balance_test.R`, `age_balance_robustness.R`, `pretrend_wald_test.R`),
+  sourced the same cwd-relative, path-qualified way
   (`source(file.path("robustness", "foo.R"))`) — never moved into `scripts/`.
 - `data/` holds small, versioned external inputs the pipeline needs (currently just the Dingel &
   Neiman teleworkability crosswalk, `data/israeli_cbs_wfh_2digit.csv`) — distinct from the raw CBS

@@ -1,8 +1,8 @@
 # test-hours_ddd_regression.R
-# Unit tests for run_hours_ddd_regression() -- the intensive-margin (WorkHoursCont) counterpart to
-# ddd_regression.R's run_ddd_regression(), using the PURE occupation-level WFH exposure measure
-# (joined by MishlachYad_ISCO_08_2) rather than the demographic-cell-based WFH_Exposure the
-# extensive-margin primary DDD uses. See docs/decisions/hours-ddd-pivot.md.
+# Unit tests for run_hours_ddd_regression() -- the primary (intensive-margin, WorkHoursCont) DDD,
+# using the PURE occupation-level WFH exposure measure (joined by MishlachYad_ISCO_08_2) rather
+# than the demographic-cell-based WFH_Exposure the secondary (employment) DDD uses. See
+# docs/decisions/hours-ddd-pivot.md.
 
 # 10 occupations with distinct, evenly-spaced occupation-level exposure. Controls, Mother, and Post
 # are all independently sampled (matching test-intensive_margin_lee_bounds.R's

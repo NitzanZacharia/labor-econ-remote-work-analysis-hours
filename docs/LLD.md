@@ -233,17 +233,26 @@ run_intensive_margin_lee_bounds(cleaned_df: tibble, controls: character = DEFAUL
 # see docs/decisions/intensive-margin-lee-bounds.md.
 
 # ── hours_ddd_regression.R / hours_ddd_lee_bounds.R / imbens_manski_ci.R ────
-# Primary DDD (intensive margin, hours) -- generalizes run_ddd_regression() (below) and
-# run_intensive_margin_lee_bounds() (above) to a single triple-interaction hours regression with
-# pure occupation-level exposure. See docs/decisions/hours-ddd-pivot.md for full design and results.
-# Wired into main.R section 8g behind RUN_HOURS_DDD_PIVOT (currently FALSE -- code/docs lag, see
-# the memo's "Resolved" section).
+# Primary DDD (intensive margin, hours) -- generalizes run_intensive_margin_lee_bounds() (above)
+# to a single triple-interaction hours regression with pure occupation-level exposure, plus a
+# second-stage occupation-by-occupation mechanism regression. See docs/decisions/hours-ddd-pivot.md
+# for full design and results. Wired into main.R section 8a, unconditional (no feature flag), run
+# three times -- once each for the calibrated/external/realized occupation-level exposure measures.
+# The secondary DDD's own equivalent (ddd_regression.R's run_ddd_regression()) was removed -- see
+# docs/decisions/employment-ddd-robustness-removal.md.
 run_hours_ddd_regression(cleaned_df: tibble, exposure_index: tibble,
                           controls: character = DEFAULT_CONTROLS) ->
-  invisible(list(table = etable_df, model = fixest, n_employed = integer(1), n_matched = integer(1)))
+  invisible(list(
+    table = etable_df, model = fixest, n_employed = integer(1), n_matched = integer(1),
+    models = list(ddd = fixest, mechanism = lm), mechanism_data = tibble,
+    dropped_occupations = list(data = tibble, n_dropped = integer(1),
+                                mean_exposure_dropped = numeric(1), mean_exposure_retained = numeric(1))
+  ))
 # WorkHoursCont ~ Mother*Post*WFH_Exposure + controls (pure occupation-level WFH_Exposure, joined
-# by MishlachYad_ISCO_08_2), cluster = ~MishlachYad_ISCO_08_2, Employed==1 only. No second-stage
-# mechanism regression (unlike run_ddd_regression() below) -- not requested for this pivot.
+# by MishlachYad_ISCO_08_2), cluster = ~MishlachYad_ISCO_08_2, Employed==1 only. Second-stage
+# mechanism regression: per-occupation Mother:Post estimates from run_intensive_margin_reg(),
+# precision-weighted (1/se_j^2) against occupation-level exposure -- mirrors the removed
+# run_ddd_regression()'s Model 2.
 
 run_hours_ddd_lee_bounds(cleaned_df: tibble, exposure_index: tibble, exposure_cells: tibble,
                           controls: character = DEFAULT_CONTROLS) ->
@@ -278,7 +287,7 @@ employment_by_child_age(cleaned_df: tibble) ->
     plots = list(raw = ggplot, period = ggplot, adjusted = ggplot)
   ))
 
-# ── Diagnostics.R ─────────────────────────────────────────────────────────
+# ── Diagnostics.R / hours_diagnostics.R ────────────────────────────────────
 run_diagnostics(cleaned_df: tibble) ->
   invisible(list(
     did_table = tibble, na_summary = tibble, miss_pattern = tibble,
@@ -287,19 +296,43 @@ run_diagnostics(cleaned_df: tibble) ->
   ))
 # Side effects: iplot(reg_pretrend, i.select = 2, ...) draws to whatever device is active (no
 # dev.new()) -- needs an explicit device (main.R) or a null-device wrapper (tests) around the call.
+# Secondary (employment) outcome.
 
-# ── gender_placebo.R ─────────────────────────────────────────────────────────
+run_hours_diagnostics(cleaned_df: tibble) ->
+  invisible(list(
+    hours_by_period = tibble, pretrend_table = etable_df, pretrend_model = fixest
+    # WorkHoursCont ~ Mother + i(ShnatSeker,ref=2019) + i(ShnatSeker,Mother,ref=2019) + controls,
+    # data = filter(cleaned_df, Employed == 1)
+  ))
+# Primary (hours) outcome analog -- same iplot()/device-management caveat as run_diagnostics()
+# above. Omits run_diagnostics()'s Employed-NA-specific missingness audits (no hours analog).
+
+# ── gender_placebo.R / hours_gender_placebo.R ─────────────────────────────────
 run_gender_placebo(folder_path: character(1), cleaned_women: tibble = NULL,
                     exposure_calibrated: tibble = NULL,
                     exposure_csv_path: character(1) = "data/israeli_cbs_wfh_2digit.csv") ->
   invisible(list(cleaned_men = tibble, result = list(...), ddd_placebo = list(...) | NULL))
   # result is basic_reg()'s own return; ddd_placebo is run_gender_ddd_placebo()'s return (NULL if
-  # no exposure_calibrated could be obtained/supplied).
+  # no exposure_calibrated could be obtained/supplied). Secondary (employment) outcome.
 run_gender_ddd_placebo(cleaned_men: tibble, exposure_calibrated: tibble,
                         controls: character = DEFAULT_CONTROLS) ->
   list(exposure_cells_men = tibble, models = list(additive = fixest | NULL, fe = fixest | NULL))
 # Not called from main.R by default. Both feols() calls cluster on the (GilNK, TeudaGvoha,
-# MachozMegurim) cell, matching main.R's primary DDD -- WFH_Exposure is cell-constant here too.
+# MachozMegurim) cell, matching main.R's secondary DDD -- WFH_Exposure is cell-constant here too.
+
+run_hours_gender_placebo(folder_path: character(1), cleaned_men: tibble = NULL,
+                          exposure_index: tibble = NULL,
+                          exposure_csv_path: character(1) = "data/israeli_cbs_wfh_2digit.csv") ->
+  invisible(list(cleaned_men = tibble, result = list(...), ddd_placebo = list(...) | NULL))
+  # result is run_intensive_margin_reg()'s own return; ddd_placebo is
+  # run_hours_gender_ddd_placebo()'s return (NULL if no exposure_index could be obtained/supplied).
+  # Primary (hours) outcome analog.
+run_hours_gender_ddd_placebo(cleaned_men: tibble, exposure_index: tibble,
+                              controls: character = DEFAULT_CONTROLS) ->
+  list(n_employed = integer(1), n_matched = integer(1), model = fixest | NULL)
+# Not called from main.R by default. Occupation-level exposure_index (not cell-based) -- no need
+# to rebuild a cell-based exposure measure for men, since occupation-level exposure is sex-agnostic.
+# Employed==1 subsample, cluster = ~MishlachYad_ISCO_08_2, matching hours_ddd_regression.R.
 
 # ── wfh_exposure_index.R / wfh_exposure_cells.R / isco_masking_diagnostics.R /
 #    ddd_collinearity_diagnostics.R ────────────────────────────────────────
@@ -355,21 +388,9 @@ compute_ddd_mde(model: fixest, coef_name: character(1) = "Mother:Post:WFH_Exposu
 # Closed-form minimum detectable effect for a fitted model's coefficient. Base R only (qnorm()) --
 # see docs/decisions/null-vs-power-audit.md.
 
-# ── ddd_regression.R ──────────────────────────────────────────────────────
-# Secondary DDD (extensive margin, Employed outcome) -- superseded in primacy by
-# hours_ddd_regression.R's run_hours_ddd_regression() above. See docs/decisions/hours-ddd-pivot.md.
-run_ddd_regression(cleaned_df: tibble, exposure_index: tibble,
-                    controls: character = DEFAULT_CONTROLS) ->
-  invisible(list(
-    table = etable_df, models = list(ddd = fixest, mechanism = lm), mechanism_data = tibble,
-    dropped_occupations = list(data = tibble, n_dropped = integer(1),
-                                mean_exposure_dropped = numeric(1), mean_exposure_retained = numeric(1))
-  ))
-# Model 1: Employed ~ Mother*Post*WFH_Exposure + controls (triple interaction).
-# Model 2: precision-weighted (1/se_j^2) beta_j ~ gamma_0 + gamma_1*WFH_Exposure_j, from
-# occupation-stratified basic_reg() runs.
-
 # ── robustness/balance_test.R / age_balance_robustness.R / pretrend_wald_test.R ─────────────
+# Secondary DDD's own occupation-level robustness regression (ddd_regression.R's
+# run_ddd_regression()) was removed -- see docs/decisions/employment-ddd-robustness-removal.md.
 run_balance_test(cleaned_df: tibble, controls: character = DEFAULT_CONTROLS,
                   exposure_cells: tibble = NULL, exposure_calibrated: tibble = NULL,
                   exposure_csv_path: character(1) = "data/israeli_cbs_wfh_2digit.csv") ->
@@ -387,7 +408,7 @@ diagnose_gilnk_by_quartile(cleaned_df: tibble, exposure_cells: tibble) ->
 run_ddd_age_interacted(cleaned_df: tibble, exposure_cells: tibble,
                         controls: character = DEFAULT_CONTROLS) ->
   invisible(list(additive = fixest, fe = fixest))
-# main.R's primary DDD formulas + Mother:GilNK. Comparison spec, not a main.R replacement.
+# Secondary DDD formulas (main.R §8b) + Mother:GilNK. Comparison spec, not a main.R replacement.
 
 build_gilnk_rake_weights(cleaned_df: tibble, exposure_cells: tibble) ->
   list(weights = tibble(WFH_Exposure_Q, Mother, GilNK, rake_weight), breaks = numeric(5))
@@ -397,14 +418,31 @@ run_ddd_reweighted(cleaned_df: tibble, exposure_cells: tibble,
 # Pre-period GilNK-raking weights (by WFH_Exposure quartile x Mother), applied via weights=
 # to the full-period regression. Comparison spec, not a main.R replacement.
 
-run_pretrend_joint_test(pretrend_model: fixest) -> invisible(wald_result)
-# Joint Wald test, H0: Diagnostics.R's pre-2020 Mother:year interactions are jointly zero.
+# Hours-outcome (primary DDD) analogs -- occupation-level exposure_index (not cell-based
+# exposure_cells) is the actual regressor, matching hours_ddd_regression.R's own specification;
+# see docs/decisions/hours-ddd-pivot.md.
+run_hours_ddd_age_interacted(cleaned_df: tibble, exposure_index: tibble,
+                              controls: character = DEFAULT_CONTROLS) ->
+  invisible(list(model = fixest))
+# WorkHoursCont ~ Mother*Post*WFH_Exposure + Mother:GilNK + controls, Employed==1, occupation-level
+# exposure, cluster = ~MishlachYad_ISCO_08_2. Single spec (no cell-FE alternative -- a cell FE would
+# be orthogonal to, not collinear with, an occupation-level regressor).
 
-# All four wired into main.R behind RUN_AGE_BALANCE_ROBUSTNESS (default FALSE) -- see
-# docs/decisions/age-balance-robustness-chain.md. robustness/phase2_robustness.R
-# (run_ddd_twoway_cluster(), run_ddd_education_checks(), run_ddd_weights_check()) exists but is
-# NOT wired in: run_ddd_weights_check() applies MishkalSofi as a feols() weight, which needs
-# explicit user sign-off per CLAUDE.md before any run uses it, not just before committing output.
+run_hours_ddd_reweighted(cleaned_df: tibble, exposure_cells: tibble, exposure_index: tibble,
+                          controls: character = DEFAULT_CONTROLS, rake: list = NULL) ->
+  invisible(list(rake = list(...), model = fixest))
+# Reuses build_gilnk_rake_weights()'s cell-based quartile grouping unchanged for the weight
+# computation, then joins occupation-level exposure_index for the actual regression --
+# WorkHoursCont ~ Mother*Post*WFH_Exposure + controls, weights = rake_weight,
+# cluster = ~MishlachYad_ISCO_08_2.
+
+run_pretrend_joint_test(pretrend_model: fixest) -> invisible(wald_result)
+# Joint Wald test, H0: a fitted pretrend model's pre-2020 Mother:year interactions are jointly
+# zero. Fully generic -- run once for the secondary DDD's pretrend model (Diagnostics.R) and once
+# for the primary DDD's (hours_diagnostics.R).
+
+# All wired into main.R behind RUN_AGE_BALANCE_ROBUSTNESS (default FALSE) -- see
+# docs/decisions/age-balance-robustness-chain.md.
 
 # ── israeli_market_mismatch.R ────────────────────────────────────────────────
 check_market_mismatch(cleaned_df: tibble, exposure_path: character(1) = "data/israeli_cbs_wfh_2digit.csv",

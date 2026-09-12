@@ -1,6 +1,5 @@
 # hours_ddd_regression.R
-# Intensive-margin counterpart to ddd_regression.R's Model 1: same triple-interaction DDD
-# (Mother*Post*WFH_Exposure), but on the hours-worked outcome instead of employment, and
+# The primary triple-interaction DDD (Mother*Post*WFH_Exposure) on the hours-worked outcome,
 # restricted (by construction) to the Employed == 1 subsample. See
 # docs/decisions/hours-ddd-pivot.md for the full rationale.
 #
@@ -19,8 +18,9 @@
 # estimate, not instead of it.
 #
 # Also includes a second-stage occupation-by-occupation mechanism regression (added for the
-# gender/robustness-parity pass following the hours pivot), mirroring run_ddd_regression()'s Model
-# 2 but built from run_intensive_margin_reg() per occupation instead of basic_reg() -- see below.
+# gender/robustness-parity pass following the hours pivot): per-occupation Mother:Post estimates
+# from run_intensive_margin_reg(), precision-weighted against occupation-level exposure -- see
+# below.
 library(tidyverse)
 library(fixest)
 source(file.path("scripts", "data_processing.R"))
@@ -55,9 +55,9 @@ run_hours_ddd_regression <- function(cleaned_df, exposure_index, controls = DEFA
     sep = " + "
   )
   formula_ddd <- as.formula(paste("WorkHoursCont ~", rhs_ddd))
-  # Same Moulton reasoning as ddd_regression.R's run_ddd_regression(): WFH_Exposure is assigned at
-  # the occupation level (~40 ISCO-2 groups), not the individual -- cluster on the occupation code,
-  # the level the regressor of interest actually varies at, not IDPUF.
+  # WFH_Exposure is assigned at the occupation level (~40 ISCO-2 groups), not the individual --
+  # cluster on the occupation code, the level the regressor of interest actually varies at, not
+  # IDPUF (a Moulton problem otherwise).
   reg_ddd <- feols(formula_ddd, data = df_ddd, cluster = ~MishlachYad_ISCO_08_2)
   check_for_dropped_coefficients(reg_ddd, "run_hours_ddd_regression()'s triple interaction")
 
@@ -65,13 +65,13 @@ run_hours_ddd_regression <- function(cleaned_df, exposure_index, controls = DEFA
   print(table_ddd)
 
   # ── Model 2: second-stage mechanism regression ──────────────────────────────
-  # Mirrors run_ddd_regression()'s Model 2 (ddd_regression.R) exactly, with run_intensive_margin_reg()
-  # (WorkHoursCont, Employed==1) in place of basic_reg() (Employed) as the per-occupation fit, and
-  # the same coefficient of interest name (Mother:Post -- run_intensive_margin_reg()'s formula is
-  # WorkHoursCont ~ Mother + Post + Mother:Post + controls, same RHS shape as basic_reg()'s).
-  # Occupations with too little data to fit are dropped from the mechanism regression rather than
-  # erroring the whole function -- see ddd_regression.R's own comment for the precision-weighting
-  # rationale (1/se_j^2), which applies identically here.
+  # For each occupation, fits run_intensive_margin_reg() (WorkHoursCont, Employed==1) on that
+  # occupation's own subset and extracts its Mother:Post estimate (beta_j) and cluster-robust SE
+  # (se_j). beta_j's precision varies enormously across occupations, so the second-stage
+  # regression of beta_j on wfh_exposure is precision-weighted (1/se_j^2) rather than unweighted --
+  # the usual approach for a two-step meta-regression on generated regressands. Occupations with
+  # too little data to fit are dropped from the mechanism regression rather than erroring the
+  # whole function.
   occ_stats <- bind_rows(lapply(exposure_index$occupation_code, function(code) {
     df_occ <- filter(df_ddd, MishlachYad_ISCO_08_2 == code)
     fit <- tryCatch({

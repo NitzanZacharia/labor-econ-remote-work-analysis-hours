@@ -42,7 +42,6 @@ source(file.path("scripts", "wfh_exposure_cells.R"))
 source(file.path("scripts", "isco_masking_diagnostics.R"))
 source(file.path("scripts", "ddd_collinearity_diagnostics.R"))
 source(file.path("scripts", "israeli_market_mismatch.R"))
-source(file.path("scripts", "ddd_regression.R"))
 source(file.path("scripts", "hours_ddd_regression.R"))
 source(file.path("scripts", "hours_ddd_lee_bounds.R"))
 source(file.path("scripts", "wfh_first_stage_check.R"))
@@ -53,12 +52,11 @@ source(file.path("scripts", "hours_diagnostics.R"))
 source(file.path("scripts", "employment_by_child_age.R"))
 source(file.path("scripts", "validation.R"))
 
-# The 4 robustness-chain scripts below live in robustness/, not scripts/ -- each defines several
+# The 3 robustness-chain scripts below live in robustness/, not scripts/ -- each defines several
 # related functions (a diagnostic + one or more regression specs sharing it), not the single
-# function per file convention scripts/ holds its 17 members to.
+# function per file convention scripts/ holds its members to.
 source(file.path("robustness", "balance_test.R"))
 source(file.path("robustness", "age_balance_robustness.R"))
-source(file.path("robustness", "phase2_robustness.R"))
 source(file.path("robustness", "pretrend_wald_test.R"))
 
 setwd(old_wd)

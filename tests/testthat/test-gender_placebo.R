@@ -53,7 +53,7 @@ test_that("run_gender_placebo skips the DDD placebo gracefully when no exposure 
 test_that("run_gender_ddd_placebo recovers a known Mother:Post:WFH_Exposure effect on a well-identified synthetic panel", {
   # A dedicated, adequately-sized synthetic panel -- not the tiny load_and_clean_data() fixtures,
   # which are sized for schema/parsing tests, not for a fully-saturated triple-interaction formula
-  # to be identified (mirrors test-ddd_regression.R's own make_occupation_data() approach).
+  # to be identified (same bespoke-fixture convention used throughout this suite's DDD-style tests).
   set.seed(42)
   cells <- expand.grid(gilnk = 3:5, moch = 1:2, KEEP.OUT.ATTRS = FALSE)
 

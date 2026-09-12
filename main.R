@@ -21,7 +21,6 @@ source(file.path("scripts", "wfh_exposure_index.R"))
 source(file.path("scripts", "wfh_exposure_cells.R"))
 source(file.path("scripts", "isco_masking_diagnostics.R"))
 source(file.path("scripts", "ddd_collinearity_diagnostics.R"))
-source(file.path("scripts", "ddd_regression.R"))
 source(file.path("scripts", "hours_ddd_regression.R"))
 source(file.path("scripts", "hours_ddd_lee_bounds.R"))
 source(file.path("scripts", "wfh_first_stage_check.R"))
@@ -255,9 +254,9 @@ hours_lee_bounds <- run_hours_ddd_lee_bounds(
   exposure_cells
 )
 
-# Occupation-level robustness variants (external/realized exposure), mirroring 8c-8e's robustness
-# variants of the secondary DDD -- run_hours_ddd_regression() already takes a generic
-# exposure_index, so no new function is needed here, just two more call sites.
+# Occupation-level robustness variants (external/realized exposure) -- run_hours_ddd_regression()
+# already takes a generic exposure_index, so no new function is needed here, just two more call
+# sites.
 message("Running primary DDD robustness variant (hours, raw external Dingel & Neiman index)...")
 hours_ddd_external <- run_hours_ddd_regression(
   cleaned_df,
@@ -347,23 +346,7 @@ print(employment_ddd_table)
 message("Checking Spec 1's collinearity at runtime (see comment above)...")
 spec1_collinearity_check <- check_spec1_collinearity(ddd_df, cell_fe_vars, DEFAULT_CONTROLS)
 
-# ── 8c-8e. Secondary/employment-outcome robustness: occupation-level DDD + mechanism regression ─
-message("Running secondary (employment) robustness DDD (calibrated occupation-level index)...")
-ddd_calibrated <- run_ddd_regression(
-  cleaned_df,
-  exposure_calibrated %>% select(occupation_code = ISCO2, wfh_exposure = wfh_exposure_calibrated)
-)
-
-message("Running secondary (employment) robustness DDD (raw external Dingel & Neiman index)...")
-ddd_external <- run_ddd_regression(
-  cleaned_df,
-  exposure_external %>% select(occupation_code = ISCO2, wfh_exposure = tele_ext)
-)
-
-message("Running secondary (employment) robustness DDD (realized Israeli index, 2021 anchor)...")
-ddd_realized <- run_ddd_regression(cleaned_df, exposure_realized)
-
-# ── 8f. Age-balance robustness chain (docs/decisions/age-balance-robustness-chain.md) ─────────
+# ── 8c. Age-balance robustness chain (docs/decisions/age-balance-robustness-chain.md) ─────────
 # Off by default: these are diagnostic/comparison checks layered on top of the employment DDD (8b),
 # not a replacement for it -- whether run_ddd_age_interacted()/run_ddd_reweighted() should REPLACE
 # 8b as the (now-secondary) spec is a separate, still-open methodological decision (see the
@@ -371,10 +354,7 @@ ddd_realized <- run_ddd_regression(cleaned_df, exposure_realized)
 # (robustness/balance_test.R, age_balance_robustness.R, pretrend_wald_test.R) existed only as
 # unit-tested functions with no orchestrator ever calling them against real data -- the
 # age-imbalance claim in age_balance_robustness.R's own header comment was asserted, not verified,
-# until this wiring. phase2_robustness.R is deliberately NOT wired in here: its
-# run_ddd_weights_check() applies MishkalSofi as a feols() weight, which CLAUDE.md requires raising
-# with the user before adding to any run, not just before committing its output -- see the decision
-# memo's "Not wired in" section.
+# until this wiring.
 RUN_AGE_BALANCE_ROBUSTNESS <- FALSE
 if (RUN_AGE_BALANCE_ROBUSTNESS) {
   source(file.path("robustness", "balance_test.R"))
@@ -412,9 +392,9 @@ if (RUN_AGE_BALANCE_ROBUSTNESS) {
   pretrend_wald_hours <- run_pretrend_joint_test(hours_diagnostics_results$pretrend_model)
 }
 
-# ── 8g. Null-vs-power audit (docs/decisions/null-vs-power-audit.md) ───────────────────────────
+# ── 8d. Null-vs-power audit (docs/decisions/null-vs-power-audit.md) ───────────────────────────
 # Off by default, diagnostic layered on top of the employment DDD (8b), not a replacement for it --
-# same framing as 8f. Exists to answer a question the null Mother:Post:WFH_Exposure result alone
+# same framing as 8c. Exists to answer a question the null Mother:Post:WFH_Exposure result alone
 # can't: is this design well-powered enough to detect a plausible effect, or is the null
 # uninformative? Two checks: (1) does WFH_Exposure actually predict realized WFH_RefWeek at all
 # once measurable (Post==1) -- the shift-share design's core relevance assumption, asserted in
@@ -461,10 +441,7 @@ results_to_export <- list(
   hours_lee_bounds_n_trimmed = hours_lee_bounds$diagnostics$n_trimmed_by_quartile,
   ddd_hours_external = hours_ddd_external$table,
   ddd_hours_realized = hours_ddd_realized$table,
-  ddd_employment = employment_ddd_table,
-  ddd_calibrated = ddd_calibrated,
-  ddd_external = ddd_external,
-  ddd_realized = ddd_realized
+  ddd_employment = employment_ddd_table
 )
 
 if (RUN_AGE_BALANCE_ROBUSTNESS) {
