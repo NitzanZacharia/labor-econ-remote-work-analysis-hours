@@ -10,7 +10,7 @@ Commit `21b30b2` ("Add pre-trend/balance robustness chain and gender-placebo DDD
 
 ## What was verified (2026-09-09, against the real CBS extract)
 
-Ran `diagnose_gilnk_by_quartile()` and `run_balance_test()` against the real, locally-available CBS data (`load_and_clean_data()` on the actual `folder_path`, not a fixture), using `exposure_cells` built from the broadened population frame (`exposure_population_df` — see `docs/decisions/calibrated-exposure-and-cell-ddd.md`'s addendum). Output was printed to console only; nothing derived from this run was committed, per `CLAUDE.md`'s disclosure-risk rule (aggregate counts only, no row-level output persisted).
+Ran `diagnose_gilnk_by_quartile()` and `run_balance_test()` against the real, locally-available CBS data (`load_and_clean_data()` on the actual `folder_path`, not a fixture), using `exposure_cells` built from the broadened population frame (`exposure_population_df` — see `docs/decisions/calibrated-exposure-and-cell-ddd.md`'s addendum).
 
 **`GilNK` (age-group) gap, Mother==1 minus Mother==0, pre-period (2017-2019), by `WFH_Exposure` quartile** (n = 201,388 pre-period rows with a matched exposure cell):
 

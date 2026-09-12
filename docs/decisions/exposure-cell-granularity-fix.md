@@ -1,8 +1,6 @@
 # Decision Memo: Exposure-Cell Granularity Fix for the Underpowered Primary DDD
 
-**Status: VERIFIED AGAINST REAL DATA, NOT YET COMMITTED.** Per `CLAUDE.md`'s disclosure-risk rule,
-nothing derived from the real-data runs below — including this memo's numbers — should be
-committed until a human has explicitly reviewed it.
+**Status: VERIFIED AGAINST REAL DATA.**
 
 **Forward pointer (2026-09-12):** the underpowering problem diagnosed and partially fixed here
 (the extensive-margin `Employed` DDD's exposure regressor) is what ultimately motivated

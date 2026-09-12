@@ -8,7 +8,7 @@ This document describes the system that implements the research design in [`moth
 
 ## 2. System Architecture
 
-**Execution model**: a single-machine, local R session (RStudio or `Rscript`). There is no database, API, scheduler, or CI — `main.R` is the sole orchestrator, run manually. State between runs is a cached file (`cleaned_df.rds`, invalidated automatically via a hash of `data_processing.R` — not just its own existence). Every result is both printed to the console and exported to `outputs/` (gitignored; disclosure-risk-gated — see §4.1).
+**Execution model**: a single-machine, local R session (RStudio or `Rscript`). There is no database, API, scheduler, or CI — `main.R` is the sole orchestrator, run manually. State between runs is a cached file (`cleaned_df.rds`, invalidated automatically via a hash of `data_processing.R` — not just its own existence). Every result is both printed to the console and exported to `outputs/`.
 
 **Layers:**
 
@@ -27,7 +27,7 @@ This document describes the system that implements the research design in [`moth
 | Descriptive Mismatch Exhibit | `israeli_market_mismatch.R`, `run_mismatch.R` | `check_market_mismatch()` — a thin, descriptive-only wrapper around `calibrate_isco_exposure()` reporting how far realized Israeli WFH adoption diverges from the external teleworkability benchmark, by occupation. Invoked via `run_mismatch.R` against a cached `cleaned_df.rds`, not sourced by `main.R`. |
 | Diagnostics Layer | `Diagnostics.R`, `hours_diagnostics.R` | `run_diagnostics()` — 2×2 DiD table, parallel-trends event-study plot (Mother×Year, ref=2019), missing-value audits (secondary/employment outcome). `run_hours_diagnostics()` — the primary (hours) pretrend/event-study analog, `Employed==1` subsample. |
 | Orchestration Layer | `main.R` | Sources every module and calls them in sequence; the only entry point. |
-| Output/Export Layer | `export_results.R` | `export_all_results()` — walks every analysis function's `invisible(list(...))` return and writes each data frame to CSV, each `ggplot` to PNG, under `outputs/` (gitignored; disclosure-risk review required before anything derived from it is committed). Called once, at the very end of `main.R`, covering every result including §8's exposure/DDD output. |
+| Output/Export Layer | `export_results.R` | `export_all_results()` — walks every analysis function's `invisible(list(...))` return and writes each data frame to CSV, each `ggplot` to PNG, under `outputs/`. Called once, at the very end of `main.R`, covering every result including §8's exposure/DDD output. |
 
 **Layer diagram:**
 

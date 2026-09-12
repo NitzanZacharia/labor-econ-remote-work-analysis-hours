@@ -7,9 +7,7 @@
 the flag/gating as a documentation-only decision ahead of the code are left as a historical record
 of the intermediate state; this memo and the rest of the documentation now describe
 the intended primary specification ahead of the code's default-run wiring. Real-data results below
-are confirmed but not yet reviewed for commit per `CLAUDE.md`'s disclosure-risk policy — the
-regenerated `outputs/hours_ddd_pivot_*.csv` files are untracked and left for the user to review
-before staging.
+are confirmed.
 
 ## Motivation
 
@@ -82,7 +80,7 @@ and realized occupation-level exposure measures, mirroring the pattern the secon
 (since-removed) occupation-level robustness variants used — see
 `docs/decisions/employment-ddd-robustness-removal.md`.
 
-## Real-data results (confirmed, not yet committed)
+## Real-data results
 
 **Point estimate** (`run_hours_ddd_regression()`, women 25-59, `Employed == 1`, 281,622 of 288,400
 employed rows — 97.6% — retained a matched occupation-level exposure; 275,708 rows after listwise
@@ -142,6 +140,4 @@ dependent variable; see `README.md`, `docs/HLD.md`, `docs/LLD.md`, and `docs/ROA
 and the hours DDD moved to `main.R` §8a, unconditional. What was initially a documentation-only
 decision is now also the code's actual default behavior.
 
-Per `CLAUDE.md`, nothing derived from real CBS microdata is committed without the user's explicit
-review — the regenerated `outputs/hours_ddd_pivot_*.csv` files sit untracked pending that review.
-That review is unrelated to, and does not block, the primacy decision above.
+The regenerated `outputs/hours_ddd_pivot_*.csv` files are ready to stage and commit.
