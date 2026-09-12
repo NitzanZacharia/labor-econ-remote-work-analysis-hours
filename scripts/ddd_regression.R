@@ -2,6 +2,12 @@
 # Checkpoint 7 (docs/ROADMAP.md): the Triple-Differences mechanism test (research doc Part 2 §2 /
 # Part 4 §4), testing whether the narrowing of the motherhood penalty is actually driven by an
 # occupation's WFH exposure. Depends on Checkpoint 6's build_wfh_exposure_index().
+#
+# SECONDARY DDD (extensive margin, Employed outcome) as of the hours pivot
+# (docs/decisions/hours-ddd-pivot.md) -- hours_ddd_regression.R's run_hours_ddd_regression() is now
+# the project's primary DDD (intensive margin, WorkHoursCont outcome, pure occupation-level
+# exposure). This file's triple-interaction + second-stage mechanism regression is still run and
+# reported (main.R's §8b-8e), just no longer the headline specification.
 library(tidyverse)
 library(fixest)
 source(file.path("scripts", "data_processing.R"))

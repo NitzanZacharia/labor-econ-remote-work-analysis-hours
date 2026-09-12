@@ -1,8 +1,10 @@
 #intensive_margin_regression
-# Checkpoint 4 (docs/ROADMAP.md): the intensive-margin counterpart to basic_regression.R's
-# extensive-margin (Employed) model, per the research doc's core DiD spec (Part 2 §1 / Part 4 §2),
-# which models both an employment indicator and weekly work hours. Hours are only meaningful
-# conditional on being employed, so this is estimated on the Employed == 1 subsample.
+# Checkpoint 4 (docs/ROADMAP.md): the intensive-margin (weekly work hours) DiD, per the research
+# doc's core DiD spec (Part 2 §1 / Part 4 §2), which models both an employment indicator and
+# weekly work hours. As of the hours pivot (docs/decisions/hours-ddd-pivot.md), this is the
+# project's PRIMARY dependent-variable regression; basic_regression.R's extensive-margin (Employed)
+# model is the secondary/comparison regression. Hours are only meaningful conditional on being
+# employed, so this is estimated on the Employed == 1 subsample.
 library(tidyverse)
 library(fixest)
 source(file.path("scripts", "data_processing.R"))

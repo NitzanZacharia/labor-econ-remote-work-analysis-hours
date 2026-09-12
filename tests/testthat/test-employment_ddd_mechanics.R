@@ -1,6 +1,8 @@
-# test-primary_ddd_mechanics.R
+# test-employment_ddd_mechanics.R
 # Correctness/bounds companion to test-pipeline_smoke.R's existing smoke test of main.R's section
-# 8a (the primary DDD: cell-based WFH_Exposure, two feols specs). That test only asserts
+# 8b (the SECONDARY, extensive-margin DDD: cell-based WFH_Exposure, two feols specs -- demoted from
+# "primary" by the hours pivot, docs/decisions/hours-ddd-pivot.md; hours_ddd_regression.R's
+# run_hours_ddd_regression() is now the primary DDD, section 8a). That smoke test only asserts
 # expect_s3_class(..., "fixest") -- it never checks that the mechanism the decision memo argues
 # for (docs/decisions/calibrated-exposure-and-cell-ddd.md) actually holds: that Spec 2's fully
 # interacted cell FE absorbs WFH_Exposure's bare main effect as collinear, leaving identification
@@ -8,8 +10,9 @@
 # (following test-gender_placebo.R's run_gender_ddd_placebo pattern -- the fixtures are sized for
 # schema tests, not for a saturated triple-interaction to be identified) with the exposure
 # regressor built through the real pipeline (build_exposure_cells(), then left_join()ed back by
-# cell), and reproduces main.R's two feols calls verbatim (main.R:174-188) so a future edit to
-# the real formulas that isn't mirrored here will visibly diverge.
+# cell), and reproduces main.R's two feols calls verbatim (main.R:303-313, the ddd_employment_additive/
+# ddd_employment_fe block) so a future edit to the real formulas that isn't mirrored here will
+# visibly diverge.
 
 make_ddd_panel <- function(delta = -2) {
   cells <- expand.grid(
@@ -57,7 +60,7 @@ make_ddd_panel <- function(delta = -2) {
     )
 }
 
-fit_primary_ddd <- function(ddd_df) {
+fit_employment_ddd <- function(ddd_df) {
   cell_fe_vars   <- c("GilNK", "TeudaGvoha", "MachozMegurim")
   other_controls <- setdiff(DEFAULT_CONTROLS, cell_fe_vars)
   cell_cluster_formula <- as.formula(paste("~", paste(cell_fe_vars, collapse = "^")))
@@ -88,7 +91,7 @@ test_that("cell_fe_vars / other_controls split is structurally correct", {
 test_that("Spec 1 (additive controls) recovers the correct sign of a known injected Mother:Post:WFH_Exposure effect", {
   set.seed(42)
   panel <- make_ddd_panel(delta = -2)
-  models <- fit_primary_ddd(panel)
+  models <- fit_employment_ddd(panel)
 
   expect_s3_class(models$additive, "fixest")
   expect_true("WFH_Exposure" %in% names(coef(models$additive)))
@@ -99,12 +102,12 @@ test_that("Spec 1 (additive controls) recovers the correct sign of a known injec
 test_that("Spec 2 (interacted cell FE) recovers the same sign, and fixest drops WFH_Exposure's bare main effect as collinear with the FE", {
   set.seed(42)
   panel <- make_ddd_panel(delta = -2)
-  models <- fit_primary_ddd(panel)
+  models <- fit_employment_ddd(panel)
 
   expect_s3_class(models$fe, "fixest")
   fe_coefs <- names(coef(models$fe))
 
-  # The documented mechanism (main.R:164-169): WFH_Exposure is cell-constant, so its bare main
+  # The documented mechanism (main.R's §8b, ddd_employment_fe): WFH_Exposure is cell-constant, so its bare main
   # effect is exactly collinear with the fully interacted cell FE and fixest drops it
   # automatically -- identification of the triple interaction survives because Mother/Post still
   # vary within a cell.
@@ -117,7 +120,7 @@ test_that("Spec 2 (interacted cell FE) recovers the same sign, and fixest drops 
 })
 
 # ── Finer exposure-cell design (docs/decisions/exposure-cell-granularity-fix.md) ─────────────────
-# main.R's real primary DDD now builds WFH_Exposure on a partition (exposure_cell_vars) FINER than
+# main.R's real employment DDD (§8b) now builds WFH_Exposure on a partition (exposure_cell_vars) FINER than
 # cell_fe_vars -- as of this update it additionally varies by MatzavMishpachti, Dat, and
 # BirthContinent (this panel only exercises MatzavMishpachti -- the mechanism being tested here is
 # general to "any extra dimension not in cell_fe_vars", not tied to the real list's exact current
@@ -177,7 +180,7 @@ make_ddd_panel_finer_exposure <- function(delta = -2) {
 test_that("Spec 2 no longer drops WFH_Exposure's main effect when exposure cells are finer than the FE", {
   set.seed(99)
   panel  <- make_ddd_panel_finer_exposure(delta = -2)
-  models <- fit_primary_ddd(panel)
+  models <- fit_employment_ddd(panel)
 
   expect_s3_class(models$fe, "fixest")
   fe_coefs <- names(coef(models$fe))

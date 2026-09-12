@@ -15,6 +15,9 @@
 #      the two diverge only when exact reweighting is infeasible, e.g. a target cell with zero
 #      support in one group -- build_gilnk_rake_weights() checks for and reports that). Kept
 #      dependency-free (no new package) per CLAUDE.md's "flag before adding a dependency".
+#   4. run_hours_ddd_age_interacted() / run_hours_ddd_reweighted() -- hours-outcome (primary DDD)
+#      analogs of #2/#3, added for the hours pivot (docs/decisions/hours-ddd-pivot.md). See their
+#      own header comment below for how they differ structurally from #2/#3.
 #
 # All three use the SAME WFH_Exposure quartile definition -- breakpoints computed once from the
 # pre-period distribution via compute_pre_period_quartile_breaks(), then applied identically to
@@ -161,6 +164,78 @@ build_gilnk_rake_weights <- function(cleaned_df, exposure_cells) {
   }
 
   list(weights = weights_tbl %>% select(WFH_Exposure_Q, Mother, GilNK, rake_weight), breaks = breaks)
+}
+
+# ── 4. Hours-outcome (primary DDD) age-balance analogs ───────────────────────────────────────────
+# Added for the hours pivot's gender/robustness-parity pass (docs/decisions/hours-ddd-pivot.md).
+# Unlike run_ddd_age_interacted()/run_ddd_reweighted() above, these mirror hours_ddd_regression.R's
+# ACTUAL formula -- pure occupation-level WFH_Exposure (exposure_index), Employed==1 subsample,
+# clustered on occupation code -- not the cell-based formula the (now-secondary) employment DDD
+# uses, since the primary hours DDD's real regressor is occupation-level. run_hours_ddd_reweighted()
+# still reuses build_gilnk_rake_weights()'s cell-based quartile grouping unchanged for the weight
+# computation itself (the "grouping role" the cell-based measure already serves for
+# hours_ddd_lee_bounds.R's selection correction), then joins the occupation-level exposure_index for
+# the actual regression -- the same "two exposure measures, two roles" split documented in that
+# file's header comment.
+
+run_hours_ddd_age_interacted <- function(cleaned_df, exposure_index, controls = DEFAULT_CONTROLS) {
+  df_ddd <- cleaned_df %>%
+    filter(Employed == 1) %>%
+    inner_join(
+      exposure_index %>% select(MishlachYad_ISCO_08_2 = occupation_code, WFH_Exposure = wfh_exposure),
+      by = "MishlachYad_ISCO_08_2"
+    )
+
+  model <- feols(
+    as.formula(paste("WorkHoursCont ~ Mother * Post * WFH_Exposure + Mother:GilNK +",
+                      paste(controls, collapse = " + "))),
+    data = df_ddd, cluster = ~MishlachYad_ISCO_08_2
+  )
+
+  print(etable(model, headers = c("Hours DDD, age-interacted"), digits = 4))
+
+  invisible(list(model = model))
+}
+
+run_hours_ddd_reweighted <- function(cleaned_df, exposure_cells, exposure_index,
+                                      controls = DEFAULT_CONTROLS, rake = NULL) {
+  if (is.null(rake)) rake <- build_gilnk_rake_weights(cleaned_df, exposure_cells)
+
+  exposure_join_vars <- setdiff(names(exposure_cells), c("WFH_Exposure", "n_cell"))
+
+  # Cell-based WFH_Exposure is used only to assign each row's rake weight (WFH_Exposure_Q x Mother
+  # x GilNK cell) -- renamed WFH_Exposure_Cell so it doesn't collide with the occupation-level
+  # WFH_Exposure joined in next, which is what the regression formula below actually uses.
+  ddd_df <- cleaned_df %>%
+    filter(Employed == 1) %>%
+    left_join(exposure_cells, by = exposure_join_vars) %>%
+    filter(!is.na(WFH_Exposure)) %>%
+    assign_wfh_quartile(rake$breaks) %>%
+    rename(WFH_Exposure_Cell = WFH_Exposure) %>%
+    left_join(rake$weights, by = c("WFH_Exposure_Q", "Mother", "GilNK")) %>%
+    inner_join(
+      exposure_index %>% select(MishlachYad_ISCO_08_2 = occupation_code, WFH_Exposure = wfh_exposure),
+      by = "MishlachYad_ISCO_08_2"
+    )
+
+  n_total   <- nrow(ddd_df)
+  n_missing <- sum(is.na(ddd_df$rake_weight))
+  if (n_missing > 0) {
+    message(sprintf(
+      paste0("run_hours_ddd_reweighted: %d of %d rows (%.1f%%) have no pre-period-derived weight ",
+             "for their (quartile, Mother, GilNK) cell -- dropped by feols's listwise deletion."),
+      n_missing, n_total, 100 * n_missing / n_total
+    ))
+  }
+
+  model <- feols(
+    as.formula(paste("WorkHoursCont ~ Mother * Post * WFH_Exposure +", paste(controls, collapse = " + "))),
+    data = ddd_df, weights = ~rake_weight, cluster = ~MishlachYad_ISCO_08_2
+  )
+
+  print(etable(model, headers = c("Hours DDD, reweighted"), digits = 4))
+
+  invisible(list(rake = rake, model = model))
 }
 
 run_ddd_reweighted <- function(cleaned_df, exposure_cells, controls = DEFAULT_CONTROLS,

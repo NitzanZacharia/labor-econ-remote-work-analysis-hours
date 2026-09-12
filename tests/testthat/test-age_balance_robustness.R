@@ -130,3 +130,71 @@ test_that("run_ddd_reweighted fits both specs using the raking weights", {
   expect_true("Mother:Post:WFH_Exposure" %in% names(coef(res$additive)))
   expect_true("Mother:Post:WFH_Exposure" %in% names(coef(res$fe)))
 })
+
+# ── Hours-outcome (primary DDD) analogs -- added for the hours pivot ──────────────────────────
+# Needs BOTH a cell-based exposure_cells table (for run_hours_ddd_reweighted's rake weights, same
+# role it serves in the real pipeline) and an occupation-level exposure_index (the actual
+# regressor for both new functions, matching hours_ddd_regression.R's own specification).
+make_hours_age_panel <- function(delta = -3) {
+  set.seed(77)
+  n_occ     <- 10
+  occ_codes <- 400 + seq_len(n_occ)
+  exposure_index <- tibble::tibble(
+    occupation_code = occ_codes,
+    wfh_exposure    = seq(0.05, 0.95, length.out = n_occ)
+  )
+
+  cell_defs <- expand.grid(gilnk = 3:7, moch = 1:2, teuda = c("X", "Y"), KEEP.OUT.ATTRS = FALSE)
+  cell_defs$WFH_Exposure_cell <- stats::runif(nrow(cell_defs))
+  exposure_cells <- tibble::tibble(
+    Min = 2, GilNK = factor(cell_defs$gilnk), TeudaGvoha = cell_defs$teuda,
+    MachozMegurim = factor(cell_defs$moch), WFH_Exposure = cell_defs$WFH_Exposure_cell
+  )
+
+  n      <- 800
+  occ_i  <- sample(seq_len(n_occ), n, replace = TRUE)
+  cell_i <- sample(seq_len(nrow(cell_defs)), n, replace = TRUE)
+
+  panel <- tibble::tibble(
+    Min = 2,
+    MishlachYad_ISCO_08_2 = occ_codes[occ_i],
+    .wfh_occ              = exposure_index$wfh_exposure[occ_i],
+    GilNK             = factor(cell_defs$gilnk[cell_i]),
+    TeudaGvoha        = cell_defs$teuda[cell_i],
+    MachozMegurim     = factor(cell_defs$moch[cell_i]),
+    MatzavMishpachti  = factor(sample(c("A", "B"), n, replace = TRUE)),
+    Dat               = factor(sample(c("A", "B"), n, replace = TRUE)),
+    Mother     = sample(0:1, n, replace = TRUE),
+    ShnatSeker = sample(c(2018, 2022), n, replace = TRUE),
+    Employed   = 1L
+  ) %>%
+    dplyr::mutate(
+      Post = as.integer(ShnatSeker >= 2021),
+      WorkHoursCont = 40 + delta * Mother * Post * .wfh_occ + stats::rnorm(dplyr::n(), 0, 0.5),
+      IDPUF = dplyr::row_number()
+    ) %>%
+    dplyr::select(-.wfh_occ)
+
+  list(panel = panel, exposure_cells = exposure_cells, exposure_index = exposure_index)
+}
+
+test_that("run_hours_ddd_age_interacted fits with Mother:GilNK terms and the occupation-level regressor", {
+  fx  <- make_hours_age_panel(delta = -3)
+  out <- capture.output(res <- suppressWarnings(
+    run_hours_ddd_age_interacted(fx$panel, fx$exposure_index)
+  ))
+  expect_s3_class(res$model, "fixest")
+  expect_true(any(grepl("^Mother:GilNK", names(coef(res$model)))))
+  expect_true("Mother:Post:WFH_Exposure" %in% names(coef(res$model)))
+  expect_lt(unname(coef(res$model)[["Mother:Post:WFH_Exposure"]]), 0)
+})
+
+test_that("run_hours_ddd_reweighted fits using cell-based raking weights and the occupation-level regressor", {
+  fx  <- make_hours_age_panel(delta = -3)
+  out <- capture.output(res <- suppressWarnings(
+    run_hours_ddd_reweighted(fx$panel, fx$exposure_cells, fx$exposure_index)
+  ))
+  expect_true(all(c("rake", "model") %in% names(res)))
+  expect_s3_class(res$model, "fixest")
+  expect_true("Mother:Post:WFH_Exposure" %in% names(coef(res$model)))
+})

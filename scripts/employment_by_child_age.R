@@ -1,5 +1,6 @@
 # employment_by_child_age.R
 # Analyses employment rates for mothers by age group of their youngest child.
+# Secondary/extensive-margin (Employed) outcome, post-hours-pivot (docs/decisions/hours-ddd-pivot.md).
 # GilYeledTzairMBNK coding: 0 = no children, 1 = age 0–1, 2 = age 2–4,
 #                            3 = age 5–9, 4 = age 10–14, 5 = age 15–17
 library(tidyverse)

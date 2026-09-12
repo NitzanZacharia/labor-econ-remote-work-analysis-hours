@@ -1,4 +1,5 @@
 #basic_regression_compared_data
+# Secondary/extensive-margin (Employed) outcome, post-hours-pivot (docs/decisions/hours-ddd-pivot.md).
 library(tidyverse)
 library(fixest)
 source(file.path("scripts", "data_processing.R"))

@@ -18,13 +18,14 @@
 # separately by hours_ddd_lee_bounds.R's run_hours_ddd_lee_bounds(), run alongside this point
 # estimate, not instead of it.
 #
-# Unlike run_ddd_regression() (ddd_regression.R), this does NOT include a second-stage
-# occupation-by-occupation mechanism regression -- not requested for this pivot, and the
-# triple-interaction coefficient itself is already the object of interest here.
+# Also includes a second-stage occupation-by-occupation mechanism regression (added for the
+# gender/robustness-parity pass following the hours pivot), mirroring run_ddd_regression()'s Model
+# 2 but built from run_intensive_margin_reg() per occupation instead of basic_reg() -- see below.
 library(tidyverse)
 library(fixest)
 source(file.path("scripts", "data_processing.R"))
 source(file.path("scripts", "ddd_collinearity_diagnostics.R"))
+source(file.path("scripts", "intensive_margin_regression.R"))
 
 run_hours_ddd_regression <- function(cleaned_df, exposure_index, controls = DEFAULT_CONTROLS) {
 
@@ -63,10 +64,63 @@ run_hours_ddd_regression <- function(cleaned_df, exposure_index, controls = DEFA
   table_ddd <- etable(reg_ddd, headers = c("WorkHoursCont (hours DDD)"), digits = 4)
   print(table_ddd)
 
+  # ── Model 2: second-stage mechanism regression ──────────────────────────────
+  # Mirrors run_ddd_regression()'s Model 2 (ddd_regression.R) exactly, with run_intensive_margin_reg()
+  # (WorkHoursCont, Employed==1) in place of basic_reg() (Employed) as the per-occupation fit, and
+  # the same coefficient of interest name (Mother:Post -- run_intensive_margin_reg()'s formula is
+  # WorkHoursCont ~ Mother + Post + Mother:Post + controls, same RHS shape as basic_reg()'s).
+  # Occupations with too little data to fit are dropped from the mechanism regression rather than
+  # erroring the whole function -- see ddd_regression.R's own comment for the precision-weighting
+  # rationale (1/se_j^2), which applies identically here.
+  occ_stats <- bind_rows(lapply(exposure_index$occupation_code, function(code) {
+    df_occ <- filter(df_ddd, MishlachYad_ISCO_08_2 == code)
+    fit <- tryCatch({
+      out <- capture.output(res <- suppressWarnings(run_intensive_margin_reg(df_occ)))
+      res
+    }, error = function(e) NULL)
+    if (is.null(fit) || !"Mother:Post" %in% names(coef(fit$models$hours))) {
+      return(tibble(occupation_code = code, beta_j = NA_real_, se_j = NA_real_))
+    }
+    m <- fit$models$hours
+    tibble(
+      occupation_code = code,
+      beta_j = unname(coef(m)[["Mother:Post"]]),
+      se_j   = unname(se(m)[["Mother:Post"]])
+    )
+  }))
+
+  joined <- exposure_index %>% left_join(occ_stats, by = "occupation_code")
+  is_dropped   <- is.na(joined$beta_j) | is.na(joined$se_j) | joined$se_j <= 0
+  mechanism_df <- joined[!is_dropped, ]
+  dropped_df   <- joined[is_dropped, ]
+
+  n_dropped <- nrow(dropped_df)
+  if (n_dropped > 0) {
+    message(n_dropped, " of ", nrow(exposure_index), " occupation(s) dropped from the hours ",
+            "mechanism regression (Mother:Post or its SE could not be estimated -- insufficient ",
+            "data or a degenerate fit).")
+    message(sprintf(
+      "  wfh_exposure -- dropped occupations: mean = %.3f (n = %d); retained occupations: mean = %.3f (n = %d).",
+      mean(dropped_df$wfh_exposure), n_dropped,
+      mean(mechanism_df$wfh_exposure), nrow(mechanism_df)
+    ))
+  }
+
+  reg_mechanism <- lm(beta_j ~ wfh_exposure, data = mechanism_df, weights = 1 / se_j^2)
+  print(summary(reg_mechanism))
+
   invisible(list(
     table      = table_ddd,
     model      = reg_ddd,
     n_employed = n_employed,
-    n_matched  = n_matched
+    n_matched  = n_matched,
+    models     = list(ddd = reg_ddd, mechanism = reg_mechanism),
+    mechanism_data = mechanism_df,
+    dropped_occupations = list(
+      data                   = dropped_df,
+      n_dropped              = n_dropped,
+      mean_exposure_dropped  = if (n_dropped > 0) mean(dropped_df$wfh_exposure) else NA_real_,
+      mean_exposure_retained = mean(mechanism_df$wfh_exposure)
+    )
   ))
 }

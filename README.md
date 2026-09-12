@@ -84,6 +84,7 @@ source("main.R"); basic_reg_comp(cleaned_df)
 
 # Gender placebo test (loads and validates a separate male subsample)
 source(file.path("scripts", "gender_placebo.R")); run_gender_placebo(folder_path)
+source(file.path("scripts", "hours_gender_placebo.R")); run_hours_gender_placebo(folder_path)
 ```
 
 A third, fully separate script, `run_mismatch.R` (`Rscript run_mismatch.R`), runs a descriptive-only mismatch exhibit against a cached `cleaned_df.rds` — it requires `data/israeli_cbs_wfh_2digit.csv`, which (unlike the raw CBS CSVs) *is* included in this repo.
@@ -110,7 +111,8 @@ Runs the `testthat` suite in `tests/testthat/` (data processing, validation, sch
 | `scripts/basic_reg_compared_data.R` | `basic_reg_comp()` | Robustness check comparing the full sample against `Muasak`-observed-only rows. Defined but **not called by default** from `main.R` — run manually if needed. |
 | `scripts/intensive_margin_regression.R` | `run_intensive_margin_reg()` | **Primary** DiD regression: `WorkHoursCont ~ Mother + Post + Mother:Post + controls`, estimated on `Employed == 1` only. |
 | `scripts/intensive_margin_lee_bounds.R` | `run_intensive_margin_lee_bounds()` | Lee (2009) trimming-bounds correction for the above: since `Employed` is itself a DiD outcome, conditioning the hours regression on `Employed == 1` risks selection bias if WFH differentially pulls marginal mothers into work post-2021. Reports a `[lower, upper]` bound on `Mother:Post` alongside the untrimmed point estimate — see `docs/decisions/intensive-margin-lee-bounds.md`. |
-| `scripts/gender_placebo.R` | `run_gender_placebo()` | Loads/validates the male subsample and reruns `basic_reg()` on it (fathers vs. childless men), as a placebo for the motherhood-specific interpretation. Sourced by `main.R` but **not called by default**. |
+| `scripts/gender_placebo.R` | `run_gender_placebo()` | Loads/validates the male subsample and reruns `basic_reg()` on it (fathers vs. childless men), as a placebo for the motherhood-specific interpretation (secondary/employment outcome). Sourced by `main.R` but **not called by default**. |
+| `scripts/hours_gender_placebo.R` | `run_hours_gender_placebo()` | Same placebo idea, primary (hours) outcome: reruns `run_intensive_margin_reg()` plus an hours-outcome DDD placebo on the male subsample. Sourced by `main.R` but **not called by default**. |
 | `scripts/wfh_exposure_index.R` | `build_wfh_exposure_index()` | Occupation-level (ISCO-08) WFH-exposure index, anchored to 2021 (see `docs/decisions/checkpoint6-wfh-anchor-year.md`). Sourced and called by default from `main.R` (one of four exposure measures — see `docs/decisions/calibrated-exposure-and-cell-ddd.md`). |
 | `scripts/isco_masking_diagnostics.R` | `check_isco_masking_sensitivity()` | Sensitivity check for CBS's ISCO-08 disclosure masking: since `wfh_exposure_index.R`/`wfh_exposure_cells.R` both drop masked-occupation rows, this compares realized WFH between masked and unmasked rows within the same coarse (`ISCO1`) occupation family, as a proxy for whether that dropped subsample is likely biasing the exposure index. |
 | `scripts/ddd_collinearity_diagnostics.R` | `check_spec1_collinearity()` | Runtime collinearity diagnostic for the primary DDD's Spec 1 (additive controls): recomputes `WFH_Exposure`'s own R²/VIF against the cell-defining controls and the Spec 1 design matrix's condition number from the live data, so these figures can't silently go stale as a hardcoded comment would. Base R only (`lm()`, `kappa()`) — deliberately avoids adding `car` as a dependency. |

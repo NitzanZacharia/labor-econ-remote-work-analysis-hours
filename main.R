@@ -7,11 +7,13 @@ source(file.path("scripts", "comparative_statistics.R"))
 source(file.path("scripts", "basic_regression.R"))
 source(file.path("scripts", "basic_reg_compared_data.R"))
 source(file.path("scripts", "Diagnostics.R"))
+source(file.path("scripts", "hours_diagnostics.R"))
 source(file.path("scripts", "employment_by_child_age.R"))
 source(file.path("scripts", "validation.R"))
 source(file.path("scripts", "intensive_margin_regression.R"))
 source(file.path("scripts", "intensive_margin_lee_bounds.R"))
 source(file.path("scripts", "gender_placebo.R"))
+source(file.path("scripts", "hours_gender_placebo.R"))
 source(file.path("scripts", "export_results.R"))
 
 # Load modules required for the WFH exposure index and DDD mechanism test
@@ -71,20 +73,23 @@ message("Running comparative statistics...")
 comp_stats <- run_comparative_stats(cleaned_df)
 
 # ── 5. Run regressions ────────────────────────────────────────────────────────
-message("Running basic regression model...")
-baseline_results <- basic_reg(cleaned_df)
-
-message("Running basic regression model — Jewish women only...")
-baseline_jewish <- basic_reg(filter(cleaned_df, Leom == 1))
-
-message("Running basic regression model — Arab women only...")
-baseline_arab <- basic_reg(filter(cleaned_df, Leom == 2))
-
+# Primary (intensive-margin/hours) regression runs first, matching the hours pivot
+# (docs/decisions/hours-ddd-pivot.md); the secondary (extensive-margin/employment) regressions
+# follow.
 message("Running intensive-margin (work hours) regression...")
 intensive_results <- run_intensive_margin_reg(cleaned_df)
 
 message("Running intensive-margin Lee (2009) trimming bounds (selection-on-employment correction)...")
 intensive_lee_bounds <- run_intensive_margin_lee_bounds(cleaned_df)
+
+message("Running secondary (employment) regression model...")
+baseline_results <- basic_reg(cleaned_df)
+
+message("Running secondary (employment) regression model — Jewish women only...")
+baseline_jewish <- basic_reg(filter(cleaned_df, Leom == 1))
+
+message("Running secondary (employment) regression model — Arab women only...")
+baseline_arab <- basic_reg(filter(cleaned_df, Leom == 2))
 
 # ── 6. Run descriptive stats ────────────────────────────────────────────────────────
 message("Running employment_by_child_age...")
@@ -96,6 +101,11 @@ emp_res <- employment_by_child_age(cleaned_df)
 # produces a saved plot instead of leaking an auto-numbered Rplots*.pdf into the repo root.
 pdf(file.path("outputs", "event_study_pretrend.pdf"))
 diagnostics_results <- run_diagnostics(cleaned_df)
+dev.off()
+
+# Primary (hours) pretrend/event-study check -- hours_diagnostics.R (docs/decisions/hours-ddd-pivot.md).
+pdf(file.path("outputs", "event_study_pretrend_hours.pdf"))
+hours_diagnostics_results <- run_hours_diagnostics(cleaned_df)
 dev.off()
 
 # Results are exported once, at the very end of the script (── 9 ──), so that §8's WFH-exposure
@@ -114,8 +124,9 @@ message("Building the WFH-exposure measures...")
 
 # calibrate_isco_exposure()/build_wfh_exposure_index()/build_exposure_cells() below must NOT be
 # built from cleaned_df alone: cleaned_df is the exact women-25-59 analysis sample that later
-# populates the primary DDD as Mother/Post/Employed, and wfh_exposure_index.R's own header comment
-# already warns against exactly this ("passing the analysis sample builds the third difference out
+# populates the employment DDD (secondary spec) as Mother/Post/Employed, and
+# wfh_exposure_index.R's own header comment already warns against exactly this ("passing the
+# analysis sample builds the third difference out
 # of the same people who enter the regression -- prefer a frame that excludes them, or at minimum
 # covers all workers"). build_exposure_cells() already stratifies by Min (sex) as a cell variable
 # (its first parameter is even named raw_all), so adding men doesn't change its women-cell output
@@ -178,8 +189,11 @@ exposure_realized <- build_wfh_exposure_index(exposure_population_df, ref_year =
 # (d) Pre-period (2017-2019) shift-share exposure by demographic cell, built from the calibrated
 # occupation-level score (b). Unlike (a)-(c), this is defined for every row of cleaned_df --
 # employed and non-employed alike -- so it's the only one of the four that doesn't condition the
-# third difference on Employed, the regression's own outcome. This is the primary exposure measure
-# for the causal DDD.
+# third difference on Employed, the regression's own outcome. This is the exposure measure for the
+# secondary (employment) DDD's own regressor, and is separately reused (for its quartile structure
+# only, not as a regressor) by the primary (hours) DDD's Lee-bounds selection correction -- see
+# hours_ddd_lee_bounds.R's header comment for why two different exposure measures serve two
+# different roles.
 #
 # exposure_cell_vars is DELIBERATELY FINER than cell_fe_vars below (adds MatzavMishpachti, Dat,
 # BirthContinent -- MatzavMishpachti/Dat are already DEFAULT_CONTROLS; BirthContinent
@@ -189,7 +203,7 @@ exposure_realized <- build_wfh_exposure_index(exposure_population_df, ref_year =
 # regardless of employment status, so adding them doesn't reintroduce occupation-level exposure's
 # employment-conditioning problem). See docs/decisions/null-vs-power-audit.md for why this matters:
 # when the exposure measure was built on EXACTLY cell_fe_vars (the old design), it was collinear
-# enough with its own controls/FE that the primary DDD's minimum detectable effect for
+# enough with its own controls/FE that the employment DDD's minimum detectable effect for
 # Mother:Post:WFH_Exposure was ~51% of the baseline employment rate -- roughly 4x the actual point
 # estimate, meaning the null result was uninformative, not evidence of a true null. Verified against
 # real data (docs/decisions/exposure-cell-granularity-fix.md): adding MatzavMishpachti+Dat cut the
@@ -206,22 +220,72 @@ exposure_cells <- build_exposure_cells(
   cell_vars = exposure_cell_vars
 )
 
-# ── 8a. Primary DDD: cell-based exposure, defined for the full sample ─────────
-# Two specs, reported side by side. cell_fe_vars (Spec 1's additive controls / Spec 2's fixed
-# effect) is intentionally COARSER than exposure_cell_vars above -- WFH_Exposure now varies within
-# every cell_fe_vars cell (across MatzavMishpachti/Dat/BirthContinent categories), which is what restores
-# identifying power for Mother:Post:WFH_Exposure (see the comment above exposure_cells and
+# ── 8a. Primary DDD (hours): pure occupation-level exposure (docs/decisions/hours-ddd-pivot.md) ─
+# PRIMARY DDD as of the 2026-09-12 hours pivot (docs/decisions/hours-ddd-pivot.md) -- the
+# extensive-margin DDD in 8b below is the secondary specification. Motivation: 8b's
+# Mother:Post:WFH_Exposure remains underpowered even after the exposure-cell-granularity fixes (MDE
+# ~26% of baseline employment, docs/decisions/exposure-cell-granularity-fix.md), and cell-level WLS
+# aggregation was confirmed unable to recover further power (same memo's "Considered and rejected"
+# section). This pivots the outcome to hours worked (WorkHoursCont, defined only for Employed==1)
+# and the exposure regressor to the PURE occupation-level measure (exposure_calibrated's
+# wfh_exposure_calibrated) -- safe here specifically because WorkHoursCont's own conditioning on
+# employment is intrinsic to the question, unlike 8b's Employed outcome, where an occupation-level
+# regressor would condition the DDD's own outcome on itself (see
+# docs/decisions/exposure-cell-granularity-fix.md's rejection of that approach for the extensive
+# margin). Dropping non-employed rows to run this regression still introduces a real
+# selection-on-a-mediator problem, bounded via run_hours_ddd_lee_bounds()'s generalization of
+# intensive_margin_lee_bounds.R's Lee (2009) trimming bounds, stratified by quartiles of the
+# demographic-cell-based WFH_Exposure (defined for the full sample) -- see hours_ddd_lee_bounds.R's
+# header comment for why two different exposure measures are used. Unconditional (no feature flag)
+# as of the pivot -- this is the project's default primary analysis, not an opt-in diagnostic.
+message("Running primary DDD (hours, pure occupation-level exposure, Employed==1 subsample)...")
+hours_ddd <- run_hours_ddd_regression(
+  cleaned_df,
+  exposure_calibrated %>% select(occupation_code = ISCO2, wfh_exposure = wfh_exposure_calibrated)
+)
+
+message("Computing minimum detectable effect for the hours DDD's triple interaction...")
+baseline_hours <- mean(cleaned_df$WorkHoursCont[cleaned_df$Employed == 1], na.rm = TRUE)
+mde_hours <- compute_ddd_mde(hours_ddd$model, baseline_rate = baseline_hours)
+
+message("Running generalized Lee bounds for the hours DDD (stratified by WFH_Exposure quartile)...")
+hours_lee_bounds <- run_hours_ddd_lee_bounds(
+  cleaned_df,
+  exposure_calibrated %>% select(occupation_code = ISCO2, wfh_exposure = wfh_exposure_calibrated),
+  exposure_cells
+)
+
+# Occupation-level robustness variants (external/realized exposure), mirroring 8c-8e's robustness
+# variants of the secondary DDD -- run_hours_ddd_regression() already takes a generic
+# exposure_index, so no new function is needed here, just two more call sites.
+message("Running primary DDD robustness variant (hours, raw external Dingel & Neiman index)...")
+hours_ddd_external <- run_hours_ddd_regression(
+  cleaned_df,
+  exposure_external %>% select(occupation_code = ISCO2, wfh_exposure = tele_ext)
+)
+
+message("Running primary DDD robustness variant (hours, realized Israeli index, 2021 anchor)...")
+hours_ddd_realized <- run_hours_ddd_regression(cleaned_df, exposure_realized)
+
+# ── 8b. Secondary DDD (employment): cell-based exposure, defined for the full sample ──────────
+# Two specs, reported side by side. Now the SECONDARY specification, per the hours pivot above --
+# still run and reported unconditionally (not gated behind a flag), consistent with basic_reg()/
+# employment_by_child_age() elsewhere in this pipeline, which are also unconditional employment
+# analyses. cell_fe_vars (Spec 1's additive controls / Spec 2's fixed effect) is intentionally
+# COARSER than exposure_cell_vars above -- WFH_Exposure now varies within every cell_fe_vars cell
+# (across MatzavMishpachti/Dat/BirthContinent categories), which is what restores identifying power
+# for Mother:Post:WFH_Exposure (see the comment above exposure_cells and
 # docs/decisions/exposure-cell-granularity-fix.md). Spec 1's WFH_Exposure still carries some
 # overlap with cell_fe_vars (it's built partly from those same 3 variables) --
 # check_spec1_collinearity() below reports the live R²/VIF/condition number rather than a static
 # comment. Spec 2's fully interacted cell FE no longer spans the same partition WFH_Exposure was
 # built on, so (verified against real data) WFH_Exposure's bare main effect is NOT dropped by
 # collinearity here anymore, unlike the old design where exposure and FE cells were identical.
-message("Running primary DDD (cell-based exposure, calibrated, full sample)...")
+message("Running secondary (employment) DDD (cell-based exposure, calibrated, full sample)...")
 ddd_df <- cleaned_df %>%
   left_join(exposure_cells, by = exposure_cell_vars)
 message(sprintf(
-  "Primary DDD join: %d of %d rows unmatched to an exposure cell (WFH_Exposure NA).",
+  "Employment DDD join: %d of %d rows unmatched to an exposure cell (WFH_Exposure NA).",
   sum(is.na(ddd_df$WFH_Exposure)), nrow(ddd_df)
 ))
 
@@ -255,61 +319,62 @@ cell_cluster_formula <- as.formula(paste("~", paste(cell_fe_vars, collapse = "^"
 # but Mother:GilNK is NOT collinear with it (the FE groups by GilNK^TeudaGvoha^MachozMegurim
 # jointly, not by an individual's own Mother status within that cell), so it still adds
 # non-redundant information there.
-ddd_primary_additive <- feols(
+ddd_employment_additive <- feols(
   as.formula(paste("Employed ~ Mother * Post * WFH_Exposure + Mother:GilNK +",
                     paste(DEFAULT_CONTROLS, collapse = " + "))),
   data = ddd_df, cluster = cell_cluster_formula
 )
-ddd_primary_fe <- feols(
+ddd_employment_fe <- feols(
   as.formula(paste("Employed ~ Mother * Post * WFH_Exposure + Mother:GilNK +",
                     paste(other_controls, collapse = " + "),
                     "|", paste(cell_fe_vars, collapse = "^"))),
   data = ddd_df, cluster = cell_cluster_formula
 )
-check_for_dropped_coefficients(ddd_primary_additive, "primary DDD Spec 1 (additive controls)")
+check_for_dropped_coefficients(ddd_employment_additive, "employment DDD Spec 1 (additive controls)")
 # Unlike the old design (exposure_cell_vars == cell_fe_vars exactly), WFH_Exposure's bare main
 # effect is NOT expected to drop here anymore -- exposure_cell_vars is now finer than cell_fe_vars
 # (see the comment above exposure_cells), so WFH_Exposure varies within every cell_fe_vars FE cell
 # and is no longer exactly collinear with the FE. Verified against real data
 # (docs/decisions/exposure-cell-granularity-fix.md); no expected_drops here means any drop at all
 # --including WFH_Exposure's-- now triggers a warning, which is the point.
-check_for_dropped_coefficients(ddd_primary_fe, "primary DDD Spec 2 (interacted cell FE)")
-primary_ddd_table <- etable(
-  ddd_primary_additive, ddd_primary_fe,
+check_for_dropped_coefficients(ddd_employment_fe, "employment DDD Spec 2 (interacted cell FE)")
+employment_ddd_table <- etable(
+  ddd_employment_additive, ddd_employment_fe,
   headers = c("Spec 1: additive controls", "Spec 2: interacted cell FE"), digits = 4
 )
-print(primary_ddd_table)
+print(employment_ddd_table)
 
 message("Checking Spec 1's collinearity at runtime (see comment above)...")
 spec1_collinearity_check <- check_spec1_collinearity(ddd_df, cell_fe_vars, DEFAULT_CONTROLS)
 
-# ── 8b-8d. Robustness: occupation-level DDD + mechanism regression ────────────
-message("Running robustness DDD (calibrated occupation-level index)...")
+# ── 8c-8e. Secondary/employment-outcome robustness: occupation-level DDD + mechanism regression ─
+message("Running secondary (employment) robustness DDD (calibrated occupation-level index)...")
 ddd_calibrated <- run_ddd_regression(
   cleaned_df,
   exposure_calibrated %>% select(occupation_code = ISCO2, wfh_exposure = wfh_exposure_calibrated)
 )
 
-message("Running robustness DDD (raw external Dingel & Neiman index)...")
+message("Running secondary (employment) robustness DDD (raw external Dingel & Neiman index)...")
 ddd_external <- run_ddd_regression(
   cleaned_df,
   exposure_external %>% select(occupation_code = ISCO2, wfh_exposure = tele_ext)
 )
 
-message("Running robustness DDD (realized Israeli index, 2021 anchor)...")
+message("Running secondary (employment) robustness DDD (realized Israeli index, 2021 anchor)...")
 ddd_realized <- run_ddd_regression(cleaned_df, exposure_realized)
 
-# ── 8e. Age-balance robustness chain (docs/decisions/age-balance-robustness-chain.md) ─────────
-# Off by default: these are diagnostic/comparison checks layered on top of the primary DDD (8a),
+# ── 8f. Age-balance robustness chain (docs/decisions/age-balance-robustness-chain.md) ─────────
+# Off by default: these are diagnostic/comparison checks layered on top of the employment DDD (8b),
 # not a replacement for it -- whether run_ddd_age_interacted()/run_ddd_reweighted() should REPLACE
-# 8a as the primary spec is a separate, still-open methodological decision (see the decision memo),
-# not something this flag resolves. Previously this whole chain (robustness/balance_test.R,
-# age_balance_robustness.R, pretrend_wald_test.R) existed only as unit-tested functions with no
-# orchestrator ever calling them against real data -- the age-imbalance claim in
-# age_balance_robustness.R's own header comment was asserted, not verified, until this wiring.
-# phase2_robustness.R is deliberately NOT wired in here: its run_ddd_weights_check() applies
-# MishkalSofi as a feols() weight, which CLAUDE.md requires raising with the user before adding to
-# any run, not just before committing its output -- see the decision memo's "Not wired in" section.
+# 8b as the (now-secondary) spec is a separate, still-open methodological decision (see the
+# decision memo), not something this flag resolves. Previously this whole chain
+# (robustness/balance_test.R, age_balance_robustness.R, pretrend_wald_test.R) existed only as
+# unit-tested functions with no orchestrator ever calling them against real data -- the
+# age-imbalance claim in age_balance_robustness.R's own header comment was asserted, not verified,
+# until this wiring. phase2_robustness.R is deliberately NOT wired in here: its
+# run_ddd_weights_check() applies MishkalSofi as a feols() weight, which CLAUDE.md requires raising
+# with the user before adding to any run, not just before committing its output -- see the decision
+# memo's "Not wired in" section.
 RUN_AGE_BALANCE_ROBUSTNESS <- FALSE
 if (RUN_AGE_BALANCE_ROBUSTNESS) {
   source(file.path("robustness", "balance_test.R"))
@@ -322,73 +387,50 @@ if (RUN_AGE_BALANCE_ROBUSTNESS) {
   message("Diagnosing GilNK (age-group) imbalance by WFH_Exposure quartile...")
   age_balance_diag <- diagnose_gilnk_by_quartile(cleaned_df, exposure_cells)
 
-  message("Running age-interacted comparison spec (Mother:GilNK added to the primary DDD)...")
+  message("Running age-interacted comparison spec (Mother:GilNK added to the employment DDD)...")
   ddd_age_interacted <- run_ddd_age_interacted(cleaned_df, exposure_cells)
 
   message("Running GilNK-reweighted comparison spec (pre-period raking weights)...")
   ddd_reweighted <- run_ddd_reweighted(cleaned_df, exposure_cells)
 
-  message("Running joint Wald test on pre-2020 Mother:year pre-trend coefficients...")
+  # Hours-outcome (primary DDD) analogs -- see age_balance_robustness.R's §4 header comment for why
+  # these use the occupation-level exposure_index rather than the cell-based exposure_cells as
+  # their actual regressor.
+  hours_exposure_index <- exposure_calibrated %>%
+    select(occupation_code = ISCO2, wfh_exposure = wfh_exposure_calibrated)
+
+  message("Running age-interacted comparison spec for the hours DDD (Mother:GilNK added)...")
+  hours_ddd_age_interacted <- run_hours_ddd_age_interacted(cleaned_df, hours_exposure_index)
+
+  message("Running GilNK-reweighted comparison spec for the hours DDD (pre-period raking weights)...")
+  hours_ddd_reweighted <- run_hours_ddd_reweighted(cleaned_df, exposure_cells, hours_exposure_index)
+
+  message("Running joint Wald test on pre-2020 Mother:year pre-trend coefficients (employment)...")
   pretrend_wald <- run_pretrend_joint_test(diagnostics_results$pretrend_model)
+
+  message("Running joint Wald test on pre-2020 Mother:year pre-trend coefficients (hours, primary)...")
+  pretrend_wald_hours <- run_pretrend_joint_test(hours_diagnostics_results$pretrend_model)
 }
 
-# ── 8f. Null-vs-power audit (docs/decisions/null-vs-power-audit.md) ───────────────────────────
-# Off by default, diagnostic layered on top of the primary DDD (8a), not a replacement for it --
-# same framing as 8e. Exists to answer a question the null Mother:Post:WFH_Exposure result alone
+# ── 8g. Null-vs-power audit (docs/decisions/null-vs-power-audit.md) ───────────────────────────
+# Off by default, diagnostic layered on top of the employment DDD (8b), not a replacement for it --
+# same framing as 8f. Exists to answer a question the null Mother:Post:WFH_Exposure result alone
 # can't: is this design well-powered enough to detect a plausible effect, or is the null
 # uninformative? Two checks: (1) does WFH_Exposure actually predict realized WFH_RefWeek at all
 # once measurable (Post==1) -- the shift-share design's core relevance assumption, asserted in
 # docs/decisions/calibrated-exposure-and-cell-ddd.md but never tested directly against real WFH
-# data until now; (2) the closed-form minimum detectable effect for both primary-DDD specs, so the
-# observed point estimates (0.103 additive / 0.131 cell-FE) can be read against how small a true
-# effect this design could even reliably detect.
+# data until now; (2) the closed-form minimum detectable effect for both employment-DDD specs, so
+# the observed point estimates (0.103 additive / 0.131 cell-FE) can be read against how small a
+# true effect this design could even reliably detect.
 RUN_NULL_VS_POWER_AUDIT <- FALSE
 if (RUN_NULL_VS_POWER_AUDIT) {
   message("Checking WFH_Exposure's first-stage relevance against realized WFH_RefWeek...")
   wfh_first_stage <- check_wfh_first_stage_relevance(ddd_df)
 
-  message("Computing minimum detectable effect for the primary DDD's triple interaction...")
+  message("Computing minimum detectable effect for the employment DDD's triple interaction...")
   baseline_employment_rate <- mean(ddd_df$Employed, na.rm = TRUE)
-  mde_additive <- compute_ddd_mde(ddd_primary_additive, baseline_rate = baseline_employment_rate)
-  mde_fe       <- compute_ddd_mde(ddd_primary_fe, baseline_rate = baseline_employment_rate)
-}
-
-# ── 8g. Hours-worked pivot: intensive-margin DDD with pure ISCO-08 exposure (docs/decisions/
-# hours-ddd-pivot.md) ──────────────────────────────────────────────────────────────────────────
-# PRIMARY DDD as of the 2026-09-12 hours pivot (docs/decisions/hours-ddd-pivot.md) -- the
-# extensive-margin DDD in 8a is now the secondary specification. Motivation: 8a's
-# Mother:Post:WFH_Exposure remains underpowered even after the exposure-cell-granularity fixes (MDE
-# ~26% of baseline employment, docs/decisions/exposure-cell-granularity-fix.md), and cell-level WLS
-# aggregation was confirmed unable to recover further power (same memo's "Considered and rejected"
-# section). This pivots the outcome to hours worked (WorkHoursCont, defined only for Employed==1)
-# and the exposure regressor to the PURE occupation-level measure (exposure_calibrated's
-# wfh_exposure_calibrated) -- safe here specifically because WorkHoursCont's own conditioning on
-# employment is intrinsic to the question, unlike 8a's Employed outcome, where an occupation-level
-# regressor would condition the DDD's own outcome on itself (see
-# docs/decisions/exposure-cell-granularity-fix.md's rejection of that approach for the extensive
-# margin). Dropping non-employed rows to run this regression still introduces a real
-# selection-on-a-mediator problem, bounded via run_hours_ddd_lee_bounds()'s generalization of
-# intensive_margin_lee_bounds.R's Lee (2009) trimming bounds, stratified by quartiles of the
-# demographic-cell-based WFH_Exposure (defined for the full sample) -- see hours_ddd_lee_bounds.R's
-# header comment for why two different exposure measures are used.
-RUN_HOURS_DDD_PIVOT <- TRUE
-if (RUN_HOURS_DDD_PIVOT) {
-  message("Running hours-worked DDD (pure occupation-level exposure, Employed==1 subsample)...")
-  hours_ddd <- run_hours_ddd_regression(
-    cleaned_df,
-    exposure_calibrated %>% select(occupation_code = ISCO2, wfh_exposure = wfh_exposure_calibrated)
-  )
-
-  message("Computing minimum detectable effect for the hours DDD's triple interaction...")
-  baseline_hours <- mean(cleaned_df$WorkHoursCont[cleaned_df$Employed == 1], na.rm = TRUE)
-  mde_hours <- compute_ddd_mde(hours_ddd$model, baseline_rate = baseline_hours)
-
-  message("Running generalized Lee bounds for the hours DDD (stratified by WFH_Exposure quartile)...")
-  hours_lee_bounds <- run_hours_ddd_lee_bounds(
-    cleaned_df,
-    exposure_calibrated %>% select(occupation_code = ISCO2, wfh_exposure = wfh_exposure_calibrated),
-    exposure_cells
-  )
+  mde_additive <- compute_ddd_mde(ddd_employment_additive, baseline_rate = baseline_employment_rate)
+  mde_fe       <- compute_ddd_mde(ddd_employment_fe, baseline_rate = baseline_employment_rate)
 }
 
 # ── 9. Export results ─────────────────────────────────────────────────────────
@@ -399,19 +441,27 @@ if (RUN_HOURS_DDD_PIVOT) {
 # persisted per-person roster.
 results_to_export <- list(
   comparative_stats = comp_stats,
+  intensive_margin = intensive_results,
+  intensive_margin_lee_bounds = intensive_lee_bounds,
   basic_reg = baseline_results,
   basic_reg_jewish = baseline_jewish,
   basic_reg_arab = baseline_arab,
-  intensive_margin = intensive_results,
-  intensive_margin_lee_bounds = intensive_lee_bounds,
   employment_by_child_age = emp_res,
   diagnostics = diagnostics_results,
+  hours_diagnostics = hours_diagnostics_results,
   isco_masking_sensitivity = isco_masking_check,
   wfh_exposure_external = exposure_external,
   wfh_exposure_calibrated = exposure_calibrated,
   wfh_exposure_realized = exposure_realized,
   wfh_exposure_cells = exposure_cells,
-  ddd_primary = primary_ddd_table,
+  ddd_hours_table = hours_ddd$table,
+  mde_hours = mde_hours,
+  hours_lee_bounds_table = hours_lee_bounds$table,
+  hours_lee_bounds_quartiles = hours_lee_bounds$diagnostics$quartile_selection_rates,
+  hours_lee_bounds_n_trimmed = hours_lee_bounds$diagnostics$n_trimmed_by_quartile,
+  ddd_hours_external = hours_ddd_external$table,
+  ddd_hours_realized = hours_ddd_realized$table,
+  ddd_employment = employment_ddd_table,
   ddd_calibrated = ddd_calibrated,
   ddd_external = ddd_external,
   ddd_realized = ddd_realized
@@ -436,6 +486,14 @@ if (RUN_AGE_BALANCE_ROBUSTNESS) {
     ddd_reweighted = etable(
       ddd_reweighted$additive, ddd_reweighted$fe,
       headers = c("Reweighted: additive", "Reweighted: cell FE"), digits = 4
+    ),
+    hours_ddd_age_interacted = etable(
+      hours_ddd_age_interacted$model,
+      headers = c("Hours DDD, age-interacted"), digits = 4
+    ),
+    hours_ddd_reweighted = etable(
+      hours_ddd_reweighted$model,
+      headers = c("Hours DDD, reweighted"), digits = 4
     )
   )
 }
@@ -445,16 +503,6 @@ if (RUN_NULL_VS_POWER_AUDIT) {
     wfh_first_stage_table = wfh_first_stage$table,
     mde_additive           = mde_additive,
     mde_fe                 = mde_fe
-  )
-}
-
-if (RUN_HOURS_DDD_PIVOT) {
-  results_to_export$hours_ddd_pivot <- list(
-    hours_ddd_table       = hours_ddd$table,
-    mde_hours             = mde_hours,
-    lee_bounds_table      = hours_lee_bounds$table,
-    lee_bounds_quartiles  = hours_lee_bounds$diagnostics$quartile_selection_rates,
-    lee_bounds_n_trimmed  = hours_lee_bounds$diagnostics$n_trimmed_by_quartile
   )
 }
 

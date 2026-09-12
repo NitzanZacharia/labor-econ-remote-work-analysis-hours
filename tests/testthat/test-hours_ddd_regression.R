@@ -76,3 +76,18 @@ test_that("run_hours_ddd_regression flags unexpected collinear drops", {
     expect_no_warning(res <- run_hours_ddd_regression(fx$panel, fx$exposure_index))
   )
 })
+
+test_that("run_hours_ddd_regression's second-stage mechanism regression recovers the known per-occupation slope", {
+  # Model 1's injected effect (delta * Mother * Post * wfh_exposure) means each occupation's own
+  # Mother:Post coefficient (beta_j) should scale with that occupation's wfh_exposure -- i.e. the
+  # mechanism regression's slope on wfh_exposure should recover the same sign as delta.
+  set.seed(13)
+  fx  <- make_hours_ddd_fixtures(delta = -3)
+  out <- capture.output(res <- suppressWarnings(run_hours_ddd_regression(fx$panel, fx$exposure_index)))
+
+  expect_true(all(c("models", "mechanism_data", "dropped_occupations") %in% names(res)))
+  expect_s3_class(res$models$ddd, "fixest")
+  expect_s3_class(res$models$mechanism, "lm")
+  expect_lt(unname(coef(res$models$mechanism)[["wfh_exposure"]]), 0)
+  expect_equal(res$dropped_occupations$n_dropped, nrow(res$dropped_occupations$data))
+})

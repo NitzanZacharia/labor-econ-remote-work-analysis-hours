@@ -14,6 +14,11 @@
 # All three share prepare_reweighted_ddd_df() so every check is built on the exact same base frame
 # (WFH_Exposure joined, quartile-assigned, rake-weighted, EducationSector flagged) rather than each
 # silently reconstructing its own slightly different version.
+#
+# Hours-outcome (primary DDD) analogs -- run_hours_ddd_twoway_cluster()/run_hours_ddd_education_
+# checks()/run_hours_ddd_weights_check(), sharing prepare_hours_reweighted_ddd_df() -- were added
+# for the hours pivot's gender/robustness-parity pass (docs/decisions/hours-ddd-pivot.md). Same
+# unwired status as the three original checks: not sourced or called from main.R.
 library(tidyverse)
 library(fixest)
 source(file.path("scripts", "data_processing.R"))
@@ -162,6 +167,125 @@ run_ddd_weights_check <- function(cleaned_df, exposure_cells, rake = NULL, contr
                headers = c("Unweighted", "Rake only", "MishkalSofi only", "Combined (rake x design)"),
                digits = 4))
   print(etable(unweighted$fe, rake_only$fe, design_only$fe, combined$fe,
+               headers = c("Unweighted", "Rake only", "MishkalSofi only", "Combined (rake x design)"),
+               digits = 4))
+
+  invisible(list(unweighted = unweighted, rake_only = rake_only, design_only = design_only,
+                 combined = combined))
+}
+
+# ── Hours-outcome (primary DDD) analogs ──────────────────────────────────────────────────────────
+# Added for the hours pivot's gender/robustness-parity pass (docs/decisions/hours-ddd-pivot.md).
+# Same unwired status as the three checks above (main.R does not source or call any of this file --
+# NOT newly wired in here either, matching that existing, unrelated MishkalSofi sign-off gap).
+# Structural difference from the employment versions: the primary hours DDD (hours_ddd_regression.R)
+# has only ONE spec (occupation-level WFH_Exposure, no cell-FE alternative -- a cell FE would be
+# orthogonal to, not collinear with, an occupation-level regressor, so there's no "does the main
+# effect survive under FE" question to ask here), so these functions fit a single formula rather
+# than an additive/cell-FE pair. Clustered on occupation code throughout, matching
+# hours_ddd_regression.R's own Moulton-consistent choice (not ~IDPUF, unlike the employment
+# versions above, which cluster on IDPUF for this specific check).
+
+prepare_hours_reweighted_ddd_df <- function(cleaned_df, exposure_cells, exposure_index, rake = NULL) {
+  if (is.null(rake)) rake <- build_gilnk_rake_weights(cleaned_df, exposure_cells)
+
+  exposure_join_vars <- setdiff(names(exposure_cells), c("WFH_Exposure", "n_cell"))
+
+  ddd_df <- cleaned_df %>%
+    filter(Employed == 1) %>%
+    left_join(exposure_cells, by = exposure_join_vars) %>%
+    filter(!is.na(WFH_Exposure)) %>%
+    assign_wfh_quartile(rake$breaks) %>%
+    rename(WFH_Exposure_Cell = WFH_Exposure) %>%
+    left_join(rake$weights, by = c("WFH_Exposure_Q", "Mother", "GilNK")) %>%
+    inner_join(
+      exposure_index %>% select(MishlachYad_ISCO_08_2 = occupation_code, WFH_Exposure = wfh_exposure),
+      by = "MishlachYad_ISCO_08_2"
+    ) %>%
+    mutate(EducationSector = as.integer(MishlachYad_ISCO_08_2 == 23))
+
+  list(ddd_df = ddd_df, rake = rake)
+}
+
+# ── Hours 2a: two-way clustering (IDPUF + occupation^year) ───────────────────────────────────────
+run_hours_ddd_twoway_cluster <- function(cleaned_df, exposure_cells, exposure_index, rake = NULL,
+                                          controls = DEFAULT_CONTROLS) {
+  prep   <- prepare_hours_reweighted_ddd_df(cleaned_df, exposure_cells, exposure_index, rake)
+  ddd_df <- prep$ddd_df
+
+  formula_rhs <- paste("Mother * Post * WFH_Exposure +", paste(controls, collapse = " + "))
+  f <- as.formula(paste("WorkHoursCont ~", formula_rhs))
+  one_way <- feols(f, data = ddd_df, weights = ~rake_weight, cluster = ~IDPUF)
+  two_way <- feols(f, data = ddd_df, weights = ~rake_weight,
+                    cluster = ~IDPUF + MishlachYad_ISCO_08_2^ShnatSeker)
+
+  n_idpuf   <- n_distinct(ddd_df$IDPUF)
+  n_occyear <- n_distinct(paste(ddd_df$MishlachYad_ISCO_08_2, ddd_df$ShnatSeker))
+  message(sprintf(
+    "run_hours_ddd_twoway_cluster: %d IDPUF clusters, %d occupation x year clusters (N=%d).",
+    n_idpuf, n_occyear, nrow(ddd_df)
+  ))
+
+  print(etable(one_way, two_way,
+               headers = c("1-way (IDPUF)", "2-way (+occ x year)"), digits = 4))
+
+  invisible(list(one_way = one_way, two_way = two_way, n_idpuf = n_idpuf, n_occyear = n_occyear,
+                 n = nrow(ddd_df)))
+}
+
+# ── Hours 2b: education-sector transparency ───────────────────────────────────────────────────────
+run_hours_ddd_education_checks <- function(cleaned_df, exposure_cells, exposure_index, rake = NULL,
+                                            controls = DEFAULT_CONTROLS) {
+  prep   <- prepare_hours_reweighted_ddd_df(cleaned_df, exposure_cells, exposure_index, rake)
+  ddd_df <- prep$ddd_df
+
+  fit_one <- function(data, extra_rhs = NULL) {
+    extra <- if (!is.null(extra_rhs)) paste(" +", extra_rhs) else ""
+    rhs <- paste0("Mother * Post * WFH_Exposure", extra, " + ", paste(controls, collapse = " + "))
+    feols(as.formula(paste("WorkHoursCont ~", rhs)), data = data, weights = ~rake_weight,
+          cluster = ~MishlachYad_ISCO_08_2)
+  }
+
+  # (i) exclude ISCO == 23 -- every row here already has a defined occupation (inner_join in
+  # prepare_hours_reweighted_ddd_df()), so unlike the employment version's is.na() guard, a plain
+  # != 23 filter can't accidentally drop a non-employed/unmatched row here.
+  n_excluded <- sum(ddd_df$MishlachYad_ISCO_08_2 == 23)
+  message(sprintf("run_hours_ddd_education_checks: excluding %d rows with MishlachYad_ISCO_08_2 == 23 (teaching).", n_excluded))
+  res_excl <- fit_one(filter(ddd_df, MishlachYad_ISCO_08_2 != 23))
+
+  # (ii) explicit Mother:Post:EducationSector term, alongside the existing WFH_Exposure
+  # interaction (not replacing it), full sample.
+  res_dummy <- fit_one(ddd_df, extra_rhs = "Mother:Post:EducationSector")
+
+  print(etable(res_excl, res_dummy,
+               headers = c("Excl. ISCO23", "+EducationSector"), digits = 4))
+
+  invisible(list(exclude_isco23 = res_excl, education_dummy = res_dummy, n_excluded = n_excluded))
+}
+
+# ── Hours 2c: survey (design) weight check ────────────────────────────────────────────────────────
+run_hours_ddd_weights_check <- function(cleaned_df, exposure_cells, exposure_index, rake = NULL,
+                                         controls = DEFAULT_CONTROLS) {
+  prep   <- prepare_hours_reweighted_ddd_df(cleaned_df, exposure_cells, exposure_index, rake)
+  ddd_df <- prep$ddd_df %>% mutate(combined_weight = rake_weight * MishkalSofi)
+
+  rhs <- paste("Mother * Post * WFH_Exposure +", paste(controls, collapse = " + "))
+  f   <- as.formula(paste("WorkHoursCont ~", rhs))
+  fit <- function(w) feols(f, data = ddd_df, weights = w, cluster = ~MishlachYad_ISCO_08_2)
+
+  unweighted  <- fit(NULL)
+  rake_only   <- fit(~rake_weight)
+  design_only <- fit(~MishkalSofi)
+  combined    <- fit(~combined_weight)
+
+  message(sprintf(
+    "run_hours_ddd_weights_check: rake_weight range [%.3f, %.3f]; MishkalSofi range [%.2f, %.2f]; combined range [%.2f, %.2f].",
+    min(ddd_df$rake_weight, na.rm = TRUE), max(ddd_df$rake_weight, na.rm = TRUE),
+    min(ddd_df$MishkalSofi, na.rm = TRUE), max(ddd_df$MishkalSofi, na.rm = TRUE),
+    min(ddd_df$combined_weight, na.rm = TRUE), max(ddd_df$combined_weight, na.rm = TRUE)
+  ))
+
+  print(etable(unweighted, rake_only, design_only, combined,
                headers = c("Unweighted", "Rake only", "MishkalSofi only", "Combined (rake x design)"),
                digits = 4))
 

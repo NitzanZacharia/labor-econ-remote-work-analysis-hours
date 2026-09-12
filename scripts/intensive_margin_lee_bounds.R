@@ -1,13 +1,16 @@
 # intensive_margin_lee_bounds.R
-# DiD-adapted Lee (2009) trimming bounds for the intensive-margin (WorkHoursCont) regression.
-# See docs/decisions/intensive-margin-lee-bounds.md for the full decision memo (problem statement,
-# alternatives considered, and this adaptation's stated limitations).
+# DiD-adapted Lee (2009) trimming bounds for the intensive-margin (WorkHoursCont) regression --
+# the project's PRIMARY dependent-variable regression as of the hours pivot
+# (docs/decisions/hours-ddd-pivot.md). See docs/decisions/intensive-margin-lee-bounds.md for the
+# full decision memo (problem statement, alternatives considered, and this adaptation's stated
+# limitations); this same machinery is later generalized to the triple-interaction DDD by
+# hours_ddd_lee_bounds.R.
 #
 # run_intensive_margin_reg() (intensive_margin_regression.R) estimates WorkHoursCont ~ Mother*Post
-# + controls on the Employed == 1 subsample. Employed is itself the outcome of this project's
-# extensive-margin DiD (basic_regression.R) -- if WFH availability differentially pulls marginal
-# mothers into employment post-2021 (exactly the mechanism this project is testing for), the
-# post-period employed-mother sample is compositionally different from the pre-period one for
+# + controls on the Employed == 1 subsample. Employed is itself the outcome of the project's
+# secondary, extensive-margin DiD (basic_regression.R) -- if WFH availability differentially pulls
+# marginal mothers into employment post-2021 (exactly the mechanism this project is testing for),
+# the post-period employed-mother sample is compositionally different from the pre-period one for
 # reasons unrelated to hours, biasing the intensive-margin Mother:Post coefficient in an unknown
 # direction. This is a textbook selection-on-a-mediator problem -- see Lee (2009), "Training,
 # Wages, and Sample Selection: Estimating Sharp Bounds on Treatment Effects", Review of Economic
