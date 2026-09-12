@@ -124,6 +124,37 @@ test_that("excess selection in Mother==1,Post==1 produces hand-computable lower/
   expect_lte(co(res$models$point), co(res$models$upper))
 })
 
+test_that("100% excess selection (trim_prop == 1) trims the whole treated cell, not one stray row", {
+  # s10 = 0 and s01 = s00 force s11_counterfactual = 0, so ANY employment in Mother=1,Post=1 counts
+  # as "excess" -> trim_prop = 1 -> n_trim == n_cell. Under the pre-fix slicing
+  # ("1:(n_cell-n_trim)" / "(n_trim+1):n_cell"), R's recycling on a 0 index and an out-of-range
+  # index each silently kept exactly ONE row instead of zero, leaving the Mother:Post interaction
+  # (barely) estimable off a single leftover data point. With the fix, zero treated-cell rows
+  # survive in either trimmed sample, so Mother:Post becomes a constant-zero column across the
+  # whole fitting sample and fixest drops it for collinearity -- which the function now reports as
+  # an informative, expected identification failure rather than either a silent wrong number or a
+  # bare "subscript out of bounds".
+  ctrl_core  <- factor(rep(c("A", "B"), length.out = 50))
+  ctrl_unemp <- factor(rep(c("A", "B"), length.out = 50))
+
+  base_cell <- function(mother, post) dplyr::bind_rows(
+    make_lee_bounds_row(mother, post, rep(1L, 50), rep(c(39, 41), length.out = 50), ctrl_core),
+    make_lee_bounds_row(mother, post, rep(0L, 50), rep(NA_real_, 50), ctrl_unemp)
+  )
+  cell10 <- make_lee_bounds_row(1, 0, rep(0L, 100), rep(NA_real_, 100),
+                                 factor(rep(c("A", "B"), length.out = 100)))
+  treated_cell <- make_lee_bounds_row(1, 1, rep(1L, 70), rep(c(39, 41), length.out = 70),
+                                       factor(rep(c("A", "B"), length.out = 70)))
+
+  synth <- dplyr::bind_rows(base_cell(0, 0), base_cell(0, 1), cell10, treated_cell)
+  synth$IDPUF <- seq_len(nrow(synth))
+
+  expect_error(
+    capture.output(res <- run_intensive_margin_lee_bounds(synth)),
+    "not estimable"
+  )
+})
+
 test_that("run_intensive_margin_lee_bounds errors informatively when a (Mother, Post) cell is entirely empty", {
   ctrl <- factor(rep(c("A", "B"), length.out = 20))
   synth <- dplyr::bind_rows(

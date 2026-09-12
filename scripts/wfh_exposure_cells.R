@@ -42,7 +42,7 @@ calibrate_isco_exposure <- function(cleaned_df, exposure_isco2, wfh_col = "WFH",
     ) %>%
     mutate(ISCO2 = MishlachYad_ISCO_08_2)
 
-  z <- qnorm(1 - (1 - conf_level) / 2)
+  z <- qnorm(conf_level)
 
   # A cluster-robust SE is undefined for two known, expected reasons: fewer than 2 distinct
   # IDPUF (feols's vcov hits a singular matrix and fixest throws an ERROR from eigen(), not a

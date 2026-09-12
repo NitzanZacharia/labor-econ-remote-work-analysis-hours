@@ -139,12 +139,34 @@ test_that("calibrate_isco_exposure: an occupation with a constant outcome gets a
   expect_false(res$swap)
 })
 
+test_that("calibrate_isco_exposure: the swap test uses the one-sided critical value, not the two-sided one", {
+  # The function's own header comment and docs/LLD.md both describe this as "a one-sided test ...
+  # at conf_level confidence" -- i.e. z should be qnorm(conf_level) (1.645 at 95%), not the
+  # two-sided qnorm(1 - (1-conf_level)/2) (1.960 at 95%). Rather than hunting for a gap/se
+  # combination that happens to flip swap/no-swap at the boundary, back out the z actually used
+  # from the returned gap/margin/se_clustered (margin = gap - z*se - gap_threshold) and compare it
+  # directly to both candidate critical values.
+  synth <- tibble::tibble(
+    ShnatSeker = rep(c(2022, 2023), length.out = 400), Employed = 1L,
+    MishlachYad_ISCO_08_2 = 100,
+    WFH = rep(c(1, 0), c(280, 120)),
+    IDPUF = rep(seq_len(200), length.out = 400)
+  )
+  dn <- tibble::tibble(ISCO2 = 100, tele_ext = 0.1)
+
+  res <- calibrate_isco_exposure(synth, dn, conf_level = 0.95, gap_threshold = 0.5)
+  implied_z <- (res$gap - res$margin - 0.5) / res$se_clustered
+
+  expect_equal(implied_z, qnorm(0.95), tolerance = 1e-6)
+  expect_false(isTRUE(all.equal(implied_z, qnorm(0.975), tolerance = 1e-6)))
+})
+
 test_that("calibrate_isco_exposure: a higher conf_level requires stronger evidence and can flip a borderline swap to no-swap", {
   # A moderately-powered occupation (20 clusters, 2 obs each) with a gap just above the
   # threshold: well-powered enough to swap at the default 95% confidence, but not powered enough
-  # to survive a much stricter one-sided test. z = qnorm(1 - (1-conf_level)/2) is monotonically
-  # increasing in conf_level, so this also exercises that conf_level is actually threaded through
-  # to the swap test rather than ignored.
+  # to survive a much stricter one-sided test. z = qnorm(conf_level) is monotonically increasing
+  # in conf_level, so this also exercises that conf_level is actually threaded through to the
+  # swap test rather than ignored.
   synth <- tibble::tibble(
     ShnatSeker = 2022, Employed = 1L, MishlachYad_ISCO_08_2 = 700,
     WFH = rep(c(1, 1, 0), length.out = 40),          # realized ~0.667
@@ -152,12 +174,12 @@ test_that("calibrate_isco_exposure: a higher conf_level requires stronger eviden
   )
   dn <- tibble::tibble(ISCO2 = 700, tele_ext = 0.0)   # gap 0.675
 
-  res_95  <- calibrate_isco_exposure(synth, dn, conf_level = 0.95)
-  res_999 <- calibrate_isco_exposure(synth, dn, conf_level = 0.999)
+  res_95   <- calibrate_isco_exposure(synth, dn, conf_level = 0.95)
+  res_9999 <- calibrate_isco_exposure(synth, dn, conf_level = 0.9999)
 
   expect_true(res_95$swap)
-  expect_false(res_999$swap)
-  expect_lt(res_999$margin, res_95$margin)
+  expect_false(res_9999$swap)
+  expect_lt(res_9999$margin, res_95$margin)
 })
 
 test_that("calibrate_isco_exposure: wfh_col lets the outcome column be named something other than WFH", {

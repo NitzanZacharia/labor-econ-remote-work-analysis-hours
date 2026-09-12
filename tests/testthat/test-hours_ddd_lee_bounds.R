@@ -137,6 +137,88 @@ test_that("excess selection concentrated in exactly one quartile trims only that
   expect_lte(co(res$models$point), co(res$models$upper))
 })
 
+test_that("100% excess selection in one quartile trims that whole cell, not one stray row", {
+  # Quartile 4: s10 = 0 and s01 = s00 = 0.5 force s11_counterfactual = 0, so the entire
+  # Mother=1,Post=1 cell (n=70) counts as excess -> trim_prop = 1 -> n_trim == n_cell for that
+  # quartile. Unlike the single-cell intensive-margin function, the other three (balanced,
+  # untrimmed) quartiles keep Mother:Post:WFH_Exposure identified via their own nonzero
+  # WFH_Exposure values, so this doesn't hit the collinearity wall -- it instead gives a clean,
+  # hand-verifiable regression test that the pre-fix reversed-slice bug (an off-by-one that kept
+  # exactly one leftover row instead of zero) doesn't recur here either. Reference values
+  # confirmed against a real run of this exact fixture before being hard-coded.
+  reps <- tibble::tibble(quartile = 1:4, GilNK = c(3, 8, 13, 18), occ = c(301, 302, 303, 304),
+                          occ_wfh = c(0.125, 0.375, 0.625, 0.875))
+  extra_gilnk_by_q <- list(`1` = c(1, 2, 4, 5), `2` = c(6, 7, 9, 10),
+                            `3` = c(11, 12, 14, 15), `4` = c(16, 17, 19, 20))
+  extras <- purrr::imap_dfr(extra_gilnk_by_q, function(gilnks, q) {
+    tibble::tibble(GilNK = gilnks, ShnatSeker = 2018, Mother = 0, Post = 0,
+                   Employed = c(1L, 1L, 0L, 0L), WorkHoursCont = ifelse(Employed == 1, 40, NA_real_),
+                   MishlachYad_ISCO_08_2 = NA_real_, Ctrl = factor("A", levels = c("A", "B")))
+  })
+  make_balanced_group <- function(gilnk, occ) {
+    make_cell <- function(mother, post) tibble::tibble(
+      GilNK = gilnk, ShnatSeker = 2022, Mother = mother, Post = post,
+      Employed = rep(c(1L, 0L), c(20, 20)),
+      WorkHoursCont = c(rep(c(39, 41), length.out = 20), rep(NA_real_, 20)),
+      MishlachYad_ISCO_08_2 = c(rep(occ, 20), rep(NA_real_, 20)),
+      Ctrl = factor(rep(c("A", "B"), length.out = 40), levels = c("A", "B"))
+    )
+    dplyr::bind_rows(make_cell(0, 0), make_cell(0, 1), make_cell(1, 0), make_cell(1, 1))
+  }
+  make_full_excess_group <- function(gilnk, occ) {
+    make_cell00_01 <- function(post) tibble::tibble(
+      GilNK = gilnk, ShnatSeker = 2022, Mother = 0, Post = post,
+      Employed = rep(c(1L, 0L), c(50, 50)),
+      WorkHoursCont = c(rep(c(39, 41), length.out = 50), rep(NA_real_, 50)),
+      MishlachYad_ISCO_08_2 = c(rep(occ, 50), rep(NA_real_, 50)),
+      Ctrl = factor(rep(c("A", "B"), length.out = 100), levels = c("A", "B"))
+    )
+    cell10 <- tibble::tibble(
+      GilNK = gilnk, ShnatSeker = 2022, Mother = 1, Post = 0,
+      Employed = rep(0L, 100), WorkHoursCont = rep(NA_real_, 100),
+      MishlachYad_ISCO_08_2 = rep(NA_real_, 100),
+      Ctrl = factor(rep(c("A", "B"), length.out = 100), levels = c("A", "B"))
+    )
+    treated_cell <- tibble::tibble(
+      GilNK = gilnk, ShnatSeker = 2022, Mother = 1, Post = 1,
+      Employed = c(rep(1L, 50), rep(1L, 20), rep(0L, 30)),
+      WorkHoursCont = c(rep(40, 50), rep(10, 20), rep(NA_real_, 30)),
+      MishlachYad_ISCO_08_2 = c(rep(occ, 70), rep(NA_real_, 30)),
+      Ctrl = factor(rep(c("A", "B"), length.out = 100), levels = c("A", "B"))
+    )
+    dplyr::bind_rows(make_cell00_01(0), make_cell00_01(1), cell10, treated_cell)
+  }
+  groups <- purrr::pmap(reps, function(quartile, GilNK, occ, occ_wfh) {
+    if (quartile == 4) make_full_excess_group(GilNK, occ) else make_balanced_group(GilNK, occ)
+  })
+  full_panel <- dplyr::bind_rows(extras, dplyr::bind_rows(groups))
+  full_panel$IDPUF <- seq_len(nrow(full_panel))
+
+  exposure_index <- dplyr::select(reps, occupation_code = occ, wfh_exposure = occ_wfh)
+  exposure_cells <- tibble::tibble(GilNK = 1:20, WFH_Exposure = seq(0.025, 0.975, length.out = 20),
+                                    n_cell = 50)
+
+  out <- capture.output(res <- suppressWarnings(
+    run_hours_ddd_lee_bounds(full_panel, exposure_index, exposure_cells, controls = "Ctrl")
+  ))
+
+  diag <- res$diagnostics$quartile_selection_rates
+  expect_equal(diag$trim_prop[diag$WFH_Exposure_Q == 4], 1)
+
+  n_trim <- res$diagnostics$n_trimmed_by_quartile
+  # The pre-fix bug would have left exactly 1 leftover row per trimmed direction instead of 0;
+  # n_trimmed must equal the FULL cell size (70), not 69.
+  expect_equal(n_trim$n_cell[n_trim$WFH_Exposure_Q == 4], 70L)
+  expect_equal(n_trim$n_trimmed[n_trim$WFH_Exposure_Q == 4], 70L)
+
+  co <- function(m) unname(coef(m)[["Mother:Post:WFH_Exposure"]])
+  expect_equal(co(res$models$point), -13.0909090909, tolerance = 1e-6)
+  # With quartile 4's cell fully removed, the remaining 3 quartiles are perfectly balanced by
+  # construction (zero DiD effect everywhere) -> both bounds collapse to exactly 0.
+  expect_equal(co(res$models$lower), 0, tolerance = 1e-6)
+  expect_equal(co(res$models$upper), 0, tolerance = 1e-6)
+})
+
 test_that("run_hours_ddd_lee_bounds warns when a quartile's Mother=1,Post=1 cell is thin", {
   fx <- make_hours_lee_bounds_fixtures(excess_in_q4 = FALSE)
   # Thin out quartile 1's Mother=1,Post=1 cell to below MIN_CELL_WARN (30).

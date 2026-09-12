@@ -120,17 +120,39 @@ run_intensive_margin_lee_bounds <- function(cleaned_df, controls = DEFAULT_CONTR
 
     ranked <- arrange(treated_cell, WorkHoursCont)
     # Lower bound: drop the highest-hours n_trim rows (marginal entrants assumed to work the most).
-    trimmed_for_lower <- if (n_trim > 0) slice(ranked, 1:(n_cell - n_trim)) else ranked
+    # seq_len(), not "1:(n_cell - n_trim)" -- the latter produces a reversed 2-element sequence
+    # (e.g. 1:0 == c(1, 0)) rather than zero rows when n_trim == n_cell (100% trim); seq_len(0)
+    # correctly yields an empty selection. See hours_ddd_lee_bounds.R's identical fix.
+    trimmed_for_lower <- if (n_trim > 0) slice(ranked, seq_len(max(n_cell - n_trim, 0))) else ranked
     # Upper bound: drop the lowest-hours n_trim rows (marginal entrants assumed to work the least).
-    trimmed_for_upper <- if (n_trim > 0) slice(ranked, (n_trim + 1):n_cell) else ranked
+    trimmed_for_upper <- if (n_trim > 0) {
+      slice(ranked, if (n_trim < n_cell) (n_trim + 1):n_cell else integer(0))
+    } else {
+      ranked
+    }
 
     lower_reg <- fit_on(bind_rows(other_cells, trimmed_for_lower))
     upper_reg <- fit_on(bind_rows(other_cells, trimmed_for_upper))
     n_trimmed <- n_trim
   }
 
-  co <- function(m) unname(coef(m)[["Mother:Post"]])
-  se_of <- function(m) unname(se(m)[["Mother:Post"]])
+  # At trim_prop == 1 (100% of the Mother=1,Post=1 cell trimmed away), neither trimmed sample has
+  # any row with Mother==1 & Post==1 left, so the Mother:Post column is constant zero across the
+  # whole fitting sample and fixest drops it for collinearity rather than leaving it as NA (see
+  # test-ddd_collinearity_diagnostics.R) -- coef(m)[["Mother:Post"]]/se(m)[["Mother:Post"]] would
+  # otherwise fail with a bare "subscript out of bounds". Fail informatively instead: this reflects
+  # a real identification failure (no data left to bound), not a bug.
+  extract <- function(m, fn) {
+    val <- fn(m)["Mother:Post"]
+    if (is.na(val)) {
+      stop("run_intensive_margin_lee_bounds: Mother:Post is not estimable in this bound's trimmed ",
+           "sample (dropped for collinearity) -- this happens when the entire Mother=1,Post=1 cell ",
+           "has been trimmed away (trim_prop == 1), leaving no data to identify the interaction.")
+    }
+    unname(val)
+  }
+  co    <- function(m) extract(m, coef)
+  se_of <- function(m) extract(m, se)
 
   se_lower <- se_of(lower_reg)
   se_point <- se_of(point_reg)
