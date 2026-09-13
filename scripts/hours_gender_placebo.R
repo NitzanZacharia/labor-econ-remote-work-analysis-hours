@@ -60,12 +60,14 @@ run_hours_gender_ddd_placebo <- function(cleaned_men, exposure_index, controls =
     NULL
   })
 
+  table_ddd <- NULL
   if (!is.null(model)) {
     check_for_dropped_coefficients(model, "run_hours_gender_ddd_placebo()'s triple interaction")
-    print(etable(model, headers = c("WorkHoursCont (hours DDD placebo, men)"), digits = 4))
+    table_ddd <- etable(model, headers = c("WorkHoursCont (hours DDD placebo, men)"), digits = 4)
+    print(table_ddd)
   }
 
-  list(n_employed = n_employed, n_matched = n_matched, model = model)
+  list(n_employed = n_employed, n_matched = n_matched, model = model, table = table_ddd)
 }
 
 run_hours_gender_placebo <- function(folder_path, cleaned_men = NULL, exposure_index = NULL,

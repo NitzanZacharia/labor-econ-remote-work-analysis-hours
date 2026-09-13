@@ -62,6 +62,9 @@ test_that("run_hours_gender_ddd_placebo recovers the correct sign of a known inj
   expect_lt(unname(coef(res$model)[["Mother:Post:WFH_Exposure"]]), 0)
   expect_equal(res$n_employed, nrow(fx$panel))
   expect_equal(res$n_matched, nrow(fx$panel))
+  # `table` (the etable() output, for export_all_results() to pick up -- a raw fixest model object
+  # is silently skipped by the exporter) must be populated whenever the model fits.
+  expect_true(is.data.frame(res$table))
 })
 
 test_that("run_hours_gender_ddd_placebo excludes non-employed and occupation-unmatched rows", {
@@ -89,4 +92,5 @@ test_that("run_hours_gender_ddd_placebo returns a NULL model (not an error) when
   })
   expect_equal(res$n_matched, 0)
   expect_null(res$model)
+  expect_null(res$table)
 })

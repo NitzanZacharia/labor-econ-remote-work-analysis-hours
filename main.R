@@ -25,6 +25,7 @@ source(file.path("scripts", "hours_ddd_regression.R"))
 source(file.path("scripts", "hours_ddd_lee_bounds.R"))
 source(file.path("scripts", "wfh_first_stage_check.R"))
 source(file.path("scripts", "ddd_mde_diagnostics.R"))
+source(file.path("scripts", "hours_subgroup_comparison.R"))
 
 # ── 2. Configure paths ────────────────────────────────────────────────────────
 message("Edit folder paths if needed!")
@@ -238,10 +239,9 @@ exposure_cells <- build_exposure_cells(
 # header comment for why two different exposure measures are used. Unconditional (no feature flag)
 # as of the pivot -- this is the project's default primary analysis, not an opt-in diagnostic.
 message("Running primary DDD (hours, pure occupation-level exposure, Employed==1 subsample)...")
-hours_ddd <- run_hours_ddd_regression(
-  cleaned_df,
-  exposure_calibrated %>% select(occupation_code = ISCO2, wfh_exposure = wfh_exposure_calibrated)
-)
+hours_exposure_index <- exposure_calibrated %>%
+  select(occupation_code = ISCO2, wfh_exposure = wfh_exposure_calibrated)
+hours_ddd <- run_hours_ddd_regression(cleaned_df, hours_exposure_index)
 
 message("Computing minimum detectable effect for the hours DDD's triple interaction...")
 baseline_hours <- mean(cleaned_df$WorkHoursCont[cleaned_df$Employed == 1], na.rm = TRUE)
@@ -265,6 +265,68 @@ hours_ddd_external <- run_hours_ddd_regression(
 
 message("Running primary DDD robustness variant (hours, realized Israeli index, 2021 anchor)...")
 hours_ddd_realized <- run_hours_ddd_regression(cleaned_df, exposure_realized)
+
+# ── Hours subgroup comparisons (demographic heterogeneity) ────────────────────────────────────
+# Two independent checks for the now-primary hours DiD/DDD, mirroring coverage that already
+# existed for the (now-secondary) employment outcome (basic_reg_jewish/basic_reg_arab, section 5
+# above) but had never been ported to hours:
+#
+# (i) Arab vs. Jewish women (Leom == 2 / Leom == 1). run_intensive_margin_reg()/
+# run_hours_ddd_regression() are exactly as generic over their input data frame as basic_reg() is,
+# so the same Leom filter applies unchanged -- no new econometric machinery, just the existing
+# hours functions called on the two subsamples. Point estimates only (DiD + DDD), matching the
+# existing basic_reg_jewish/arab precedent: no separate per-subgroup Lee-bounds/MDE run, since the
+# analogous employment breakdown doesn't do that either and this is a heterogeneity check on the
+# primary spec, not a new primary specification in its own right.
+#
+# (ii) Male vs. female (gender placebo). hours_gender_placebo.R's run_hours_gender_placebo()/
+# run_hours_gender_ddd_placebo() already implement this -- replicate the hours DiD/DDD on men,
+# reading "Mother" as "Father", to test whether the effect is motherhood-specific rather than a
+# general parenthood/macro pattern (see that file's header comment) -- and are unit-tested, but
+# were sourced without ever being called from main.R or exported. Reuses cleaned_men_for_exposure
+# (already loaded above for the WFH-exposure construction) and hours_exposure_index (defined above)
+# rather than reloading/rebuilding either.
+message("Running hours DiD/DDD by ethnicity (Jewish vs. Arab women)...")
+intensive_jewish <- run_intensive_margin_reg(filter(cleaned_df, Leom == 1))
+check_for_dropped_coefficients(intensive_jewish$models$hours, "hours DiD, Jewish women")
+intensive_arab   <- run_intensive_margin_reg(filter(cleaned_df, Leom == 2))
+check_for_dropped_coefficients(intensive_arab$models$hours, "hours DiD, Arab women")
+
+hours_ddd_jewish <- run_hours_ddd_regression(filter(cleaned_df, Leom == 1), hours_exposure_index)
+check_for_dropped_coefficients(hours_ddd_jewish$model, "hours DDD, Jewish women")
+hours_ddd_arab   <- run_hours_ddd_regression(filter(cleaned_df, Leom == 2), hours_exposure_index)
+check_for_dropped_coefficients(hours_ddd_arab$model, "hours DDD, Arab women")
+
+message("Running hours gender placebo (men, 'Mother' read as 'Father')...")
+hours_gender_placebo <- run_hours_gender_placebo(
+  folder_path,
+  cleaned_men    = cleaned_men_for_exposure,
+  exposure_index = hours_exposure_index
+)
+
+message("Building hours subgroup comparison plots (DiD and DDD terms, across ethnicity + gender placebo)...")
+hours_did_subgroup_comparison <- build_hours_subgroup_comparison(
+  models = list(
+    "All women (primary)" = intensive_results$models$hours,
+    "Jewish women"        = intensive_jewish$models$hours,
+    "Arab women"          = intensive_arab$models$hours,
+    "Men (placebo)"       = hours_gender_placebo$result$models$hours
+  ),
+  term     = "Mother:Post",
+  title    = "Hours DiD (Mother x Post) by subgroup",
+  subtitle = "Weekly hours worked, Employed==1; 95% CI, clustered by IDPUF"
+)
+hours_ddd_subgroup_comparison <- build_hours_subgroup_comparison(
+  models = list(
+    "All women (primary)" = hours_ddd$model,
+    "Jewish women"        = hours_ddd_jewish$model,
+    "Arab women"          = hours_ddd_arab$model,
+    "Men (placebo)"       = hours_gender_placebo$ddd_placebo$model
+  ),
+  term     = "Mother:Post:WFH_Exposure",
+  title    = "Hours DDD (Mother x Post x WFH_Exposure) by subgroup",
+  subtitle = "Weekly hours worked, Employed==1; 95% CI, clustered by occupation"
+)
 
 # ── 8b. Secondary DDD (employment): cell-based exposure, defined for the full sample ──────────
 # Two specs, reported side by side. Now the SECONDARY specification, per the hours pivot above --
@@ -441,6 +503,14 @@ results_to_export <- list(
   hours_lee_bounds_n_trimmed = hours_lee_bounds$diagnostics$n_trimmed_by_quartile,
   ddd_hours_external = hours_ddd_external$table,
   ddd_hours_realized = hours_ddd_realized$table,
+  intensive_margin_jewish_table   = intensive_jewish$table,
+  intensive_margin_arab_table     = intensive_arab$table,
+  ddd_hours_jewish_table          = hours_ddd_jewish$table,
+  ddd_hours_arab_table            = hours_ddd_arab$table,
+  hours_gender_placebo_did_table  = hours_gender_placebo$result$table,
+  hours_gender_placebo_ddd_table  = hours_gender_placebo$ddd_placebo$table,
+  hours_did_subgroup_comparison   = hours_did_subgroup_comparison,
+  hours_ddd_subgroup_comparison   = hours_ddd_subgroup_comparison,
   ddd_employment = employment_ddd_table
 )
 
