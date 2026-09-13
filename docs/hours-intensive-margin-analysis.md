@@ -207,3 +207,151 @@ of the point estimate, §3) and the underlying economic story is coherent with t
 operates on *how much* mothers who stay employed work, conditional on remaining employed, not on
 *whether* they are employed at all. The (out-of-scope) employment DDD's null result is consistent
 with this framing rather than contradicting it.
+
+## 5. Subgroup Heterogeneity and Gender Placebo
+
+This section extends §§1-4 with two demographic-heterogeneity checks newly wired into the pipeline:
+Arab vs. Jewish women (Leom == 2 / Leom == 1) and a male gender placebo ("Mother" read as "Father").
+Both use the same primary specifications as §2 — `run_intensive_margin_reg()` for the DiD,
+`run_hours_ddd_regression()` (or its placebo analog) for the DDD — applied to different subsamples,
+with no new econometric machinery. Point estimates below are exact values from
+`outputs/hours_did_subgroup_comparison_data.csv` and `outputs/hours_ddd_subgroup_comparison_data.csv`
+(4 significant figures; console/CSV table output rounds further). All cross-group tests below are
+two-sample z-tests, `z = (b1 - b2) / sqrt(se1^2 + se2^2)`, valid without a covariance correction
+because each pair of subsamples compared is disjoint (Jewish/Arab partition `cleaned_df`; the
+male placebo is an entirely separate `cleaned_men_for_exposure` sample) — the two estimates'
+sampling covariance is exactly zero, not merely assumed small.
+
+### 5.1 Point estimates by subgroup
+
+| Subgroup | DiD `Mother:Post` | SE | N | DDD `Mother:Post:WFH_Exposure` | SE | N |
+|---|---|---|---|---|---|---|
+| All women (primary) | 0.8261*** | 0.1830 | 281,750 | 3.4073*** | 0.9302 | 275,708 |
+| Jewish women | 0.9029*** | 0.2047 | 241,738 | 2.9238** | 0.8901 | 236,554 |
+| Arab women | 0.1267 (ns) | 0.4798 | 26,876 | 6.0062* | 2.6426 | 26,164 |
+| Men (placebo) | -0.3860* | 0.1909 | 276,343 | -1.8806 (ns) | 1.1226 | 266,087 |
+
+Sources: `outputs/intensive_margin_jewish_table.csv`, `outputs/intensive_margin_arab_table.csv`,
+`outputs/ddd_hours_jewish_table.csv`, `outputs/ddd_hours_arab_table.csv`,
+`outputs/hours_gender_placebo_did_table.csv`, `outputs/hours_gender_placebo_ddd_table.csv`. Visual
+summary: `outputs/hours_did_subgroup_comparison_plot.png`,
+`outputs/hours_ddd_subgroup_comparison_plot.png`.
+
+### 5.2 Is the Arab DDD estimate (6.006) genuinely larger than the Jewish estimate (2.924), or a small-sample artifact?
+
+The raw point estimates suggest the mechanism is *more than twice as strong* for Arab women. Three
+pieces of evidence argue this reading is not supportable, and that the gap is best explained by
+Arab women's much smaller, more occupationally-concentrated subsample rather than a genuinely
+larger effect.
+
+**(a) The two coefficients are not statistically distinguishable.** A two-sample z-test on the DDD
+term:
+
+> z = (6.0062 − 2.9238) / sqrt(2.6426² + 0.8901²) = 3.0824 / 2.7885 = **1.105, p = 0.269**
+
+fails to reject equality at any conventional level. The apparent gap is well within what Arab
+women's own sampling noise can produce — Arab's SE (2.643) is nearly 3x Jewish's (0.890), driven
+by the ~9x smaller sample (26,164 vs. 236,554 employed, occupation-matched rows). The same test on
+the plain DiD term (0.9029 vs. 0.1267) gives z = 1.488, p = 0.137 — also not significant, though
+here the *direction* matters too: Arab women's own plain-DiD estimate is statistically
+indistinguishable from zero (0.1267, SE 0.4798), so there is no significant average hours effect
+for Arab women to begin with; the DDD's marginal significance (see (b)) rests entirely on the
+cross-occupation exposure gradient, not a broad group-level shift.
+
+**(b) The Arab DDD's own occupation-level mechanism check contradicts its sign.**
+`run_hours_ddd_regression()`'s second-stage mechanism regression (per-occupation `Mother:Post`
+estimates regressed on occupation `wfh_exposure`, precision-weighted) is the direct test of whether
+the triple interaction's implied cross-occupation gradient actually holds within the subgroup. For
+Jewish women it does, directionally: slope = **2.148 (SE 1.136), p = 0.067, R² = 0.093, n = 37**
+occupations (3 of 40 dropped) — positive, marginal, and consistent in sign with the full-sample
+calibrated mechanism regression (slope 2.639, SE 0.899, p = 0.006, n = 37; console output of
+`run_hours_ddd_regression(cleaned_df, hours_exposure_index)`, §2). For Arab women, the same check
+runs in the **opposite direction**: slope = **-19.29 (SE 7.04), t = -2.74, p = 0.011, R² = 0.238,
+n = 26** occupations (**14 of 40 dropped** — a 35% attrition rate, vs. 7.5% for Jewish/the full
+sample). That is, among the occupations where an Arab-specific `Mother:Post` estimate could even be
+fit, higher-exposure occupations show a *smaller* motherhood hours effect, not a larger one — the
+opposite of what the individual-level triple interaction (6.006, positive) implies. An estimate
+whose own internal mechanism check contradicts its headline sign is not merely imprecise; it is
+actively uncorroborated by within-subgroup evidence, which is a stronger objection than "the
+confidence interval is wide."
+
+**(c) A plausible mechanical cause: occupational concentration.** The 14-of-40 (35%) occupation
+dropout rate for Arab women, versus 3-of-40 (7.5%) for Jewish/the full sample, is consistent with
+the well-documented concentration of Arab women's employment in Israel into a narrower set of
+occupations (disproportionately education and health-aide roles) — leaving far fewer than 40
+occupations with enough Arab respondents to fit a stable per-occupation `Mother:Post` estimate at
+all. This is the same small-cell-instability failure mode this project's exposure-calibration step
+was built to guard against at the *occupation* level (`docs/decisions/calibrated-exposure-and-cell-ddd.md`'s
+Problem 2 — a 4-observation ISCO-63 cell swinging an entire ranking); here it resurfaces at the
+*subgroup* level instead. With only 26 occupations carrying real information, a small number of
+high-leverage occupations can dominate — and, per (b), evidently do flip — the sign of the
+mechanism regression, and by extension undermine confidence in the DDD coefficient it is supposed
+to corroborate.
+
+**Conclusion for the paper.** Report the Arab DDD point estimate (6.006*, nominally significant on
+its own one-sample test: z = 2.273, p = 0.023) transparently, but do **not** characterize it as
+evidence that the WFH-exposure mechanism is stronger for Arab women than for Jewish women. The
+correct statement is: the Arab estimate is imprecisely estimated, statistically indistinguishable
+from the Jewish estimate, and contradicted by its own occupation-level mechanism check — a textbook
+small-sample/thin-occupational-coverage fragility, not a documented heterogeneous treatment effect.
+The Jewish-women estimate (2.924**, corroborated directionally by its own mechanism regression) is
+the more credible of the two ethnicity-specific results and should anchor any subgroup claim the
+paper makes.
+
+### 5.3 Gender placebo: does the mechanism validate as motherhood-specific?
+
+`hours_gender_placebo.R`'s design (see its header comment) exists to distinguish three competing
+explanations for the primary result: (i) a genuine motherhood-specific mechanism, (ii) a general
+parenthood effect that would appear symmetrically for fathers, or (iii) a macro, sex-and-parenthood-
+agnostic post-2021 hours trend that happens to correlate with occupational WFH exposure for
+unrelated reasons. Re-running the primary DiD/DDD on the male subsample, reading `Mother` as
+"Father," discriminates between these: (ii) and (iii) both predict a placebo coefficient similar in
+sign and magnitude to the women's estimate; (i) predicts it should not.
+
+The data support (i). Formal two-sample z-tests (independent samples: women vs. men are disjoint by
+construction):
+
+| Comparison | DDD term | DiD term |
+|---|---|---|
+| All women (primary) vs. Men (placebo) | z = 3.627, **p = 0.0003** | z = 4.584, **p < 0.0001** |
+| Jewish women vs. Men (placebo) | z = 3.354, **p = 0.0008** | z = 4.605, **p < 0.0001** |
+| Arab women vs. Men (placebo) | z = 2.747, **p = 0.006** | — (Arab DiD itself is ns, §5.2) |
+
+Every female subgroup's coefficient is statistically distinguishable from the male placebo's, for
+both the DiD and the DDD. This is not merely "the placebo is insignificant" (a weaker claim,
+consistent with (ii)/(iii) plus low power) — the placebo is significantly *different from* the
+women's estimate, which is the stronger, correctly-specified test for ruling out (ii)/(iii).
+
+The male coefficients are also informative in their own right, not just as a null:
+- **DiD**: `Mother:Post` (i.e., Father:Post) = **-0.386\* (SE 0.191)**, N = 276,343 — small,
+  statistically significant, and *negative*. Fathers' hours moved slightly down post-2021 relative
+  to childless men, the opposite direction from mothers' +0.826. This rules out (iii) outright: a
+  macro trend common to all workers would need to explain a positive shift for mothers and a
+  negative one for fathers, which a single macro factor cannot do without additional structure.
+- **DDD**: `Mother:Post:WFH_Exposure` = **-1.881 (ns, SE 1.123)**, N = 266,087 — not
+  significantly different from zero, and, notably, the point estimate itself is negative, the
+  opposite sign from the primary women's 3.407. There is no evidence that fathers' hours respond
+  more positively to occupational WFH exposure post-2021 the way mothers' do; if anything the
+  (statistically insignificant) point estimate points the other way.
+
+**Limitations of this placebo, stated plainly.** (1) No second-stage occupation-level mechanism
+regression was run for the male placebo — `run_hours_gender_ddd_placebo()` does not implement one
+(unlike `run_hours_ddd_regression()`), so §5.2's corroboration-check logic has no male analog in
+this pipeline; the placebo rests on the triple-interaction point estimate alone. (2) Men's labor
+supply is shaped by institutional factors this project's controls do not model (e.g., differential
+reserve-duty exposure, different typical retirement timing) that could independently move men's
+hours across 2017-2023 for reasons unrelated to WFH or fatherhood; `DEFAULT_CONTROLS` does not
+purge this, though nothing about it points toward the specific pattern observed (a WFH-exposure
+gradient with the opposite sign from mothers'). (3) The z-tests above compare independently-fit
+coefficients rather than jointly estimating a single fully-interacted `Mother*Post*WFH_Exposure*Sex`
+model; the independent-samples covariance argument makes this valid, but a joint specification
+sharing `DEFAULT_CONTROLS` across sexes would be a natural next robustness step if reviewers ask for
+one model rather than two compared post hoc.
+
+**Conclusion for the paper.** The gender-placebo evidence is a genuine, positive result, not just an
+absence of a counter-finding: fathers show no positive WFH-linked hours response, and if anything a
+small negative post-2021 hours shift. Combined with §5.2's ethnicity finding, the paper's
+defensible subgroup claim is: *the hours-WFH mechanism is well-supported for women generally and for
+Jewish women specifically, is not corroborated by within-subgroup mechanism evidence for Arab women
+despite a nominally significant point estimate, and is absent (or reversed) for men* — supporting a
+motherhood-specific, not a general parenthood- or macro-driven, interpretation.
