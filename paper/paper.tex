@@ -1,0 +1,855 @@
+% paper.tex -- seminar paper draft.
+% Every number in this file is taken verbatim from paper/notes/results_digest.md (2026-09-15).
+% Not compiled; raw LaTeX/BibTeX only. Bibliography: paper/references.bib.
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{threeparttable}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage[authoryear,round]{natbib}
+\usepackage{xcolor} % draft-conclusion flag
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+
+\newcommand{\sym}[1]{\ensuremath{^{#1}}}
+\newcommand{\Mother}{\text{Mother}}
+\newcommand{\Post}{\text{Post}}
+\newcommand{\WFH}{\text{WFH\_Exposure}}
+
+\title{Did Remote Work Narrow the Motherhood Penalty?\\
+\large Evidence on the Intensive Margin from Israeli Labor Force Survey Microdata, 2017--2023}
+\author{Inbal Muriel \and Nitzan Zacharia}
+\date{Seminar paper draft --- \today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent
+\citet{harrington2025} ask whether the post-pandemic rise of work from home (WFH) reduced the
+motherhood penalty in the United States. This paper takes that question to Israel and to a
+different margin of labor supply. Using Central Bureau of Statistics (CBS) Labor Force Survey
+microdata on women aged 25--59 in 2017--2019 and 2021--2023, we estimate difference-in-differences
+(DiD) and triple-differences (DDD) models of employment and of usual weekly work hours for mothers
+relative to childless women, using the COVID-19-driven shift to remote work as the ``post'' period
+and an occupation-level WFH-exposure index as the third difference. On the extensive margin, the
+mother--non-mother employment gap did not change ($\Mother \times \Post = -0.0053$, SE $0.0052$),
+and the employment DDD is underpowered rather than informative (minimum detectable effect about
+26\% of the baseline employment rate). On the intensive margin, employed mothers' weekly hours rose
+by $0.83$ hours relative to childless women (SE $0.18$), and this increase is concentrated in
+WFH-exposed occupations: the triple interaction is $3.41$ hours per unit of exposure (SE $0.93$,
+$p<0.001$), robust to a generalized Lee (2009) selection correction with a 95\% Imbens--Manski
+confidence interval of $[1.50, 5.21]$. A gender placebo on fathers shows no such pattern. We read
+this as WFH access relaxing a binding time constraint for mothers who remain employed in
+teleworkable jobs.
+\end{abstract}
+
+%======================================================================
+\section{Introduction}
+%======================================================================
+
+\citet{harrington2025} pose a simple question for the United States: has the rise of work from
+home reduced the motherhood penalty in the labor market? Their answer is yes on the extensive
+margin and on income --- a 10\% rise in WFH raises mothers' employment by roughly $0.78$ percentage
+points relative to other women, concentrated in careers with high returns to hours and inflexible
+time demands, and employed mothers' incomes rise by about $1.3\%$ relative to other employed women.
+This paper asks the same question of a different country and a different margin. We use Israeli
+CBS Labor Force Survey microdata to test whether the post-COVID shift to remote work altered the
+motherhood penalty in Israel, and our headline result concerns \emph{usual weekly work hours}
+among employed women rather than employment or income. It is therefore an extension of
+\citeauthor{harrington2025}'s design to another labor market and to the intensive margin, not a
+direct replication of their US finding: we also estimate the employment margin, but --- for
+reasons of statistical power that we document rather than paper over --- that specification is
+secondary.
+
+Israel is a natural setting for the question. It combines high labor productivity with birth
+rates that are exceptionally high relative to the rest of the OECD, so changes in the motherhood
+penalty carry outsized economic weight, and the findings speak to live domestic policy debates on
+gender equality, parental leave, and flexible work arrangements. At the same time, Israeli
+institutional practice diverges sharply from US task-based predictions of which jobs can be done
+remotely --- schools stayed in person by policy, for example --- which matters for how ``WFH
+exposure'' should be measured and is one of the methodological contributions below.
+
+Our research design exploits the pandemic as the moment at which remote work became a mainstream
+labor-market practice. Before 2020, working from home accounted for roughly 5\% of workdays; after
+the pandemic it accounted for 25--30\%. We therefore compare mothers and childless women across a
+pre-period of 2017--2019 and a post-period of 2021--2023, excluding 2020 as a transitional year of
+emergency, ad hoc arrangements that reflect improvisation rather than the settled remote-work
+practices whose effect we want to measure. (A second, practical reason is that no 2020 CBS extract
+exists for this project at all; Section~\ref{sec:data} discusses what that implies for the
+exposure index.) The ``post'' dummy captures this structural shift toward remote work.
+
+The core estimator is an individual-level DiD of the form
+$Y_{it} = \beta_0 + \beta_1 \Mother_i + \beta_2 \Post_t + \beta_3 (\Mother_i \times \Post_t) +
+X'_{it}\gamma + \varepsilon_{it}$, where $\beta_3$ is the differential post-shift change for
+mothers. To test whether remote work is the \emph{mechanism}, we extend this to a
+triple-differences (DDD) model that interacts $\Mother \times \Post$ with an occupation's WFH
+exposure, so that the parameter of interest is whether the narrowing of the penalty is larger in
+jobs that can actually be done from home.
+
+Our findings are as follows. On the extensive margin there is nothing to see and, more
+importantly, nothing the design could have seen: the employment DiD is a precise zero, and the
+employment DDD has a minimum detectable effect roughly 8--10 times its point estimate. On the
+intensive margin, mothers' hours rose by about $0.83$ hours per week relative to childless women,
+but this average masks the real result: once occupational WFH exposure enters, the plain
+$\Mother \times \Post$ term collapses to essentially zero and the entire effect loads onto the
+triple interaction, $3.41$ additional weekly hours per unit of exposure ($p<0.001$). This estimate
+survives a selection-into-employment correction, two age-balance robustness specifications, and a
+gender placebo on fathers, whose corresponding coefficients are small, insignificant, and of the
+opposite sign.
+
+The remainder of the paper proceeds as follows. Section~\ref{sec:lit} places the question in the
+literature. Section~\ref{sec:data} describes the data, the sample, and the construction of the WFH
+exposure measures. Section~\ref{sec:strategy} sets out the DiD and DDD specifications and the
+selection correction. Section~\ref{sec:results} reports the results, moving from the extensive to
+the intensive margin. Sections~\ref{sec:discussion}--\ref{sec:limitations} interpret the findings
+and state their limitations, and Section~\ref{sec:conclusion} concludes.
+
+%======================================================================
+\section{Literature Review}\label{sec:lit}
+%======================================================================
+
+\paragraph{The motherhood penalty.}
+The child penalty is one of the most robust facts in labor economics. \citet{kleven2019denmark}
+use Danish administrative data and an event-study design around the birth of the first child to
+show that women's earnings fall by roughly 20\% in the long run relative to men's, with the gap
+fueled by reduced work hours, exit from the labor market, and moves into family-friendly,
+lower-paying jobs. \citet{kleven2019countries} extend the event-study approach across countries and
+find that the qualitative pattern is universal while its magnitude varies sharply, with the penalty
+steepest where cultural and gender norms expect mothers to stay home with children. Both papers
+matter here because they identify \emph{hours} as a first-order channel of the penalty --- which is
+why an intervention that changes the time cost of combining work and care could plausibly move
+the intensive margin even where it does not move employment.
+
+\paragraph{Temporal flexibility as the mechanism.}
+\citet{goldin2014} argues that the last chapter of gender convergence turns on the structure of
+jobs rather than on human capital: occupations that reward long, particular, and inflexible hours
+--- where the marginal return to being physically present at a specific time is high --- carry the
+largest gender gaps, and the gap would shrink if firms did not disproportionately reward temporal
+inflexibility. Remote work is, in this reading, precisely a change in temporal flexibility. It
+lowers commute friction, allows a virtual presence in demanding professions, and may reduce the
+stigma attached to a mother's physical availability. It may also cut the other way, through lower
+visibility and slower advancement. Which effect dominates is an empirical question, and Goldin's
+framework tells us where to look: in occupations where the work \emph{can} be done remotely.
+
+\paragraph{Measuring who can work from home.}
+\citet{dingel2020} classify occupations by whether their tasks can be performed entirely at home,
+using O*NET task content, and find that 37\% of US jobs can be done from home. Their occupational
+classification, mapped to the two-digit ISCO-08 codes in the CBS data, is the starting point for
+our WFH-exposure index. As Section~\ref{sec:data} explains, however, a US task-based measure
+misclassifies occupations where Israeli institutional practice diverged from what the tasks would
+predict, and we therefore calibrate it against realized Israeli behavior.
+
+\paragraph{Remote work and the motherhood penalty.}
+The paper closest to ours is \citet{harrington2025}, who show for the United States that the rise
+of WFH raised mothers' employment relative to other women's, that this is driven by fields with
+high returns to hours and inflexible demands on time, and that women who could work from home
+before childbirth are less likely to exit the workforce. We take their question to Israel. Our
+contribution is threefold: a different country with a distinctive combination of high fertility
+and high productivity; a different and, in the child-penalty literature, central margin --- hours
+conditional on employment --- with an explicit correction for the selection problem that
+conditioning on employment creates; and an exposure measure calibrated to Israeli practice rather
+than imported from US task content.
+
+\paragraph{Identification.}
+The triple-differences estimator we use for the mechanism test is analyzed formally by
+\citet{olden2022}, who clarify that the DDD does not require two parallel-trends assumptions but
+rather a single assumption that the \emph{difference} between the two DiDs would have evolved
+in parallel absent treatment. Section~\ref{sec:strategy} states the identifying assumptions in
+those terms.
+
+%======================================================================
+\section{Data and Institutional Context}\label{sec:data}
+%======================================================================
+
+\subsection{Source and sample}
+
+The data are individual-level microdata from the Israeli Central Bureau of Statistics Labor Force
+Survey for the survey years 2017, 2018, 2019, 2021, 2022, and 2023. The analysis sample is women
+aged 25--59 (CBS age-group codes 3--7). A woman is coded as a \emph{mother} if she has any child
+under 17 in the household, and as childless otherwise; the treatment group is mothers and the
+control group is childless women. \emph{Post} equals one for survey years 2021 and later.
+
+Two outcomes are studied. The primary outcome is \emph{usual weekly work hours}, a continuous
+variable constructed from the CBS binned hours item by assigning each bin its median and imputing
+irregular-hours codes from observed medians within the same period; it is defined only for
+employed women. The secondary outcome is a binary employment indicator, equal to one if the
+respondent reports being employed and zero otherwise (unemployed and not-in-labor-force are both
+zero). Among employed women the pooled mean of weekly hours is $38.24$ ($n = 288{,}400$); the
+pooled employment rate is $0.7737$ ($n = 372{,}741$), $0.7574$ among childless women and $0.7828$
+among mothers.
+
+All regressions include the same set of categorical controls: marital status, religiosity,
+age group, district of residence, and highest educational attainment (six groups). Age enters as
+the categorical CBS age-group code because the extract contains no continuous age or birth-year
+variable. CBS survey weights are deliberately not applied in any outcome regression; all reported
+estimates are unweighted estimates on the analysis sample rather than population-representative
+statistics (see Section~\ref{sec:limitations}).
+
+\subsection{Why 2017--2019 versus 2021--2023}
+
+The window is designed around the pandemic's role in making WFH a mainstream practice: working
+from home rose from about 5\% of workdays before 2020 to 25--30\% afterward. The post-period is
+therefore 2021--2023 and the pre-period 2017--2019. The year 2020 is excluded as a transitional
+year. There is also a data-driven reason: no 2020 CBS extract was acquired for this project, so
+2020 could not be included even in principle. The consequence that matters for the design is
+discussed next.
+
+\subsection{Constructing WFH exposure}\label{sec:exposure}
+
+The mechanism test requires an occupation-level measure of how exposed each job is to remote work.
+We build it in three steps, each producing a measure that is reported.
+
+\emph{External.} The \citet{dingel2020} teleworkability score, via an O*NET/SOC-to-ISCO crosswalk,
+at the two-digit ISCO-08 level. This is pre-period by construction and immune to Israel's own
+COVID-era behavior, but it is a US task-based measure and misclassifies occupations where Israeli
+institutional practice diverged: teaching (ISCO 23) scores $0.966$ on the external index although
+Israeli schools stayed in person by Ministry of Education policy.
+
+\emph{Calibrated (primary).} We correct the external score only where the gap between it and the
+realized 2022--23 Israeli WFH share is large (greater than $0.5$) \emph{and} statistically
+distinguishable from sampling noise, using a one-sided cluster-robust test at the 95\% level. Ten of
+the 40 two-digit occupations are swapped to their realized Israeli values. The corrections are
+concrete and checkable: teaching falls from $0.966$ to $0.069$, clerical support (ISCO 41) from
+$1.000$ to $0.098$, while ICT professionals (ISCO 25) go from $1.000$ to $0.360$. Because it draws
+on 2022--23 realized data, which sit inside the post-period, the calibrated measure is a documented
+compromise rather than a fully pre-treatment index; the exposure measures are built from a
+population that includes men as well as the women in the analysis sample, so that an occupation's
+score is not constructed from exactly the people who enter the regression.
+
+\emph{Realized.} The realized Israeli WFH share by occupation, anchored to 2021 with a minimum of
+200 observations per occupation. This is post-treatment by construction and is reported as a
+robustness check.
+
+The original research plan specified anchoring the realized index to the 2020 WFH variable. Because
+no 2020 extract exists, the index is anchored to 2021 instead. This is a disclosed deviation with a
+stated justification --- 2021 already flows through the validated pipeline, and a measure taken
+during 2020's emergency disruption might reflect improvisation rather than each occupation's
+settled remote-work potential --- and a stated downside: by 2021 occupations had had a year to
+adapt, and if adaptation was uneven a 2021-based index could rank occupations differently than a
+2020-based one would have. We return to this in Section~\ref{sec:limitations}.
+
+For the employment-outcome DDD, occupation is undefined for the non-employed, so an
+occupation-level regressor would condition the outcome on itself. That specification therefore
+uses a fourth measure: a pre-period (2017--2019) shift-share index by demographic cell (sex, age
+group, education, district, marital status, religiosity, and continent of birth --- 8,884 cells),
+equal to the weighted mean of the calibrated occupation score over the cell's pre-period
+occupational composition. It is defined for employed and non-employed women alike. The two DDDs
+thus use \emph{different} exposure measures, and we are careful never to compare their
+coefficients as if they were on a common scale.
+
+%======================================================================
+\section{Empirical Strategy}\label{sec:strategy}
+%======================================================================
+
+\subsection{Difference-in-differences}
+
+For outcome $Y_{it}$ (employment, or weekly hours conditional on employment) we estimate
+\begin{equation}\label{eq:did}
+Y_{it} = \beta_0 + \beta_1 \Mother_i + \beta_2 \Post_t + \beta_3 (\Mother_i \times \Post_t)
++ X'_{it}\gamma + \varepsilon_{it},
+\end{equation}
+where $X_{it}$ is the control vector described above and standard errors are clustered by
+individual identifier. $\beta_3$ is the DiD estimator: the differential change in the outcome for
+mothers relative to childless women after the shift to remote work. For the hours specification a
+positive $\beta_3$ indicates a narrowing of the penalty on the intensive margin; for employment it
+indicates a narrowing on the extensive margin. The employment DiD is also estimated separately for
+Jewish and Arab women.
+
+\subsection{Triple differences}
+
+To test whether the narrowing operates through remote work, we interact the DiD with occupational
+WFH exposure:
+\begin{equation}\label{eq:ddd}
+Y_{it} = \alpha + \Mother_i \times \Post_t \times \WFH_{j(i)} \text{ (all lower-order terms)}
++ X'_{it}\gamma + \varepsilon_{it}.
+\end{equation}
+The coefficient on the triple interaction asks whether the post-shift change for mothers relative
+to non-mothers is larger in more exposed occupations. Following \citet{olden2022}, the identifying
+assumption is that the mother/non-mother gap in high- versus low-exposure jobs would have evolved
+in parallel absent the shift to remote work. For the hours DDD, $\WFH_j$ is the calibrated
+occupation-level score of Section~\ref{sec:exposure}, the sample is employed women matched to an
+occupation, and standard errors are clustered by two-digit occupation --- the level at which the
+regressor varies, so that individual-level clustering would understate the standard error. For the
+employment DDD, $\WFH$ is the cell-based shift-share index, estimated on the full sample of
+employed and non-employed women, with a $\Mother \times \text{age group}$ interaction added to
+correct a documented pre-period age imbalance between mothers and non-mothers, in two variants:
+additive controls (Spec~1) and fully interacted age-by-education-by-district cell fixed effects
+(Spec~2). Standard errors are clustered on the age-by-education-by-district cell (about 210
+clusters). We also report the exposure-specific minimum detectable effect,
+$\mathrm{MDE} = \mathrm{SE} \times (z_{0.975} + z_{0.80}) = 2.8016 \times \mathrm{SE}$, so that a
+null coefficient can be read as ``genuinely null'' or ``underpowered.''
+
+\subsection{Selection into employment: Lee bounds}
+
+Hours are observed only for the employed, and employment is itself an outcome of the same
+treatment. If remote work differentially pulls marginal mothers into employment after 2021, the
+post-period sample of employed mothers is compositionally different from the pre-period one for
+reasons unrelated to hours choices, biasing $\beta_3$ in the hours equation in a direction that is
+not signable a priori. We address this with trimming bounds in the spirit of \citet{lee2009},
+adapted to the two-by-two design. Let $s_{ab} = \Pr(\text{Employed}=1 \mid \Mother=a, \Post=b)$.
+The parallel-trends-in-selection counterfactual for post-period mothers is
+$s^*_{11} = s_{10} + (s_{01} - s_{00})$. If the observed $s_{11}$ exceeds $s^*_{11}$, the excess
+share $p = 1 - s^*_{11}/s_{11}$ is trimmed from the $(\Mother=1,\Post=1)$ cell's hours
+distribution --- from the top to obtain a lower bound on $\beta_3$, from the bottom to obtain an
+upper bound --- and equation~\eqref{eq:did} is re-estimated on each trimmed sample. For the DDD we
+generalize this construction: the selection counterfactual is computed separately within each
+quartile of the cell-based exposure index (which, unlike the occupation-level index, is observable
+for the non-employed), each quartile's post-period mothers are trimmed by that quartile's own
+excess share, the trimmed subsets are recombined, and equation~\eqref{eq:ddd} is refit with the
+occupation-level regressor. Two different exposure measures thus serve two different roles.
+Because the parameter is only partially identified, we report, alongside each bound's own
+cluster-robust confidence interval, the \citet{imbens2004} confidence interval for the identified
+set, which accounts jointly for the sampling uncertainty of both endpoints. The construction
+handles only \emph{excess} selection in the treated cell, and assumes monotone selection; both
+limitations are stated in Section~\ref{sec:limitations}.
+
+\subsection{Diagnostics and placebo}
+
+We estimate event-study versions of equation~\eqref{eq:did} with $\Mother \times$ year
+interactions (reference year 2019) for both outcomes and test the pre-period coefficients jointly.
+We re-estimate the hours DDD with an added $\Mother \times$ age-group interaction and with
+pre-period age-group raking weights, in response to the age imbalance noted above; with the
+external and realized exposure indices in place of the calibrated one; and, as a gender placebo,
+on the male subsample with ``mother'' read as ``father,'' comparing the male and female
+coefficients with two-sample $z$-tests (valid without a covariance correction because the samples
+are disjoint).
+
+%======================================================================
+\section{Results}\label{sec:results}
+%======================================================================
+
+Throughout, significance is denoted \sym{***} $p<0.001$, \sym{**} $p<0.01$, \sym{*} $p<0.05$,
+\sym{\cdot} $p<0.1$. Standard errors are in parentheses.
+
+\subsection{Extensive margin: the employment DiD}\label{sec:res-emp-did}
+
+Table~\ref{tab:emp-did} reports equation~\eqref{eq:did} with employment as the outcome, for all
+women and separately for Jewish and Arab women. The DiD coefficient is $-0.0053$ (SE $0.0052$) in
+the pooled sample: the mother/non-mother employment gap did not change after the shift to remote
+work. The estimate is precise --- a change of one percentage point in either direction is inside
+the confidence interval, but not much more --- so this is a tight null on the extensive margin, not
+an uninformative one. The stratified estimates are $-0.0041$ (SE $0.0058$) for Jewish women and
+$-0.0208$ (SE $0.0138$) for Arab women, neither significant.\footnote{The religiosity control
+(\texttt{Dat}) is not identified within the Jewish-only subsample and enters with fewer categories
+in the Arab-only subsample, so the effective control set differs slightly across the stratified
+models.} Employment rose in the post-period for all women ($\Post = 0.0153$\sym{***} pooled), and
+markedly so for Arab women ($0.0601$\sym{***}).
+
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Extensive-margin DiD: employment}\label{tab:emp-did}
+\begin{tabular}{lccc}
+\toprule
+ & All women & Jewish women & Arab women \\
+\midrule
+Mother $\times$ Post & $-0.0053$ & $-0.0041$ & $-0.0208$ \\
+ & $(0.0052)$ & $(0.0058)$ & $(0.0138)$ \\
+Mother & $-0.0034$ & $0.0054$ & $0.0200$\sym{\cdot} \\
+ & $(0.0041)$ & $(0.0045)$ & $(0.0110)$ \\
+Post & $0.0153$\sym{***} & $0.0070$ & $0.0601$\sym{***} \\
+ & $(0.0043)$ & $(0.0049)$ & $(0.0111)$ \\
+Constant & $0.4926$\sym{***} & [TODO: confirm] & [TODO: confirm] \\
+ & $(0.0085)$ & & \\
+\midrule
+Observations & 364{,}784 & 283{,}975 & 65{,}598 \\
+$R^2$ & 0.22689 & [TODO: confirm] & [TODO: confirm] \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\small
+\item Dependent variable: employment indicator. Controls: marital status, religiosity, age group,
+district, education. Standard errors clustered by individual. Jewish/Arab samples defined by the
+CBS population-group code.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\subsection{Extensive margin: the employment DDD is underpowered}\label{sec:res-emp-ddd}
+
+Table~\ref{tab:emp-ddd} reports the employment DDD with the cell-based exposure index. The triple
+interaction is $-0.0257$ (SE $0.0725$) with additive controls and $-0.0194$ (SE $0.0722$) with
+interacted cell fixed effects --- small, negative, and nowhere near significant. The question is
+whether this is evidence of no mechanism or evidence of nothing. The minimum detectable effect
+answers it: at $\alpha = 0.05$ and 80\% power, the design could detect a triple interaction no
+smaller than $0.2031$ (Spec~1) or $0.2022$ (Spec~2), which is about 26\% of the baseline employment
+rate of $0.7737$ and roughly 8--10 times the point estimates. Moving a mother from the least to the
+most exposed cell would have to change her relative post-2021 employment probability by a quarter
+of the baseline employment rate before this design could see it. That is not a plausible effect
+size for a labor-supply mechanism, so the null here is \emph{uninformative}: the employment DDD
+cannot be read as evidence for or against a WFH-mediated employment effect.
+
+This is not for want of a working exposure measure. The cell-based index strongly predicts realized
+post-period WFH: a first-stage regression of the reference-week WFH indicator on exposure in the
+post-period yields $0.6557$\sym{***} (SE $0.0954$, $n = 110{,}051$), stable across 2021--2023
+(interactions with 2022 and 2023 of $0.0118$ and $0.0379$, the latter marginal). Nor is it a
+specification failure: the exposure cells are deliberately finer than the fixed-effect cells, so
+the regressor retains within-cell variation ($R^2$ of exposure on the fixed-effect variables
+$0.285$, VIF $1.40$). An earlier version of the design, in which exposure was built on exactly the
+regression's own control variables, had an MDE of 51\% of baseline; successive refinements of the
+cell definition halved it to the current 26\%, and cell-level aggregation was confirmed to add no
+power. The remaining limitation is structural: exposure assigned at the demographic-cell level
+simply does not vary enough. This is what motivates the intensive-margin analysis, where
+occupation-level exposure is available.
+
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Extensive-margin DDD: employment $\times$ cell-based WFH exposure}\label{tab:emp-ddd}
+\begin{tabular}{lcc}
+\toprule
+ & Spec 1: additive controls & Spec 2: interacted cell FE \\
+\midrule
+Mother $\times$ Post $\times$ WFH\_Exposure & $-0.0257$ & $-0.0194$ \\
+ & $(0.0725)$ & $(0.0722)$ \\
+Mother $\times$ Post & $0.0065$ & $0.0044$ \\
+ & $(0.0168)$ & $(0.0166)$ \\
+Mother $\times$ WFH\_Exposure & $-0.1404$\sym{\cdot} & $-0.0818$ \\
+ & $(0.0803)$ & $(0.0702)$ \\
+Post $\times$ WFH\_Exposure & $-0.1555$\sym{**} & $-0.1516$\sym{**} \\
+ & $(0.0566)$ & $(0.0554)$ \\
+WFH\_Exposure & $0.0131$ & $0.0056$ \\
+ & $(0.0565)$ & $(0.0490)$ \\
+\midrule
+MDE ($\alpha=0.05$, power $0.80$) & 0.2031 & 0.2022 \\
+MDE / baseline employment rate & 26.3\% & 26.1\% \\
+MDE / $|$point estimate$|$ & 7.9$\times$ & 10.4$\times$ \\
+\midrule
+Observations & 355{,}984 & 355{,}984 \\
+$R^2$ & 0.22103 & 0.22952 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\small
+\item Dependent variable: employment indicator; full sample of employed and non-employed women.
+Both specifications include Mother $\times$ age-group interactions and the standard controls
+(Spec~2 absorbs age group, education, and district into interacted cell fixed effects). Standard
+errors clustered on the age-by-education-by-district cell. Baseline employment rate $0.7737$.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\subsection{Intensive margin: hours}\label{sec:res-hours}
+
+\paragraph{Pre-trends.}
+Before turning to the estimates, Table~\ref{tab:pretrend} reports the hours event study. Relative
+to 2019, the $\Mother \times$ year coefficient is $-1.524$\sym{***} in 2017 but a flat $0.1222$ in
+2018; a joint Wald test on the two pre-period coefficients rejects parallel trends over the full
+window ($F(2, 65{,}088) = 23.7$, $p = 5.2\times10^{-11}$). The shorter 2018--2019 window is
+consistent with parallel trends, and we state the identifying assumption on that basis. The same
+test on the employment outcome passes ($F(2, 79{,}069) = 0.63$, $p = 0.53$): the pre-trend problem
+is specific to hours. In the post-period the effect builds gradually --- $0.3069$ in 2021, $0.1080$
+in 2022, and $0.7435$\sym{**} in 2023.
+
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Event study: $\Mother \times$ year, weekly hours (reference 2019)}\label{tab:pretrend}
+\begin{tabular}{lcc}
+\toprule
+Year & Coefficient & SE \\
+\midrule
+2017 & $-1.524$\sym{***} & 0.2766 \\
+2018 & $0.1222$ & 0.2140 \\
+2021 & $0.3069$ & 0.2567 \\
+2022 & $0.1080$ & 0.2620 \\
+2023 & $0.7435$\sym{**} & 0.2609 \\
+\midrule
+Joint test, 2017--2018 & \multicolumn{2}{c}{$F(2, 65{,}088) = 23.7$, $p = 5.2\times10^{-11}$} \\
+Observations & \multicolumn{2}{c}{281{,}750} \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\small
+\item Employed women only; standard controls; standard errors clustered by individual.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\paragraph{The hours DiD.}
+Column~(1) of Table~\ref{tab:hours} reports equation~\eqref{eq:did} for weekly hours among
+employed women. Mothers work $2.223$ fewer hours per week than childless women
+($\Mother = -2.223$\sym{***}), the intensive-margin penalty itself. After the shift to remote work
+this gap narrowed: $\Mother \times \Post = 0.8261$\sym{***} (SE $0.1830$), so mothers' weekly hours
+rose by about $0.83$ hours more than non-mothers' ($N = 281{,}750$). The raw cell means tell the
+same story --- mothers' hours rose from $36.85$ to $38.52$ while childless women's rose from
+$39.01$ to $39.80$.
+
+This estimate is, however, fragile to selection into employment. The employment rate of
+post-period mothers ($0.7961$) exceeds the parallel-trends-in-selection counterfactual
+($s^*_{11} = 0.7717 + (0.7639 - 0.7518) = 0.7838$), so there is excess selection to trim --- about
+1.5\% of the cell [TODO: confirm]. Table~\ref{tab:lee-did} reports the resulting Lee bounds: the
+lower bound is $0.2133$ (SE $0.1808$, 95\% CI $[-0.1411, 0.5678]$) and the upper bound $1.3132$
+(SE $0.1814$). The \citet{imbens2004} 95\% confidence interval for the identified set is
+$[-0.084, 1.612]$, which crosses zero. The plain hours DiD therefore does \emph{not} survive a
+selection-on-employment correction, and we treat it as suggestive rather than as the substantive
+finding.
+
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Intensive-margin DiD and DDD: weekly hours, employed women}\label{tab:hours}
+\begin{tabular}{lcc}
+\toprule
+ & (1) DiD & (2) DDD, calibrated exposure \\
+\midrule
+Mother $\times$ Post $\times$ WFH\_Exposure & & $3.407$\sym{***} \\
+ & & $(0.9302)$ \\
+Mother $\times$ Post & $0.8261$\sym{***} & $0.0153$ \\
+ & $(0.1830)$ & $(0.2893)$ \\
+Mother $\times$ WFH\_Exposure & & $-1.429$ \\
+ & & $(1.143)$ \\
+Post $\times$ WFH\_Exposure & & $-0.8668$ \\
+ & & $(0.8280)$ \\
+WFH\_Exposure & & $1.831$ \\
+ & & $(4.153)$ \\
+Mother & $-2.223$\sym{***} & $-1.897$\sym{***} \\
+ & $(0.1485)$ & $(0.3650)$ \\
+Post & $0.7289$\sym{***} & $0.9153$\sym{**} \\
+ & $(0.1503)$ & $(0.2746)$ \\
+Constant & $30.90$\sym{***} & $30.51$\sym{***} \\
+ & $(0.3198)$ & $(1.570)$ \\
+\midrule
+MDE for triple interaction & & 2.6059 \\
+Observations & 281{,}750 & 275{,}708 \\
+$R^2$ & 0.03836 & 0.03906 \\
+Clustering & individual & 2-digit occupation \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\small
+\item Dependent variable: usual weekly work hours, employed women only. Standard controls in both
+columns. Column (2) uses the calibrated occupation-level exposure index; 281{,}622 of 288{,}400
+employed rows (97.6\%) matched an occupation, 275{,}708 after listwise deletion on controls. MDE at
+$\alpha = 0.05$, power $0.80$.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Lee bounds on the hours DiD ($\Mother \times \Post$)}\label{tab:lee-did}
+\begin{tabular}{lccc}
+\toprule
+Bound & Coefficient & SE & 95\% CI \\
+\midrule
+Lower & 0.2133 & 0.1808 & $[-0.1411,\ 0.5678]$ \\
+Point (untrimmed) & 0.8261 & 0.1830 & $[0.4675,\ 1.1846]$ \\
+Upper & 1.3132 & 0.1814 & $[0.9576,\ 1.6688]$ \\
+\midrule
+Imbens--Manski 95\% CI & \multicolumn{3}{c}{$[-0.084,\ 1.612]$} \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\small
+\item Selection rates $s_{ab}$: $s_{00} = 0.7518$ ($n = 71{,}532$), $s_{01} = 0.7639$
+($62{,}114$), $s_{10} = 0.7717$ ($129{,}856$), $s_{11} = 0.7961$ ($109{,}239$).
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\paragraph{The hours DDD: the paper's headline result.}
+Column~(2) of Table~\ref{tab:hours} interacts the DiD with the calibrated occupation-level
+exposure index. The triple interaction is $3.407$\sym{***} (SE $0.9302$, $N = 275{,}708$): among
+employed mothers, those in more WFH-exposed occupations saw a larger post-2021 increase in weekly
+hours relative to childless women in the same occupations --- about $3.4$ additional hours per
+unit of exposure, where exposure runs from zero to one. Two features of the column are as
+informative as the headline. First, the bare $\Mother \times \Post$ term collapses from $0.826$ to
+$0.0153$ and becomes insignificant once the exposure interactions enter: the average hours effect
+in the DiD is not a broad, occupation-independent shift but is absorbed entirely into exposure
+heterogeneity. Second, the estimate is well inside the design's power: the minimum detectable
+effect is $2.6059$ hours (6.8\% of mean weekly hours, or 76.5\% of the point estimate), so unlike
+the employment DDD this design could and did detect an effect of the size observed.
+
+\paragraph{Lee bounds for the DDD.}
+Table~\ref{tab:lee-ddd} applies the generalized selection correction. Excess selection into
+employment among post-period mothers is present in all four quartiles of the cell-based exposure
+index but modest everywhere: the trim proportion ranges from $0.25\%$ (quartile 2) to $4.61\%$
+(quartile 1, the least teleworkable jobs), and a total of $1{,}068$ of $83{,}336$ post-period
+employed mothers are trimmed. The bounds barely move: the lower bound is $3.4414$ (SE $0.9927$),
+the upper bound $3.4570$ (SE $0.8975$), and the Imbens--Manski 95\% confidence interval for the
+identified set is $[1.5035, 5.2091]$, which excludes zero comfortably. Unlike the plain DiD, the
+triple interaction survives the selection correction. This is the strongest single piece of
+evidence in the paper: the result is not an artifact of differential selection into employment.
+
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Generalized Lee bounds on the hours DDD ($\Mother \times \Post \times \WFH$)}\label{tab:lee-ddd}
+\begin{tabular}{lccccccc}
+\toprule
+\multicolumn{8}{l}{\emph{Panel A: selection rates and trimming by cell-exposure quartile}} \\
+Quartile & $s_{00}$ & $s_{01}$ & $s_{10}$ & $s_{11}$ & $s^*_{11}$ & $n(\Mother{=}1,\Post{=}1)$ & Trim \\
+\midrule
+1 & 0.6284 & 0.6419 & 0.6045 & 0.6478 & 0.6180 & 21{,}655 & 4.61\% \\
+2 & 0.7624 & 0.7867 & 0.7773 & 0.8037 & 0.8016 & 28{,}540 & 0.25\% \\
+3 & 0.8167 & 0.8099 & 0.8651 & 0.8619 & 0.8584 & 34{,}293 & 0.41\% \\
+4 & 0.8674 & 0.8514 & 0.8538 & 0.8501 & 0.8377 & 21{,}815 & 1.45\% \\
+\midrule
+\multicolumn{8}{l}{\emph{Panel B: bounds on the triple interaction}} \\
+Bound & \multicolumn{2}{c}{Coefficient} & \multicolumn{2}{c}{SE} & \multicolumn{3}{c}{95\% CI} \\
+\midrule
+Lower & \multicolumn{2}{c}{3.4414} & \multicolumn{2}{c}{0.9927} & \multicolumn{3}{c}{$[1.4958,\ 5.3870]$} \\
+Point (untrimmed) & \multicolumn{2}{c}{3.4077} & \multicolumn{2}{c}{0.9564} & \multicolumn{3}{c}{$[1.5331,\ 5.2823]$} \\
+Upper & \multicolumn{2}{c}{3.4570} & \multicolumn{2}{c}{0.8975} & \multicolumn{3}{c}{$[1.6979,\ 5.2161]$} \\
+\midrule
+Imbens--Manski 95\% CI & \multicolumn{7}{c}{$[1.5035,\ 5.2091]$} \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\small
+\item Rows trimmed by quartile: 632 of 13{,}718; 56 of 22{,}490; 117 of 29{,}022; 263 of 18{,}106.
+The untrimmed point estimate here ($3.4077$) differs slightly from Table~\ref{tab:hours}
+($3.407$) because this sample additionally requires a matched cell-based exposure. Observations
+for the bound regressions: [TODO: confirm]. Outcome regressions use the occupation-level index and
+cluster by occupation.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\paragraph{Robustness.}
+Table~\ref{tab:robust} collects the remaining checks. With the raw \citet{dingel2020} external
+index in place of the calibrated one, the triple interaction is $0.9404$ (SE $0.8649$), positive
+but insignificant; with the realized 2021-anchored index it is $6.416$\sym{*} (SE $2.454$). The
+direction is consistent across all three measures but the magnitude and significance are not, and
+we describe the result as directionally rather than point-estimate robust to the exposure measure.
+The calibrated measure is the one purpose-built to correct the external index's known
+misclassification of Israeli occupations, and we lead with it. Adding a $\Mother \times$ age-group
+interaction leaves the estimate essentially unchanged ($3.367$\sym{**}, SE $0.9553$); reweighting
+the sample to balance pre-period age groups between mothers and non-mothers attenuates it by about
+17\% to $2.836$\sym{**} (SE $0.9055$), still significant at the 1\% level. The age imbalance being
+corrected is real and tracks exposure --- the pre-period mother/non-mother gap in the age-group
+code is $-0.974$ in the lowest exposure quartile ($t = -94.0$), $-0.735$ in the second, $-0.169$ in
+the third, and $+0.057$ in the highest --- so the reweighted attenuation is worth reporting, but it
+does not overturn the result. An incidental finding of the age-interacted specification is a
+significant, non-monotonic age profile in the hours penalty itself, independent of exposure
+($\Mother \times$ age group 4: $-2.083$\sym{***}; group 6: $1.063$\sym{*}; group 7:
+$1.337$\sym{*}).
+
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Hours DDD: sensitivity of $\Mother \times \Post \times \WFH$}\label{tab:robust}
+\begin{tabular}{lccc}
+\toprule
+Specification & Coefficient & SE & $N$ \\
+\midrule
+\emph{Exposure measure} & & & \\
+\quad Calibrated (primary) & $3.407$\sym{***} & 0.9302 & 275{,}708 \\
+\quad External (Dingel--Neiman) & $0.9404$ & 0.8649 & 275{,}708 \\
+\quad Realized (2021 anchor) & $6.416$\sym{*} & 2.454 & 275{,}390 \\
+\midrule
+\emph{Age-balance} & & & \\
+\quad Age-interacted ($+\,\Mother \times$ age group) & $3.367$\sym{**} & 0.9553 & 275{,}708 \\
+\quad Reweighted (pre-period age-group raking) & $2.836$\sym{**} & 0.9055 & 271{,}621 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\small
+\item All rows: weekly hours, employed women, standard controls, clustered by occupation.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\subsection{Heterogeneity by population group and the gender placebo}\label{sec:res-subgroup}
+
+Table~\ref{tab:subgroup} re-estimates the hours DiD and DDD separately for Jewish and Arab women,
+and on men as a placebo. For Jewish women the pattern is the pooled pattern: the DiD is
+$0.9029$\sym{***} (SE $0.2047$) and the DDD $2.9238$\sym{**} (SE $0.8901$), each with a confidence
+interval that excludes zero. For Arab women the DiD is $0.1267$ (SE $0.4798$), indistinguishable
+from zero --- there is no significant average hours effect for Arab mothers to begin with, and Arab
+women's hours fell in the post-period overall ($\Post = -1.579$\sym{***}) --- while the DDD is
+$6.0062$\sym{*} (SE $2.6426$, 95\% CI $[0.8267, 11.1857]$), nominally significant and twice the
+Jewish point estimate.
+
+We do not read the larger Arab estimate as evidence that the mechanism is stronger for Arab women,
+for two reasons. First, the two coefficients are not statistically distinguishable. The Arab
+subsample is about nine times smaller than the Jewish one ($26{,}164$ versus $236{,}554$ employed,
+occupation-matched women), the Arab standard error is nearly three times the Jewish one, and a
+two-sample $z$-test on the DDD term gives
+$z = (6.0062 - 2.9238)/\sqrt{2.6426^2 + 0.8901^2} = 1.105$, $p = 0.269$ --- the apparent gap is well
+within what the Arab subsample's own sampling noise can produce. (The same test on the DiD gives
+$z = 1.488$, $p = 0.137$.) Second, there is a plausible mechanical cause for the imprecision:
+Arab women's employment in Israel is concentrated in a narrow set of occupations, disproportionately
+education and health-aide roles, so that far fewer than the 40 two-digit occupations carry enough
+Arab respondents to inform an occupation-specific comparison --- 14 of 40 are too thin to support
+one, against 3 of 40 for Jewish women. With so few occupations carrying real information, a small
+number of high-leverage occupations can dominate the estimate. The Arab result is therefore best
+described as imprecisely estimated and statistically indistinguishable from the Jewish estimate ---
+a small-sample, thin-occupational-coverage fragility rather than a documented heterogeneous
+treatment effect. The Jewish-women estimate is the more credible of the two and anchors any
+subgroup claim we make.
+
+The gender placebo goes the other way. Re-estimating the same models on men, with ``mother'' read
+as ``father,'' gives a DiD of $-0.3860$\sym{*} (SE $0.1909$, $N = 276{,}343$) --- fathers' hours
+moved slightly \emph{down} relative to childless men after 2021 --- and a DDD of $-1.8806$ (SE
+$1.1226$, $N = 266{,}087$), insignificant and with a negative point estimate. The women's and men's
+coefficients are statistically distinguishable: $z = 3.627$ ($p = 0.0003$) for the DDD and
+$z = 4.584$ ($p < 0.0001$) for the DiD. This is a stronger statement than ``the placebo is
+insignificant'': fathers show no positive WFH-linked hours response, and a macro trend common to all
+workers cannot explain a positive shift for mothers alongside a negative one for fathers.
+
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Hours DiD and DDD by subgroup, and the gender placebo}\label{tab:subgroup}
+\begin{tabular}{lcccccc}
+\toprule
+ & \multicolumn{3}{c}{DiD: $\Mother \times \Post$} & \multicolumn{3}{c}{DDD: $\Mother \times \Post \times \WFH$} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+Subgroup & Coef. & SE & $N$ & Coef. & SE & $N$ \\
+\midrule
+All women (primary) & $0.8261$\sym{***} & 0.1830 & 281{,}750 & $3.4073$\sym{***} & 0.9302 & 275{,}708 \\
+Jewish women & $0.9029$\sym{***} & 0.2047 & 241{,}738 & $2.9238$\sym{**} & 0.8901 & 236{,}554 \\
+Arab women & $0.1267$ & 0.4798 & 26{,}876 & $6.0062$\sym{*} & 2.6426 & 26{,}164 \\
+Men (placebo) & $-0.3860$\sym{*} & 0.1909 & 276{,}343 & $-1.8806$ & 1.1226 & 266{,}087 \\
+\midrule
+95\% CI, Jewish & \multicolumn{3}{c}{$[0.5017,\ 1.3041]$} & \multicolumn{3}{c}{$[1.1792,\ 4.6683]$} \\
+95\% CI, Arab & \multicolumn{3}{c}{$[-0.8137,\ 1.0671]$} & \multicolumn{3}{c}{$[0.8267,\ 11.1857]$} \\
+Jewish vs.\ Arab, $z$ ($p$) & \multicolumn{3}{c}{1.488 (0.137)} & \multicolumn{3}{c}{1.105 (0.269)} \\
+Women vs.\ men, $z$ ($p$) & \multicolumn{3}{c}{4.584 ($<0.0001$)} & \multicolumn{3}{c}{3.627 (0.0003)} \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\small
+\item Weekly hours, employed only, standard controls. DiD clustered by individual; DDD clustered by
+occupation. Men: ``Mother'' read as ``Father.'' Two-sample $z$-tests are valid without a covariance
+correction because the compared samples are disjoint.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+%======================================================================
+\section{Discussion}\label{sec:discussion}
+%======================================================================
+
+Among mothers who remain employed, the post-2021 hours effect is not uniform across occupations.
+It is concentrated in occupations with higher WFH exposure, with a triple-interaction coefficient
+of about $3.4$ additional weekly hours per unit of exposure, and it survives a correction for
+selection into employment. This is consistent with WFH access relaxing a binding time constraint
+specifically for mothers in teleworkable jobs --- the \citet{goldin2014} mechanism --- rather than
+with a general post-pandemic recovery common to all women, since the effect scales with
+occupational exposure rather than appearing uniformly, and since fathers show no analogous response.
+
+Which occupations are doing the work is concrete. The calibration step moved ten occupations away
+from their US task-based scores toward realized Israeli behavior: clerical support and teaching
+were corrected sharply downward, because Israeli institutional practice kept them in person
+regardless of task content, while ICT professionals remained high on both measures. The
+triple interaction is identified off exactly this contrast, which grounds ``exposure'' in checkable
+occupational content. That the raw external index yields a positive but insignificant estimate is
+itself informative: the mechanism shows up cleanly only once exposure is measured as Israeli jobs
+were actually done, not as US task content says they could be.
+
+The timing is also informative. The event study rises gradually from an insignificant 2021
+estimate to a significant one in 2023, consistent with WFH adoption and household time
+reallocation being a multi-year adjustment rather than an instantaneous response to the 2020--21
+shock --- plausible given that occupational WFH norms were themselves still settling over
+2021--2023.
+
+Why hours and not employment? The employment DDD is not a failed test of the mechanism; it is an
+uninformative one, with a minimum detectable effect of a quarter of the baseline employment rate.
+The intensive-margin design is well powered because it can use occupation-level exposure, which the
+employment design cannot without conditioning its own outcome on itself. Substantively, the two
+results are coherent: the effect operates on \emph{how much} mothers who stay employed work, not on
+\emph{whether} they are employed, which is precisely the margin \citet{kleven2019denmark} identify
+as a leading channel of the child penalty. This is also where our findings depart from
+\citet{harrington2025}: their US evidence is on employment and income, and we cannot confirm or
+reject an employment effect in Israel with this design; what we can say is that the intensive
+margin responds, and that it responds through remote work.
+
+The subgroup results are more modest than the point estimates suggest. The Jewish-women estimate
+carries the pooled result. The Arab-women estimate is larger but imprecise, statistically
+indistinguishable from the Jewish one, and rests on thin occupational coverage; we report it
+transparently but do not claim heterogeneity on its basis.
+
+%======================================================================
+\section{Limitations}\label{sec:limitations}
+%======================================================================
+
+\paragraph{Parallel trends and the 2017 anomaly.}
+The hours event study shows a statistically significant pre-trend violation in 2017
+($-1.524$\sym{***} relative to 2019), and a joint test on 2017--2018 rejects parallel trends over
+the full pre-period ($F(2, 65{,}088) = 23.7$, $p = 5.2\times10^{-11}$). By contrast 2018 is flat
+relative to 2019. The paper's parallel-trends assumption therefore rests on the 2018--2019
+comparison, not the full 2017--2019 window, and the 2017 anomaly is a limitation rather than
+something to be smoothed over. The problem is specific to hours: the same test on employment passes
+($F(2, 79{,}069) = 0.63$, $p = 0.53$). The Lee-bounds counterfactual itself relies on the same
+parallel-trends assumption already dented by the 2017 finding.
+
+\paragraph{Lee bounds: direction and monotonicity.}
+The trimming construction only handles \emph{excess} selection in the post-period mother cell ---
+the direction the project's own hypothesis predicts. Under-selection in that cell (fewer employed
+mothers than the counterfactual implies) is a missing-data problem, not an excess-observed-data
+problem, and is not addressed. The construction assumes monotone selection (that WFH weakly
+increases, never decreases, a mother's employment probability) to justify trimming from a single
+tail, and computes selection rates unweighted, consistent with the rest of the analysis. A finding
+of small excess selection should be read as ``this construction found little to correct,'' not as
+proof that the selection concern is absent.
+
+\paragraph{Survey weights.}
+CBS survey weights are intentionally not applied in any outcome regression. This is a scope
+decision, not an oversight: reported rates and coefficients are unweighted estimates on the analysis
+sample, not population-representative statistics. The one exception is internal to constructing
+the cell-based exposure index, where occupation exposure is aggregated to demographic cells using
+the survey weight; that is not a representativeness correction for the outcome regressions.
+
+\paragraph{The exposure anchor: 2021, not 2020.}
+The realized WFH index is anchored to 2021 rather than to the 2020 variable the original research
+plan specified, because no 2020 extract exists. The justification is that 2021 already passes the
+validated data pipeline and is arguably a more stable measurement point than 2020's emergency
+disruption. The downside is real: by 2021 occupations had had a year to adapt, and if adaptation
+was uneven a 2021-based index could rank occupations' exposure differently than a 2020-based one
+would have. The realized index enters only as a robustness variant; the primary calibrated index
+draws on 2022--23 realized data for its swap test and is itself a documented compromise rather than
+a fully pre-treatment measure.
+
+\paragraph{Age controls and age imbalance.}
+Age enters as a categorical age-group code, because the extract has no continuous age or
+birth-year variable. Mothers and non-mothers are imbalanced on this code in the pre-period, and the
+imbalance tracks exposure quartile; the age-interacted and reweighted specifications address this
+and the estimate survives, but the reweighted attenuation ($3.407 \to 2.836$) is the largest
+single move any robustness check produces.
+
+\paragraph{Inference.}
+The hours DDD clusters on about 40 occupation groups and the employment DDD on about 210
+demographic cells; no small-cluster correction is applied. The same person can in principle
+contribute observations to both the pre- and post-period. Occupation codes masked by the CBS for
+disclosure control are dropped when building exposure; a proxy check finds no strong evidence that
+this biases the exposure measure, though that is weak rather than conclusive evidence. The
+calibrated exposure measure uses post-period (2022--23) realized data, as noted.
+
+%======================================================================
+\section{Conclusion}\label{sec:conclusion}
+%======================================================================
+
+% DRAFT CONCLUSION -- DO NOT SUBMIT
+\noindent\textbf{\color{red}[DRAFT CONCLUSION -- FOR SELF-COMPARISON ONLY, NOT FOR SUBMISSION]}
+\begin{quote}\itshape
+This paper asked whether the post-COVID shift to remote work altered the motherhood penalty in
+Israel, extending the question \citet{harrington2025} pose for the United States to a different
+country and to the intensive margin of labor supply. Using CBS Labor Force Survey microdata on
+women aged 25--59 across 2017--2019 and 2021--2023, we find no change in the mother/non-mother
+employment gap and an employment-by-exposure triple difference that is too underpowered to speak to
+the mechanism either way. On hours, by contrast, employed mothers gained about $0.83$ weekly hours
+relative to childless women, and that gain is entirely concentrated in occupations exposed to remote
+work: the triple interaction of $3.41$ hours per unit of exposure is significant at the 0.1\% level,
+robust to a generalized Lee-bounds correction for selection into employment (Imbens--Manski 95\% CI
+$[1.50, 5.21]$), to age-balance adjustments, and to a gender placebo in which fathers show, if
+anything, the opposite pattern. The result is consistent with remote work relaxing the temporal
+inflexibility that Goldin identifies as the last barrier to gender convergence, operating for
+mothers who remain employed in jobs that can actually be done from home. Its limitations are
+equally clear: a 2017 pre-trend anomaly confines the parallel-trends claim to 2018--2019, the
+selection correction handles only excess selection, the exposure measure is anchored a year later
+than planned and partly on post-period data, and the extensive margin remains, for this design, an
+open question rather than a null. The natural next steps are a higher-powered test of the
+employment margin and a jointly estimated model that lets the mechanism differ by sex and
+population group within a single specification.
+\end{quote}
+\textbf{\color{red}[END DRAFT CONCLUSION]}
+
+%======================================================================
+\bibliographystyle{apalike}
+\bibliography{references}
+
+\end{document}
