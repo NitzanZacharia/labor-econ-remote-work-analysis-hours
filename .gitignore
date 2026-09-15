@@ -16,3 +16,16 @@ Rplots*.pdf
 # above would otherwise still catch every CSV in here, hence the negation. See docs/ROADMAP.md
 # Checkpoint 9.
 !outputs/**
+
+# LaTeX build artifacts from compiling paper/paper.tex (pdflatex + bibtex four-pass; see the
+# compile notes in paper/notes/results_digest.md). Regenerated on every build, so they only create
+# diff noise. paper/paper.pdf is deliberately NOT listed here -- the compiled paper is a tracked
+# deliverable, same convention as outputs/ above. No blanket *.pdf rule exists in this file
+# (Rplots*.pdf above is name-anchored), so the PDF needs no negation to stay tracked.
+paper/*.aux
+paper/*.bbl
+paper/*.log
+paper/*.blg
+paper/*.out
+paper/*.fls
+paper/*.fdb_latexmk
