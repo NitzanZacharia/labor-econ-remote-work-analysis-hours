@@ -197,7 +197,15 @@ under 17. `Post` = year ≥ 2021. (`README.md` "Key variables"; `docs/HLD.md` §
   Sanity check: bounds nearly coincide so `c_α ≈ 1.95`; 3.4414 − 1.952×0.9927 = 1.504 ✓;
   3.4570 + 1.952×0.8975 = 5.209 ✓.
 
-### 1.5 [PRIMARY] Second-stage occupation-level mechanism regression
+### 1.5 [PRIMARY — **OUT OF SCOPE, DO NOT DRAFT**] Second-stage occupation-level mechanism regression
+
+> **Scope decision (2026-09-15):** this regression is **not** to be drafted into the paper's
+> results section. It is not one of the three core models (hours DiD, hours DDD, employment
+> DiD/DDD), and its underlying data is not verifiably exported (see the ⚠ below and §7 item 1).
+> Recorded here for completeness only. Note this also removes the Jewish/Arab mechanism-slope
+> numbers in §3.3(b) from anything the paper can cite directly — §3.3's conclusion should rest on
+> (a) the z-test and (c) the occupational-concentration argument, referring to (b) only as an
+> unexported internal check if at all.
 
 - **Function:** inside `run_hours_ddd_regression()` (Model 2): per-occupation `Mother:Post` from
   `run_intensive_margin_reg()` on that occupation's rows (β_j, se_j), then
@@ -370,9 +378,13 @@ input (`main.R` §5 and §8a).
 
 Other terms — Jewish: `Mother` 0.0054 (0.0045), `Post` 0.0070 (0.0049). Arab: `Mother` 0.0200.
 (0.0110), `Post` 0.0601*** (0.0111).
-`[TODO: confirm]` The Jewish-women tables (employment *and* hours) contain no `Dat` coefficients at
-all, while the Arab tables have `Dat2–Dat4` only; check the `Dat` coding by `Leom` before
-describing the control set for the stratified models.
+**Footnote for the paper (near the subgroup results; no further investigation — resolved
+2026-09-15):** The Jewish-women tables (employment *and* hours) contain no `Dat` coefficients at
+all, while the Arab tables have `Dat2–Dat4` only, so the religiosity control's coding (and hence
+the effective control set) may differ by subgroup; the stratified estimates should be read with
+that caveat. Suggested footnote text: *"The religiosity control (`Dat`) is not identified within
+the Jewish-only subsample and enters with fewer categories in the Arab-only subsample, so the
+effective control set differs slightly across the stratified models."*
 
 ### 3.2 [PRIMARY] Hours DiD and DDD by group
 
@@ -570,53 +582,77 @@ F = 0.63, p = 0.53 on employment).
 
 ## 6. Literature citations
 
-Verified by web search on 2026-09-15 unless marked. The repo itself cites Correll et al. (2007),
-Kleven et al. (2019 ×2), Harrington et al. (2025), Dingel & Neiman, Bloom (WFH Research), and
-"Cohen & Manor (2024)" (`README.md` Background; research doc Part 1 §IV, Part 4 §4). **Goldin and
-Olden & Møen are not cited anywhere in the repo** — the entries below are the standard papers for
-the roles they would play (Goldin: temporal flexibility / gender convergence; Olden & Møen: DDD
-identification); confirm which Goldin paper the paper intends.
+Verified by web search on 2026-09-15 unless marked. Scope decisions recorded 2026-09-15 (user
+instruction): the paper's bibliography consists of the **five substantive citations (§6.1)** plus
+the **two methods citations (§6.2)**. Everything in §6.3 is out of scope. Goldin and Olden & Møen
+are not cited anywhere in the repo; their roles are fixed below.
 
-1. **Goldin, Claudia (2014).** "A Grand Gender Convergence: Its Last Chapter." *American Economic
-   Review*, 104(4): 1091–1119. DOI 10.1257/aer.104.4.1091. `[VERIFY: is this the intended Goldin —
-   alternative is Goldin (2021), *Career and Family: Women's Century-Long Journey toward Equity*,
-   Princeton University Press (book, no volume/pages)]`
+### 6.1 Substantive citations (Introduction / Literature Review) — REQUIRED
 
-2. **Kleven, Henrik, Camille Landais, and Jakob Egholt Søgaard (2019).** "Children and Gender
+1. **Harrington, Emma, and Matthew E. Kahn (2025).** "Has the Rise of Work from Home Reduced the
+   Motherhood Penalty in the Labor Market?" NBER Working Paper No. 34147.
+   - **Central, required citation.** This project's design is directly modeled on / extends this
+     paper to the Israeli context. The Introduction should frame the project explicitly as
+     **testing Harrington & Kahn's US finding on Israeli CBS Labor Force Survey microdata**.
+   - **Byline is two authors — Harrington & Kahn — not "et al."** (confirmed from the NBER listing;
+     the repo's `README.md` / research doc write "Harrington et al. (2025)", which is wrong and
+     should not be carried into the paper).
+   - Their headline (from the NBER abstract): a 10% rise in WFH raises mothers' employment ~0.78 pp
+     relative to other women, concentrated in careers with high returns to hours / inflexible time
+     demands; employed mothers' incomes rise ~1.3% relative to other employed women. Note the
+     margin contrast: their main result is extensive-margin/income; this project's headline is
+     intensive-margin (hours).
+
+2. **Goldin, Claudia (2014).** "A Grand Gender Convergence: Its Last Chapter." *American Economic
+   Review*, 104(4): 1091–1119. DOI 10.1257/aer.104.4.1091.
+   - **Locked in** as the intended Goldin citation (over the 2021 *Career and Family* book): the
+     standard reference for the **temporal-flexibility mechanism** this project's WFH-exposure
+     design is built around.
+
+3. **Kleven, Henrik, Camille Landais, and Jakob Egholt Søgaard (2019).** "Children and Gender
    Inequality: Evidence from Denmark." *American Economic Journal: Applied Economics*, 11(4):
    181–209. DOI 10.1257/app.20180010. (= the repo's "Kleven et al. (2019, Denmark)".)
 
-3. **Kleven, Henrik, Camille Landais, Johanna Posch, Andreas Steinhauer, and Josef Zweimüller
+4. **Kleven, Henrik, Camille Landais, Johanna Posch, Andreas Steinhauer, and Josef Zweimüller
    (2019).** "Child Penalties across Countries: Evidence and Explanations." *AEA Papers and
    Proceedings*, 109: 122–126. DOI 10.1257/pandp.20191078. (= the repo's "Kleven et al. (2019,
    cross-country)".)
 
-4. **Dingel, Jonathan I., and Brent Neiman (2020).** "How Many Jobs Can Be Done at Home?" *Journal
+5. **Dingel, Jonathan I., and Brent Neiman (2020).** "How Many Jobs Can Be Done at Home?" *Journal
    of Public Economics*, 189: 104235. DOI 10.1016/j.jpubeco.2020.104235. (Source of the external
    teleworkability score in `data/israeli_cbs_wfh_2digit.csv` / `build_exposure_isco2()`
    `[VERIFY: that the crosswalk file is derived from D&N's published occupational classification —
    the repo says so but the provenance of the SOC→ISCO mapping is not documented]`.)
 
-5. **Olden, Andreas, and Jarle Møen (2022).** "The Triple Difference Estimator." *The Econometrics
-   Journal*, 25(3): 531–553. DOI 10.1093/ectj/utac010 `[VERIFY DOI]`.
+### 6.2 Methods citations (Empirical Strategy section only) — REQUIRED, but NOT literature review
 
-Also cited in the repo (not requested, recorded for completeness):
+These belong in the Empirical Strategy section's discussion of identification (DDD) and of the
+Lee-bounds correction / partial-identification CI. **Do not lump them in with §6.1's substantive
+comparisons** in the Introduction or Literature Review.
 
-6. **Harrington, Emma, and Matthew E. Kahn (2025).** "Has the Rise of Work from Home Reduced the
-   Motherhood Penalty in the Labor Market?" NBER Working Paper No. 34147. (The repo writes
-   "Harrington et al. (2025)"; the NBER paper has two authors — `[VERIFY author list]`.)
-7. **Correll, Shelley J., Stephen Benard, and In Paik (2007).** "Getting a Job: Is There a
-   Motherhood Penalty?" *American Journal of Sociology*, 112(5): 1297–1338. `[VERIFY: not
-   web-checked in this pass; from memory of the standard citation]`
-8. **Lee, David S. (2009).** "Training, Wages, and Sample Selection: Estimating Sharp Bounds on
+6. **Olden, Andreas, and Jarle Møen (2022).** "The Triple Difference Estimator." *The Econometrics
+   Journal*, 25(3): 531–553. DOI 10.1093/ectj/utac010 `[VERIFY DOI — not blocking]`. (DDD
+   identification / interpretation of the triple interaction.)
+
+7. **Lee, David S. (2009).** "Training, Wages, and Sample Selection: Estimating Sharp Bounds on
    Treatment Effects." *Review of Economic Studies*, 76(3): 1071–1102. `[VERIFY: not web-checked]`
-9. **Imbens, Guido W., and Charles F. Manski (2004).** "Confidence Intervals for Partially
+   (Trimming bounds, §1.2 and §1.4.)
+
+8. **Imbens, Guido W., and Charles F. Manski (2004).** "Confidence Intervals for Partially
    Identified Parameters." *Econometrica*, 72(6): 1845–1857. `[VERIFY: not web-checked]`
-10. **Cohen & Manor (2024)** — Israeli policy paper on WFH; `[TODO: confirm — no title, venue, or
-    full author names anywhere in the repo]`.
-11. **Bloom, Nicholas** — "WFH Research (Nick Bloom, Stanford)" per research doc Part 4 §4;
-    `[TODO: confirm which Bloom et al. paper/dataset is meant — likely Barrero, Bloom & Davis
-    (2021/2023), "The Evolution of Work from Home", JEP 37(4): 23–50 — VERIFY]`.
+   (CI for the identified set, §1.2 and §1.4.)
+
+### 6.3 OUT OF SCOPE for this paper's bibliography (background citations used elsewhere in the repo)
+
+Recorded only so the draft step knows they were considered and deliberately excluded. **Do not add
+to the paper.**
+
+- Correll, Shelley J., Stephen Benard, and In Paik (2007). "Getting a Job: Is There a Motherhood
+  Penalty?" *American Journal of Sociology*, 112(5): 1297–1338. (Cited in `README.md` Background.)
+- Cohen & Manor (2024) — Israeli WFH policy paper named in research doc Part 4 §4; no full
+  reference exists in the repo.
+- Bloom / "WFH Research (Nick Bloom, Stanford)" — named in research doc Part 4 §4 as a
+  plausibility anchor for the exposure index; no specific paper identified in the repo.
 
 ---
 
@@ -624,6 +660,7 @@ Also cited in the repo (not requested, recorded for completeness):
 
 1. Hours mechanism regression slope (2.639, SE 0.899, p 0.006, n 37) and its Jewish/Arab analogs —
    console only; the CSV the narrative doc cites is a stale employment-outcome artifact (§1.5).
+   **Resolved 2026-09-15: §1.5 is out of scope — not to be drafted.**
 2. Imbens–Manski CIs for both Lee-bounds tables — console only, arithmetically consistent with the
    exported per-bound SEs (§1.2, §1.4).
 3. Hours-DDD MDE (2.6059) — console only; arithmetically verified from the exported SE (§1.3).
@@ -634,8 +671,12 @@ Also cited in the repo (not requested, recorded for completeness):
 6. `GilNK` imbalance figures in the narrative doc / HLD (−0.797 / +0.239; "~0.8, t≈−81") differ from
    the current CSV (−0.974 / +0.057; t = −94) — docs predate the `BirthContinent` cell change (§1.7).
 7. Employment-outcome gender placebo (`run_gender_placebo()`) has no exported result (§3.4).
-8. Why the Jewish-women tables carry no `Dat` coefficients (§3.1).
+8. Why the Jewish-women tables carry no `Dat` coefficients (§3.1). **Resolved 2026-09-15: no
+   investigation; handled as a one-sentence footnote near the subgroup results (text in §3.1).**
 9. Lee-bounds trim proportion for the plain DiD (≈1.5%, inferred) and N of the three hours-DDD
    Lee-bounds fits — not exported (§1.2, §1.4).
-10. Citation gaps: which Goldin; Olden & Møen DOI; Cohen & Manor (2024) full reference; Bloom
-    reference; Harrington author list (§6).
+10. Citation gaps — **resolved 2026-09-15 (§6):** Goldin locked to 2014 AER; Harrington & Kahn
+    confirmed two-author, marked central/required; Olden & Møen kept with DOI `[VERIFY]`
+    (non-blocking); Correll, Cohen & Manor, and Bloom placed out of scope; Lee (2009) and
+    Imbens & Manski (2004) reclassified as methods citations. Remaining: Olden & Møen DOI; Lee and
+    Imbens–Manski page ranges not web-checked; D&N crosswalk provenance.
