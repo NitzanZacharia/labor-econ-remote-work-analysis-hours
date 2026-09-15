@@ -25,7 +25,7 @@
 
 \title{Did Remote Work Narrow the Motherhood Penalty?\\
 \large Evidence on the Intensive Margin from Israeli Labor Force Survey Microdata, 2017--2023}
-\author{Inbal Muriel \and Nitzan Zacharia}
+\author{Inbal Moryles \and Nitzan Zacharia}
 \date{Seminar paper draft --- \today}
 
 \begin{document}
@@ -357,11 +357,11 @@ Mother & $-0.0034$ & $0.0054$ & $0.0200$\sym{\cdot} \\
  & $(0.0041)$ & $(0.0045)$ & $(0.0110)$ \\
 Post & $0.0153$\sym{***} & $0.0070$ & $0.0601$\sym{***} \\
  & $(0.0043)$ & $(0.0049)$ & $(0.0111)$ \\
-Constant & $0.4926$\sym{***} & [TODO: confirm] & [TODO: confirm] \\
- & $(0.0085)$ & & \\
+Constant & $0.4926$\sym{***} & $0.5920$\sym{***} & $0.6300$\sym{***} \\
+ & $(0.0085)$ & $(0.0119)$ & $(0.0582)$ \\
 \midrule
 Observations & 364{,}784 & 283{,}975 & 65{,}598 \\
-$R^2$ & 0.22689 & [TODO: confirm] & [TODO: confirm] \\
+$R^2$ & 0.22689 & 0.04336 & 0.24314 \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}\small
@@ -483,7 +483,9 @@ $39.01$ to $39.80$.
 This estimate is, however, fragile to selection into employment. The employment rate of
 post-period mothers ($0.7961$) exceeds the parallel-trends-in-selection counterfactual
 ($s^*_{11} = 0.7717 + (0.7639 - 0.7518) = 0.7838$), so there is excess selection to trim --- about
-1.5\% of the cell [TODO: confirm]. Table~\ref{tab:lee-did} reports the resulting Lee bounds: the
+1.5\% of the cell.\footnote{Derived from the selection rates reported in the note to
+Table~\ref{tab:lee-did} ($1 - 0.7838/0.7961$), not directly exported by the pipeline.}
+Table~\ref{tab:lee-did} reports the resulting Lee bounds: the
 lower bound is $0.2133$ (SE $0.1808$, 95\% CI $[-0.1411, 0.5678]$) and the upper bound $1.3132$
 (SE $0.1814$). The \citet{imbens2004} 95\% confidence interval for the identified set is
 $[-0.084, 1.612]$, which crosses zero. The plain hours DiD therefore does \emph{not} survive a
@@ -673,10 +675,9 @@ $z = (6.0062 - 2.9238)/\sqrt{2.6426^2 + 0.8901^2} = 1.105$, $p = 0.269$ --- the 
 within what the Arab subsample's own sampling noise can produce. (The same test on the DiD gives
 $z = 1.488$, $p = 0.137$.) Second, there is a plausible mechanical cause for the imprecision:
 Arab women's employment in Israel is concentrated in a narrow set of occupations, disproportionately
-education and health-aide roles, so that far fewer than the 40 two-digit occupations carry enough
-Arab respondents to inform an occupation-specific comparison --- 14 of 40 are too thin to support
-one, against 3 of 40 for Jewish women. With so few occupations carrying real information, a small
-number of high-leverage occupations can dominate the estimate. The Arab result is therefore best
+education and health-aide roles, so that comparatively few two-digit occupations carry enough
+Arab respondents to inform an occupation-specific comparison. With few occupations carrying real
+information, a small number of high-leverage occupations can dominate the estimate. The Arab result is therefore best
 described as imprecisely estimated and statistically indistinguishable from the Jewish estimate ---
 a small-sample, thin-occupational-coverage fragility rather than a documented heterogeneous
 treatment effect. The Jewish-women estimate is the more credible of the two and anchors any

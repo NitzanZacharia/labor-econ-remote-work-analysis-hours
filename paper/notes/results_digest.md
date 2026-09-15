@@ -5,6 +5,9 @@ tagged with the exact file it was read from. Where the only source is a console 
 a decision memo (never exported to `outputs/`), that is stated explicitly. Anything not confirmable
 from a repo artifact is marked `[TODO: confirm]`; citation fields not verified are marked `[VERIFY]`.
 
+**Authors (paper byline):** Inbal Moryles and Nitzan Zacharia. (The research doc's byline spells
+the first author "Inbal Muriel" — that spelling is wrong; do not copy it into the paper.)
+
 **Digest date:** 2026-09-15. **Repo state:** branch `main`, HEAD `f6e64bc`. Live `outputs/*.csv`
 files were regenerated 2026-09-13 (commit `6043755`) unless noted as stale below.
 
@@ -94,7 +97,8 @@ under 17. `Post` = year ≥ 2021. (`README.md` "Key variables"; `docs/HLD.md` §
 | 1 | 1 | 0.7961 | 109,239 |
 
   → `s11* = 0.7717 + (0.7639 − 0.7518) = 0.7838`; `s11 = 0.7961 > s11*` ⇒ excess selection;
-  implied trim ≈ 1 − 0.7838/0.7961 ≈ 1.5% `[TODO: confirm exact trim_prop — not exported]`.
+  implied trim ≈ 1 − 0.7838/0.7961 ≈ 1.5% — **derived from the selection rates above, not
+  directly exported by the pipeline**; cite it as a derived figure (footnoted), not a sourced one.
 
 - **Bounds table** (`outputs/intensive_margin_lee_bounds_table.csv`):
 
@@ -376,8 +380,10 @@ input (`main.R` §5 and §8a).
 | Jewish women | −0.0041 | 0.0058 | (ns) | 283,975 | `outputs/basic_reg_jewish_table.csv` |
 | Arab women | −0.0208 | 0.0138 | (ns) | 65,598 | `outputs/basic_reg_arab_table.csv` |
 
-Other terms — Jewish: `Mother` 0.0054 (0.0045), `Post` 0.0070 (0.0049). Arab: `Mother` 0.0200.
-(0.0110), `Post` 0.0601*** (0.0111).
+Other terms — Jewish: `Mother` 0.0054 (0.0045), `Post` 0.0070 (0.0049), Constant 0.5920***
+(0.0119), R² 0.04336 (adj. 0.04328). Arab: `Mother` 0.0200. (0.0110), `Post` 0.0601*** (0.0111),
+Constant 0.6300*** (0.0582), R² 0.24314 (adj. 0.24286). (Constant/R² added 2026-09-15 from the
+same two CSVs.)
 **Footnote for the paper (near the subgroup results; no further investigation — resolved
 2026-09-15):** The Jewish-women tables (employment *and* hours) contain no `Dat` coefficients at
 all, while the Arab tables have `Dat2–Dat4` only, so the religiosity control's coding (and hence
@@ -674,7 +680,8 @@ to the paper.**
 8. Why the Jewish-women tables carry no `Dat` coefficients (§3.1). **Resolved 2026-09-15: no
    investigation; handled as a one-sentence footnote near the subgroup results (text in §3.1).**
 9. Lee-bounds trim proportion for the plain DiD (≈1.5%, inferred) and N of the three hours-DDD
-   Lee-bounds fits — not exported (§1.2, §1.4).
+   Lee-bounds fits — not exported (§1.2, §1.4). **2026-09-15: the ≈1.5% is used in the paper as a
+   derived, footnoted figure; the DDD Lee-bounds N stays `[TODO: confirm]` — do not infer it.**
 10. Citation gaps — **resolved 2026-09-15 (§6):** Goldin locked to 2014 AER; Harrington & Kahn
     confirmed two-author, marked central/required; Olden & Møen kept with DOI `[VERIFY]`
     (non-blocking); Correll, Cohen & Manor, and Bloom placed out of scope; Lee (2009) and
