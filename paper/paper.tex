@@ -39,14 +39,15 @@ different margin of labor supply. Using Central Bureau of Statistics (CBS) Labor
 microdata on women aged 25--59 in 2017--2019 and 2021--2023, we estimate difference-in-differences
 (DiD) and triple-differences (DDD) models of employment and of usual weekly work hours for mothers
 relative to childless women, using the COVID-19-driven shift to remote work as the ``post'' period
-and an occupation-level WFH-exposure index as the third difference. On the extensive margin, the
+and a WFH-exposure index as the third difference (occupation-level for the hours model,
+demographic-cell-based for the employment model). On the extensive margin, the
 mother--non-mother employment gap did not change ($\Mother \times \Post = -0.0053$, SE $0.0052$),
 and the employment DDD is underpowered rather than informative (minimum detectable effect about
 26\% of the baseline employment rate). On the intensive margin, employed mothers' weekly hours rose
 by $0.83$ hours relative to childless women (SE $0.18$), and this increase is concentrated in
 WFH-exposed occupations: the triple interaction is $3.41$ hours per unit of exposure (SE $0.93$,
-$p<0.001$), robust to a generalized Lee (2009) selection correction with a 95\% Imbens--Manski
-confidence interval of $[1.50, 5.21]$. A gender placebo on fathers shows no such pattern. We read
+$p<0.001$), robust to a generalized trimming-bounds correction for selection into employment,
+with a 95\% confidence interval for the identified set of $[1.50, 5.21]$. A gender placebo on fathers shows no such pattern. We read
 this as WFH access relaxing a binding time constraint for mothers who remain employed in
 teleworkable jobs.
 \end{abstract}
@@ -102,8 +103,9 @@ but this average masks the real result: once occupational WFH exposure enters, t
 $\Mother \times \Post$ term collapses to essentially zero and the entire effect loads onto the
 triple interaction, $3.41$ additional weekly hours per unit of exposure ($p<0.001$). This estimate
 survives a selection-into-employment correction, two age-balance robustness specifications, and a
-gender placebo on fathers, whose corresponding coefficients are small, insignificant, and of the
-opposite sign.
+gender placebo on fathers, whose corresponding coefficients are small and of the opposite sign
+(the fathers' triple interaction is insignificant; their plain DiD is small, negative, and only
+marginally significant).
 
 The remainder of the paper proceeds as follows. Section~\ref{sec:lit} places the question in the
 literature. Section~\ref{sec:data} describes the data, the sample, and the construction of the WFH
@@ -122,11 +124,12 @@ use Danish administrative data and an event-study design around the birth of the
 show that women's earnings fall by roughly 20\% in the long run relative to men's, with the gap
 fueled by reduced work hours, exit from the labor market, and moves into family-friendly,
 lower-paying jobs. \citet{kleven2019countries} extend the event-study approach across countries and
-find that the qualitative pattern is universal while its magnitude varies sharply, with the penalty
-steepest where cultural and gender norms expect mothers to stay home with children. Both papers
-matter here because they identify \emph{hours} as a first-order channel of the penalty --- which is
-why an intervention that changes the time cost of combining work and care could plausibly move
-the intensive margin even where it does not move employment.
+find that the qualitative pattern is universal while its magnitude varies sharply across
+countries, and argue that differences in gender norms, rather than in family policy, are the more
+likely explanation. The Danish study matters here in particular because it identifies
+\emph{hours} as one of the channels through which the penalty operates --- which is why an
+intervention that changes the time cost of combining work and care could plausibly move the
+intensive margin even where it does not move employment.
 
 \paragraph{Temporal flexibility as the mechanism.}
 \citet{goldin2014} argues that the last chapter of gender convergence turns on the structure of
@@ -334,9 +337,8 @@ Throughout, significance is denoted \sym{***} $p<0.001$, \sym{**} $p<0.01$, \sym
 Table~\ref{tab:emp-did} reports equation~\eqref{eq:did} with employment as the outcome, for all
 women and separately for Jewish and Arab women. The DiD coefficient is $-0.0053$ (SE $0.0052$) in
 the pooled sample: the mother/non-mother employment gap did not change after the shift to remote
-work. The estimate is precise --- a change of one percentage point in either direction is inside
-the confidence interval, but not much more --- so this is a tight null on the extensive margin, not
-an uninformative one. The stratified estimates are $-0.0041$ (SE $0.0058$) for Jewish women and
+work. The estimate is precise --- its standard error is about half a percentage point --- so this
+is a tight null on the extensive margin, not an uninformative one. The stratified estimates are $-0.0041$ (SE $0.0058$) for Jewish women and
 $-0.0208$ (SE $0.0138$) for Arab women, neither significant.\footnote{The religiosity control
 (\texttt{Dat}) is not identified within the Jewish-only subsample and enters with fewer categories
 in the Arab-only subsample, so the effective control set differs slightly across the stratified
@@ -487,7 +489,7 @@ post-period mothers ($0.7961$) exceeds the parallel-trends-in-selection counterf
 Table~\ref{tab:lee-did} ($1 - 0.7838/0.7961$), not directly exported by the pipeline.}
 Table~\ref{tab:lee-did} reports the resulting Lee bounds: the
 lower bound is $0.2133$ (SE $0.1808$, 95\% CI $[-0.1411, 0.5678]$) and the upper bound $1.3132$
-(SE $0.1814$). The \citet{imbens2004} 95\% confidence interval for the identified set is
+(SE $0.1814$). The Imbens--Manski 95\% confidence interval for the identified set is
 $[-0.084, 1.612]$, which crosses zero. The plain hours DiD therefore does \emph{not} survive a
 selection-on-employment correction, and we treat it as suggestive rather than as the substantive
 finding.
