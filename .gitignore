@@ -29,3 +29,9 @@ paper/*.blg
 paper/*.out
 paper/*.fls
 paper/*.fdb_latexmk
+
+# Personal Claude Code overrides. Holds the paper-recompile PostToolUse hook, whose command
+# hardcodes this machine's MiKTeX location (~/AppData/Local/Programs/MiKTeX/...), so it is not
+# portable to a co-author's machine and must not be committed. A shared, portable
+# .claude/settings.json is deliberately NOT ignored.
+.claude/settings.local.json

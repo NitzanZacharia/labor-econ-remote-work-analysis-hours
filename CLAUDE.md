@@ -32,3 +32,9 @@
   is a pre-`scripts/`-restructure planning doc, kept only for history.
 - Every change that touches a function used elsewhere (data_processing.R, the controls list)
   needs the full `Rscript run_tests.R` suite green before you consider the task done.
+- Whenever `paper/paper.tex` or `paper/references.bib` is modified in a session, recompile before
+  finishing the turn, overwriting `paper/paper.pdf`. `latexmk` is not usable on this machine
+  (MiKTeX's `latexmk` requires Perl, which isn't installed) — use the manual sequence instead:
+  `pdflatex`, `bibtex`, `pdflatex`, `pdflatex`, run from within `paper/`. If the final log warns
+  that labels may have changed, run one more `pdflatex` pass. Report any BibTeX warnings or
+  undefined-citation/reference warnings from the logs.
