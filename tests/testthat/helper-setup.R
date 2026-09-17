@@ -30,6 +30,7 @@ old_wd <- setwd(project_root)
 
 source(file.path("scripts", "data_processing.R"))
 source(file.path("scripts", "comparative_statistics.R"))
+source(file.path("scripts", "descriptive_table.R"))
 source(file.path("scripts", "basic_regression.R"))
 source(file.path("scripts", "basic_reg_compared_data.R"))
 source(file.path("scripts", "intensive_margin_regression.R"))

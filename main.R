@@ -4,6 +4,7 @@
 rm(list = ls())
 source(file.path("scripts", "data_processing.R"))
 source(file.path("scripts", "comparative_statistics.R"))
+source(file.path("scripts", "descriptive_table.R"))
 source(file.path("scripts", "basic_regression.R"))
 source(file.path("scripts", "basic_reg_compared_data.R"))
 source(file.path("scripts", "Diagnostics.R"))
@@ -71,6 +72,9 @@ wfh_refweek_check <- check_wfh_refweek_avadbeshavua(cleaned_df)
 # ── 4. Comparative statistics ─────────────────────────────────────────────────
 message("Running comparative statistics...")
 comp_stats <- run_comparative_stats(cleaned_df)
+
+message("Building the descriptive (Table 1) summary...")
+desc_table <- build_descriptive_table(cleaned_df)
 
 # ── 5. Run regressions ────────────────────────────────────────────────────────
 # Primary (intensive-margin/hours) regression runs first, matching the hours pivot
@@ -483,6 +487,7 @@ if (RUN_NULL_VS_POWER_AUDIT) {
 # persisted per-person roster.
 results_to_export <- list(
   comparative_stats = comp_stats,
+  descriptive_table = desc_table,
   intensive_margin = intensive_results,
   intensive_margin_lee_bounds = intensive_lee_bounds,
   basic_reg = baseline_results,

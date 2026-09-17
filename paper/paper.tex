@@ -268,9 +268,18 @@ variable constructed from the CBS binned hours item by assigning each bin its me
 irregular-hours codes from observed medians within the same period; it is defined only for
 employed women. The secondary outcome is a binary employment indicator, equal to one if the
 respondent reports being employed and zero otherwise (unemployed and not-in-labor-force are both
-zero). Among employed women the pooled mean of weekly hours is $38.24$ ($n = 288{,}400$); the
-pooled employment rate is $0.7737$ ($n = 372{,}741$), $0.7574$ among childless women and $0.7828$
-among mothers.
+zero). Among employed women the pooled mean of weekly hours is $38.24$ ($n = 288{,}400$) and the
+pooled employment rate is $0.7737$ ($n = 372{,}741$).
+
+Table~\ref{tab:descriptives} describes the sample on either side of the treatment/control split.
+Two features matter for what follows. Mothers are \emph{more} likely to be employed than childless
+women ($0.7828$ versus $0.7574$) but work \emph{fewer} hours when they are ($37.63$ versus
+$39.38$), so the penalty this paper studies is visible in the raw data on the intensive margin and
+runs the other way on the extensive one. And mothers are the better-educated group, with $47.97\%$
+holding an academic degree against $40.24\%$ of childless women, which is why the controls matter:
+the unconditional hours gap understates the conditional one. The two groups are also imbalanced on
+age, mothers sitting about $0.44$ of an age-group code younger, an imbalance Section~\ref{sec:results}
+returns to because it tracks WFH exposure.
 
 All regressions include the same set of categorical controls: marital status, religiosity,
 age group, district of residence, and highest educational attainment (six groups). Age enters as
@@ -278,6 +287,46 @@ the categorical CBS age-group code because the extract contains no continuous ag
 variable. CBS survey weights are deliberately not applied in any outcome regression; all reported
 estimates are unweighted estimates on the analysis sample rather than population-representative
 statistics (see Section~\ref{sec:limitations}).
+
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Summary statistics: women aged 25--59, by mother status}\label{tab:descriptives}
+\begin{tabular}{lccc}
+\toprule
+ & Childless women & Mothers & Difference \\
+\midrule
+\multicolumn{4}{l}{\emph{Panel A: outcomes}} \\
+Observations & 133{,}646 & 239{,}095 & \\
+Employment rate & 0.7574 & 0.7828 & $0.0254$ \\
+Usual weekly hours (employed), mean & 39.38 & 37.63 & $-1.76$ \\
+\quad standard deviation & [12.87] & [12.77] & \\
+\midrule
+\multicolumn{4}{l}{\emph{Panel B: characteristics}} \\
+Age-group code (CBS 3--7), mean & 5.40 & 4.96 & $-0.44$ \\
+Arab (\%) & 17.73 & 17.78 & $0.05$ \\
+\addlinespace
+\emph{Education (\%)} & & & \\
+\quad Below high school & 11.37 & 6.63 & $-4.74$ \\
+\quad High school, no matriculation & 12.70 & 11.95 & $-0.74$ \\
+\quad Matriculation (Bagrut) & 22.73 & 18.82 & $-3.90$ \\
+\quad Post-secondary, non-academic & 11.50 & 13.68 & $2.18$ \\
+\quad Academic degree (BA/MA/PhD) & 40.24 & 47.97 & $7.73$ \\
+\quad Other / no certificate & 1.47 & 0.95 & $-0.52$ \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\small
+\item Israeli CBS Labor Force Survey, survey years 2017--2019 and 2021--2023, women aged 25--59.
+A woman is a mother if she has any child under 17 in the household. Weekly hours are conditional
+on employment; the standard deviation is in brackets. Education percentages sum to 100 within each
+column. The difference column is mothers minus childless women. All figures are \emph{unweighted}
+counts on the analysis sample and are not population-representative (Section~\ref{sec:limitations}).
+Marital status, religion and district enter every regression as controls but are omitted here: the
+extract carries them only as unlabelled numeric CBS codes. Their full composition by mother status
+is reported in the replication output.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
 
 \subsection{Why 2017--2019 versus 2021--2023}
 
@@ -539,14 +588,17 @@ errors clustered on the age-by-education-by-district cell. Baseline employment r
 \subsection{Intensive margin: hours}\label{sec:res-hours}
 
 \paragraph{Pre-trends.}
-Before turning to the estimates, Table~\ref{tab:pretrend} reports the hours event study. Relative
+Before turning to the estimates, Table~\ref{tab:pretrend} and Figure~\ref{fig:pretrend} report the
+hours event study. Relative
 to 2019, the $\Mother \times$ year coefficient is $-1.524$\sym{***} in 2017 but a flat $0.1222$ in
 2018; a joint Wald test on the two pre-period coefficients rejects parallel trends over the full
 window ($F(2, 65{,}088) = 23.7$, $p = 5.2\times10^{-11}$). The shorter 2018--2019 window is
 consistent with parallel trends, and we state the identifying assumption on that basis. The same
 test on the employment outcome passes ($F(2, 79{,}069) = 0.63$, $p = 0.53$): the pre-trend problem
 is specific to hours. In the post-period the effect builds gradually --- $0.3069$ in 2021, $0.1080$
-in 2022, and $0.7435$\sym{**} in 2023.
+in 2022, and $0.7435$\sym{**} in 2023. Figure~\ref{fig:pretrend} plots the same coefficients with
+their confidence intervals, where both the isolated 2017 dip and the gradual post-period build are
+visible directly.
 
 \begin{table}[htbp]
 \centering
@@ -571,6 +623,19 @@ Observations & \multicolumn{2}{c}{281{,}750} \\
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../outputs/event_study_pretrend_hours.pdf}
+\caption{Event study: $\Mother \times$ year interactions for weekly hours, reference year
+2019}\label{fig:pretrend}
+\begin{minipage}{0.8\textwidth}\small
+\vspace{0.3em}
+\emph{Notes:} Employed women only; standard controls; standard errors clustered by individual.
+Vertical bars are 95\% confidence intervals. The gap between 2019 and 2021 is the excluded 2020
+survey year. Point estimates are those of Table~\ref{tab:pretrend}.
+\end{minipage}
+\end{figure}
 
 \paragraph{The hours DiD.}
 Column~(1) of Table~\ref{tab:hours} reports equation~\eqref{eq:did} for weekly hours among
