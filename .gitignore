@@ -27,6 +27,7 @@ paper/*.bbl
 paper/*.log
 paper/*.blg
 paper/*.out
+paper/*.toc
 paper/*.fls
 paper/*.fdb_latexmk
 

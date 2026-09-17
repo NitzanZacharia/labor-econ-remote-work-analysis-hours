@@ -70,6 +70,19 @@
 
 \end{titlepage}
 
+% Contents page. tocdepth 2 pins the listing to sections and subsections: the many
+% \paragraph units in the Literature Review, Results and Limitations sit at level 4
+% and stay out, and the explicit setting also keeps a future \subsubsection from
+% appearing unbidden. The \begingroup wrapper prints entries in black rather than
+% hyperref's blue while leaving them clickable, and restores linkcolor=blue for the
+% cross-references and citations in the body.
+\setcounter{tocdepth}{2}
+\begingroup
+\hypersetup{linkcolor=black}
+\tableofcontents
+\endgroup
+\newpage
+
 \begin{abstract}
 \noindent
 \citet{harrington2025} ask whether the post-pandemic rise of work from home (WFH) reduced the
