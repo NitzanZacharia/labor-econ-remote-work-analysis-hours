@@ -71,17 +71,24 @@ direct replication of their US finding: we also estimate the employment margin, 
 reasons of statistical power that we document rather than paper over --- that specification is
 secondary.
 
-Israel is a natural setting for the question. It combines high labor productivity with birth
-rates that are exceptionally high relative to the rest of the OECD, so changes in the motherhood
-penalty carry outsized economic weight, and the findings speak to live domestic policy debates on
-gender equality, parental leave, and flexible work arrangements. At the same time, Israeli
+The policy stakes are particularly high in Israel, which combines a highly productive,
+internationally integrated labor market with the OECD's highest total fertility rate. A labor
+market that induces mothers of young children to reduce employment or hours imposes a substantial
+aggregate cost. This cost is especially large in a country where a large and growing share of the
+working-age population is, at any given time, a parent of young children. Conversely, flexible
+work arrangements might measurably narrow the gap between mothers and other workers. If so, the
+finding bears directly on the design of remote-work policy, parental-leave rules, and public
+discourse on gender equality in the labor market. At the same time, Israeli
 institutional practice diverges sharply from US task-based predictions of which jobs can be done
 remotely --- schools stayed in person by policy, for example --- which matters for how ``WFH
 exposure'' should be measured and is one of the methodological contributions below.
 
 Our research design exploits the pandemic as the moment at which remote work became a mainstream
 labor-market practice. Before 2020, working from home accounted for roughly 5\% of workdays; after
-the pandemic it accounted for 25--30\%. We therefore compare mothers and childless women across a
+the pandemic it accounted for 25--30\%. Unlike the acute, transitory disruption of 2020, WFH has
+proven to be a persistent feature of the post-pandemic labor market rather than a temporary
+accommodation \citep{barrero2021}. This renders the question policy-relevant rather than merely
+historical. We therefore compare mothers and childless women across a
 pre-period of 2017--2019 and a post-period of 2021--2023, excluding 2020 as a transitional year of
 emergency, ad hoc arrangements that reflect improvisation rather than the settled remote-work
 practices whose effect we want to measure. (A second, practical reason is that no 2020 CBS extract
@@ -143,13 +150,35 @@ stigma attached to a mother's physical availability. It may also cut the other w
 visibility and slower advancement. Which effect dominates is an empirical question, and Goldin's
 framework tells us where to look: in occupations where the work \emph{can} be done remotely.
 
+\paragraph{Does remote work narrow the gap in practice?}
+The evidence on whether flexible-work arrangements realize this potential is mixed. In a field
+experiment on Italian white-collar workers, \citet{angelici2024} find that randomly assigned
+flexible (``smart'') working arrangements shifted the division of household tasks. Women's
+reported well-being also increased, suggestive of a genuine flexibility benefit. Real-time survey
+evidence from the acute pandemic period tells a more ambiguous story. \citet{adamsprassl2020} show
+that WFH-feasible jobs were substantially better shielded from the 2020 employment and earnings
+shock. Women in WFH-feasible jobs, however, simultaneously absorbed a larger share of the
+additional childcare burden created by school and daycare closures. The same shock that protected
+employment could, in principle, degrade the quality of that employment for mothers specifically.
+\citet{alon2020} formalize the macro logic for why COVID-19-type shocks hit mothers asymmetrically
+(sector composition plus school closures). They do not take a stand on whether WFH exposure
+specifically offsets or compounds this asymmetry. This paper is designed to adjudicate empirically
+between these two directions using post-acute-period (2021--2023) data, rather than the
+initial-shock period that most of this literature studies.
+
 \paragraph{Measuring who can work from home.}
 \citet{dingel2020} classify occupations by whether their tasks can be performed entirely at home,
 using O*NET task content, and find that 37\% of US jobs can be done from home. Their occupational
 classification, mapped to the two-digit ISCO-08 codes in the CBS data, is the starting point for
 our WFH-exposure index. As Section~\ref{sec:data} explains, however, a US task-based measure
 misclassifies occupations where Israeli institutional practice diverged from what the tasks would
-predict, and we therefore calibrate it against realized Israeli behavior.
+predict, and we therefore calibrate it against realized Israeli behavior. For the Israeli labor
+market specifically, \citet{yaish2021} document that the 2020 lockdown reallocated paid and unpaid
+labor within dual-earner households in gender-unequal ways. \citet{madhala2021} provide a
+descriptive occupation-level baseline of WFH feasibility among Israeli workers.
+\citet{buzaglo2023} shows that within-firm sorting, not occupation choice alone, is a first-order
+driver of the Israeli gender wage gap. This is a reminder that any occupation-based exposure
+measure captures only part of the relevant heterogeneity.
 
 \paragraph{Remote work and the motherhood penalty.}
 The paper closest to ours is \citet{harrington2025}, who show for the United States that the rise
@@ -160,7 +189,9 @@ contribution is threefold: a different country with a distinctive combination of
 and high productivity; a different and, in the child-penalty literature, central margin --- hours
 conditional on employment --- with an explicit correction for the selection problem that
 conditioning on employment creates; and an exposure measure calibrated to Israeli practice rather
-than imported from US task content.
+than imported from US task content. Because the data span both pre- and multiple post-COVID years,
+they also allow separate identification of extensive- and intensive-margin responses --- a
+distinction the WFH-and-gender literature above largely does not draw.
 
 \paragraph{Identification.}
 The triple-differences estimator we use for the mechanism test is analyzed formally by
@@ -208,8 +239,11 @@ discussed next.
 
 \subsection{Constructing WFH exposure}\label{sec:exposure}
 
-The mechanism test requires an occupation-level measure of how exposed each job is to remote work.
-We build it in three steps, each producing a measure that is reported.
+Since realized WFH status is itself a labor-market outcome --- jointly determined with employment
+and hours --- causal designs need a measure of WFH \emph{exposure} that is not chosen by the
+individual whose hours are being modeled. The mechanism test therefore requires an
+occupation-level measure of how exposed each job is to remote work. We build it in three steps,
+each producing a measure that is reported.
 
 \emph{External.} The \citet{dingel2020} teleworkability score, via an O*NET/SOC-to-ISCO crosswalk,
 at the two-digit ISCO-08 level. This is pre-period by construction and immune to Israel's own
@@ -252,6 +286,16 @@ coefficients as if they were on a common scale.
 %======================================================================
 \section{Empirical Strategy}\label{sec:strategy}
 %======================================================================
+
+\subsection{Hypotheses}
+
+Two hypotheses follow directly from the flexibility framework in \citet{goldin2014} and the mixed
+empirical record above. \textbf{H1 (extensive margin):} occupational WFH exposure raises mothers'
+employment probability relative to other workers after 2021, if flexibility relaxes a binding
+participation constraint. \textbf{H2 (intensive margin):} even absent a detectable
+extensive-margin effect, WFH exposure raises mothers' hours conditional on employment, if the
+participation margin is structurally protected (e.g., by a furlough regime) while hours remain the
+flexible margin of adjustment.
 
 \subsection{Difference-in-differences}
 
@@ -387,7 +431,10 @@ rate of $0.7737$ and roughly 8--10 times the point estimates. Moving a mother fr
 most exposed cell would have to change her relative post-2021 employment probability by a quarter
 of the baseline employment rate before this design could see it. That is not a plausible effect
 size for a labor-supply mechanism, so the null here is \emph{uninformative}: the employment DDD
-cannot be read as evidence for or against a WFH-mediated employment effect.
+cannot be read as evidence for or against a WFH-mediated employment effect. The
+$\Post \times \WFH$ main effect, by contrast, is negative and significant in both specifications
+($-0.1555$\sym{**} and $-0.1516$\sym{**}). This indicates a general post-2021 employment decline in
+high-exposure cells that is unrelated to motherhood specifically.
 
 This is not for want of a working exposure measure. The cell-based index strongly predicts realized
 post-period WFH: a first-stage regression of the reference-week WFH indicator on exposure in the
@@ -760,7 +807,18 @@ results are coherent: the effect operates on \emph{how much} mothers who stay em
 as a leading channel of the child penalty. This is also where our findings depart from
 \citet{harrington2025}: their US evidence is on employment and income, and we cannot confirm or
 reject an employment effect in Israel with this design; what we can say is that the intensive
-margin responds, and that it responds through remote work.
+margin responds, and that it responds through remote work. A purely statistical account is not
+mutually exclusive: the extensive-margin DDD requires an implausibly large true effect (on the
+order of a quarter of the baseline employment rate) to be detectable at all. The continuous hours
+outcome, by contrast, carries strictly more information per observation and is correspondingly
+better powered to detect an effect of realistic magnitude. One institutional account is also
+consistent with this pattern: Israel's furlough (\textit{Halat}) system preserves the formal
+employment relationship through disruption at comparatively low cost to the worker. Labor-supply
+adjustment is thus likely to occur first, or exclusively, on the less costly margin --- hours ---
+before reaching the more costly margin of exiting employment altogether. If this interpretation is
+correct, it carries a direct policy implication: expanding WFH availability should be evaluated as
+a lever for improving the quality and intensity of employment among mothers already in the labor
+force, rather than as an instrument expected to raise labor-force participation.
 
 The subgroup results are more modest than the point estimates suggest. The Jewish-women estimate
 carries the pooled result. The Arab-women estimate is larger but imprecise, statistically
