@@ -26,7 +26,7 @@ $$Y_{it} = \beta_0 + \beta_1 \cdot \text{Mother}_i + \beta_2 \cdot \text{Post}_t
 - **Mother**: 1 for women with a child under 17 (treatment group); 0 for childless women (control group).
 - **Post**: 1 for 2021–2023 (post-shift), 0 for 2017–2019 (baseline); 2020 is excluded as a transitional year.
 - **β₃**: the DiD estimator — the differential post-shift change in outcomes for mothers vs. childless women. For the primary (hours) specification, a significant positive β₃ indicates a narrowing of the penalty on the intensive margin; the same estimator on the secondary (employment) specification indicates a narrowing extensive-margin penalty.
-- **X'**: controls (education, age group, marital status, religiosity, district — see `DEFAULT_CONTROLS` below); errors are clustered by individual (`IDPUF`).
+- **X'**: controls (education, age group, marital status, religion, district — see `DEFAULT_CONTROLS` below); errors are clustered by individual (`IDPUF`).
 
 The secondary (employment) regression is estimated on the full pooled sample and separately for Jewish and Arab women (`Leom == 1` / `Leom == 2`), to check whether the effect differs by population group.
 
@@ -134,7 +134,7 @@ Runs the `testthat` suite in `tests/testthat/` (data processing, validation, sch
 | `WorksOutsideLocality` | `1` if she commutes outside her locality of residence for work, derived from `DargatNayadut`; used in comparative statistics only, not as a regression control. |
 | `MishlachYad_ISCO_08_2` | 2-digit ISCO-08 occupation code; the join key for the WFH-exposure index and DDD regression. |
 
-`DEFAULT_CONTROLS` (defined once in `scripts/data_processing.R`, reused by `basic_regression.R`, `basic_reg_compared_data.R`, `intensive_margin_regression.R`, `employment_by_child_age.R`, `Diagnostics.R`, `hours_diagnostics.R`, and `hours_ddd_regression.R`): `MatzavMishpachti` (marital status), `Dat` (religiosity), `GilNK` (age group), `MachozMegurim` (district of residence), `TeudaGvoha` (education) — all treated as categorical factors.
+`DEFAULT_CONTROLS` (defined once in `scripts/data_processing.R`, reused by `basic_regression.R`, `basic_reg_compared_data.R`, `intensive_margin_regression.R`, `employment_by_child_age.R`, `Diagnostics.R`, `hours_diagnostics.R`, and `hours_ddd_regression.R`): `MatzavMishpachti` (marital status), `Dat` (religion of the household head, per the CBS codebook: Jewish / Christian / Muslim / Druze / other — not religiosity), `GilNK` (age group), `MachozMegurim` (district of residence), `TeudaGvoha` (education) — all treated as categorical factors.
 
 ## Outputs
 
