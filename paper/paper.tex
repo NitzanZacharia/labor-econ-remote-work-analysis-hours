@@ -277,11 +277,15 @@ women ($0.7828$ versus $0.7574$) but work \emph{fewer} hours when they are ($37.
 $39.38$), so the penalty this paper studies is visible in the raw data on the intensive margin and
 runs the other way on the extensive one. And mothers are the better-educated group, with $47.97\%$
 holding an academic degree against $40.24\%$ of childless women, which is why the controls matter:
-the unconditional hours gap understates the conditional one. The two groups are also imbalanced on
-age, mothers sitting about $0.44$ of an age-group code younger, an imbalance Section~\ref{sec:results}
-returns to because it tracks WFH exposure.
+the unconditional hours gap understates the conditional one. The largest single difference is
+marital status: $84.57\%$ of mothers are married against $46.55\%$ of childless women, with the
+single, never-married share running the other way ($5.90\%$ versus $34.00\%$), so marital status
+does real work as a control. The two groups are also imbalanced on age, mothers sitting about
+$0.44$ of an age-group code younger, an imbalance Section~\ref{sec:results} returns to because it
+tracks WFH exposure. Religion and district are close to balanced, the one visible tilt being that
+mothers are more concentrated in Jerusalem and Judea and Samaria and less in Tel Aviv.
 
-All regressions include the same set of categorical controls: marital status, religiosity,
+All regressions include the same set of categorical controls: marital status, religion,
 age group, district of residence, and highest educational attainment (six groups). Age enters as
 the categorical CBS age-group code because the extract contains no continuous age or birth-year
 variable. CBS survey weights are deliberately not applied in any outcome regression; all reported
@@ -290,8 +294,14 @@ statistics (see Section~\ref{sec:limitations}).
 
 \begin{table}[htbp]
 \centering
+% Single-spaced and \small: this is the one float with ~35 body rows, and at the document's
+% one-and-a-half spacing it overflows the page by about 32pt. setspace's \singlespacing did not
+% take inside this float, so the stretch is reset directly; a stretch only becomes active at the
+% next font-size selection, which is what the \small does. Local to the float. Single spacing is
+% also the conventional look for a summary-statistics table.
 \begin{threeparttable}
 \caption{Summary statistics: women aged 25--59, by mother status}\label{tab:descriptives}
+\renewcommand{\baselinestretch}{1}\small
 \begin{tabular}{lccc}
 \toprule
  & Childless women & Mothers & Difference \\
@@ -306,6 +316,29 @@ Usual weekly hours (employed), mean & 39.38 & 37.63 & $-1.76$ \\
 Age-group code (CBS 3--7), mean & 5.40 & 4.96 & $-0.44$ \\
 Arab (\%) & 17.73 & 17.78 & $0.05$ \\
 \addlinespace
+\emph{Marital status (\%)} & & & \\
+\quad Married & 46.55 & 84.57 & $38.02$ \\
+\quad Married, living separately & 3.58 & 0.84 & $-2.74$ \\
+\quad Divorced & 13.13 & 7.70 & $-5.42$ \\
+\quad Widowed & 2.75 & 0.99 & $-1.76$ \\
+\quad Single, never married & 34.00 & 5.90 & $-28.10$ \\
+\addlinespace
+\emph{Religion of household head (\%)} & & & \\
+\quad Jewish & 73.08 & 79.50 & $6.42$ \\
+\quad Christian & 7.12 & 2.23 & $-4.89$ \\
+\quad Muslim & 13.78 & 14.89 & $1.11$ \\
+\quad Druze & 1.88 & 1.64 & $-0.24$ \\
+\quad Other & 4.15 & 1.75 & $-2.40$ \\
+\addlinespace
+\emph{District of residence (\%)} & & & \\
+\quad Jerusalem & 8.76 & 12.31 & $3.56$ \\
+\quad North & 17.52 & 16.58 & $-0.94$ \\
+\quad Haifa & 14.38 & 11.92 & $-2.45$ \\
+\quad Center & 23.99 & 26.52 & $2.53$ \\
+\quad Tel Aviv & 21.55 & 14.90 & $-6.65$ \\
+\quad South & 11.66 & 12.37 & $0.72$ \\
+\quad Judea and Samaria & 2.15 & 5.39 & $3.24$ \\
+\addlinespace
 \emph{Education (\%)} & & & \\
 \quad Below high school & 11.37 & 6.63 & $-4.74$ \\
 \quad High school, no matriculation & 12.70 & 11.95 & $-0.74$ \\
@@ -318,12 +351,14 @@ Arab (\%) & 17.73 & 17.78 & $0.05$ \\
 \begin{tablenotes}\small
 \item Israeli CBS Labor Force Survey, survey years 2017--2019 and 2021--2023, women aged 25--59.
 A woman is a mother if she has any child under 17 in the household. Weekly hours are conditional
-on employment; the standard deviation is in brackets. Education percentages sum to 100 within each
-column. The difference column is mothers minus childless women. All figures are \emph{unweighted}
-counts on the analysis sample and are not population-representative (Section~\ref{sec:limitations}).
-Marital status, religion and district enter every regression as controls but are omitted here: the
-extract carries them only as unlabelled numeric CBS codes. Their full composition by mother status
-is reported in the replication output.
+on employment; the standard deviation is in brackets. Within each categorical block, percentages
+sum to 100 in each column. The difference column is mothers minus childless women. All figures are
+\emph{unweighted} counts on the analysis sample and are not population-representative
+(Section~\ref{sec:limitations}). The Arab share is the CBS population-group code, the variable
+used for the subgroup analysis; religion is a separate CBS item recorded for the household head.
+Level labels for marital status, religion and district follow the CBS codebook that accompanies
+the extract. Marital status, religion, district, age group and education are the five controls in
+every regression.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
@@ -377,7 +412,7 @@ adapt, and if adaptation was uneven a 2021-based index could rank occupations di
 For the employment-outcome DDD, occupation is undefined for the non-employed, so an
 occupation-level regressor would condition the outcome on itself. That specification therefore
 uses a fourth measure: a pre-period (2017--2019) shift-share index by demographic cell (sex, age
-group, education, district, marital status, religiosity, and continent of birth --- 8,884 cells),
+group, education, district, marital status, religion, and continent of birth --- 8,884 cells),
 equal to the weighted mean of the calibrated occupation score over the cell's pre-period
 occupational composition. It is defined for employed and non-employed women alike. The two DDDs
 thus use \emph{different} exposure measures, and we are careful never to compare their
@@ -484,7 +519,7 @@ women and separately for Jewish and Arab women. The DiD coefficient is $-0.0053$
 the pooled sample: the mother/non-mother employment gap did not change after the shift to remote
 work. The estimate is precise --- its standard error is about half a percentage point --- so this
 is a tight null on the extensive margin, not an uninformative one. The stratified estimates are $-0.0041$ (SE $0.0058$) for Jewish women and
-$-0.0208$ (SE $0.0138$) for Arab women, neither significant.\footnote{The religiosity control
+$-0.0208$ (SE $0.0138$) for Arab women, neither significant.\footnote{The religion control
 (\texttt{Dat}) is not identified within the Jewish-only subsample and enters with fewer categories
 in the Arab-only subsample, so the effective control set differs slightly across the stratified
 models.} Employment rose in the post-period for all women ($\Post = 0.0153$\sym{***} pooled), and
@@ -512,7 +547,7 @@ $R^2$ & 0.22689 & 0.04336 & 0.24314 \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}\small
-\item Dependent variable: employment indicator. Controls: marital status, religiosity, age group,
+\item Dependent variable: employment indicator. Controls: marital status, religion, age group,
 district, education. Standard errors clustered by individual. Jewish/Arab samples defined by the
 CBS population-group code.
 \end{tablenotes}

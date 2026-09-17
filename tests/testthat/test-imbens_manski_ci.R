@@ -27,17 +27,35 @@ test_that("delta > 0 solves the documented Imbens-Manski (2004) defining equatio
   delta <- theta_U - theta_L
   denom <- max(se_L, se_U)
   reference_target <- function(c) pnorm(c + delta / denom) - pnorm(-c) - conf_level
-  expected_c_alpha <- uniroot(reference_target, interval = c(0, 20))$root
+  # The reference must be at least as precise as the 1e-6 comparison below; uniroot's default
+  # tolerance (~1e-4) is not, which is exactly the defect the function itself was fixed for.
+  expected_c_alpha <- uniroot(reference_target, interval = c(0, 20), tol = 1e-12)$root
 
   ci <- imbens_manski_ci(theta_L, theta_U, se_L, se_U, conf_level)
 
   expect_equal(ci$c_alpha, expected_c_alpha, tolerance = 1e-6)
   expect_equal(ci$lower, theta_L - expected_c_alpha * se_L, tolerance = 1e-6)
   expect_equal(ci$upper, theta_U + expected_c_alpha * se_U, tolerance = 1e-6)
-  # A real excess-selection case: the returned c_alpha must be strictly larger than the ordinary
-  # (delta == 0) z-value -- the whole point of the Imbens-Manski correction is a wider interval
-  # than treating theta_L/theta_U as if they had no partial-identification gap between them.
-  expect_gt(ci$c_alpha, qnorm(1 - (1 - conf_level) / 2))
+  # A real excess-selection case: Imbens & Manski's c_alpha lies strictly BETWEEN the one-sided
+  # z (qnorm(1 - alpha)) and the two-sided z (qnorm(1 - alpha/2)). It is smaller than the ordinary
+  # two-sided value, not larger -- the correction widens the interval relative to putting the
+  # one-sided z on each endpoint, which is what treating each bound in isolation would justify.
+  # At delta/denom = 1 the value is about 1.68.
+  expect_lt(ci$c_alpha, qnorm(1 - (1 - conf_level) / 2))
+  expect_gt(ci$c_alpha, qnorm(conf_level))
+})
+
+test_that("c_alpha decreases monotonically from the two-sided z toward the one-sided z as delta grows", {
+  # Pins the direction of the correction so the 'wider than two-sided z' misconception cannot
+  # return: delta/denom = 0 gives exactly qnorm(0.975); increasing delta drives c_alpha down
+  # toward qnorm(0.95), never below it.
+  ratios  <- c(0, 0.1, 0.5, 1, 2, 4)
+  c_alpha <- vapply(ratios, function(r) imbens_manski_ci(0, r, 1, 1, 0.95)$c_alpha, numeric(1))
+
+  expect_equal(c_alpha[1], qnorm(0.975))
+  expect_true(all(diff(c_alpha) < 0))
+  expect_true(all(c_alpha[-1] > qnorm(0.95)))
+  expect_true(all(c_alpha[-1] < qnorm(0.975)))
 })
 
 test_that("delta > 0 with asymmetric SEs still solves the defining equation (denom = max(se_L, se_U))", {
@@ -45,7 +63,9 @@ test_that("delta > 0 with asymmetric SEs still solves the defining equation (den
   delta <- theta_U - theta_L
   denom <- max(se_L, se_U)
   reference_target <- function(c) pnorm(c + delta / denom) - pnorm(-c) - conf_level
-  expected_c_alpha <- uniroot(reference_target, interval = c(0, 20))$root
+  # The reference must be at least as precise as the 1e-6 comparison below; uniroot's default
+  # tolerance (~1e-4) is not, which is exactly the defect the function itself was fixed for.
+  expected_c_alpha <- uniroot(reference_target, interval = c(0, 20), tol = 1e-12)$root
 
   ci <- imbens_manski_ci(theta_L, theta_U, se_L, se_U, conf_level)
 

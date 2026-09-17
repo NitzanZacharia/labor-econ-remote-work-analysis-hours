@@ -99,6 +99,31 @@ build_descriptive_table <- function(cleaned_df) {
       mutate(pct_difference = pct_mother1 - pct_mother0)
   }
 
+  # Level labels for the three controls the extract carries only as numeric CBS codes. Source:
+  # H20231031Codebook.xlsx, shipped alongside the raw CBS CSVs (sheet "H20231031Codebook":
+  # column F = variable, C = code, B = Hebrew label). The same parse reproduces
+  # data_processing.R's TeudaGvoha grouping code for code, which is what validates the alignment.
+  # English rendering confirmed by the authors, 2026-09-17. Dat is the religion of the household
+  # head -- religion, not religiosity. TeudaGvoha is already labelled by data_processing.R, so
+  # its level is its label; anything unmapped falls back to the raw code rather than NA.
+  code_labels <- list(
+    MatzavMishpachti = c(`1` = "Married", `2` = "Married, living separately", `3` = "Divorced",
+                         `4` = "Widowed", `5` = "Single, never married"),
+    Dat              = c(`1` = "Jewish", `2` = "Christian", `3` = "Muslim", `4` = "Druze",
+                         `5` = "Other"),
+    MachozMegurim    = c(`1` = "Jerusalem", `2` = "North", `3` = "Haifa", `4` = "Center",
+                         `5` = "Tel Aviv", `6` = "South", `7` = "Judea and Samaria")
+  )
+  label_for <- function(v, l) {
+    lk <- code_labels[[v]]
+    if (is.null(lk)) return(l)
+    out <- unname(lk[l])
+    if (is.na(out)) l else out
+  }
+  categorical <- categorical %>%
+    mutate(level_label = map2_chr(variable, level, label_for)) %>%
+    relocate(level_label, .after = level)
+
   message("=== Descriptive statistics: categorical composition, by mother status ===")
   print(as.data.frame(categorical), digits = 4)
 

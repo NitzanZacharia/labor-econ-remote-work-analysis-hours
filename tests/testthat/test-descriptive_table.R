@@ -81,6 +81,32 @@ test_that("each group's categorical composition sums to 100 percent within a var
   }
 })
 
+test_that("coded controls carry the confirmed CBS codebook labels", {
+  out <- capture.output(res <- build_descriptive_table(cleaned))
+  ct <- res$categorical
+
+  expect_true("level_label" %in% names(ct))
+  expect_true(all(nzchar(ct$level_label)))
+  expect_false(any(is.na(ct$level_label)))
+
+  labs <- function(v) unique(ct$level_label[ct$variable == v])
+  expect_true(all(labs("MatzavMishpachti") %in%
+    c("Married", "Married, living separately", "Divorced", "Widowed", "Single, never married")))
+  expect_true(all(labs("Dat") %in% c("Jewish", "Christian", "Muslim", "Druze", "Other")))
+  expect_true(all(labs("MachozMegurim") %in%
+    c("Jerusalem", "North", "Haifa", "Center", "Tel Aviv", "South", "Judea and Samaria")))
+
+  # Spot-check the two codes whose sample shares corroborate the mapping independently.
+  m1 <- ct$level_label[ct$variable == "MatzavMishpachti" & ct$level == "1"]
+  if (length(m1)) expect_equal(m1, "Married")
+  d1 <- ct$level_label[ct$variable == "Dat" & ct$level == "1"]
+  if (length(d1)) expect_equal(d1, "Jewish")
+
+  # Education is labelled upstream by data_processing.R: its label is its level.
+  edu <- ct[ct$variable == "TeudaGvoha", ]
+  expect_equal(edu$level_label, edu$level)
+})
+
 test_that("the categorical panel covers the control set minus GilNK", {
   out <- capture.output(res <- build_descriptive_table(cleaned))
 
