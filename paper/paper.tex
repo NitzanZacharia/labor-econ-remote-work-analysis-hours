@@ -122,6 +122,17 @@ direct replication of their US finding: we also estimate the employment margin, 
 reasons of statistical power that we document rather than paper over --- that specification is
 secondary.
 
+The question carries both scientific and policy significance. Scientifically, the sudden, large,
+and plausibly exogenous shift in the location of work constitutes a rare natural experiment in
+workplace flexibility. This is the very margin that \citet{goldin2014} identifies as the last
+major driver of the remaining gender pay gap in developed labor markets. Temporal and locational
+flexibility is a good mothers may pay for, in the form of lower wages or slower promotion. A shock
+that lowers the cost of supplying flexibility should, in principle, be detectable in mothers'
+labor-supply choices --- and, for mothers already employed, most directly in how many hours they
+supply. Unlike the acute, transitory disruption of 2020, WFH has proven to be a persistent feature
+of the post-pandemic labor market rather than a temporary accommodation \citep{barrero2021}. This
+renders the question policy-relevant rather than merely historical.
+
 The policy stakes are particularly high in Israel, which combines a highly productive,
 internationally integrated labor market with the OECD's highest total fertility rate. A labor
 market that induces mothers of young children to reduce employment or hours imposes a substantial
@@ -136,10 +147,7 @@ exposure'' should be measured and is one of the methodological contributions bel
 
 Our research design exploits the pandemic as the moment at which remote work became a mainstream
 labor-market practice. Before 2020, working from home accounted for roughly 5\% of workdays; after
-the pandemic it accounted for 25--30\%. Unlike the acute, transitory disruption of 2020, WFH has
-proven to be a persistent feature of the post-pandemic labor market rather than a temporary
-accommodation \citep{barrero2021}. This renders the question policy-relevant rather than merely
-historical. We therefore compare mothers and childless women across a
+the pandemic it accounted for 25--30\%. We therefore compare mothers and childless women across a
 pre-period of 2017--2019 and a post-period of 2021--2023, excluding 2020 as a transitional year of
 emergency, ad hoc arrangements that reflect improvisation rather than the settled remote-work
 practices whose effect we want to measure. (A second, practical reason is that no 2020 CBS extract
@@ -168,8 +176,8 @@ marginally significant).
 
 The remainder of the paper proceeds as follows. Section~\ref{sec:lit} places the question in the
 literature. Section~\ref{sec:data} describes the data, the sample, and the construction of the WFH
-exposure measures. Section~\ref{sec:strategy} sets out the DiD and DDD specifications and the
-selection correction. Section~\ref{sec:results} reports the results, moving from the extensive to
+exposure measures. Section~\ref{sec:strategy} states the hypotheses and sets out the DiD and DDD specifications and
+the selection correction. Section~\ref{sec:results} reports the results, moving from the extensive to
 the intensive margin. Sections~\ref{sec:discussion}--\ref{sec:limitations} interpret the findings
 and state their limitations, and Section~\ref{sec:conclusion} concludes.
 
@@ -195,7 +203,11 @@ intensive margin even where it does not move employment.
 jobs rather than on human capital: occupations that reward long, particular, and inflexible hours
 --- where the marginal return to being physically present at a specific time is high --- carry the
 largest gender gaps, and the gap would shrink if firms did not disproportionately reward temporal
-inflexibility. Remote work is, in this reading, precisely a change in temporal flexibility. It
+inflexibility. Workers who need temporal flexibility --- disproportionately mothers --- pay a wage
+penalty for it. This framework generates a sharp, testable prediction: an exogenous change that
+lowers the cost of supplying flexibility should differentially help mothers, either by raising
+their employment probability, their hours, or both. Remote work is, in this reading, precisely
+such a change in temporal flexibility. It
 lowers commute friction, allows a virtual presence in demanding professions, and may reduce the
 stigma attached to a mother's physical availability. It may also cut the other way, through lower
 visibility and slower advancement. Which effect dominates is an empirical question, and Goldin's
@@ -242,7 +254,10 @@ conditional on employment --- with an explicit correction for the selection prob
 conditioning on employment creates; and an exposure measure calibrated to Israeli practice rather
 than imported from US task content. Because the data span both pre- and multiple post-COVID years,
 they also allow separate identification of extensive- and intensive-margin responses --- a
-distinction the WFH-and-gender literature above largely does not draw.
+distinction the WFH-and-gender literature above largely does not draw. And because the exposure
+measure is built from pre-determined occupational content rather than realized WFH status, it
+avoids the reverse-causality problem inherent in treating self-reported WFH as an explanatory
+variable for hours.
 
 \paragraph{Identification.}
 The triple-differences estimator we use for the mechanism test is analyzed formally by
@@ -424,13 +439,14 @@ coefficients as if they were on a common scale.
 
 \subsection{Hypotheses}
 
-Two hypotheses follow directly from the flexibility framework in \citet{goldin2014} and the mixed
-empirical record above. \textbf{H1 (extensive margin):} occupational WFH exposure raises mothers'
-employment probability relative to other workers after 2021, if flexibility relaxes a binding
-participation constraint. \textbf{H2 (intensive margin):} even absent a detectable
-extensive-margin effect, WFH exposure raises mothers' hours conditional on employment, if the
-participation margin is structurally protected (e.g., by a furlough regime) while hours remain the
-flexible margin of adjustment.
+Two hypotheses follow directly from the flexibility framework of \citet{goldin2014} and the mixed
+empirical record reviewed above. \textbf{H1 (intensive margin):} WFH exposure raises mothers'
+hours conditional on employment relative to childless women after 2021, if flexibility relaxes a
+binding time constraint while the participation margin remains the more costly one to adjust.
+\textbf{H2 (extensive margin):} occupational WFH exposure raises mothers' employment probability
+relative to other women after 2021, if flexibility relaxes a binding participation constraint. H1
+is the paper's primary hypothesis; H2 is tested but, for the power reasons documented below, is
+secondary.
 
 \subsection{Difference-in-differences}
 
@@ -959,17 +975,18 @@ as a leading channel of the child penalty. This is also where our findings depar
 \citet{harrington2025}: their US evidence is on employment and income, and we cannot confirm or
 reject an employment effect in Israel with this design; what we can say is that the intensive
 margin responds, and that it responds through remote work. A purely statistical account is not
-mutually exclusive: the extensive-margin DDD requires an implausibly large true effect (on the
-order of a quarter of the baseline employment rate) to be detectable at all. The continuous hours
-outcome, by contrast, carries strictly more information per observation and is correspondingly
-better powered to detect an effect of realistic magnitude. One institutional account is also
+mutually exclusive: the continuous hours outcome carries strictly more information per
+observation than a binary employment indicator and is correspondingly better powered to detect an
+effect of realistic magnitude. One institutional account is also
 consistent with this pattern: Israel's furlough (\textit{Halat}) system preserves the formal
 employment relationship through disruption at comparatively low cost to the worker. Labor-supply
 adjustment is thus likely to occur first, or exclusively, on the less costly margin --- hours ---
-before reaching the more costly margin of exiting employment altogether. If this interpretation is
-correct, it carries a direct policy implication: expanding WFH availability should be evaluated as
-a lever for improving the quality and intensity of employment among mothers already in the labor
-force, rather than as an instrument expected to raise labor-force participation.
+before reaching the more costly margin of exiting employment altogether. We offer this as a
+conjecture rather than a tested claim: the employment indicator used here counts furloughed
+workers as employed, so the design cannot separate the two. If the pattern holds, the policy
+reading is that WFH availability matters mainly for how intensively mothers who already hold jobs
+can work, not for whether they hold them --- which is where our evidence speaks, and where it
+does not.
 
 The subgroup results are more modest than the point estimates suggest. The Jewish-women estimate
 carries the pooled result. The Arab-women estimate is larger but imprecise, statistically
@@ -1027,7 +1044,12 @@ single move any robustness check produces.
 \paragraph{Inference.}
 The hours DDD clusters on about 40 occupation groups and the employment DDD on about 210
 demographic cells; no small-cluster correction is applied. The same person can in principle
-contribute observations to both the pre- and post-period. Occupation codes masked by the CBS for
+contribute observations to both the pre- and post-period, but an individual-level panel
+fixed-effects design was considered and rejected: only 1.9\% of sampled individuals are
+re-interviewed across the pre/post boundary, far too few for within-person identification to be
+credible.
+% [VERIFY] 1.9% is console output of check_idpuf_panel_structure() (scripts/validation.R); not exported to outputs/.
+Occupation codes masked by the CBS for
 disclosure control are dropped when building exposure; a proxy check finds no strong evidence that
 this biases the exposure measure, though that is weak rather than conclusive evidence. The
 calibrated exposure measure uses post-period (2022--23) realized data, as noted.
