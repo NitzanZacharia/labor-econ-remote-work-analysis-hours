@@ -473,7 +473,12 @@ called unconditionally by `main.R` and exports `outputs/gender_placebo_did_table
 `gender_placebo_ddd_table.csv`. Results, men with `Mother` read as `Father`: DiD
 `Mother:Post` = 0.0077 (SE 0.0054); DDD `Mother:Post:WFH_Exposure` = 0.0444 (SE 0.0833) additive
 and 0.0661 (SE 0.0849) with cell FE. All insignificant, which is the direction a placebo should
-go. **Not currently reported in the paper**, which reports the hours placebo only; note that the
+go. **Decided 2026-09-19: deliberately NOT reported in the paper.** The hours placebo does the
+falsification work for the primary specification, and the employment placebo sits on a margin the
+paper itself establishes as underpowered (§2.3), so reporting its null as corroboration would
+repeat, in the placebo, the error the paper is careful to avoid in the main result. The artifacts
+are kept in `outputs/` for completeness and because the pipeline produces them; their absence from
+the paper is a choice, not an oversight. Note that the
 employment DDD is underpowered in its own right (§2.3), so a null placebo on that margin is
 uninformative in the same way the main employment DDD is, and should not be presented as
 corroboration without that caveat.

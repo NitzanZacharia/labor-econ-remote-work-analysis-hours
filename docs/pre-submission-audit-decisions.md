@@ -14,9 +14,22 @@ complete outstanding list; everything else in this register is either resolved o
 | D1 | The Conclusion | Author writes it last | Replace the skeleton block at `paper/paper.tex` with your own prose, and delete the banner |
 | D2 | Furlough sentence | Author is checking for a CBS source | Either the citation, or the reworded sentence in the D2 entry below |
 | D5 | Crosswalk provenance | Author is tracing where the file came from | See `docs/open-question-wfh-crosswalk-provenance.md` |
-| D15 | Null-placebo caveat | New, see below | Decide whether the employment placebo enters the paper, and with what caveat |
+| ~~D15~~ | ~~Null-placebo caveat~~ | **CLOSED 2026-09-19** | Decided: leave it out, keep only the hours placebo. See below. |
 
-### D15. The employment placebo's null is underpowered, not informative
+### D15. The employment placebo's null is underpowered, not informative — CLOSED
+
+**Decision, 2026-09-19: leave it out of the paper; keep only the hours placebo.** No change to
+`paper.tex` was needed — every placebo reference there already scopes to the hours DDD, and the
+Empirical Strategy section states that explicitly. The artifacts stay in `outputs/` because the
+pipeline produces them, and `results_digest.md` §3.4 now records that their absence from the paper
+is a deliberate choice rather than an oversight, which matters because the repository is graded.
+
+Two things also changed the picture after this was first written. The power claim was rescaled
+(see the active task above), so the employment margin is underpowered by a factor of roughly two
+to three rather than eight to ten. And the paper's own placebo section is unambiguous about which
+outcome it uses. Both make leaving it out the cleaner choice rather than a gap.
+
+The original analysis follows, for the record.
 
 Wired in on 2026-09-19 and now exported as `outputs/gender_placebo_{did,ddd}_table.csv`.
 Estimates, men with `Mother` read as `Father`: DiD $0.0077$ (SE $0.0054$); DDD $0.0444$
