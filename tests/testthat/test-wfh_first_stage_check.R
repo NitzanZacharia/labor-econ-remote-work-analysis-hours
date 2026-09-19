@@ -1,6 +1,6 @@
 # test-wfh_first_stage_check.R
 # Unit tests for check_wfh_first_stage_relevance() (scripts/wfh_first_stage_check.R). Builds a
-# self-contained synthetic panel (following test-primary_ddd_mechanics.R's make_ddd_panel pattern:
+# self-contained synthetic panel (following test-employment_ddd_mechanics.R's make_ddd_panel pattern:
 # a pre-period 2017-2019 slice run through the real build_exposure_cells() pipeline, then a
 # post-period panel joined back to it by cell) with a WFH_RefWeek outcome constructed to have a
 # known relationship to WFH_Exposure, so the level and dynamic specs can be checked against a

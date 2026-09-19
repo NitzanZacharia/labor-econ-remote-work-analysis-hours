@@ -79,7 +79,7 @@ unexpected drop in Spec 2, including this one, rather than silently whitelisting
   Comments at the top of §8a and around the collinearity/clustering rationale were rewritten to
   describe the new, deliberately-finer design instead of the old aliased one.
 - **A latent fan-out bug was found and fixed while implementing this**: `robustness/balance_test.R`,
-  `robustness/age_balance_robustness.R`, and `robustness/phase2_robustness.R` all receive
+  `robustness/age_balance_robustness.R`, and `robustness/phase2_robustness.R` (since removed) all receive
   `main.R`'s `exposure_cells` as a parameter and hardcoded the *old* 4-variable join key
   internally. Left unfixed, passing the new 6-variable `exposure_cells` into any of them (e.g. via
   `RUN_AGE_BALANCE_ROBUSTNESS`) would have silently fanned out rows (multiple `exposure_cells` rows
@@ -91,7 +91,7 @@ unexpected drop in Spec 2, including this one, rather than silently whitelisting
   separate, self-consistent 4-variable `exposure_cells_men` and was left untouched — it isn't
   fed `main.R`'s `exposure_cells`, so there's no fan-out risk there, only a (pre-existing,
   out-of-scope) design difference from the primary spec.
-- `tests/testthat/test-primary_ddd_mechanics.R`: added a new synthetic-panel test asserting the
+- `tests/testthat/test-employment_ddd_mechanics.R`: added a new synthetic-panel test asserting the
   opposite of the existing "Spec 2 drops WFH_Exposure" test — with exposure cells genuinely finer
   than the FE, `WFH_Exposure`'s main effect now survives. The original test is kept unmodified; it
   still correctly documents the general aliasing mechanism whenever exposure cells match the FE
@@ -196,7 +196,7 @@ regression control or FE dimension, only part of the exposure-cell definition). 
 already derives its key from `exposure_cell_vars` (a variable, not a hardcoded list, from the
 original fix), so no separate join-key edit was needed — confirms that design choice was the right
 one. The robustness-chain files (`balance_test.R`, `age_balance_robustness.R`,
-`phase2_robustness.R`) already derive their join key dynamically from `exposure_cells`'s own
+`phase2_robustness.R`, since removed) already derive their join key dynamically from `exposure_cells`'s own
 columns (also from the original fix), so they needed no changes either — confirmed by re-running
 `RUN_AGE_BALANCE_ROBUSTNESS` end-to-end against real data.
 

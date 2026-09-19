@@ -22,7 +22,7 @@ classic bug hypotheses — miscoded `Mother`/`Post`/`Employed`, bad merges, unin
 collinearity — for the primary DDD (see `main.R`'s own comments at lines ~184-249 and
 `scripts/ddd_collinearity_diagnostics.R`). `WFH_Exposure`'s main-effect drop in Spec 2 is
 confirmed to be the intended, documented, unit-tested mechanism by which a shift-share regressor's
-collinearity with its own cell-defining controls is resolved (`test-primary_ddd_mechanics.R`), not
+collinearity with its own cell-defining controls is resolved (`test-employment_ddd_mechanics.R`), not
 a defect. That left one open question: **does this design have enough identifying variation to
 detect a real effect, or is the null genuine?** This memo answers that question with two new
 diagnostics.

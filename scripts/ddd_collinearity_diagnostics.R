@@ -62,7 +62,7 @@ check_spec1_collinearity <- function(ddd_df, cell_fe_vars, controls) {
 #
 # expected_drops lets a caller name variables it ALREADY KNOWS will be dropped by design (e.g.
 # main.R's Spec 2: WFH_Exposure's bare main effect is intentionally collinear with the interacted
-# cell FE -- see main.R's own comment and test-primary_ddd_mechanics.R). Only UNEXPECTED drops
+# cell FE -- see main.R's own comment and test-employment_ddd_mechanics.R). Only UNEXPECTED drops
 # trigger a warning; warning(), not stop(), since killing the whole main.R run over one collinear
 # coefficient in a robustness spec would be disproportionate -- matches this codebase's existing
 # non-destructive convention (e.g. calibrate_isco_exposure() keeps a theoretical value rather than
