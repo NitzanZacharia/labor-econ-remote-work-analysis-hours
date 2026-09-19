@@ -1080,30 +1080,72 @@ calibrated exposure measure uses post-period (2022--23) realized data, as noted.
 \section{Conclusion}\label{sec:conclusion}
 %======================================================================
 
-% DRAFT CONCLUSION -- DO NOT SUBMIT
-\noindent\textbf{\color{red}[DRAFT CONCLUSION -- FOR SELF-COMPARISON ONLY, NOT FOR SUBMISSION]}
-\begin{quote}\itshape
-This paper asked whether the post-COVID shift to remote work altered the motherhood penalty in
-Israel, extending the question \citet{harrington2025} pose for the United States to a different
-country and to the intensive margin of labor supply. Using CBS Labor Force Survey microdata on
-women aged 25--59 across 2017--2019 and 2021--2023, we find no change in the mother/non-mother
-employment gap and an employment-by-exposure triple difference that is too underpowered to speak to
-the mechanism either way. On hours, by contrast, employed mothers gained about $0.83$ weekly hours
-relative to childless women, and that gain is entirely concentrated in occupations exposed to remote
-work: the triple interaction of $3.41$ hours per unit of exposure is significant at the 0.1\% level,
-robust to a generalized Lee-bounds correction for selection into employment (Imbens--Manski 95\% CI
-$[1.50, 5.21]$), to age-balance adjustments, and to a gender placebo in which fathers show, if
-anything, the opposite pattern. The result is consistent with remote work relaxing the temporal
-inflexibility that Goldin identifies as the last barrier to gender convergence, operating for
-mothers who remain employed in jobs that can actually be done from home. Its limitations are
-equally clear: a 2017 pre-trend anomaly confines the parallel-trends claim to 2018--2019, the
-selection correction handles only excess selection, the exposure measure is anchored a year later
-than planned and partly on post-period data, and the extensive margin remains, for this design, an
-open question rather than a null. The natural next steps are a higher-powered test of the
-employment margin and a jointly estimated model that lets the mechanism differ by sex and
-population group within a single specification.
-\end{quote}
-\textbf{\color{red}[END DRAFT CONCLUSION]}
+% =====================================================================================
+% SKELETON -- NOT SUBMITTABLE TEXT. REPLACE THIS ENTIRE BLOCK WITH YOUR OWN PROSE.
+%
+% The assignment requires this section to be written individually by the student
+% (paper/archive/old_paper.tex:209-213). What follows is deliberately NOT prose: it is a
+% checklist of the claims the verified results actually support, in note form, with the
+% figure and the section where each is established. Write your own sentences from it.
+%
+% The previously-committed model answer was removed on 2026-09-19. If you want it back for
+% self-comparison it is in git history: `git show d662aa3^:paper/paper.tex`.
+%
+% Every figure below was verified against a committed artifact during the pre-submission
+% audit (see docs/pre-submission-audit-decisions.md). Delete this whole block, banner and
+% all, once your text is in.
+% =====================================================================================
+\noindent\textbf{\color{red}[SKELETON ONLY --- REPLACE WITH YOUR OWN TEXT BEFORE SUBMISSION]}
+
+\begin{enumerate}\itshape\small
+\item \textbf{Restate the question and the move.} \citet{harrington2025} for the US; this paper
+takes it to Israel \emph{and} to the intensive margin. Not a replication.
+(Section~\ref{sec:lit}.)
+
+\item \textbf{Extensive margin: two different nulls, do not conflate them.} The employment DiD is
+a \emph{precise} null ($-0.0053$, SE $0.0052$). The employment DDD is \emph{uninformative}, not
+null: MDE $0.2031$, about 26\% of the baseline employment rate and 8--10 times the point estimate
+(Sections~\ref{sec:res-emp-did}--\ref{sec:res-emp-ddd}).
+
+\item \textbf{Intensive margin, the honest two-step.} The plain hours DiD is $0.8261$
+(SE $0.1830$) but does \emph{not} survive the selection correction --- Imbens--Manski
+$[-0.084, 1.612]$ crosses zero. Report it as suggestive, not as the finding
+(Section~\ref{sec:res-hours}).
+
+\item \textbf{The actual result.} Triple interaction $3.407$ (SE $0.9302$, $p<0.001$), which
+\emph{does} survive the generalized correction: Imbens--Manski $[1.5035, 5.2091]$. Well inside the
+design's power (MDE $2.6059$). This is the paper's claim (Section~\ref{sec:res-hours}).
+
+\item \textbf{Why it reads as a mechanism and not a trend.} The bare $\Mother \times \Post$ term
+collapses from $0.826$ to $0.0153$ once exposure enters: the effect is not a uniform post-2021
+shift but scales with how teleworkable the job is. Link to \citet{goldin2014}
+(Section~\ref{sec:discussion}).
+
+\item \textbf{Measurement is part of the result.} The raw \citet{dingel2020} index gives $0.9404$
+(insignificant); the Israeli-calibrated index gives $3.407$. The mechanism is visible only once
+exposure is measured as Israeli jobs were actually done (Section~\ref{sec:discussion}).
+
+\item \textbf{The placebo strengthens it.} Fathers: DiD $-0.3860$, DDD $-1.8806$ (insignificant,
+opposite sign). Women versus men $z = 4.584$ and $z = 3.627$. A common macro trend cannot produce
+this (Section~\ref{sec:res-subgroup}).
+
+\item \textbf{Be modest about subgroups.} Jewish women ($2.9238$) carry the pooled result. The
+larger Arab estimate ($6.0062$) is statistically indistinguishable from it ($z = 1.105$,
+$p = 0.269$) and rests on thin occupational coverage. Do not claim heterogeneity.
+
+\item \textbf{Own the limitations, do not bury them.} The 2017 pre-trend
+($F(2, 65{,}088) = 23.7$, $p = 5.2\times10^{-11}$) confines parallel trends to 2018--2019; the
+bounds handle only excess selection and assume monotonicity; the exposure index is anchored to
+2021 and the calibration draws on 2022--23; estimates are unweighted; inference rests on about 40
+occupation clusters with no small-cluster correction (Section~\ref{sec:limitations}).
+
+\item \textbf{Close on what it means and what is next.} Policy reading: WFH availability bears on
+how intensively mothers already employed can work, not on whether they are employed. Next steps: a
+higher-powered test of the employment margin, and a jointly estimated model letting the mechanism
+differ by sex and population group.
+\end{enumerate}
+
+\noindent\textbf{\color{red}[END SKELETON --- DELETE THIS BLOCK]}
 
 %======================================================================
 \bibliographystyle{apalike}

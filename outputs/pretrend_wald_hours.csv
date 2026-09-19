@@ -1,0 +1,2 @@
+"statistic","F_stat","df1","df2","p_value","vcov"
+"Joint Wald, H0: pre-2020 Mother:year coefficients = 0",23.6854674914169,2,65088,5.21523147138e-11,"Clustered (IDPUF)"

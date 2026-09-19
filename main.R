@@ -28,6 +28,11 @@ source(file.path("scripts", "wfh_first_stage_check.R"))
 source(file.path("scripts", "ddd_mde_diagnostics.R"))
 source(file.path("scripts", "hours_subgroup_comparison.R"))
 
+# robustness/ is normally sourced only inside the RUN_AGE_BALANCE_ROBUSTNESS block, but
+# pretrend_wald_test.R is a diagnostic rather than a robustness spec: its two F-statistics are the
+# paper's parallel-trends evidence, so it runs unconditionally in §7 and is sourced here.
+source(file.path("robustness", "pretrend_wald_test.R"))
+
 # ── 2. Configure paths ────────────────────────────────────────────────────────
 message("Edit folder paths if needed!")
 folder_path   <- "G:/My Drive/Uni/econ/csv_data"
@@ -111,6 +116,18 @@ dev.off()
 pdf(file.path("outputs", "event_study_pretrend_hours.pdf"))
 hours_diagnostics_results <- run_hours_diagnostics(cleaned_df)
 dev.off()
+
+# Joint Wald tests on the pre-2020 Mother:year coefficients. These run unconditionally, right
+# beside the event studies whose models they test: parallel trends requires the pre-period
+# coefficients to be jointly, not just individually, indistinguishable from zero, and both
+# F-statistics are reported in the paper (Results §5.3 and Limitations). They used to sit inside
+# the RUN_AGE_BALANCE_ROBUSTNESS block, so a default `Rscript main.R` produced neither, and the
+# paper's parallel-trends evidence was not reproducible by the documented command.
+message("Running joint Wald test on pre-2020 Mother:year pre-trend coefficients (employment)...")
+pretrend_wald <- run_pretrend_joint_test(diagnostics_results$pretrend_model)
+
+message("Running joint Wald test on pre-2020 Mother:year pre-trend coefficients (hours, primary)...")
+pretrend_wald_hours <- run_pretrend_joint_test(hours_diagnostics_results$pretrend_model)
 
 # Results are exported once, at the very end of the script (── 9 ──), so that §8's WFH-exposure
 # measures and DDD regressions are captured in the same outputs/ artifact set as everything above
@@ -425,7 +442,6 @@ RUN_AGE_BALANCE_ROBUSTNESS <- FALSE
 if (RUN_AGE_BALANCE_ROBUSTNESS) {
   source(file.path("robustness", "balance_test.R"))
   source(file.path("robustness", "age_balance_robustness.R"))
-  source(file.path("robustness", "pretrend_wald_test.R"))
 
   message("Running Phase 1b covariate-balance test (Mother vs. non-Mother, by WFH_Exposure quartile)...")
   balance_check <- run_balance_test(cleaned_df, exposure_cells = exposure_cells)
@@ -451,11 +467,8 @@ if (RUN_AGE_BALANCE_ROBUSTNESS) {
   message("Running GilNK-reweighted comparison spec for the hours DDD (pre-period raking weights)...")
   hours_ddd_reweighted <- run_hours_ddd_reweighted(cleaned_df, exposure_cells, hours_exposure_index)
 
-  message("Running joint Wald test on pre-2020 Mother:year pre-trend coefficients (employment)...")
-  pretrend_wald <- run_pretrend_joint_test(diagnostics_results$pretrend_model)
-
-  message("Running joint Wald test on pre-2020 Mother:year pre-trend coefficients (hours, primary)...")
-  pretrend_wald_hours <- run_pretrend_joint_test(hours_diagnostics_results$pretrend_model)
+  # (The two joint Wald tests that used to live here now run unconditionally in §7, beside the
+  # event studies they test -- see the comment there.)
 }
 
 # ── 8d. Null-vs-power audit (docs/decisions/null-vs-power-audit.md) ───────────────────────────
@@ -496,6 +509,8 @@ results_to_export <- list(
   employment_by_child_age = emp_res,
   diagnostics = diagnostics_results,
   hours_diagnostics = hours_diagnostics_results,
+  pretrend_wald_employment = pretrend_wald$table,
+  pretrend_wald_hours = pretrend_wald_hours$table,
   isco_masking_sensitivity = isco_masking_check,
   wfh_exposure_external = exposure_external,
   wfh_exposure_calibrated = exposure_calibrated,

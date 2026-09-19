@@ -270,9 +270,12 @@ ref = 2019, cluster `IDPUF`, N = 281,750):
 | 2022 | 0.1080 | 0.2620 | (ns) |
 | 2023 | 0.7435 | 0.2609 | ** |
 
-Joint Wald test on 2017+2018: **F(2, 65,088) = 23.7, p = 5.2e-11** (console output of
-`run_pretrend_joint_test()`; `docs/hours-intensive-margin-analysis.md` §1; not exported). Same test
-on the employment outcome: F(2, 79,069) = 0.63, p = 0.53 (same source). Implication stated there:
+Joint Wald test on 2017+2018: **F(2, 65,088) = 23.7, p = 5.2e-11**. Same test on the employment
+outcome: F(2, 79,069) = 0.63, p = 0.53. **Update 2026-09-19: both are now exported** as
+`outputs/pretrend_wald_hours.csv` and `outputs/pretrend_wald_employment.csv`, and
+`run_pretrend_joint_test()` runs unconditionally in `main.R` §7 rather than behind
+`RUN_AGE_BALANCE_ROBUSTNESS`. Exported values: 23.6854674914169 (p 5.21523147138e-11) and
+0.630649732652335 (p 0.532248548305119). Previously console-only. Implication stated there:
 parallel trends should be claimed on 2018–2019 only; 2017 disclosed as a limitation.
 
 ---
@@ -671,7 +674,9 @@ to the paper.**
    exported per-bound SEs (§1.2, §1.4).
 3. Hours-DDD MDE (2.6059) — console only; arithmetically verified from the exported SE (§1.3).
    Narrative doc's "68% of the point estimate" is a mis-statement (should be 76.5%).
-4. Pre-trend joint Wald F-tests — console only (§1.8).
+4. ~~Pre-trend joint Wald F-tests — console only (§1.8).~~ **Resolved 2026-09-19:** the test now
+   runs unconditionally and exports `outputs/pretrend_wald_{hours,employment}.csv`. The paper's
+   parallel-trends evidence is reproducible by a default `Rscript main.R`.
 5. "MDE ≈ 4× the point estimate" for the employment DDD refers to the original design; current
    ratio is 8–10× (§2.3).
 6. `GilNK` imbalance figures in the narrative doc / HLD (−0.797 / +0.239; "~0.8, t≈−81") differ from
