@@ -1,6 +1,15 @@
 % paper.tex -- seminar paper draft.
-% Every number in this file is taken verbatim from paper/notes/results_digest.md (2026-09-15).
-% Not compiled; raw LaTeX/BibTeX only. Bibliography: paper/references.bib.
+% Provenance of the numbers, verified 2026-09-19 against a full pipeline re-run:
+%   - most figures come from paper/notes/results_digest.md (2026-09-15), which attributes each to
+%     a file in outputs/;
+%   - Table 1 comes from outputs/descriptive_table_continuous.csv and _categorical.csv, which
+%     post-date the digest and are not listed in it;
+%   - the hours-DDD constant (30.51) comes from outputs/ddd_hours_table.csv, which the digest's
+%     own table omits;
+%   - a handful of values (the MDEs, both Imbens-Manski intervals, the joint Wald tests, the
+%     two-sample z-tests, the 1.9% panel share) are console-only: reproducible by re-running the
+%     pipeline but written to no file. See results_digest.md section 7.
+% Compiled with pdflatex + bibtex (four passes); bibliography: paper/references.bib.
 \documentclass[12pt,a4paper]{article}
 
 \usepackage[utf8]{inputenc}
@@ -494,7 +503,9 @@ post-period sample of employed mothers is compositionally different from the pre
 reasons unrelated to hours choices, biasing $\beta_3$ in the hours equation in a direction that is
 not signable a priori. We address this with trimming bounds in the spirit of \citet{lee2009},
 adapted to the two-by-two design. Let $s_{ab} = \Pr(\text{Employed}=1 \mid \Mother=a, \Post=b)$.
-The parallel-trends-in-selection counterfactual for post-period mothers is
+The counterfactual below assumes parallel trends \emph{in selection}, which inherits the same
+2018--2019 restriction the outcome equation's parallel-trends assumption carries
+(Section~\ref{sec:limitations}). For post-period mothers it is
 $s^*_{11} = s_{10} + (s_{01} - s_{00})$. If the observed $s_{11}$ exceeds $s^*_{11}$, the excess
 share $p = 1 - s^*_{11}/s_{11}$ is trimmed from the $(\Mother=1,\Post=1)$ cell's hours
 distribution --- from the top to obtain a lower bound on $\beta_3$, from the bottom to obtain an
@@ -534,11 +545,16 @@ Table~\ref{tab:emp-did} reports equation~\eqref{eq:did} with employment as the o
 women and separately for Jewish and Arab women. The DiD coefficient is $-0.0053$ (SE $0.0052$) in
 the pooled sample: the mother/non-mother employment gap did not change after the shift to remote
 work. The estimate is precise --- its standard error is about half a percentage point --- so this
-is a tight null on the extensive margin, not an uninformative one. The stratified estimates are $-0.0041$ (SE $0.0058$) for Jewish women and
+is a tight null for the employment \emph{DiD}, not an uninformative one --- a distinction that
+matters, because the employment DDD in Section~\ref{sec:res-emp-ddd} is underpowered rather than
+precise, and the two should not be read as one verdict. The stratified estimates are $-0.0041$ (SE $0.0058$) for Jewish women and
 $-0.0208$ (SE $0.0138$) for Arab women, neither significant.\footnote{The religion control
 (\texttt{Dat}) is not identified within the Jewish-only subsample and enters with fewer categories
 in the Arab-only subsample, so the effective control set differs slightly across the stratified
-models.} Employment rose in the post-period for all women ($\Post = 0.0153$\sym{***} pooled), and
+models. Its smallest category (``other'') is also dropped for collinearity in two of the pooled
+models, this employment DiD and the hours DDD of Table~\ref{tab:hours}, so those too estimate four
+religion categories rather than five. No reported coefficient is affected; the dropped column
+carries no independent variation once the other controls are in.} Employment rose in the post-period for all women ($\Post = 0.0153$\sym{***} pooled), and
 markedly so for Arab women ($0.0601$\sym{***}).
 
 \begin{table}[htbp]
@@ -693,7 +709,7 @@ Column~(1) of Table~\ref{tab:hours} reports equation~\eqref{eq:did} for weekly h
 employed women. Mothers work $2.223$ fewer hours per week than childless women
 ($\Mother = -2.223$\sym{***}), the intensive-margin penalty itself. After the shift to remote work
 this gap narrowed: $\Mother \times \Post = 0.8261$\sym{***} (SE $0.1830$), so mothers' weekly hours
-rose by about $0.83$ hours more than non-mothers' ($N = 281{,}750$). The raw cell means tell the
+rose by about $0.83$ hours more than childless women's ($N = 281{,}750$). The raw cell means tell the
 same story --- mothers' hours rose from $36.85$ to $38.52$ while childless women's rose from
 $39.01$ to $39.80$.
 
@@ -792,8 +808,10 @@ index but modest everywhere: the trim proportion ranges from $0.25\%$ (quartile 
 employed mothers are trimmed. The bounds barely move: the lower bound is $3.4414$ (SE $0.9927$),
 the upper bound $3.4570$ (SE $0.8975$), and the Imbens--Manski 95\% confidence interval for the
 identified set is $[1.5035, 5.2091]$, which excludes zero comfortably. Unlike the plain DiD, the
-triple interaction survives the selection correction. This is the strongest single piece of
-evidence in the paper: the result is not an artifact of differential selection into employment.
+triple interaction survives the selection correction: the result is not an artifact of
+differential selection into employment. This is the strongest single piece of evidence in the
+paper, with the caveat that the trimming counterfactual rests on the same parallel-trends
+assumption the 2017 pre-trend already dents (Section~\ref{sec:limitations}).
 
 \begin{table}[htbp]
 \centering
@@ -820,11 +838,13 @@ Imbens--Manski 95\% CI & \multicolumn{7}{c}{$[1.5035,\ 5.2091]$} \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}\small
-\item Rows trimmed by quartile: 632 of 13{,}718; 56 of 22{,}490; 117 of 29{,}022; 263 of 18{,}106.
-The untrimmed point estimate here ($3.4077$) differs slightly from Table~\ref{tab:hours}
-($3.407$) because this sample additionally requires a matched cell-based exposure. Observations
-for the bound regressions: [TODO: confirm]. Outcome regressions use the occupation-level index and
-cluster by occupation.
+\item Panel A's $n$ column counts \emph{all} post-period mothers in the quartile, employed or not,
+because the cell-based exposure index is defined for the non-employed as well. The trim
+proportions apply to the employed, occupation-matched subset, which is the population the bound
+regressions use: 632 of 13{,}718; 56 of 22{,}490; 117 of 29{,}022; 263 of 18{,}106, or
+1{,}068 of 83{,}336 in total. The untrimmed point estimate here ($3.4077$) differs slightly from
+Table~\ref{tab:hours} ($3.407$) because this sample additionally requires a matched cell-based
+exposure. Outcome regressions use the occupation-level index and cluster by occupation.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
@@ -1048,7 +1068,9 @@ contribute observations to both the pre- and post-period, but an individual-leve
 fixed-effects design was considered and rejected: only 1.9\% of sampled individuals are
 re-interviewed across the pre/post boundary, far too few for within-person identification to be
 credible.
-% [VERIFY] 1.9% is console output of check_idpuf_panel_structure() (scripts/validation.R); not exported to outputs/.
+% Provenance: 1,514 of 80,560 distinct individuals (1.88%) appear in both the pre- and post-period.
+% Console output of check_idpuf_panel_structure() (scripts/validation.R); not exported to outputs/.
+% Confirmed against a full pipeline run, 2026-09-19.
 Occupation codes masked by the CBS for
 disclosure control are dropped when building exposure; a proxy check finds no strong evidence that
 this biases the exposure measure, though that is weak rather than conclusive evidence. The
