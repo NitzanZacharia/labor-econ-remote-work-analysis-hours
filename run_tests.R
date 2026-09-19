@@ -13,7 +13,9 @@ library(testthat)
 # fallback and routes it to null for the whole test run.
 options(device = function(...) grDevices::pdf(file = base::nullfile()))
 
-results <- test_dir("tests/testthat", reporter = "summary", stop_on_failure = FALSE)
+# "check" rather than "summary": the summary reporter prints per-file dots but no FAIL/WARN/SKIP/
+# PASS counts, so a machine-readable pass total existed only in the exit code.
+results <- test_dir("tests/testthat", reporter = "check", stop_on_failure = FALSE)
 
 results_df <- as.data.frame(results)
 n_fail <- sum(results_df$failed) + sum(results_df$error)

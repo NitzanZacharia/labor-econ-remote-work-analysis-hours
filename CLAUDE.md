@@ -21,10 +21,14 @@
   don't reintroduce a local copy in any new file.
 - CBS survey weights (`MishkalSofi`, `MishkalShnati`, etc.) are intentionally NOT applied in any
   outcome regression — see README.md's "Known limitations". This is a deliberate scope decision,
-  not a gap. Do not add `weights =` to a `feols()`/`lm()` call in this repo without raising it with
-  the user first. `build_exposure_cells()` (`wfh_exposure_cells.R`) is the one existing exception —
-  it weights by `MishkalSofi` when aggregating occupation exposure up to demographic cells, which is
-  internal to constructing the exposure regressor and not a survey-representativeness correction.
+  not a gap. Do not add a CBS survey weight to a `feols()`/`lm()` call in this repo without raising
+  it with the user first. Three non-survey `weights =` uses already exist and are expected:
+  `build_exposure_cells()` (`wfh_exposure_cells.R`) weights by `MishkalSofi` when aggregating
+  occupation exposure up to demographic cells, which is internal to constructing the exposure
+  regressor; `run_ddd_reweighted()` and `run_hours_ddd_reweighted()`
+  (`robustness/age_balance_robustness.R`) pass `weights = ~rake_weight`, which is what those
+  age-rebalancing specs are for; and `run_hours_ddd_regression()` uses inverse-variance weights in
+  its second-stage `lm()`. None of these is a representativeness correction.
 - Before implementing anything, read: docs/ROADMAP.md (the checkpoint in question),
   docs/LLD.md (schema/contracts), docs/HLD.md (why the gap exists). Don't implement from the
   research doc directly — LLD/HLD already reconcile it against the real codebase. For how to test

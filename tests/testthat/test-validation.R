@@ -208,7 +208,11 @@ test_that("check_wfh_refweek_avadbeshavua correctly tallies consistent, inconsis
     AvadMeHaBayit = rep(NA_real_, 5),
     AvadBeshavua  = c(0, 2, 1, 1, NA)  # 2 consistent (!=1), 2 inconsistent (==1), 1 indeterminate (NA)
   )
-  out <- suppressMessages(check_wfh_refweek_avadbeshavua(df))
+  # This fixture deliberately contains 2 inconsistent rows, so the function is *expected* to warn.
+  # Capturing it with expect_warning() keeps the suite at WARN 0, so that a genuinely new warning
+  # stands out instead of blending into a permanent one.
+  out <- suppressMessages(expect_warning(check_wfh_refweek_avadbeshavua(df),
+                                         "contradict"))
 
   expect_equal(out$n, 5)
   expect_equal(out$consistent, 2)

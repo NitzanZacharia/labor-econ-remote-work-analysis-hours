@@ -34,7 +34,10 @@ compute_ddd_mde <- function(model, coef_name = "Mother:Post:WFH_Exposure",
     ),
     coef_name, point_estimate, se, sig_level, power * 100, mde,
     if (!is.null(baseline_rate)) {
-      sprintf(" (baseline employment rate = %.4f, i.e. MDE is %.1f%% of baseline)",
+      # "baseline" deliberately left unnamed: main.R passes the baseline employment rate for the
+      # employment DDD but mean weekly hours for the hours DDD, and hardcoding "employment rate"
+      # here printed "baseline employment rate = 38.2446" for the hours call, which reads as a bug.
+      sprintf(" (baseline = %.4f, i.e. MDE is %.1f%% of baseline)",
               baseline_rate, 100 * mde / baseline_rate)
     } else ""
   ))

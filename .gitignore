@@ -10,7 +10,7 @@
 Rplots*.pdf
 *.csv
 !tests/testthat/fixtures/**/*.csv
-!israeli_cbs_wfh_2digit.csv
+!data/israeli_cbs_wfh_2digit.csv
 
 # Checkpoint 9: persisted output layer. Tracked in git (not blanket-ignored). The `*.csv` rule
 # above would otherwise still catch every CSV in here, hence the negation. See docs/ROADMAP.md

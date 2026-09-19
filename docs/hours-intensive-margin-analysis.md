@@ -50,8 +50,10 @@ again in §4.
 **Balance tests.** The one balance check run against real data is the `GilNK` (age-group) imbalance
 diagnostic (`docs/decisions/age-balance-robustness-chain.md`,
 `outputs/age_balance_robustness_age_imbalance_by_quartile.csv`): the pre-period age gap between
-mothers and non-mothers is **-0.797 GilNK units at the lowest WFH-exposure quartile, shrinking
-monotonically to +0.239 at the highest quartile**. This gap tracks `WFH_Exposure` quartile — exactly
+mothers and non-mothers is **-0.974 GilNK units at the lowest WFH-exposure quartile (t = -94.0),
+shrinking monotonically to +0.057 at the highest**. *Corrected 2026-09-19: this file previously
+read "-0.797 ... +0.239", which predates the `BirthContinent` change to the exposure cells. The
+figures above are the current CSV's and match the paper.* This gap tracks `WFH_Exposure` quartile — exactly
 the hours DDD's own regressor — so an additive age control cannot fully absorb it. This is addressed
 directly in §3 (age-interacted and reweighted specs, now run against real data for the hours DDD
 specifically).
@@ -107,8 +109,11 @@ plain DiD, the triple interaction survives the selection correction. This is the
 piece of evidence in the paper: the result is not an artifact of differential selection into
 employment.
 
-**Minimum detectable effect**: 2.606 (68% of the 3.41 point estimate) — the design is well-powered
-for an effect of this size (`compute_ddd_mde()` console output).
+**Minimum detectable effect**: 2.606 (76.5% of the 3.41 point estimate, and 6.8% of the 38.24 mean
+weekly hours) — the design is well-powered for an effect of this size (`compute_ddd_mde()` console
+output). *Corrected 2026-09-19: this file previously read "68% of the point estimate", which
+transposed the 6.8%-of-mean-hours figure. 2.6059 / 3.4073 = 76.5%. The paper has always used the
+correct value.*
 
 **Exposure-measure sensitivity** (`outputs/ddd_hours_external.csv`, `outputs/ddd_hours_realized.csv`):
 
@@ -202,8 +207,8 @@ makes the same point about the exposure measure's own anchor-year choice).
 **Why hours, not employment.** This project's primary specification pivoted from the extensive
 margin (employment) to the intensive margin (hours) specifically because the employment DDD remained
 underpowered even after two rounds of exposure-measure fixes (MDE ~26% of baseline, roughly 4x the
-point estimate — `docs/decisions/hours-ddd-pivot.md`). The hours mechanism is well-powered (MDE 68%
-of the point estimate, §3) and the underlying economic story is coherent with that pivot: the effect
+point estimate — `docs/decisions/hours-ddd-pivot.md`). The hours mechanism is well-powered (MDE
+76.5% of the point estimate, §3) and the underlying economic story is coherent with that pivot: the effect
 operates on *how much* mothers who stay employed work, conditional on remaining employed, not on
 *whether* they are employed at all. The (out-of-scope) employment DDD's null result is consistent
 with this framing rather than contradicting it.

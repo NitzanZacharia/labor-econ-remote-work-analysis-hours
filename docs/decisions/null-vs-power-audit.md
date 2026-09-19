@@ -9,7 +9,7 @@ ultimate resolution — the extensive-margin DDD's power problem, diagnosed here
 fixed by the granularity fix, is what motivated moving the primary specification to an
 hours-outcome DDD, which is not underpowered.
 
-**Status: VERIFIED AGAINST REAL DATA, NOT YET COMMITTED.** The two diagnostics below
+**Status: VERIFIED AGAINST REAL DATA AND COMMITTED.** (Status corrected 2026-09-19: `outputs/null_vs_power_audit_wfh_first_stage_table.csv` is committed and regenerates byte-identically under the current code.) The two diagnostics below
 (`scripts/wfh_first_stage_check.R`, `scripts/ddd_mde_diagnostics.R`) are built, unit-tested, and
 have been run once against the real CBS extract to produce the numbers in this memo.
 `RUN_NULL_VS_POWER_AUDIT` is `FALSE` in the committed `main.R`; the numbers below came from a

@@ -191,12 +191,17 @@ employment_by_child_age <- function(cleaned_df) {
     )
   
   # ── 7. Print plots ───────────────────────────────────────────────────────
-  # Reset graphics device in case a previous plot left it in a bad state
-  tryCatch(dev.off(), error = function(e) invisible(NULL))
-  
-  print(p_raw)
-  print(p_period)
-  print(p_adj)
+  # Interactive convenience only. Under a headless `Rscript main.R` these print() calls used to
+  # open R's default device and leak an Rplots.pdf into the repo root on every run (the
+  # .gitignore rule hid the symptom; the file was still created, and had been committed twice
+  # historically). The three plots reach disk as PNGs via export_all_results() regardless, so
+  # skipping the prints in a non-interactive session loses nothing. The bare dev.off() that used
+  # to sit here was removed with them: it had no device to close and was itself part of the leak.
+  if (interactive()) {
+    print(p_raw)
+    print(p_period)
+    print(p_adj)
+  }
   
   # ── 8. Return results invisibly ─────────────────────────────────────────
   invisible(list(

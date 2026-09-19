@@ -92,7 +92,7 @@ Rscript -e 'source("main.R"); run_gender_placebo("G:/My Drive/Uni/econ/csv_data"
 ```
 Confirm the model fits without a `fixest` collinearity/singularity error. Per the research doc's own success criterion, an **insignificant** `Mother:Post` coefficient (relabelled conceptually as the father-treatment interaction) supports the motherhood-specific interpretation — record the coefficient and p-value alongside the primary model's for direct comparison.
 
-Note: this placebo is built on `basic_reg()` (the now-secondary, employment-outcome regression). No hours-based placebo analog exists yet — a gap worth flagging rather than silently implying it's covered.
+Note: this placebo is built on `basic_reg()` (the now-secondary, employment-outcome regression). **Update 2026-09-19: an hours-based placebo does now exist** — `scripts/hours_gender_placebo.R`, called unconditionally from `main.R` and exported as `hours_gender_placebo_{did,ddd}_table.csv`; it is the placebo the paper reports. The employment placebo above remains manual and unexported.
 
 ---
 

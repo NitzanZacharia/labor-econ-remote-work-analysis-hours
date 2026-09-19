@@ -12,7 +12,17 @@ Commit `21b30b2` ("Add pre-trend/balance robustness chain and gender-placebo DDD
 
 Ran `diagnose_gilnk_by_quartile()` and `run_balance_test()` against the real, locally-available CBS data (`load_and_clean_data()` on the actual `folder_path`, not a fixture), using `exposure_cells` built from the broadened population frame (`exposure_population_df` — see `docs/decisions/calibrated-exposure-and-cell-ddd.md`'s addendum).
 
-**`GilNK` (age-group) gap, Mother==1 minus Mother==0, pre-period (2017-2019), by `WFH_Exposure` quartile** (n = 201,388 pre-period rows with a matched exposure cell):
+> **Superseded numbers — read this first (added 2026-09-19).** The table immediately below is the
+> original 2026-09-09 run, built on the 4-variable exposure cells. The exposure-cell partition has
+> since gained `MatzavMishpachti`, `Dat` and `BirthContinent`
+> (`docs/decisions/exposure-cell-granularity-fix.md`), which changes both the quartile boundaries
+> and the matched row count. **The live figures, in
+> `outputs/age_balance_robustness_age_imbalance_by_quartile.csv` and used by the paper, are
+> Q1 −0.9736 (t = −94.03), Q2 −0.7354 (t = −62.81), Q3 −0.1695 (t = −11.98), Q4 +0.0570
+> (t = +5.00), over 198,669 pre-period rows.** The qualitative claim this memo makes — monotone
+> shrinkage from Q1 and a sign reversal by Q4 — survives the change. Cite the CSV, not this table.
+
+**`GilNK` (age-group) gap, Mother==1 minus Mother==0, pre-period (2017-2019), by `WFH_Exposure` quartile** (n = 201,388 pre-period rows with a matched exposure cell; superseded, see the note above):
 
 | Quartile | mean GilNK, Mother=0 | mean GilNK, Mother=1 | gap (Mother1 − Mother0) | t-stat | p-value |
 |---|---|---|---|---|---|

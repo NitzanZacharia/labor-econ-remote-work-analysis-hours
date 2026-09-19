@@ -150,7 +150,7 @@ own real-data numbers are left intact as a historical record of the pre-fix desi
 
 ## Update: adding `BirthContinent` (same design, a 7th safe dimension)
 
-**Status: VERIFIED AGAINST REAL DATA, NOT YET COMMITTED.**
+**Status: VERIFIED AGAINST REAL DATA AND COMMITTED.** (Status corrected 2026-09-19: the results below match the live `outputs/ddd_employment.csv` exactly, so this has been committed for some time.)
 
 **Motivation.** The user asked why `WFH_Exposure` isn't built directly from ISCO-08 occupation
 codes. Analysis showed that would reintroduce a selection-on-the-outcome problem (occupation is

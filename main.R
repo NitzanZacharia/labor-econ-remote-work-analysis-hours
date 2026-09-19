@@ -512,6 +512,10 @@ results_to_export <- list(
   intensive_margin_arab_table     = intensive_arab$table,
   ddd_hours_jewish_table          = hours_ddd_jewish$table,
   ddd_hours_arab_table            = hours_ddd_arab$table,
+  # Only the two etable tables are taken here. hours_gender_placebo$cleaned_men is the full male
+  # microdata frame (one row per surveyed person) and is deliberately NOT exported: it is a
+  # data.frame, so export_all_results() would write it straight to outputs/ if the whole object
+  # were passed. Same disclosure-risk logic as idpuf_panel_check and the age-balance pre_df.
   hours_gender_placebo_did_table  = hours_gender_placebo$result$table,
   hours_gender_placebo_ddd_table  = hours_gender_placebo$ddd_placebo$table,
   hours_did_subgroup_comparison   = hours_did_subgroup_comparison,

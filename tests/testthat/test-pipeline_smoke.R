@@ -83,16 +83,23 @@ test_that("the WFH-exposure + secondary (employment) DDD pipeline (main.R's sect
   exposure_realized <- build_wfh_exposure_index(cleaned, ref_year = 2021, min_n = 0)
   expect_gt(nrow(exposure_realized), 0)
 
+  # Mirror main.R's ACTUAL exposure-cell definition (main.R:219-225), not build_exposure_cells()'s
+  # 4-variable default. Those are not the same design: with the default, the exposure cells are
+  # built from exactly the variables that also serve as the regression's fixed effects, which is
+  # the aliased specification whose MDE was ~51% of baseline and which the granularity fix
+  # deliberately abandoned (docs/decisions/exposure-cell-granularity-fix.md). A smoke test that
+  # claims to mirror §8b has to use the 7-variable partition the pipeline actually runs.
+  exposure_cell_vars <- c("Min", "GilNK", "TeudaGvoha", "MachozMegurim", "MatzavMishpachti",
+                          "Dat", "BirthContinent")
   exposure_cells <- build_exposure_cells(
     cleaned,
-    exposure_calibrated %>% dplyr::select(ISCO2, tele_ext = wfh_exposure_calibrated)
+    exposure_calibrated %>% dplyr::select(ISCO2, tele_ext = wfh_exposure_calibrated),
+    cell_vars = exposure_cell_vars
   )
-  expect_true(all(
-    c("Min", "GilNK", "TeudaGvoha", "MachozMegurim", "WFH_Exposure") %in% names(exposure_cells)
-  ))
+  expect_true(all(c(exposure_cell_vars, "WFH_Exposure") %in% names(exposure_cells)))
 
   ddd_df <- cleaned %>%
-    dplyr::left_join(exposure_cells, by = c("Min", "GilNK", "TeudaGvoha", "MachozMegurim"))
+    dplyr::left_join(exposure_cells, by = exposure_cell_vars)
 
   cell_fe_vars   <- c("GilNK", "TeudaGvoha", "MachozMegurim")
   other_controls <- setdiff(DEFAULT_CONTROLS, cell_fe_vars)
@@ -152,9 +159,14 @@ test_that("the primary (hours) DDD pipeline (main.R's section 8a) runs end-to-en
   out <- capture.output(exposure_calibrated <- suppressWarnings(
     calibrate_isco_exposure(cleaned, exposure_external)
   ))
+  # Same 7-variable partition main.R uses (main.R:219-225), not the 4-variable default -- these
+  # cells stratify the Lee-bounds selection counterfactual below, so the definition matters here
+  # too. See the longer note in the §8b smoke test above.
   exposure_cells <- build_exposure_cells(
     cleaned,
-    exposure_calibrated %>% dplyr::select(ISCO2, tele_ext = wfh_exposure_calibrated)
+    exposure_calibrated %>% dplyr::select(ISCO2, tele_ext = wfh_exposure_calibrated),
+    cell_vars = c("Min", "GilNK", "TeudaGvoha", "MachozMegurim", "MatzavMishpachti",
+                  "Dat", "BirthContinent")
   )
   exposure_index <- exposure_calibrated %>%
     dplyr::select(occupation_code = ISCO2, wfh_exposure = wfh_exposure_calibrated)

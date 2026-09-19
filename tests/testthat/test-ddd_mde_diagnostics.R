@@ -59,12 +59,15 @@ test_that("within_mde correctly flags a point estimate smaller than the MDE", {
   expect_equal(result$within_mde, abs(result$point_estimate) < result$mde)
 })
 
-test_that("compute_ddd_mde's message includes the baseline-rate framing when baseline_rate is supplied", {
+test_that("compute_ddd_mde's message includes the baseline framing when baseline_rate is supplied", {
   df <- data.frame(y = rnorm(200), x = rnorm(200))
   m  <- fixest::feols(y ~ x, data = df)
 
+  # The label is deliberately "baseline", not "baseline employment rate": main.R passes mean weekly
+  # hours for the hours DDD and an employment rate for the employment DDD, and the old hardcoded
+  # wording printed "baseline employment rate = 38.2446" for the hours call.
   expect_message(
     compute_ddd_mde(m, coef_name = "x", baseline_rate = 0.75),
-    "baseline employment rate"
+    "baseline = 0\\.7500, i\\.e\\. MDE is"
   )
 })

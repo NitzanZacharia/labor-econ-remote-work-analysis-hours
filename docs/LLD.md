@@ -402,7 +402,7 @@ run_balance_test(cleaned_df: tibble, controls: character = DEFAULT_CONTROLS,
 diagnose_gilnk_by_quartile(cleaned_df: tibble, exposure_cells: tibble) ->
   invisible(list(gap_by_quartile = tibble, breaks = numeric(5), pre_df = tibble))
 # gap_by_quartile: mean_GilNK_Mother0/1, gap_Mother1_minus_0, t_stat, p_value, n, per quartile.
-# Verified against real data 2026-09-09: gap is largest in Q1 (~-0.8 GilNK units, t~-81) and
+# Verified against real data; refreshed 2026-09-19: gap is largest in Q1 (-0.974 GilNK units, t = -94.0) and
 # shrinks/reverses by Q4 -- see docs/decisions/age-balance-robustness-chain.md.
 
 run_ddd_age_interacted(cleaned_df: tibble, exposure_cells: tibble,
