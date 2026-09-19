@@ -679,8 +679,16 @@ to the paper.**
    **Resolved 2026-09-15: §1.5 is out of scope — not to be drafted.**
 2. Imbens–Manski CIs for both Lee-bounds tables — console only, arithmetically consistent with the
    exported per-bound SEs (§1.2, §1.4).
-3. Hours-DDD MDE (2.6059) — console only; arithmetically verified from the exported SE (§1.3).
-   Narrative doc's "68% of the point estimate" is a mis-statement (should be 76.5%).
+3. ~~Hours-DDD MDE (2.6059) — console only; arithmetically verified from the exported SE (§1.3).~~
+   **Resolved 2026-09-19:** `compute_ddd_mde()` now returns a one-row data frame, so all three
+   MDEs are exported: `outputs/mde_hours.csv` (2.60593, 6.81% of the 38.24 mean weekly hours,
+   `within_mde` FALSE — the effect is detectable) and, under `RUN_NULL_VS_POWER_AUDIT`,
+   `null_vs_power_audit_mde_{additive,fe}.csv` (0.20312 and 0.20224, 26.25% and 26.14% of the
+   0.7737 baseline, `within_mde` TRUE for both — the employment design cannot detect its own point
+   estimate). The `within_mde` column makes the paper's "underpowered, not null" argument
+   machine-checkable rather than a claim a reader has to recompute.
+   The narrative doc's "68% of the point estimate" was a mis-statement (76.5%), corrected in
+   `docs/hours-intensive-margin-analysis.md` on the same day.
 4. ~~Pre-trend joint Wald F-tests — console only (§1.8).~~ **Resolved 2026-09-19:** the test now
    runs unconditionally and exports `outputs/pretrend_wald_{hours,employment}.csv`. The paper's
    parallel-trends evidence is reproducible by a default `Rscript main.R`.

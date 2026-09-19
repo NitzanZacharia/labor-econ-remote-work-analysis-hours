@@ -42,7 +42,25 @@ compute_ddd_mde <- function(model, coef_name = "Mother:Post:WFH_Exposure",
     } else ""
   ))
 
+  # Returned as a one-row data frame as well as the scalar list, so export_all_results() can write
+  # it: the layer only recognises data frames and ggplots, so a list of scalars reaches no file.
+  # The paper cites all three MDEs (2.6059 for hours, 0.2031/0.2022 for employment) and none of
+  # them was on disk before 2026-09-19. Same fix as run_pretrend_joint_test()'s.
+  tbl <- data.frame(
+    coef_name      = coef_name,
+    point_estimate = unname(point_estimate),
+    se             = unname(se),
+    sig_level      = sig_level,
+    power          = power,
+    mde            = unname(mde),
+    baseline       = if (is.null(baseline_rate)) NA_real_ else unname(baseline_rate),
+    mde_pct_of_baseline = if (is.null(baseline_rate)) NA_real_ else 100 * mde / baseline_rate,
+    within_mde     = abs(point_estimate) < mde,
+    stringsAsFactors = FALSE
+  )
+
   invisible(list(
+    table          = tbl,
     coef_name      = coef_name,
     point_estimate = point_estimate,
     se             = se,

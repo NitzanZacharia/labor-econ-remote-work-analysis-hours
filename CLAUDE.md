@@ -3,6 +3,12 @@
 - This is a set of R scripts (no package layout — no DESCRIPTION/NAMESPACE, no roxygen, no
   installed-package semantics). Dependencies: tidyverse + fixest only. Do not add a new dependency
   without flagging it in your response first.
+- The "one function per file" rule below is the intent, not a universal fact. Five files in
+  `scripts/` already hold more than one, each for a stated reason: `validation.R` (4 — a family of
+  data-quality checks), `wfh_exposure_cells.R` (3 — the exposure-construction chain),
+  `gender_placebo.R` and `hours_gender_placebo.R` (2 each — a runner plus the DDD variant it
+  calls), and `ddd_collinearity_diagnostics.R` (2 — a diagnostic plus a shared guard used by six
+  call sites). Follow the rule for new files; do not split these five to satisfy it.
 - `main.R` is the orchestrator and stays at the repo root, alongside `run_tests.R` and
   `run_mismatch.R`. Every other .R file defines one function, lives in `scripts/`, and is
   `source()`d via a root-relative, path-qualified call (`source(file.path("scripts", "foo.R"))`) —

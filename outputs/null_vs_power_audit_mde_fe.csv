@@ -1,0 +1,2 @@
+"coef_name","point_estimate","se","sig_level","power","mde","baseline","mde_pct_of_baseline","within_mde"
+"Mother:Post:WFH_Exposure",-0.0193633310113033,0.0721885119056163,0.05,0.8,0.202242267872347,0.773727601739546,26.1386911126929,TRUE

@@ -540,7 +540,7 @@ results_to_export <- list(
   wfh_exposure_realized = exposure_realized,
   wfh_exposure_cells = exposure_cells,
   ddd_hours_table = hours_ddd$table,
-  mde_hours = mde_hours,
+  mde_hours = mde_hours$table,
   hours_lee_bounds_table = hours_lee_bounds$table,
   hours_lee_bounds_quartiles = hours_lee_bounds$diagnostics$quartile_selection_rates,
   hours_lee_bounds_n_trimmed = hours_lee_bounds$diagnostics$n_trimmed_by_quartile,
@@ -598,8 +598,8 @@ if (RUN_AGE_BALANCE_ROBUSTNESS) {
 if (RUN_NULL_VS_POWER_AUDIT) {
   results_to_export$null_vs_power_audit <- list(
     wfh_first_stage_table = wfh_first_stage$table,
-    mde_additive           = mde_additive,
-    mde_fe                 = mde_fe
+    mde_additive           = mde_additive$table,
+    mde_fe                 = mde_fe$table
   )
 }
 

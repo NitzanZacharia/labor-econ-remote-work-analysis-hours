@@ -4,6 +4,40 @@
 `d662aa3` (paper) and `7967624` (repo). **No factual error was found in the paper.** This document
 records every item still waiting on an author decision, ordered by whether it blocks submission.
 
+## Deferred — circle back before submission
+
+The author asked on 2026-09-19 to park these four and return to them at the end. They are the
+complete outstanding list; everything else in this register is either resolved or actioned.
+
+| # | Item | Why it is parked | What closes it |
+|---|---|---|---|
+| D1 | The Conclusion | Author writes it last | Replace the skeleton block at `paper/paper.tex` with your own prose, and delete the banner |
+| D2 | Furlough sentence | Author is checking for a CBS source | Either the citation, or the reworded sentence in the D2 entry below |
+| D5 | Crosswalk provenance | Author is tracing where the file came from | See `docs/open-question-wfh-crosswalk-provenance.md` |
+| D15 | Null-placebo caveat | New, see below | Decide whether the employment placebo enters the paper, and with what caveat |
+
+### D15. The employment placebo's null is underpowered, not informative
+
+Wired in on 2026-09-19 and now exported as `outputs/gender_placebo_{did,ddd}_table.csv`.
+Estimates, men with `Mother` read as `Father`: DiD $0.0077$ (SE $0.0054$); DDD $0.0444$
+(SE $0.0833$) additive and $0.0661$ (SE $0.0849$) with cell fixed effects. All insignificant.
+
+**The issue.** A placebo returning null is the direction you want. But this placebo sits on the
+employment margin, and the paper already establishes (Section 5.2) that the employment DDD is
+underpowered rather than precise: its minimum detectable effect is about 26% of the baseline
+employment rate, 8–10 times the point estimate. A null on that margin is uninformative for the
+same reason the main employment DDD is. Presenting it as corroboration without that caveat would
+repeat, in the placebo, exactly the error the paper is careful to avoid in the main result.
+
+**Options.** (a) Leave it out of the paper entirely; it is in the repo for completeness and the
+hours placebo already does the falsification work. (b) Report it with the caveat stated plainly,
+one sentence, alongside the hours placebo. (c) Report it without the caveat — not recommended.
+
+**Impact.** (a) is the safe default and costs nothing, since the hours placebo is the one that
+matters for the primary specification. (b) is more complete and shows you understand what your
+own power analysis implies; it costs two sentences. (c) would be a real inconsistency an examiner
+could fairly pick up.
+
 ## What the audit established
 
 | Check | Result |
