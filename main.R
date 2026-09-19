@@ -325,6 +325,19 @@ hours_gender_placebo <- run_hours_gender_placebo(
   exposure_index = hours_exposure_index
 )
 
+# Employment-outcome placebo, the secondary-margin twin of the call above. Wired in 2026-09-19:
+# it had existed and been unit-tested since Checkpoint 5 but was never called, so the paper could
+# report a placebo for the primary (hours) margin and none for the secondary one, and
+# results_digest.md §7 item 7 listed it as having no exported result. Both frames are reused
+# rather than reloaded -- cleaned_men_for_exposure is already in memory.
+message("Running employment gender placebo (men, 'Mother' read as 'Father')...")
+gender_placebo <- run_gender_placebo(
+  folder_path,
+  cleaned_men         = cleaned_men_for_exposure,
+  cleaned_women       = cleaned_df,
+  exposure_calibrated = exposure_calibrated
+)
+
 message("Building hours subgroup comparison plots (DiD and DDD terms, across ethnicity + gender placebo)...")
 hours_did_subgroup_comparison <- build_hours_subgroup_comparison(
   models = list(
@@ -438,7 +451,13 @@ spec1_collinearity_check <- check_spec1_collinearity(ddd_df, cell_fe_vars, DEFAU
 # unit-tested functions with no orchestrator ever calling them against real data -- the
 # age-imbalance claim in age_balance_robustness.R's own header comment was asserted, not verified,
 # until this wiring.
-RUN_AGE_BALANCE_ROBUSTNESS <- FALSE
+# Default changed FALSE -> TRUE on 2026-09-19. The paper's robustness table (tab:robust) and its
+# age-imbalance sentence both cite artifacts this block produces, so with the flag off a reader
+# following the README could not reproduce them: `Rscript main.R` yielded an incomplete set and the
+# missing pieces were only discoverable by reading this file. The flag is kept, rather than
+# removed, so the chain can still be switched off for a fast run. Verified 2026-09-19: all nine
+# age_balance_robustness_* artifacts regenerate byte-identically with it on.
+RUN_AGE_BALANCE_ROBUSTNESS <- TRUE
 if (RUN_AGE_BALANCE_ROBUSTNESS) {
   source(file.path("robustness", "balance_test.R"))
   source(file.path("robustness", "age_balance_robustness.R"))
@@ -481,7 +500,11 @@ if (RUN_AGE_BALANCE_ROBUSTNESS) {
 # data until now; (2) the closed-form minimum detectable effect for both employment-DDD specs, so
 # the observed point estimates (0.103 additive / 0.131 cell-FE) can be read against how small a
 # true effect this design could even reliably detect.
-RUN_NULL_VS_POWER_AUDIT <- FALSE
+# Default changed FALSE -> TRUE on 2026-09-19, same reasoning as the flag above: the paper's
+# first-stage figures (0.6557, SE 0.0954, n = 110,051, and the 2022/2023 interactions) come from
+# this block, so a default run has to produce them. Verified: the artifact regenerates
+# byte-identically with the flag on.
+RUN_NULL_VS_POWER_AUDIT <- TRUE
 if (RUN_NULL_VS_POWER_AUDIT) {
   message("Checking WFH_Exposure's first-stage relevance against realized WFH_RefWeek...")
   wfh_first_stage <- check_wfh_first_stage_relevance(ddd_df)
@@ -533,6 +556,9 @@ results_to_export <- list(
   # were passed. Same disclosure-risk logic as idpuf_panel_check and the age-balance pre_df.
   hours_gender_placebo_did_table  = hours_gender_placebo$result$table,
   hours_gender_placebo_ddd_table  = hours_gender_placebo$ddd_placebo$table,
+  # Same cherry-pick, same reason: gender_placebo$cleaned_men is full male microdata.
+  gender_placebo_did_table        = gender_placebo$result$table,
+  gender_placebo_ddd_table        = gender_placebo$ddd_placebo$table,
   hours_did_subgroup_comparison   = hours_did_subgroup_comparison,
   hours_ddd_subgroup_comparison   = hours_ddd_subgroup_comparison,
   ddd_employment = employment_ddd_table

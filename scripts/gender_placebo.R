@@ -79,25 +79,40 @@ run_gender_ddd_placebo <- function(cleaned_men, exposure_calibrated, controls = 
   fe       <- fit(paste("Mother * Post * WFH_Exposure +", paste(other_controls, collapse = " + ")),
                    fe = paste(cell_fe_vars, collapse = "^"))
 
+  # The etable is returned as $table, not just printed, so main.R can export it -- mirroring
+  # run_hours_gender_ddd_placebo(). Without this the employment placebo ran on every pipeline pass
+  # and still left no artifact, which is how results_digest.md §7 item 7 came to record it as
+  # having no exported result.
+  table_ddd <- NULL
   models_ok <- Filter(Negate(is.null), list(additive = additive, fe = fe))
   if (length(models_ok) > 0) {
     hdrs <- c(additive = "Placebo Spec 1: additive controls",
               fe       = "Placebo Spec 2: interacted cell FE")[names(models_ok)]
-    print(do.call(etable, c(models_ok, list(headers = unname(hdrs), digits = 4))))
+    table_ddd <- do.call(etable, c(models_ok, list(headers = unname(hdrs), digits = 4)))
+    print(table_ddd)
   } else {
     message("run_gender_ddd_placebo: neither DDD placebo spec could be fit.")
   }
 
-  list(exposure_cells_men = exposure_cells_men, models = list(additive = additive, fe = fe))
+  list(exposure_cells_men = exposure_cells_men,
+       models = list(additive = additive, fe = fe),
+       table  = table_ddd)
 }
 
-run_gender_placebo <- function(folder_path, cleaned_women = NULL, exposure_calibrated = NULL,
+run_gender_placebo <- function(folder_path, cleaned_men = NULL, cleaned_women = NULL,
+                                exposure_calibrated = NULL,
                                 exposure_csv_path = file.path("data", "israeli_cbs_wfh_2digit.csv")) {
-  message("Loading data for men (sex_filter = 'men')...")
-  cleaned_men <- load_and_clean_data(folder_path, sex_filter = "men")
+  # cleaned_men is accepted rather than always reloaded, mirroring run_hours_gender_placebo(): once
+  # main.R calls this in the default pipeline it already holds a cleaned male frame (built for the
+  # exposure population), and reloading it from the raw CSVs would repeat the single most expensive
+  # step in the run for no gain. Passing NULL keeps the old standalone behaviour.
+  if (is.null(cleaned_men)) {
+    message("Loading data for men (sex_filter = 'men')...")
+    cleaned_men <- load_and_clean_data(folder_path, sex_filter = "men")
 
-  message("Validating cleaned data (male subsample)...")
-  validate_cleaned_df(cleaned_men, sex_filter = "men")
+    message("Validating cleaned data (male subsample)...")
+    validate_cleaned_df(cleaned_men, sex_filter = "men")
+  }
 
   # Human gate (docs/AUTONOMOUS_RUN_PLAN.md Checkpoint 5): report category sizes only -- a
   # category that's sparse for women (e.g. single-father counts in MisparHorimYechidim) may be

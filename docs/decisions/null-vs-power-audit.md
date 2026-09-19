@@ -12,8 +12,10 @@ hours-outcome DDD, which is not underpowered.
 **Status: VERIFIED AGAINST REAL DATA AND COMMITTED.** (Status corrected 2026-09-19: `outputs/null_vs_power_audit_wfh_first_stage_table.csv` is committed and regenerates byte-identically under the current code.) The two diagnostics below
 (`scripts/wfh_first_stage_check.R`, `scripts/ddd_mde_diagnostics.R`) are built, unit-tested, and
 have been run once against the real CBS extract to produce the numbers in this memo.
-`RUN_NULL_VS_POWER_AUDIT` is `FALSE` in the committed `main.R`; the numbers below came from a
-one-off local run with the flag temporarily flipped to `TRUE`, then reverted.
+`RUN_NULL_VS_POWER_AUDIT` defaults to `TRUE` in the committed `main.R` as of 2026-09-19 (it was
+`FALSE` when this memo was written, and the numbers below came from a one-off run with it
+temporarily flipped). The flag was flipped because the paper cites this block's first-stage
+figures, so a default run has to produce them.
 
 ## Background
 
@@ -99,7 +101,7 @@ result here could be read as evidence of no effect.
 
 ## What was wired into `main.R`
 
-Behind `RUN_NULL_VS_POWER_AUDIT` (default `FALSE`, so no behavior change for existing runs unless
+Behind `RUN_NULL_VS_POWER_AUDIT` (default flipped to `TRUE` on 2026-09-19, so a default run now produces the first-stage table the paper cites; previously no behavior change unless
 explicitly enabled): `check_wfh_first_stage_relevance()` and `compute_ddd_mde()` (both specs),
 exported (when the flag is on) as `null_vs_power_audit` in `outputs/`, aggregate-only (an etable
 and two closed-form MDE summaries — no row-level output).

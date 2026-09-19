@@ -308,7 +308,7 @@ run_hours_diagnostics(cleaned_df: tibble) ->
 # above. Omits run_diagnostics()'s Employed-NA-specific missingness audits (no hours analog).
 
 # ── gender_placebo.R / hours_gender_placebo.R ─────────────────────────────────
-run_gender_placebo(folder_path: character(1), cleaned_women: tibble = NULL,
+run_gender_placebo(folder_path: character(1), cleaned_men: tibble = NULL, cleaned_women: tibble = NULL,
                     exposure_calibrated: tibble = NULL,
                     exposure_csv_path: character(1) = "data/israeli_cbs_wfh_2digit.csv") ->
   invisible(list(cleaned_men = tibble, result = list(...), ddd_placebo = list(...) | NULL))
@@ -441,7 +441,7 @@ run_pretrend_joint_test(pretrend_model: fixest) -> invisible(wald_result)
 # zero. Fully generic -- run once for the secondary DDD's pretrend model (Diagnostics.R) and once
 # for the primary DDD's (hours_diagnostics.R).
 
-# All wired into main.R behind RUN_AGE_BALANCE_ROBUSTNESS (default FALSE) -- see
+# All wired into main.R behind RUN_AGE_BALANCE_ROBUSTNESS (default TRUE as of 2026-09-19) -- see
 # docs/decisions/age-balance-robustness-chain.md.
 
 # ── israeli_market_mismatch.R ────────────────────────────────────────────────

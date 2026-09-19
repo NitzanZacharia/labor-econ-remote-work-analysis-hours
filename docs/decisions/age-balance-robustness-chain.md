@@ -37,7 +37,7 @@ Ran `diagnose_gilnk_by_quartile()` and `run_balance_test()` against the real, lo
 
 ## What was wired into `main.R`
 
-Behind `RUN_AGE_BALANCE_ROBUSTNESS` (default `FALSE`, so no behavior changes for existing runs unless explicitly enabled):
+Behind `RUN_AGE_BALANCE_ROBUSTNESS` (default flipped to `TRUE` on 2026-09-19, so a default run now reproduces the artifacts the paper cites):
 - `run_balance_test()` — full covariate-balance table.
 - `diagnose_gilnk_by_quartile()` — the table above.
 - `run_ddd_age_interacted()` — secondary (employment) DDD formulas + `Mother:GilNK`.

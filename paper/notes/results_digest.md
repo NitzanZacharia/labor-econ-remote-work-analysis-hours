@@ -452,8 +452,15 @@ DDD z = 2.747 (p = 0.006). Men's DiD `Father:Post` = −0.3860* (0.1909): small,
 Men's DDD −1.881 (ns, SE 1.123): negative point estimate. Stated placebo limitations (§5.3): no
 second-stage mechanism regression exists for men; men's labor supply has unmodeled institutional
 drivers (reserve duty, retirement timing); the test compares independently-fit models rather than a
-joint `× Sex` specification. Employment-outcome gender placebo (`run_gender_placebo()`) is not
-called by `main.R` and has no exported result `[TODO: confirm — not run in outputs/]`.
+joint `× Sex` specification. **Update 2026-09-19: the employment-outcome gender placebo now runs.** `run_gender_placebo()` is
+called unconditionally by `main.R` and exports `outputs/gender_placebo_did_table.csv` and
+`gender_placebo_ddd_table.csv`. Results, men with `Mother` read as `Father`: DiD
+`Mother:Post` = 0.0077 (SE 0.0054); DDD `Mother:Post:WFH_Exposure` = 0.0444 (SE 0.0833) additive
+and 0.0661 (SE 0.0849) with cell FE. All insignificant, which is the direction a placebo should
+go. **Not currently reported in the paper**, which reports the hours placebo only; note that the
+employment DDD is underpowered in its own right (§2.3), so a null placebo on that margin is
+uninformative in the same way the main employment DDD is, and should not be presented as
+corroboration without that caveat.
 
 ---
 
@@ -681,7 +688,12 @@ to the paper.**
    ratio is 8–10× (§2.3).
 6. `GilNK` imbalance figures in the narrative doc / HLD (−0.797 / +0.239; "~0.8, t≈−81") differ from
    the current CSV (−0.974 / +0.057; t = −94) — docs predate the `BirthContinent` cell change (§1.7).
-7. Employment-outcome gender placebo (`run_gender_placebo()`) has no exported result (§3.4).
+7. ~~Employment-outcome gender placebo (`run_gender_placebo()`) has no exported result (§3.4).~~
+   **Resolved 2026-09-19:** wired into `main.R` and exporting
+   `outputs/gender_placebo_{did,ddd}_table.csv`. Two defects had to be fixed for this: the
+   function always reloaded the male subsample from the raw CSVs instead of accepting the one
+   already in memory, and `run_gender_ddd_placebo()` printed its etable without returning it, so
+   the DDD table reached no file even once the call was wired in (§3.4).
 8. Why the Jewish-women tables carry no `Dat` coefficients (§3.1). **Resolved 2026-09-15: no
    investigation; handled as a one-sentence footnote near the subgroup results (text in §3.1).**
 9. Lee-bounds trim proportion for the plain DiD (≈1.5%, inferred) and N of the three hours-DDD
