@@ -348,6 +348,22 @@ Source chain: `docs/decisions/null-vs-power-audit.md` (diagnosis, pre-fix number
 | **+BirthContinent (7-var, CURRENT)** | 1 | **−0.0257** | **0.0725** | **0.2031** | **26.3%** | **7.9×** | granularity-fix.md "Post-change numbers"; matches `outputs/ddd_employment.csv` |
 | **CURRENT** | 2 | **−0.0194** | **0.0722** | **0.2022** | **26.1%** | **10.4×** | same |
 
+> **The "% of baseline" column is a per-UNIT figure and overstates the shortfall (added
+> 2026-09-19).** The MDE is a coefficient: an effect per one unit of `WFH_Exposure`. On the
+> estimation sample that regressor has SD 0.0706, IQR 0.0766, and never spans a unit, so
+> comparing the per-unit MDE to the baseline employment rate answers a question the data cannot
+> pose. Correctly scaled, and now exported in
+> `outputs/null_vs_power_audit_mde_{additive,fe}.csv`: **MDE per SD = 0.0143 (1.43 pp, 1.85% of
+> baseline); per IQR = 0.0156 (1.56 pp, 2.01%).** Against `harrington2025`'s ~0.78 pp per 10%
+> rise in WFH, the design is underpowered by roughly 2–3x, not the 8–10x a reader infers from
+> "26% of baseline". **The `MDE / |estimate|` column is a ratio, is scale-invariant, and is
+> unaffected — it remains the basis for the "uninformative, not null" verdict.**
+>
+> Fixes tested and rejected (none rescues the design; it is structural): clustering on the
+> exposure cell rather than the coarse FE cell moves the SE 0.0725 → 0.0711; the combined margin
+> (hours incl. zeros) leaves the triple interaction at 0.45 of its own MDE; a one-sided test buys
+> 11%; finer cells were already exhausted over two rounds (51% → 32% → 26%).
+
 - **Verbatim verdict** (`null-vs-power-audit.md`, "Verdict"): "**Underpowered, not a genuine
   null.** The null `Mother:Post:WFH_Exposure` result is not informative about whether a
   WFH-exposure-driven motherhood employment effect exists — the design could not have detected a

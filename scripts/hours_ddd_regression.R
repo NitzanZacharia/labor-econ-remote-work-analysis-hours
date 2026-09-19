@@ -114,6 +114,10 @@ run_hours_ddd_regression <- function(cleaned_df, exposure_index, controls = DEFA
     model      = reg_ddd,
     n_employed = n_employed,
     n_matched  = n_matched,
+    # The regressor's own values on the estimation sample, so compute_ddd_mde() can report the MDE
+    # per SD/IQR of exposure rather than only per unit. A bare numeric vector, not a data frame,
+    # so export_all_results() ignores it (it is row-level and has no business in outputs/).
+    exposure_vector = df_ddd$WFH_Exposure,
     models     = list(ddd = reg_ddd, mechanism = reg_mechanism),
     mechanism_data = mechanism_df,
     dropped_occupations = list(

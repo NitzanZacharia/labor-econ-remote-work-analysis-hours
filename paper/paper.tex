@@ -103,8 +103,8 @@ relative to childless women, using the COVID-19-driven shift to remote work as t
 and a WFH-exposure index as the third difference (occupation-level for the hours model,
 demographic-cell-based for the employment model). On the extensive margin, the
 mother--non-mother employment gap did not change ($\Mother \times \Post = -0.0053$, SE $0.0052$),
-and the employment DDD is underpowered rather than informative (minimum detectable effect about
-26\% of the baseline employment rate). On the intensive margin, employed mothers' weekly hours rose
+and the employment DDD is underpowered rather than informative (its minimum detectable effect is
+roughly eight to ten times its own point estimate). On the intensive margin, employed mothers' weekly hours rose
 by $0.83$ hours relative to childless women (SE $0.18$), and this increase is concentrated in
 WFH-exposed occupations: the triple interaction is $3.41$ hours per unit of exposure (SE $0.93$,
 $p<0.001$), robust to a generalized trimming-bounds correction for selection into employment,
@@ -593,12 +593,28 @@ interaction is $-0.0257$ (SE $0.0725$) with additive controls and $-0.0194$ (SE 
 interacted cell fixed effects --- small, negative, and nowhere near significant. The question is
 whether this is evidence of no mechanism or evidence of nothing. The minimum detectable effect
 answers it: at $\alpha = 0.05$ and 80\% power, the design could detect a triple interaction no
-smaller than $0.2031$ (Spec~1) or $0.2022$ (Spec~2), which is about 26\% of the baseline employment
-rate of $0.7737$ and roughly 8--10 times the point estimates. Moving a mother from the least to the
-most exposed cell would have to change her relative post-2021 employment probability by a quarter
-of the baseline employment rate before this design could see it. That is not a plausible effect
-size for a labor-supply mechanism, so the null here is \emph{uninformative}: the employment DDD
-cannot be read as evidence for or against a WFH-mediated employment effect. The
+smaller than $0.2031$ (Spec~1) or $0.2022$ (Spec~2), roughly 8--10 times the point estimates.
+That ratio is the cleanest statement of the problem, because it is invariant to how the regressor
+is scaled: the design cannot detect an effect the size of the one it estimates.
+
+Putting the coefficient on an interpretable scale requires care, because it is an effect per
+\emph{unit} of exposure and the cell-based index never moves a unit: on the estimation sample its
+standard deviation is $0.0706$ and its interquartile range $0.0766$. A one-standard-deviation
+increase in exposure would therefore have to shift mothers' relative post-2021 employment
+probability by $1.43$ percentage points, or $1.85\%$ of the baseline employment rate of $0.7737$,
+before this design could see it. For comparison, \citet{harrington2025} report roughly $0.78$
+percentage points per 10\% rise in WFH, so the design is underpowered against the closest
+available benchmark by a factor of about two to three. The null here is therefore
+\emph{uninformative}: the employment DDD cannot be read as evidence for or against a WFH-mediated
+employment effect.
+
+The shortfall is structural rather than a specification choice, and we report that having tried to
+close it. Clustering on the exposure cell rather than the coarser fixed-effect cell changes the
+standard error from $0.0725$ to $0.0711$; estimating the combined margin instead, with hours coded
+zero for the non-employed, leaves the triple interaction at less than half its own minimum
+detectable effect; and two successive refinements of the exposure-cell partition had already cut
+the detectable effect from $51\%$ of baseline to the present figure. A binary outcome and a
+regressor with a standard deviation of $0.07$ do not support a tighter design. The
 $\Post \times \WFH$ main effect, by contrast, is negative and significant in both specifications
 ($-0.1555$\sym{**} and $-0.1516$\sym{**}). This indicates a general post-2021 employment decline in
 high-exposure cells that is unrelated to motherhood specifically.
@@ -635,8 +651,9 @@ Post $\times$ WFH\_Exposure & $-0.1555$\sym{**} & $-0.1516$\sym{**} \\
 WFH\_Exposure & $0.0131$ & $0.0056$ \\
  & $(0.0565)$ & $(0.0490)$ \\
 \midrule
-MDE ($\alpha=0.05$, power $0.80$) & 0.2031 & 0.2022 \\
-MDE / baseline employment rate & 26.3\% & 26.1\% \\
+MDE ($\alpha=0.05$, power $0.80$), per unit & 0.2031 & 0.2022 \\
+MDE per SD of exposure & 0.0143 & 0.0143 \\
+\quad as \% of baseline employment rate & 1.85\% & 1.85\% \\
 MDE / $|$point estimate$|$ & 7.9$\times$ & 10.4$\times$ \\
 \midrule
 Observations & 355{,}984 & 355{,}984 \\
@@ -647,7 +664,11 @@ $R^2$ & 0.22103 & 0.22952 \\
 \item Dependent variable: employment indicator; full sample of employed and non-employed women.
 Both specifications include Mother $\times$ age-group interactions and the standard controls
 (Spec~2 absorbs age group, education, and district into interacted cell fixed effects). Standard
-errors clustered on the age-by-education-by-district cell. Baseline employment rate $0.7737$.
+errors clustered on the age-by-education-by-district cell. Baseline employment rate $0.7737$. The
+MDE is a coefficient, so its per-unit value answers a question the data cannot pose: the exposure
+index has a standard deviation of $0.0706$ and an interquartile range of $0.0766$ on this sample,
+and never spans a unit. The per-SD row is the interpretable one. The ratio to the point estimate
+is invariant to scaling and is the basis for calling this null uninformative.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
@@ -986,7 +1007,8 @@ shock --- plausible given that occupational WFH norms were themselves still sett
 2021--2023.
 
 Why hours and not employment? The employment DDD is not a failed test of the mechanism; it is an
-uninformative one, with a minimum detectable effect of a quarter of the baseline employment rate.
+uninformative one: its minimum detectable effect is roughly eight to ten times its own point
+estimate, and about twice to three times the effect the closest study in the literature reports.
 The intensive-margin design is well powered because it can use occupation-level exposure, which the
 employment design cannot without conditioning its own outcome on itself. Substantively, the two
 results are coherent: the effect operates on \emph{how much} mothers who stay employed work, not on
@@ -1104,7 +1126,8 @@ takes it to Israel \emph{and} to the intensive margin. Not a replication.
 
 \item \textbf{Extensive margin: two different nulls, do not conflate them.} The employment DiD is
 a \emph{precise} null ($-0.0053$, SE $0.0052$). The employment DDD is \emph{uninformative}, not
-null: MDE $0.2031$, about 26\% of the baseline employment rate and 8--10 times the point estimate
+null: MDE $0.2031$ per unit of exposure, which is $1.43$ percentage points per standard deviation
+and 8--10 times the point estimate
 (Sections~\ref{sec:res-emp-did}--\ref{sec:res-emp-ddd}).
 
 \item \textbf{Intensive margin, the honest two-step.} The plain hours DiD is $0.8261$

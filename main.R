@@ -266,7 +266,8 @@ hours_ddd <- run_hours_ddd_regression(cleaned_df, hours_exposure_index)
 
 message("Computing minimum detectable effect for the hours DDD's triple interaction...")
 baseline_hours <- mean(cleaned_df$WorkHoursCont[cleaned_df$Employed == 1], na.rm = TRUE)
-mde_hours <- compute_ddd_mde(hours_ddd$model, baseline_rate = baseline_hours)
+mde_hours <- compute_ddd_mde(hours_ddd$model, baseline_rate = baseline_hours,
+                             regressor = hours_ddd$exposure_vector)
 
 message("Running generalized Lee bounds for the hours DDD (stratified by WFH_Exposure quartile)...")
 hours_lee_bounds <- run_hours_ddd_lee_bounds(
@@ -511,8 +512,10 @@ if (RUN_NULL_VS_POWER_AUDIT) {
 
   message("Computing minimum detectable effect for the employment DDD's triple interaction...")
   baseline_employment_rate <- mean(ddd_df$Employed, na.rm = TRUE)
-  mde_additive <- compute_ddd_mde(ddd_employment_additive, baseline_rate = baseline_employment_rate)
-  mde_fe       <- compute_ddd_mde(ddd_employment_fe, baseline_rate = baseline_employment_rate)
+  mde_additive <- compute_ddd_mde(ddd_employment_additive, baseline_rate = baseline_employment_rate,
+                                  regressor = ddd_df$WFH_Exposure)
+  mde_fe       <- compute_ddd_mde(ddd_employment_fe, baseline_rate = baseline_employment_rate,
+                                  regressor = ddd_df$WFH_Exposure)
 }
 
 # ── 9. Export results ─────────────────────────────────────────────────────────

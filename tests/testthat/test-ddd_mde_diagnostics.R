@@ -19,6 +19,39 @@ test_that("compute_ddd_mde matches the closed-form formula computed by hand from
   expect_equal(result$point_estimate, unname(coef(m)["x"]), tolerance = 1e-8)
 })
 
+test_that("supplying a regressor rescales the MDE by its SD and IQR", {
+  # The per-unit MDE assumes the regressor moves a full unit. When it does not -- WFH_Exposure has
+  # a weighted SD of ~0.08 on the real sample -- the per-unit figure overstates how large a true
+  # effect the design needs. These assertions pin the rescaling against hand arithmetic.
+  set.seed(11)
+  df <- data.frame(y = rnorm(500), x = runif(500, 0, 0.5))
+  m  <- fixest::feols(y ~ x, data = df)
+
+  res <- compute_ddd_mde(m, coef_name = "x", regressor = df$x)
+
+  expect_equal(res$mde_per_sd,  res$mde * sd(df$x), tolerance = 1e-10)
+  expect_equal(res$mde_per_iqr, res$mde * unname(diff(quantile(df$x, c(0.25, 0.75)))),
+               tolerance = 1e-10)
+  # Rescaling by an SD below 1 must shrink the figure, which is the whole point.
+  expect_lt(res$mde_per_sd, res$mde)
+  expect_equal(res$table$regressor_sd, sd(df$x), tolerance = 1e-10)
+  expect_equal(res$table$mde_per_sd, res$mde_per_sd, tolerance = 1e-10)
+})
+
+test_that("omitting the regressor leaves the original behaviour untouched", {
+  set.seed(12)
+  df <- data.frame(y = rnorm(200), x = rnorm(200))
+  m  <- fixest::feols(y ~ x, data = df)
+
+  res <- compute_ddd_mde(m, coef_name = "x")
+
+  expect_true(is.na(res$mde_per_sd))
+  expect_true(is.na(res$table$regressor_sd))
+  expect_true(is.na(res$table$mde_per_iqr))
+  # The unscaled MDE is unaffected by the new argument's absence.
+  expect_equal(res$mde, unname(fixest::se(m)["x"]) * (qnorm(0.975) + qnorm(0.8)), tolerance = 1e-10)
+})
+
 test_that("compute_ddd_mde respects custom sig_level/power", {
   set.seed(2)
   df <- data.frame(y = rnorm(200), x = rnorm(200))

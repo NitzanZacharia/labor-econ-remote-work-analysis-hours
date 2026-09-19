@@ -14,8 +14,20 @@
 # avoids adding car for the same reason).
 library(fixest)
 
+# `regressor` (optional): the numeric vector of the interacted regressor -- WFH_Exposure -- on the
+# estimation sample. Supply it and the MDE is ALSO reported per standard deviation and per
+# interquartile range of that regressor, not only per unit.
+#
+# Why this matters (added 2026-09-19). The MDE is a coefficient: an effect per ONE UNIT of the
+# regressor. Comparing it to a baseline rate silently assumes the regressor moves a full unit.
+# WFH_Exposure never does: on the analysis sample its weighted SD is 0.081, its IQR 0.105, and its
+# entire observed range is 0 to 0.75. Reporting only the per-unit figure made the employment DDD
+# look ~8-10x underpowered against the literature when the honest per-SD comparison is ~2-3x. The
+# scale-free ratio MDE/|point estimate| is unaffected by any of this and remains the strongest
+# statement of the power problem.
 compute_ddd_mde <- function(model, coef_name = "Mother:Post:WFH_Exposure",
-                             sig_level = 0.05, power = 0.8, baseline_rate = NULL) {
+                             sig_level = 0.05, power = 0.8, baseline_rate = NULL,
+                             regressor = NULL) {
   se_vec <- fixest::se(model)
   if (!coef_name %in% names(se_vec) || is.na(se_vec[[coef_name]])) {
     stop(sprintf(
@@ -26,6 +38,19 @@ compute_ddd_mde <- function(model, coef_name = "Mother:Post:WFH_Exposure",
   se             <- unname(se_vec[[coef_name]])
   point_estimate <- unname(coef(model)[[coef_name]])
   mde            <- se * (qnorm(1 - sig_level / 2) + qnorm(power))
+
+  # Scale the MDE by how much the regressor actually moves, when the caller supplies it.
+  reg_sd <- reg_iqr <- mde_per_sd <- mde_per_iqr <- NA_real_
+  if (!is.null(regressor)) {
+    r <- as.numeric(regressor)
+    r <- r[is.finite(r)]
+    if (length(r) > 1) {
+      reg_sd      <- stats::sd(r)
+      reg_iqr     <- unname(diff(stats::quantile(r, c(0.25, 0.75))))
+      mde_per_sd  <- mde * reg_sd
+      mde_per_iqr <- mde * reg_iqr
+    }
+  }
 
   message(sprintf(
     paste0(
@@ -42,6 +67,22 @@ compute_ddd_mde <- function(model, coef_name = "Mother:Post:WFH_Exposure",
     } else ""
   ))
 
+  if (!is.na(mde_per_sd)) {
+    message(sprintf(
+      paste0(
+        "  regressor SD = %.4f, IQR = %.4f -> MDE per SD = %.4f, per IQR = %.4f%s\n",
+        "  (the per-unit MDE above assumes a 1-unit move in a regressor whose SD is %.4f; ",
+        "prefer the per-SD figure when comparing against the literature)"
+      ),
+      reg_sd, reg_iqr, mde_per_sd, mde_per_iqr,
+      if (!is.null(baseline_rate)) {
+        sprintf(" (%.1f%% and %.1f%% of baseline)",
+                100 * mde_per_sd / baseline_rate, 100 * mde_per_iqr / baseline_rate)
+      } else "",
+      reg_sd
+    ))
+  }
+
   # Returned as a one-row data frame as well as the scalar list, so export_all_results() can write
   # it: the layer only recognises data frames and ggplots, so a list of scalars reaches no file.
   # The paper cites all three MDEs (2.6059 for hours, 0.2031/0.2022 for employment) and none of
@@ -55,6 +96,14 @@ compute_ddd_mde <- function(model, coef_name = "Mother:Post:WFH_Exposure",
     mde            = unname(mde),
     baseline       = if (is.null(baseline_rate)) NA_real_ else unname(baseline_rate),
     mde_pct_of_baseline = if (is.null(baseline_rate)) NA_real_ else 100 * mde / baseline_rate,
+    regressor_sd   = reg_sd,
+    regressor_iqr  = reg_iqr,
+    mde_per_sd     = mde_per_sd,
+    mde_per_iqr    = mde_per_iqr,
+    mde_per_sd_pct_of_baseline =
+      if (is.null(baseline_rate)) NA_real_ else 100 * mde_per_sd / baseline_rate,
+    mde_per_iqr_pct_of_baseline =
+      if (is.null(baseline_rate)) NA_real_ else 100 * mde_per_iqr / baseline_rate,
     within_mde     = abs(point_estimate) < mde,
     stringsAsFactors = FALSE
   )
@@ -67,6 +116,8 @@ compute_ddd_mde <- function(model, coef_name = "Mother:Post:WFH_Exposure",
     sig_level      = sig_level,
     power          = power,
     mde            = mde,
+    mde_per_sd     = mde_per_sd,
+    mde_per_iqr    = mde_per_iqr,
     within_mde     = abs(point_estimate) < mde
   ))
 }
