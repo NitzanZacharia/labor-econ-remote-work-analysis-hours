@@ -217,13 +217,14 @@ under 17. `Post` = year ≥ 2021. (`README.md` "Key variables"; `docs/HLD.md` §
 - **Result:** slope = **2.639 (SE 0.899), p = 0.006**, R² = 0.197, n = 37 occupations (3 of 40
   dropped for degenerate fits). Source: `docs/hours-intensive-margin-analysis.md` §2 (console
   output only).
-  - ⚠ The narrative doc cites `outputs/ddd_calibrated_mechanism_data.csv` as the "underlying
-    data". **That file is stale** (committed 2026-09-11, produced by the removed employment-outcome
-    `ddd_regression.R`; its `beta_j` values are in employment-probability units, −0.19 to +0.13, not
-    hours). `main.R` exports only `hours_ddd$table`, not `hours_ddd$mechanism_data`, so the hours
-    mechanism data is **not on disk**. The 3 dropped occupations in the stale file (ISCO 63, 62, 95)
-    are plausibly the same ones but this is not verifiable. `[TODO: confirm — export
-    hours_ddd$mechanism_data or re-run to verify slope 2.639]`
+  - ✅ **Resolved 2026-09-20 (Checkpoint 12).** `main.R` §8e now exports the real frame as
+    `outputs/hours_mechanism_data.csv`, and refitting from it gives **slope 2.6386, SE 0.8993,
+    n = 37** — the recorded figures, now verifiable from disk. The previously-cited
+    `outputs/archive/ddd_calibrated_mechanism_data.csv` was **stale** (committed 2026-09-11 by the
+    removed employment-outcome `ddd_regression.R`; its `beta_j` values are in
+    employment-probability units, −0.19 to +0.13, not hours) and should not be used. Note this
+    closes the *data* gap only: the scope decision above is unchanged, and this regression is
+    still not to be drafted into the paper.
 
 ### 1.6 [PRIMARY] Exposure-measure sensitivity (same formula, different occupation index)
 
@@ -695,9 +696,18 @@ to the paper.**
 
 ## 7. Open items / things not confirmable from artifacts
 
-1. Hours mechanism regression slope (2.639, SE 0.899, p 0.006, n 37) and its Jewish/Arab analogs —
-   console only; the CSV the narrative doc cites is a stale employment-outcome artifact (§1.5).
+1. ~~Hours mechanism regression slope (2.639, SE 0.899, p 0.006, n 37) and its Jewish/Arab analogs —
+   console only; the CSV the narrative doc cites is a stale employment-outcome artifact (§1.5).~~
    **Resolved 2026-09-15: §1.5 is out of scope — not to be drafted.**
+   **Export gap closed 2026-09-20** (Checkpoint 12, `docs/decisions/paper-figure-layer.md`):
+   `main.R` now exports `hours_ddd$mechanism_data` as `outputs/hours_mechanism_data.csv` (37 rows:
+   `occupation_code, wfh_exposure, beta_j, se_j` + CI columns). Refitting
+   `lm(beta_j ~ wfh_exposure, weights = 1/se_j^2)` from that file reproduces **slope 2.6386,
+   SE 0.8993, n 37**, confirming the recorded 2.639/0.899/37 from disk rather than console
+   scrollback, and superseding the stale `outputs/archive/ddd_calibrated_mechanism_data.csv`
+   (employment-probability units). The §1.5 scope decision is unaffected — the data is now
+   verifiable, but the regression is still not drafted into the paper. The Jewish/Arab analogs
+   remain console-only.
 2. Imbens–Manski CIs for both Lee-bounds tables — console only, arithmetically consistent with the
    exported per-bound SEs (§1.2, §1.4).
 3. ~~Hours-DDD MDE (2.6059) — console only; arithmetically verified from the exported SE (§1.3).~~

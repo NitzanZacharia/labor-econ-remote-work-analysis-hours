@@ -47,3 +47,31 @@ test_that("build_hours_subgroup_comparison returns NULL when no model has the te
   models <- list("No such term" = fixest::feols(y ~ x, data = data.frame(y = rnorm(30), x = rnorm(30))))
   expect_null(build_hours_subgroup_comparison(models, term = "Mother:Post", title = "Test"))
 })
+
+test_that("placebo subgroups are flagged for separate styling", {
+  # The male placebo is a different population, not another slice of the study sample, so it is
+  # styled apart from the women subgroups rather than sharing their colour and shape.
+  models <- list(
+    "All women (primary)" = make_toy_model(5, term_coef = 2),
+    "Men (placebo)"       = make_toy_model(6, term_coef = -1)
+  )
+  out <- build_hours_subgroup_comparison(models, term = "Mother:Post", title = "Test",
+                                         placebo = "Men (placebo)")
+
+  expect_true("is_placebo" %in% names(out$data))
+  expect_equal(sum(out$data$is_placebo), 1L)
+  expect_true(out$data$is_placebo[out$data$subgroup == "Men (placebo)"])
+})
+
+test_that("placebo defaults to none, so existing call sites are unaffected", {
+  models <- list("All women (primary)" = make_toy_model(7, term_coef = 2))
+  out <- build_hours_subgroup_comparison(models, term = "Mother:Post", title = "Test")
+  expect_false(any(out$data$is_placebo))
+})
+
+test_that("x_label overrides the default axis label", {
+  models <- list("All women (primary)" = make_toy_model(8, term_coef = 2))
+  out <- build_hours_subgroup_comparison(models, term = "Mother:Post", title = "Test",
+                                         x_label = "Custom label")
+  expect_equal(out$plot$labels$x, "Custom label")
+})

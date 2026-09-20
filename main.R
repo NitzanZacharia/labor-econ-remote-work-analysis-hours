@@ -16,6 +16,7 @@ source(file.path("scripts", "intensive_margin_lee_bounds.R"))
 source(file.path("scripts", "gender_placebo.R"))
 source(file.path("scripts", "hours_gender_placebo.R"))
 source(file.path("scripts", "export_results.R"))
+source(file.path("scripts", "export_paper_figures.R"))
 
 # Load modules required for the WFH exposure index and DDD mechanism test
 source(file.path("scripts", "wfh_exposure_index.R"))
@@ -27,6 +28,13 @@ source(file.path("scripts", "hours_ddd_lee_bounds.R"))
 source(file.path("scripts", "wfh_first_stage_check.R"))
 source(file.path("scripts", "ddd_mde_diagnostics.R"))
 source(file.path("scripts", "hours_subgroup_comparison.R"))
+
+# Paper figure layer (docs/decisions/paper-figure-layer.md): the shared theme/palette plus the
+# three descriptive builders added for the paper's Descriptive Statistics section.
+source(file.path("scripts", "paper_theme.R"))
+source(file.path("scripts", "hours_descriptive_plots.R"))
+source(file.path("scripts", "hours_dose_response.R"))
+source(file.path("scripts", "build_mechanism_scatter.R"))
 
 # robustness/ is normally sourced only inside the RUN_AGE_BALANCE_ROBUSTNESS block, but
 # pretrend_wald_test.R is a diagnostic rather than a robustness spec: its two F-statistics are the
@@ -349,7 +357,10 @@ hours_did_subgroup_comparison <- build_hours_subgroup_comparison(
   ),
   term     = "Mother:Post",
   title    = "Hours DiD (Mother x Post) by subgroup",
-  subtitle = "Weekly hours worked, Employed==1; 95% CI, clustered by IDPUF"
+  subtitle = "Weekly hours worked, Employed==1; 95% CI, clustered by IDPUF",
+  # Styled apart from the three women subgroups: men are a different population, not another
+  # slice of the study sample, and the placebo's value lies in running the opposite way.
+  placebo  = "Men (placebo)"
 )
 hours_ddd_subgroup_comparison <- build_hours_subgroup_comparison(
   models = list(
@@ -360,7 +371,8 @@ hours_ddd_subgroup_comparison <- build_hours_subgroup_comparison(
   ),
   term     = "Mother:Post:WFH_Exposure",
   title    = "Hours DDD (Mother x Post x WFH_Exposure) by subgroup",
-  subtitle = "Weekly hours worked, Employed==1; 95% CI, clustered by occupation"
+  subtitle = "Weekly hours worked, Employed==1; 95% CI, clustered by occupation",
+  placebo  = "Men (placebo)"
 )
 
 # ── 8b. Secondary DDD (employment): cell-based exposure, defined for the full sample ──────────
@@ -518,6 +530,39 @@ if (RUN_NULL_VS_POWER_AUDIT) {
                                   regressor = ddd_df$WFH_Exposure)
 }
 
+# ── 8e. Descriptive figure set for the paper ──────────────────────────────────
+# Unconditional, like §8a and unlike the two audit blocks above -- paper/paper.tex compiles against
+# these figures, and a flag that defaults off would be the same defect both flags above were flipped
+# to TRUE on 2026-09-19 to fix.
+#
+# This is the first point in the pipeline where all the inputs exist: hours_diagnostics_results
+# (§2), emp_res (§3), hours_exposure_index and hours_ddd (§8a).
+message("Building descriptive figures for the paper (hours 2x2, by-year, dose-response)...")
+
+# hours_by_period is passed rather than recomputed so this figure and
+# outputs/hours_diagnostics_hours_by_period.csv are physically the same numbers. If
+# hours_diagnostics.R's cell-mean computation ever changes, the figure follows it automatically --
+# but only for as long as this argument keeps being passed.
+hours_descriptives <- build_hours_descriptive_plots(
+  cleaned_df,
+  hours_by_period = hours_diagnostics_results$hours_by_period
+)
+
+# Binned on the occupation-level calibrated measure -- the same regressor the hours DDD uses, NOT
+# the demographic-cell index. The two are on different scales and must never be mixed.
+hours_dose_response <- build_hours_dose_response(cleaned_df, hours_exposure_index)
+
+# Repo-level diagnostic only. results_digest.md §1.5 records a 2026-09-15 decision that the
+# second-stage mechanism regression is out of scope for the paper's results, and that stands --
+# this figure is deliberately absent from the paper_figures list below. What it does close is the
+# separate open item at §7 item 1: exporting hours_ddd$mechanism_data finally puts the 37-occupation
+# frame behind the 2.639 slope on disk, replacing a stale employment-outcome artifact in
+# outputs/archive/ whose beta_j values are in probability units rather than hours.
+hours_mechanism <- build_mechanism_scatter(
+  hours_ddd$mechanism_data,
+  fit = hours_ddd$models$mechanism
+)
+
 # ── 9. Export results ─────────────────────────────────────────────────────────
 # idpuf_panel_check is deliberately NOT included here: its idpuf_years/idpuf_periods tables are
 # keyed by individual IDPUF, which is closer to raw identifiable microdata than the aggregate
@@ -544,6 +589,14 @@ results_to_export <- list(
   wfh_exposure_cells = exposure_cells,
   ddd_hours_table = hours_ddd$table,
   mde_hours = mde_hours$table,
+
+  # Paper descriptive figures (§8e). Every frame here is aggregate, per the disclosure convention
+  # above: hours_by_period is 4 cells, hours_by_year is 6 years x 3 series, dose_response's
+  # cell_means is 16 cells, and hours_mechanism$data is one coefficient per ISCO-2 occupation (37
+  # rows, the un-fittable ones already dropped inside run_hours_ddd_regression()). Nothing row-level.
+  hours_descriptives  = hours_descriptives,
+  hours_dose_response = hours_dose_response,
+  hours_mechanism     = hours_mechanism,
   hours_lee_bounds_table = hours_lee_bounds$table,
   hours_lee_bounds_quartiles = hours_lee_bounds$diagnostics$quartile_selection_rates,
   hours_lee_bounds_n_trimmed = hours_lee_bounds$diagnostics$n_trimmed_by_quartile,
@@ -608,3 +661,23 @@ if (RUN_NULL_VS_POWER_AUDIT) {
 
 message("Exporting results to outputs/...")
 export_all_results(results_to_export)
+
+# Paper figures, again and deliberately. export_all_results() has already written every plot above
+# as an 8x5in 150dpi PNG for browsing; this second pass rewrites the handful paper/paper.tex
+# actually includes as vector PDFs at the size they are printed at (~0.8\textwidth). Text sized for
+# a 5in-wide PDF looks small in the 8in PNG -- that is expected, and the PNG is not what compiles.
+#
+# Keys here are filenames: paper.tex hard-codes ../outputs/figures/<key>.pdf, so renaming one
+# breaks the LaTeX build. emp_res$plots$raw is intentionally omitted -- the plain raw bar chart is
+# subsumed by the pre/post panel and by Table 1, so it stays a repo artifact only. The mechanism
+# scatter is omitted for the scope reason recorded at §8e.
+message("Exporting paper figures (vector PDF) to outputs/figures/...")
+paper_figures <- list(
+  hours_2x2             = list(plot = hours_descriptives$plots$period_2x2, width = 5.0, height = 3.2),
+  hours_by_year         = list(plot = hours_descriptives$plots$by_year,    width = 5.0, height = 5.0),
+  hours_dose_response   = list(plot = hours_dose_response$plot,            width = 5.0, height = 3.4),
+  emp_childage_period   = list(plot = emp_res$plots$period,                width = 5.0, height = 3.6),
+  emp_childage_adjusted = list(plot = emp_res$plots$adjusted,              width = 5.0, height = 3.6),
+  mobility              = list(plot = comp_stats$plots$mobility,           width = 5.0, height = 3.4)
+)
+export_paper_figures(paper_figures)

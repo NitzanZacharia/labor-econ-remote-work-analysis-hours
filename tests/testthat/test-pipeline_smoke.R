@@ -200,4 +200,33 @@ test_that("the primary (hours) DDD pipeline (main.R's section 8a) runs end-to-en
   )
   expect_true(is.null(hours_lee_bounds) ||
                 nrow(hours_lee_bounds$diagnostics$quartile_selection_rates) > 0)
+
+  # ── main.R §8e: the descriptive figure set ──────────────────────────────────────────────────
+  # Mirrored here so this file keeps tracking main.R's real sequence. Correctness of each builder
+  # lives in its own test file; what is checked here is that they compose against pipeline-shaped
+  # inputs -- in particular that hours_descriptives accepts run_hours_diagnostics()' own frame,
+  # which is the contract keeping the figure and its CSV in agreement.
+  out <- capture.output(hours_diag <- suppressWarnings(run_hours_diagnostics(cleaned)))
+  out <- capture.output(hours_descriptives <- build_hours_descriptive_plots(
+    cleaned, hours_by_period = hours_diag$hours_by_period
+  ))
+  expect_s3_class(hours_descriptives$plots$period_2x2, "ggplot")
+  expect_s3_class(hours_descriptives$plots$by_year, "ggplot")
+  expect_equal(
+    dplyr::arrange(hours_descriptives$hours_by_period, Mother, Post)$mean_hours,
+    dplyr::arrange(hours_diag$hours_by_period, Mother, Post)$mean_hours
+  )
+
+  # Same quartile-degeneracy caveat as the Lee-bounds call above: the fixtures are unlikely to
+  # support four non-empty exposure bins, so a clean failure is tolerated.
+  dose <- tryCatch(
+    suppressWarnings(build_hours_dose_response(cleaned, exposure_index)),
+    error = function(e) NULL
+  )
+  expect_true(is.null(dose) || inherits(dose$plot, "ggplot"))
+
+  if (!is.null(hours_ddd)) {
+    mech <- build_mechanism_scatter(hours_ddd$mechanism_data, fit = hours_ddd$models$mechanism)
+    expect_true(is.null(mech) || inherits(mech$plot, "ggplot"))
+  }
 })

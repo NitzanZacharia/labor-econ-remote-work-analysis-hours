@@ -5,6 +5,7 @@
 #                            3 = age 5–9, 4 = age 10–14, 5 = age 15–17
 library(tidyverse)
 library(fixest)
+source(file.path("scripts", "paper_theme.R"))
 
 employment_by_child_age <- function(cleaned_df) {
   
@@ -56,7 +57,14 @@ employment_by_child_age <- function(cleaned_df) {
       n        = n(),
       .groups  = "drop"
     ) %>%
-    mutate(Period = if_else(Post == 1, "Post-2021", "Pre-2021"))
+    mutate(
+      Period = if_else(Post == 1, "Post-2021", "Pre-2021"),
+      # Binomial standard error for the plotted rate. Added so the pre/post profiles carry
+      # uncertainty: without bars, two lines a percentage point apart read as a finding.
+      se      = sqrt(emp_rate * (1 - emp_rate) / n),
+      ci_low  = pmax(0, emp_rate - 1.96 * se),
+      ci_high = pmin(1, emp_rate + 1.96 * se)
+    )
   print(emp_by_period)
   
   # ── 4. Regression: employment ~ child-age bin (with controls) ───────────
@@ -96,14 +104,14 @@ employment_by_child_age <- function(cleaned_df) {
   
   # 6a. Raw employment rate by child-age bin
   p_raw <- ggplot(emp_raw, aes(x = ChildAgeBin, y = emp_rate)) +
-    geom_col(fill = "#1D9E75", alpha = 0.85, width = 0.65) +
+    geom_col(fill = PAPER_PALETTE$estimate, alpha = 0.85, width = 0.65) +
     geom_text(
       aes(label = paste0(round(emp_rate * 100, 1), "%")),
       vjust = -0.5, size = 3.2, colour = "#2C2C2A"
     ) +
     geom_text(
       aes(label = paste0("n=", scales::comma(n))),
-      vjust = 1.6, size = 2.8, colour = "#5F5E5A"
+      vjust = 1.6, size = 2.8, colour = PAPER_PALETTE$annotation
     ) +
     scale_y_continuous(
       labels = scales::percent_format(accuracy = 1),
@@ -117,15 +125,9 @@ employment_by_child_age <- function(cleaned_df) {
       y        = "Employment rate",
       caption  = "Source: LFS data. Bars show raw employment rates; n = cell size."
     ) +
-    theme_minimal(base_size = 12) +
-    theme(
-      plot.title       = element_text(size = 13, face = "bold"),
-      plot.subtitle    = element_text(size = 10, colour = "grey40"),
-      axis.title       = element_text(size = 10),
-      panel.grid.major.x = element_blank(),
-      panel.grid.minor   = element_blank()
-    )
-  
+    theme_paper() +
+    theme(panel.grid.major.x = element_blank())
+
   # 6b. Pre vs Post comparison (line chart)
   p_period <- ggplot(
     emp_by_period,
@@ -133,13 +135,14 @@ employment_by_child_age <- function(cleaned_df) {
   ) +
     geom_line(linewidth = 0.9) +
     geom_point(size = 2.5) +
-    scale_colour_manual(values = c("Pre-2021" = "#378ADD", "Post-2021" = "#D85A30")) +
+    geom_errorbar(aes(ymin = ci_low, ymax = ci_high), width = 0.08, linewidth = 0.4) +
+    scale_colour_manual(values = PAPER_PALETTE$period) +
+    # Padded around the plotted range rather than the former c(min*0.92, max*1.06): those
+    # multiplicative limits silently clip a point once a rate approaches 0 or 1, and they ignored
+    # the confidence bars entirely. expansion() cannot clip.
     scale_y_continuous(
       labels = scales::percent_format(accuracy = 1),
-      limits = c(
-        min(emp_by_period$emp_rate) * 0.92,
-        max(emp_by_period$emp_rate) * 1.06
-      )
+      expand = expansion(mult = 0.10)
     ) +
     labs(
       title    = "Employment rate by youngest-child age: Pre vs Post-2021",
@@ -147,47 +150,52 @@ employment_by_child_age <- function(cleaned_df) {
       x        = "Age group of youngest child",
       y        = "Employment rate",
       colour   = NULL,
-      caption  = "Post-2021 covers 2021–2023; Pre-2021 covers 2017–2019."
+      caption  = paste(
+        "Bars are 95% confidence intervals. Post-2021 covers 2021–2023; Pre-2021 covers 2017–2019.",
+        "\nRaw rates among mothers only: no control group and no covariate adjustment, so the",
+        "pre/post distance is not an estimated effect."
+      )
     ) +
-    theme_minimal(base_size = 12) +
-    theme(
-      plot.title         = element_text(size = 13, face = "bold"),
-      plot.subtitle      = element_text(size = 10, colour = "grey40"),
-      axis.title         = element_text(size = 10),
-      legend.position    = "top",
-      panel.grid.minor   = element_blank()
-    )
+    theme_paper()
   
-  # 6c. Raw vs adjusted side-by-side
-  p_adj <- plot_df %>%
+  # 6c. Raw vs adjusted, as a dumbbell rather than dodged bars.
+  # The whole point of this figure is the ~5pp divergence between the raw and adjusted profiles in
+  # the older-child bins. Bars must be anchored at zero, which squeezed every one of those
+  # differences into the top fifth of the panel and made the figure unreadable. A point-and-segment
+  # chart carries no such obligation, so the y-axis can zoom to the range the data actually
+  # occupies, and the connecting segment states the raw-to-adjusted distance directly.
+  adj_levels <- names(PAPER_PALETTE$adjustment)   # "Raw", then "Adjusted (controls)"
+  p_adj_long <- plot_df %>%
     pivot_longer(cols = c(emp_rate, adj_emp),
                  names_to = "type", values_to = "rate") %>%
-    mutate(type = recode(type,
-                         emp_rate = "Raw",
-                         adj_emp  = "Adjusted (controls)")) %>%
-    ggplot(aes(x = ChildAgeBin, y = rate, fill = type)) +
-    geom_col(position = position_dodge(width = 0.7), width = 0.6, alpha = 0.85) +
-    scale_fill_manual(values = c("Raw" = "#1D9E75", "Adjusted (controls)" = "#7F77DD")) +
+    mutate(type = factor(
+      recode(type, emp_rate = "Raw", adj_emp = "Adjusted (controls)"),
+      levels = adj_levels
+    ))
+
+  p_adj <- ggplot(p_adj_long, aes(x = ChildAgeBin, y = rate)) +
+    geom_line(aes(group = ChildAgeBin), colour = PAPER_PALETTE$annotation, linewidth = 0.6) +
+    geom_point(aes(colour = type), size = 3.2) +
+    scale_colour_manual(values = PAPER_PALETTE$adjustment, breaks = adj_levels) +
     scale_y_continuous(
       labels = scales::percent_format(accuracy = 1),
-      expand = expansion(mult = c(0, 0.05))
+      expand = expansion(mult = 0.12)
     ) +
     labs(
       title    = "Raw vs adjusted employment rate by youngest-child age",
       subtitle = "Controls: marital status, religion, age group, district, education",
       x        = "Age group of youngest child",
       y        = "Employment rate",
-      fill     = NULL,
-      caption  = "Adjusted rates: OLS predictions with controls held at sample means."
+      colour   = NULL,
+      caption  = paste(
+        "Adjusted rates: OLS predictions with controls held at sample means.",
+        "\nNote the y-axis does not start at zero; segments show the raw-to-adjusted distance."
+      )
     ) +
-    theme_minimal(base_size = 12) +
+    theme_paper() +
     theme(
-      plot.title         = element_text(size = 13, face = "bold"),
       plot.subtitle      = element_text(size = 9.5, colour = "grey40"),
-      axis.title         = element_text(size = 10),
-      legend.position    = "top",
-      panel.grid.major.x = element_blank(),
-      panel.grid.minor   = element_blank()
+      panel.grid.major.x = element_blank()
     )
   
   # ── 7. Print plots ───────────────────────────────────────────────────────

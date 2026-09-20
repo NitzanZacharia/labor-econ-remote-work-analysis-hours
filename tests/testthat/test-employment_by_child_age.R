@@ -23,3 +23,15 @@ test_that("raw and adjusted employment rates are finite", {
   out <- capture.output(res <- employment_by_child_age(cleaned))
   expect_true(all(is.finite(res$emp_raw$emp_rate)))
 })
+
+test_that("emp_by_period carries binomial confidence intervals inside [0, 1]", {
+  # Added with the paper figure layer: the pre/post profiles are plotted with error bars, so the
+  # bounds have to exist and be valid proportions.
+  out <- capture.output(res <- employment_by_child_age(cleaned))
+
+  expect_true(all(c("se", "ci_low", "ci_high") %in% names(res$emp_by_period)))
+  expect_true(all(res$emp_by_period$ci_low >= 0))
+  expect_true(all(res$emp_by_period$ci_high <= 1))
+  expect_true(all(res$emp_by_period$ci_low <= res$emp_by_period$emp_rate))
+  expect_true(all(res$emp_by_period$ci_high >= res$emp_by_period$emp_rate))
+})

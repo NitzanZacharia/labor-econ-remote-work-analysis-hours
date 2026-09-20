@@ -8,6 +8,12 @@
 # on repeated calls (see Diagnostics.R's and run_tests.R's own comments on this). Not a real
 # output -- has leaked into the working tree and gotten accidentally committed twice already.
 Rplots*.pdf
+
+# testthat writes a dump of each failing expectation's context here when the "check" reporter
+# runs (run_tests.R:19). Debugging debris from a red run, not source -- it lingers after the
+# failure is fixed and would otherwise get committed alongside the fix.
+tests/testthat/_problems/
+
 *.csv
 !tests/testthat/fixtures/**/*.csv
 !data/israeli_cbs_wfh_2digit.csv

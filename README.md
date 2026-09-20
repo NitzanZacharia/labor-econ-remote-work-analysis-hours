@@ -127,6 +127,11 @@ Runs the `testthat` suite in `tests/testthat/` (data processing, validation, sch
 | `scripts/ddd_mde_diagnostics.R` | `compute_ddd_mde()` | Closed-form minimum detectable effect for a triple interaction. Console-only: its return value is a list of scalars, which `export_all_results()` skips, so the MDEs quoted in the paper are reproducible by re-running but are in no CSV. |
 | `scripts/wfh_first_stage_check.R` | `check_wfh_first_stage_relevance()` | First-stage relevance of `WFH_Exposure` against realized reference-week WFH, level and year-dynamic. Gated behind `RUN_NULL_VS_POWER_AUDIT`, which defaults to `TRUE` as of 2026-09-19 (the paper cites its first-stage figures). |
 | `scripts/export_results.R` | `export_all_results()` | Walks the heterogeneous result lists returned by every analysis function and writes each data frame to CSV and each `ggplot` to PNG under `outputs/`. |
+| `scripts/export_paper_figures.R` | `export_paper_figures()` | Vector-PDF export for the hand-picked figures `paper/paper.tex` includes. Takes a **flat** named list (the key is the filename, since `paper.tex` hard-codes them), writes `cairo_pdf` at per-figure dimensions, and strips in-plot titles so the LaTeX `\caption`/`Notes` block isn't duplicated. Does not replace `export_all_results()`; both run. |
+| `scripts/paper_theme.R` | `theme_paper()` (+ `PAPER_PALETTE`) | Shared ggplot theme and colour palette for every figure. Exists chiefly to resolve a semantic collision: the same two hexes previously meant *Mothers/Non-mothers* in one script and *Post-2021/Pre-2021* in another. `PAPER_PALETTE` is a constant, like `DEFAULT_CONTROLS`. |
+| `scripts/hours_descriptive_plots.R` | `build_hours_descriptive_plots()` | The primary outcome described rather than estimated: the raw hours 2×2 (DiD **+0.878**, SE 0.099, against the estimated 0.8261) and a new by-year series whose gap panel shows the 2017 pre-trend anomaly with no regression adjustment. Accepts `run_hours_diagnostics()`'s own cell means so the figure and `outputs/hours_diagnostics_hours_by_period.csv` cannot disagree. |
+| `scripts/hours_dose_response.R` | `build_hours_dose_response()` | Raw hours DiD within each quartile of **occupation-level** WFH exposure — the same regressor the hours DDD uses, deliberately not the cell-based index. Cell arithmetic only, no regression. |
+| `scripts/build_mechanism_scatter.R` | `build_mechanism_scatter()` | Per-occupation `Mother:Post` against WFH exposure. Draws the **precision-weighted** fit passed in, never an unweighted `geom_smooth`. Repo diagnostic only — deliberately not in the paper (`results_digest.md` §1.5), though its data is now exported. |
 | `run_tests.R` | — | `testthat` runner (`Rscript run_tests.R`); exits non-zero on failure. |
 
 ## Key variables
@@ -148,6 +153,10 @@ Runs the `testthat` suite in `tests/testthat/` (data processing, validation, sch
 ## Outputs
 
 `Rscript main.R` writes one file per result table/plot to `outputs/` (CSV for tables, PNG for plots) via `export_all_results()`. `outputs/` is **tracked in git**, not gitignored.
+
+The handful of figures the paper actually includes are then written a **second** time, as vector PDFs under `outputs/figures/`, by `export_paper_figures()` (`scripts/export_paper_figures.R`). This is deliberate, not redundant: the PNG is the browsing copy at a fixed 8×5in/150dpi, while `paper/paper.tex` compiles against the PDF at the ~5in width it is printed at. Two consequences worth knowing before editing either side — the keys of `main.R`'s `paper_figures` list **are** the filenames `paper.tex` hard-codes, so renaming one breaks the LaTeX build; and the paper figures are exported with their in-plot title/subtitle/caption stripped, because in a LaTeX float that text is the job of `\caption` and the `Notes` block. See [`docs/decisions/paper-figure-layer.md`](docs/decisions/paper-figure-layer.md).
+
+Because `paper.tex` references those figures with `../outputs/figures/`-relative paths and no `\graphicspath`, **the figures must exist before the paper compiles** — run `Rscript main.R` before editing `paper.tex`, and the paper only compiles from inside `paper/`.
 
 ## Known limitations
 

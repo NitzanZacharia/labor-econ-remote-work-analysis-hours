@@ -186,3 +186,25 @@ Must exit with status 0, no hard-fail validation errors, and produce the full se
 Full motivation, design, and real-data results are recorded in [`docs/decisions/hours-ddd-pivot.md`](decisions/hours-ddd-pivot.md) — not duplicated here. In brief: the Checkpoint 7 `Employed`-outcome DDD remained underpowered (MDE ~4x the point estimate) even after Checkpoint 6/7's exposure-measure refinements; the hours-outcome DDD unlocks a more precise occupation-level exposure regressor (unavailable to the employment-outcome DDD because occupation is undefined for the non-employed) and yields a statistically significant, Lee-bounds-robust result well outside its own MDE.
 
 **Verification Step:** See `docs/decisions/hours-ddd-pivot.md`'s "Real-data results" section for the confirmed point estimate, MDE, and Lee-bounds/Imbens-Manski CI values.
+
+---
+
+## Checkpoint 12 — Paper Figure Layer (Descriptive Statistics Section)
+
+**Objective:** Give the paper a standalone Descriptive Statistics section with figures, and give the pipeline a vector-PDF export path, a shared plot theme, and descriptive builders for the primary (hours) margin — which had none.
+
+**Status:** Implemented. New: `scripts/paper_theme.R`, `scripts/export_paper_figures.R`, `scripts/hours_descriptive_plots.R`, `scripts/hours_dose_response.R`, `scripts/build_mechanism_scatter.R`. Wired into `main.R` §8e (unconditional, no feature flag) plus a second export call after §9. `paper/paper.tex` gains §4 "Descriptive Statistics" with six figures; §4–§8 renumbered to §5–§9 and Table 1 moved from §3.1 into §4.1.
+
+Full motivation, the plot triage, and the design rationale are recorded in [`docs/decisions/paper-figure-layer.md`](decisions/paper-figure-layer.md) — not duplicated here. In brief: after Checkpoint 11 made hours the primary outcome, four of the repo's six plots still described the secondary margin and none described the primary one, so the paper asserted its headline result numerically without ever showing it.
+
+Two notes that matter for anyone extending this:
+
+- **`export_all_results()` is unchanged.** Paper figures are written twice on purpose — an 8x5in 150dpi PNG for browsing `outputs/`, and a vector PDF at ~5in for the paper. Keys in `main.R`'s `paper_figures` list are filenames that `paper.tex` hard-codes, so renaming one breaks the LaTeX build.
+- **The mechanism scatter is built and its data exported, but the figure is deliberately not in the paper** — `paper/notes/results_digest.md` §1.5's 2026-09-15 out-of-scope decision stands. Exporting `hours_ddd$mechanism_data` closes the separate open item at §7 item 1; refitting from `outputs/hours_mechanism_data.csv` reproduces slope 2.6386 (SE 0.8993), n = 37.
+
+**Verification Step:**
+```r
+Rscript run_tests.R   # 732 passing
+Rscript main.R        # writes outputs/figures/*.pdf + outputs/hours_mechanism_data.csv
+```
+Then, from inside `paper/`: `pdflatex`, `bibtex`, `pdflatex`, `pdflatex`. Check `paper/paper.log` for `File ... not found` and undefined citations/references directly rather than trusting the hook's summary line — the figures must exist before the `.tex` edit compiles.
