@@ -1,5 +1,21 @@
 # Results Digest — WFH and the Motherhood Penalty (Israel, CBS LFS 2017–19 / 2021–23)
 
+> ## ⚠️ STALE FOR EVERY HOURS-DERIVED NUMBER — read this first
+>
+> Checkpoint 13 (2026-09-21, [`docs/decisions/hours-population-harmonization.md`](../../docs/decisions/hours-population-harmonization.md))
+> harmonized the hours population across survey years, and a follow-up redefined the Lee-bounds
+> selection rate on the observed-hours sample. **Every hours figure below predates both.** The
+> employment margin, the WFH-exposure construction and Table 1's non-hours rows are unaffected and
+> remain valid.
+>
+> `paper/paper.tex` has already been updated directly from the regenerated `outputs/` CSVs, so for
+> hours numbers **the paper is currently ahead of this digest**, inverting the usual
+> source-of-truth relationship. Do not transcribe an hours number from here into the paper.
+> Headline changes: pre-trend Wald *F* = 23.69 → **0.949** (*p* = 0.387, now passing); hours DiD
+> 0.8261\*\*\* → **0.2280** (null); hours DDD 3.4073\*\*\* → **3.224**\*\*; Imbens–Manski on the DDD
+> [1.5035, 5.2091] → **[1.021, 5.324]**. §5.4's parallel-trends caveat and §7's open items 3–4 are
+> obsolete. This digest needs a full hours pass before it is cited again.
+
 **Purpose.** Fact-extraction pass for the seminar paper. No prose, no LaTeX. Every number is
 tagged with the exact file it was read from. Where the only source is a console message quoted in
 a decision memo (never exported to `outputs/`), that is stated explicitly. Anything not confirmable
