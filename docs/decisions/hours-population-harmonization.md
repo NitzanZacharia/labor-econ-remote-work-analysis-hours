@@ -185,3 +185,36 @@ needed to drop the paper's 2018–2019 restriction on the identifying assumption
 - Latent, pre-existing: both Lee-bounds files sort `NA` last in `arrange()`. The Step-2 filter
   removes the exposure today, but the ordering itself is still NA-naive if a future extract
   reintroduces code 99 in a post-period year.
+
+---
+
+## Follow-up: the Lee-bounds selection rate (2026-09-21)
+
+Harmonization introduced a mismatch in both Lee-bounds constructions. `s_ab` was
+`mean(Employed == 1)` on the full frame, but the hours distribution it trims now excludes
+reference-week absentees — so the trim proportion was derived on one denominator and applied to
+another. `s_ab` is now the share whose **outcome is observed**, `mean(!is.na(WorkHoursCont))`,
+written that way rather than by naming the gate conditions so it keeps tracking whatever defines
+the estimation sample.
+
+**This also resolved a live defect.** Before the change the DDD bounds *inverted* — lower 3.30763
+above upper 3.30592, an empty identified set — which tripped the degenerate branch in
+`imbens_manski_ci()` and returned a plain 1.96 critical value rather than a root-found one. The
+bounds are now properly ordered and the critical value is genuine.
+
+| | before this follow-up | after |
+|---|---|---|
+| DiD bounds | [−0.3783, +0.7095] | **[−0.5166, +0.8017]** |
+| DiD Imbens–Manski | [−0.6720, 1.0043] | **[−0.8095, 1.0959]** |
+| DDD bounds | [3.3076, **3.3059**] — inverted | **[3.1255, 3.4434]** — ordered |
+| DDD Imbens–Manski | [1.2100, 5.2205] (*c*α 1.960, degenerate) | **[1.0208, 5.3237]** (*c*α 1.840) |
+| Selection rates (DiD) | 0.7518 / 0.7639 / 0.7717 / 0.7961 | **0.7010 / 0.7058 / 0.6786 / 0.6964** |
+| Trim by quartile | 632 / 56 / 117 / 263 (1,068) | **548 / 197 / 202 / 449 (1,396)** |
+
+The headline DDD still excludes zero under the corrected bounds. Five CSVs moved — both bounds
+tables, both selection-rate files, and `hours_lee_bounds_n_trimmed.csv`; the first two of those
+were byte-identical under the original harmonization and move only now.
+
+Recomputed *z*-tests (unchanged by this follow-up, since the subgroup point estimates do not depend
+on the bounds): Arab vs Jewish DiD −0.720 (0.471), DDD +0.942 (0.346); women vs men DiD +2.406
+(0.0161), DDD +3.461 (0.0005).

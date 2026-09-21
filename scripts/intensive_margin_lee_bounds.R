@@ -23,7 +23,9 @@
 # Mother==1's selection into employment, relative to what Mother==0's own pre/post change in
 # selection implies (a parallel-trends-in-selection counterfactual):
 #
-#   s_ab = P(Employed==1 | Mother==a, Post==b)          for a,b in {0,1}
+#   s_ab = P(hours observed | Mother==a, Post==b)       for a,b in {0,1}
+#          (i.e. employed AND worked the reference week -- the estimation sample, not the employed;
+#           see docs/decisions/hours-population-harmonization.md)
 #   s11_counterfactual = s10 + (s01 - s00)               (implied Post effect for mothers, absent
 #                                                          any differential WFH-driven entry)
 #
@@ -66,9 +68,16 @@ source(file.path("scripts", "imbens_manski_ci.R"))
 run_intensive_margin_lee_bounds <- function(cleaned_df, controls = DEFAULT_CONTROLS) {
 
   # ── Selection rates by (Mother, Post) cell, and the implied counterfactual ──
+  # The rate is the share whose OUTCOME IS OBSERVED, not the share employed. Lee bounds correct for
+  # selection into the sample the outcome is measured on, and since the hours population was
+  # harmonized to reference-week workers (docs/decisions/hours-population-harmonization.md) that is
+  # no longer the same set as the employed: ~10% of employed rows in every year have no usual-hours
+  # value. Using mean(Employed == 1) would derive the trim proportion on one denominator and apply
+  # it to another. Written as !is.na(WorkHoursCont) rather than by naming the gate conditions, so it
+  # keeps tracking whatever defines the estimation sample.
   sel_rates <- cleaned_df %>%
     group_by(Mother, Post) %>%
-    summarise(selection_rate = mean(Employed == 1), n = n(), .groups = "drop")
+    summarise(selection_rate = mean(!is.na(WorkHoursCont)), n = n(), .groups = "drop")
 
   get_rate <- function(m, p) {
     rate <- sel_rates$selection_rate[sel_rates$Mother == m & sel_rates$Post == p]
@@ -87,7 +96,7 @@ run_intensive_margin_lee_bounds <- function(cleaned_df, controls = DEFAULT_CONTR
 
   message(sprintf(
     paste0(
-      "run_intensive_margin_lee_bounds: selection (employment) rates -- ",
+      "run_intensive_margin_lee_bounds: selection (observed-hours) rates -- ",
       "Mother=0,Post=0: %.4f | Mother=0,Post=1: %.4f | Mother=1,Post=0: %.4f | ",
       "Mother=1,Post=1: %.4f (parallel-trends counterfactual: %.4f).\n  %s"
     ),
