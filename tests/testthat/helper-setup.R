@@ -38,6 +38,7 @@ source(file.path("scripts", "basic_reg_compared_data.R"))
 source(file.path("scripts", "intensive_margin_regression.R"))
 source(file.path("scripts", "imbens_manski_ci.R"))
 source(file.path("scripts", "intensive_margin_lee_bounds.R"))
+source(file.path("scripts", "placebo_male_frame.R"))
 source(file.path("scripts", "gender_placebo.R"))
 source(file.path("scripts", "hours_gender_placebo.R"))
 source(file.path("scripts", "wfh_exposure_index.R"))
@@ -91,4 +92,43 @@ extract_controls_vector <- function(file_path) {
     stop("Could not find a `controls <- ...` assignment in ", file_path)
   }
   eval(parse(text = m), envir = globalenv())
+}
+
+# A synthetic occupation-level hours panel with a known injected DDD effect, shared by
+# test-hours_ddd_regression.R and test-hours_gender_placebo.R. The two files previously carried
+# character-identical copies of this that differed only in the Min column, so a fix to one silently
+# left the other behind; `min_sex = 1L` produces the male-subsample variant the placebo needs.
+#
+# 10 occupations with distinct, evenly-spaced exposure. Mother/Post are assigned independently per
+# row rather than per occupation: the regression needs within-occupation variation in both, and
+# occupation-level assignment would make an occupation entirely Mother or entirely non-Mother.
+make_hours_ddd_panel <- function(delta = -3, n = 400, n_occ = 10, min_sex = NULL) {
+  occ_codes <- 300 + seq_len(n_occ)
+  exposure_index <- tibble::tibble(
+    occupation_code = occ_codes,
+    wfh_exposure    = seq(0.05, 0.95, length.out = n_occ)
+  )
+
+  occ_i <- sample(seq_len(n_occ), n, replace = TRUE)
+  panel <- tibble::tibble(
+    MishlachYad_ISCO_08_2 = occ_codes[occ_i],
+    .wfh                  = exposure_index$wfh_exposure[occ_i],
+    MatzavMishpachti = factor(sample(1:5, n, replace = TRUE)),
+    Dat              = factor(sample(1:5, n, replace = TRUE)),
+    GilNK            = factor(sample(3:7, n, replace = TRUE)),
+    MachozMegurim    = factor(sample(1:7, n, replace = TRUE)),
+    TeudaGvoha       = factor(sample(c("A", "B", "C"), n, replace = TRUE)),
+    Mother   = sample(0:1, n, replace = TRUE),
+    Post     = sample(0:1, n, replace = TRUE),
+    Employed = 1L
+  ) %>%
+    dplyr::mutate(
+      WorkHoursCont = 40 + delta * Mother * Post * .wfh + stats::rnorm(dplyr::n(), 0, 0.5),
+      IDPUF = dplyr::row_number()
+    ) %>%
+    dplyr::select(-.wfh)
+
+  if (!is.null(min_sex)) panel <- dplyr::mutate(panel, Min = min_sex, .before = 1)
+
+  list(panel = panel, exposure_index = exposure_index)
 }
