@@ -485,32 +485,28 @@ every regression.
 
 \subsection{The raw hours gap}\label{sec:desc-hours}
 
-Figure~\ref{fig:hours-2x2} shows the paper's primary outcome in four cell means. Mothers work
-$38.54$ hours per week before 2021 and $38.84$ after, a gain of $0.31$ hours. Childless women move
-from $40.04$ to $40.08$, a gain of $0.04$. The difference between those two changes is $0.266$
-hours (SE $0.098$), and it is the entire difference-in-differences of equation~\eqref{eq:did}
-computed without a single control variable.
+Before any model, the primary outcome in four cell means. Mothers work $38.54$ hours per week
+before 2021 and $38.84$ after, a gain of $0.31$ hours. Childless women move from $40.04$ to
+$40.08$, a gain of $0.04$. The difference between those two changes is $0.266$ hours, and it is the
+entire difference-in-differences of equation~\eqref{eq:did} computed without a single control
+variable.
 
 This matters for how the later estimate should be read. The regression DiD of Table~\ref{tab:hours}
-is $0.2280$ (SE $0.1809$) --- within a twentieth of an hour of the raw figure. What the controls
-do not do, in other words, is manufacture or conceal an average effect: the near-absence of one is
-already present in the arithmetic of four averages, and adding the control set moves it by less
-than four hundredths of an hour. Note also that mothers remain well below childless women in both
-periods, and that the gap closes by a fraction of what it would take to eliminate it. The average
-mother's hours are not what moves in this paper; Section~\ref{sec:desc-exposure} shows what does.
+is $0.2280$, within four hundredths of an hour of the raw figure. What the controls do not do, in
+other words, is manufacture or conceal an average effect: the near-absence of one is already
+present in the arithmetic of four averages.
 
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.8\textwidth]{../outputs/figures/hours_2x2.pdf}
-\caption{Mean weekly hours by motherhood and period}\label{fig:hours-2x2}
-\begin{minipage}{0.8\textwidth}\small
-\vspace{0.3em}
-\emph{Notes:} Women aged 25--59 who worked in the reference week, unweighted cell means with no
-controls. Vertical bars are 95\% confidence intervals on each cell mean. Pre-2021 pools 2017--2019
-and Post-2021 pools 2021--2023; 2020 is excluded throughout. The raw difference-in-differences is
-$+0.266$ hours (SE $0.098$); compare the estimated $0.2280$ in Table~\ref{tab:hours}.
-\end{minipage}
-\end{figure}
+The two differ in precision rather than in magnitude, and the difference matters. The raw
+difference has a standard error of $0.098$, which treats the $251{,}857$ observations as
+independent; the regression clusters by individual and returns $0.1809$, very nearly double. Taken
+at face value the raw figure would appear to show a significant increase, and it does not: the
+estimate this paper reports is the clustered one, and it is a null
+(Section~\ref{sec:res-hours}). We note this because the unadjusted arithmetic is easy to
+reproduce and easy to over-read.
+
+Note also that mothers remain well below childless women in both periods, and that the gap closes
+by a fraction of what it would take to eliminate it. The average mother's hours are not what moves
+in this paper; Section~\ref{sec:desc-exposure} shows what does.
 
 \subsection{Hours year by year}\label{sec:desc-pretrend}
 
@@ -551,7 +547,7 @@ Table~\ref{tab:pretrend}.
 
 The triple difference asks whether the hours gain is larger where work can be done from home.
 Figure~\ref{fig:dose-response} puts that question to the data directly, by computing the same raw
-difference-in-differences as Figure~\ref{fig:hours-2x2} separately within each quartile of
+difference-in-differences as Section~\ref{sec:desc-hours} separately within each quartile of
 occupational WFH exposure. The answer is not that the gain is larger at the top; it is that there
 is no gain anywhere else. The bottom three quartiles return $-0.32$, $0.27$ and $-0.02$ hours,
 none of them distinguishable from zero. The top quartile returns $1.55$ hours
@@ -941,9 +937,11 @@ Column~(1) of Table~\ref{tab:hours} reports equation~\eqref{eq:did} for weekly h
 working in the reference week. Mothers work $1.739$ fewer hours per week than childless women
 ($\Mother = -1.739$\sym{***}), the intensive-margin penalty itself. That penalty did not
 measurably change after the shift to remote work: $\Mother \times \Post = 0.2280$ (SE $0.1809$),
-$t = 1.26$, $N = 251{,}857$. The raw cell means of Figure~\ref{fig:hours-2x2} agree: the unadjusted
-difference-in-differences is $0.266$, so the controls move the estimate by less than a twentieth of
-an hour in either direction.
+$t = 1.26$, $N = 251{,}857$. The raw cell means of Section~\ref{sec:desc-hours} agree on magnitude:
+the unadjusted difference-in-differences is $0.266$, so the controls move the estimate by less than
+four hundredths of an hour. They do not agree on precision --- the unclustered standard error is
+$0.098$, roughly half the clustered one --- which is why the raw arithmetic should not be read as
+evidence of a significant increase.
 
 Following the standard set in Section~\ref{sec:res-emp-did}, it is worth saying what kind of null
 this is. At this standard error the design's minimum detectable effect is

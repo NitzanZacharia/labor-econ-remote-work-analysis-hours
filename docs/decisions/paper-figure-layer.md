@@ -1,7 +1,7 @@
 # Decision Memo: Paper Figure Layer (Descriptive Statistics Section, Vector Export, Shared Theme)
 
 **Status: IMPLEMENTED** (2026-09-20). `paper/paper.tex` gains a standalone §4 "Descriptive
-Statistics" carrying six figures; the pipeline gains a vector-PDF export path, a shared plot theme,
+Statistics" carrying figures (six on creation; the hours 2x2 was cut in 2026-09-21 -- see the note at the end of this memo); the pipeline gains a vector-PDF export path, a shared plot theme,
 and three new hours-margin descriptive builders.
 
 ## Motivation
@@ -129,3 +129,38 @@ figures describe levels and must not be read against the employment DiD of `tab:
 Real-data values now shown in the paper: raw hours DiD **+0.878 (SE 0.099)** against the estimated
 0.8261; per-quartile raw DiDs **0.39 / 0.75 / 0.47 / 2.24**; raw mother-minus-non-mother hours gap
 **−3.30 (2017), −1.57 (2018), −1.68 (2019), −1.46 (2021), −1.56 (2022), −0.83 (2023)**.
+
+---
+
+## Follow-up: the hours 2×2 figure was cut (2026-09-21)
+
+`fig:hours-2x2` has been removed from `paper.tex` and from `main.R`'s `paper_figures` list; the
+paper now carries five figures from this layer plus the event study. `outputs/figures/hours_2x2.pdf`
+is deleted. The plot itself is unchanged and still reaches `outputs/` as a PNG via
+`export_all_results()` — it is a fine browsing artifact, just not a paper figure.
+
+**Two reasons, the second being the decisive one.**
+
+**It was informationally redundant.** Both it and `fig:hours-by-year` plot the same variable, the
+same two groups, over the same span; the by-year figure is the same data at six time points instead
+of two. The DiD itself is recoverable from the by-year figure's lower panel: pre-period mean gap
+−1.509, post-period −1.232, difference **+0.277** against the 2×2's n-weighted **+0.266**. The only
+things unique to the 2×2 were the n-weighted pooled means as plotted quantities (the by-year panel
+shows no cell sizes) and the canonical two-line DiD visual.
+
+**It contradicted the paper's own conclusion on significance.** Its caption reported the raw DiD as
+$0.266$ (SE $0.098$) — *t* = 2.72, CI $[0.074, 0.458]$, excluding zero. The paper's DiD is
+$0.2280$ (SE $0.1809$) — *t* = 1.26, CI $[-0.127, 0.583]$, including zero. Same coefficient to
+within four hundredths of an hour, opposite inference: the raw standard error treats 251,857
+observations as independent, while the regression clusters by individual and returns very nearly
+double. So the descriptive section was showing, as its first figure, a version of the secondary
+result that reads as significant four pages before §6.3 concludes it is a null.
+
+This was not a pre-existing flaw. Before the hours harmonization (Checkpoint 13) the DiD was
+$0.8261$\sym{***} and both the raw and clustered versions agreed it was significant; the figure and
+the paper said the same thing. The mismatch appeared only once the estimate became a null, which is
+a good argument for re-reading descriptive figures after any change to the estimate they describe.
+
+§4.2 survives as prose and now states the precision difference explicitly, rather than — as it did
+briefly — emphasising that "the controls move it by less than four hundredths of an hour", which is
+true of the coefficient and silent about the standard error that determines the conclusion.

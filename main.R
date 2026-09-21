@@ -673,7 +673,12 @@ export_all_results(results_to_export)
 # scatter is omitted for the scope reason recorded at §8e.
 message("Exporting paper figures (vector PDF) to outputs/figures/...")
 paper_figures <- list(
-  hours_2x2             = list(plot = hours_descriptives$plots$period_2x2, width = 5.0, height = 3.2),
+  # hours_descriptives$plots$period_2x2 is deliberately NOT here. The paper cut the 2x2 figure:
+  # its content is a strict subset of the by-year panel below (whose lower panel recovers the same
+  # DiD to within 0.011 hours), and its caption reported the UNCLUSTERED raw SE of 0.098, which
+  # reads as significant against the clustered 0.1809 the paper actually reports as a null. The
+  # plot still reaches outputs/ as a PNG via export_all_results() for browsing; it just has no
+  # business being the figure a reader sees next to a null result.
   hours_by_year         = list(plot = hours_descriptives$plots$by_year,    width = 5.0, height = 5.0),
   hours_dose_response   = list(plot = hours_dose_response$plot,            width = 5.0, height = 3.4),
   emp_childage_period   = list(plot = emp_res$plots$period,                width = 5.0, height = 3.6),
