@@ -13,7 +13,9 @@
 # Mother-labelling in two places and invite them to drift. The one-function-per-file rule (CLAUDE.md)
 # counts functions, and this is one -- same shape as employment_by_child_age.R, which returns three.
 library(tidyverse)
+library(fixest)
 source(file.path("scripts", "paper_theme.R"))
+source(file.path("scripts", "clustered_se.R"))
 
 build_hours_descriptive_plots <- function(cleaned_df, hours_by_period = NULL) {
   # WorkHoursCont is defined only among the employed -- the same subsample
@@ -37,14 +39,19 @@ build_hours_descriptive_plots <- function(cleaned_df, hours_by_period = NULL) {
 
   # Dispersion is joined on rather than folded into mean_hours, so a supplied mean_hours column is
   # returned exactly as it arrived.
+  #
+  # se is CLUSTER-ROBUST (by IDPUF), not sd/sqrt(n). See scripts/clustered_se.R for why: the LFS
+  # repeats individuals ~4 times, so the independent-observations SE is roughly half the right one.
+  # feols(WorkHoursCont ~ 1) returns the cell mean exactly, so this changes no point estimate.
   dispersion <- hours_df %>%
     group_by(Mother, Post) %>%
-    summarise(
-      sd        = sd(WorkHoursCont, na.rm = TRUE),
-      n_nonmiss = sum(!is.na(WorkHoursCont)),
-      .groups   = "drop"
-    ) %>%
-    mutate(se = sd / sqrt(n_nonmiss)) %>%
+    group_modify(~ {
+      fit <- clustered_se(.x, WorkHoursCont ~ 1, "(Intercept)")
+      tibble(sd = sd(.x$WorkHoursCont, na.rm = TRUE),
+             se = fit$se,
+             n_nonmiss = sum(!is.na(.x$WorkHoursCont)))
+    }) %>%
+    ungroup() %>%
     select(Mother, Post, sd, se)
 
   hours_by_period <- hours_by_period %>%
@@ -65,11 +72,11 @@ build_hours_descriptive_plots <- function(cleaned_df, hours_by_period = NULL) {
     hours_by_period$se[hours_by_period$Mother == m & hours_by_period$Post == p][1]
   }
   did_value <- (cell(1, 1) - cell(1, 0)) - (cell(0, 1) - cell(0, 0))
-  did_se    <- sqrt(sum(vapply(
-    list(c(1, 1), c(1, 0), c(0, 1), c(0, 0)),
-    function(mp) cell_se(mp[1], mp[2])^2,
-    numeric(1)
-  ), na.rm = TRUE))
+  # Cluster-robust, from the saturated 2x2. The Mother:Post coefficient of feols(y ~ Mother*Post)
+  # IS (m11-m10)-(m01-m00) exactly, so this is the same number as did_value with a correct SE --
+  # not the root-sum-of-squares of four independent cell SEs, which assumed away the panel.
+  did_fit <- clustered_se(hours_df, WorkHoursCont ~ Mother * Post, "Mother:Post")
+  did_se  <- did_fit$se
 
   raw_did <- tibble(
     did     = did_value,
@@ -98,15 +105,27 @@ build_hours_descriptive_plots <- function(cleaned_df, hours_by_period = NULL) {
     theme_paper()
 
   # -- 2. Year by year --------------------------------------------------------------------------
+  # Cluster-robust cell means, as above.
   by_year <- hours_df %>%
     group_by(ShnatSeker, Mother) %>%
-    summarise(
-      mean_hours = mean(WorkHoursCont, na.rm = TRUE),
-      sd         = sd(WorkHoursCont, na.rm = TRUE),
-      n          = sum(!is.na(WorkHoursCont)),
-      .groups    = "drop"
-    ) %>%
-    mutate(se = sd / sqrt(n))
+    group_modify(~ {
+      fit <- clustered_se(.x, WorkHoursCont ~ 1, "(Intercept)")
+      tibble(mean_hours = fit$estimate,
+             sd = sd(.x$WorkHoursCont, na.rm = TRUE),
+             n  = sum(!is.na(.x$WorkHoursCont)),
+             se = fit$se)
+    }) %>%
+    ungroup()
+
+  # The gap's SE comes from a within-year feols(WorkHoursCont ~ Mother) rather than
+  # sqrt(se_1^2 + se_0^2). That formula is only valid when the two group means are independent,
+  # and they are not: the same individuals recur within a survey year (2.7-2.9 rows per IDPUF), so
+  # it understated the gap SE by roughly 1.6x. This is the change that makes §4.3's
+  # "each within the others' confidence bounds" true rather than false.
+  gap_se_by_year <- hours_df %>%
+    group_by(ShnatSeker) %>%
+    group_modify(~ tibble(gap_se = clustered_se(.x, WorkHoursCont ~ Mother, "Mother")$se)) %>%
+    ungroup()
 
   panel_levels <- c("Mean weekly hours", "Mother minus non-mother gap")
 
@@ -130,9 +149,10 @@ build_hours_descriptive_plots <- function(cleaned_df, hours_by_period = NULL) {
       series = "Gap (mothers - non-mothers)",
       panel  = panel_levels[2],
       value  = mean_hours_1 - mean_hours_0,
-      se     = sqrt(se_1^2 + se_0^2),
       n      = n_1 + n_0
-    )
+    ) %>%
+    left_join(gap_se_by_year, by = "ShnatSeker") %>%
+    rename(se = gap_se)
 
   # series is an explicit factor so the legend reads Mothers, Non-mothers, Gap rather than the
   # alphabetical order ggplot would otherwise impose, which led with the derived gap series.

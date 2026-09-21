@@ -197,7 +197,8 @@ this in Section~\ref{sec:res-subgroup}.
 The remainder of the paper proceeds as follows. Section~\ref{sec:lit} places the question in the
 literature. Section~\ref{sec:data} describes the data, the sample, and the construction of the WFH
 exposure measures. Section~\ref{sec:descriptives} describes the analysis sample and shows both
-margins, and the exposure measure, before any model is imposed on them.
+margins and the exposure measure before any model is imposed on them, and presents the commuting
+evidence bearing on the mechanism.
 Section~\ref{sec:strategy} states the hypotheses and sets out the DiD and DDD specifications and
 the selection correction. Section~\ref{sec:results} reports the results, moving from the extensive to
 the intensive margin. Sections~\ref{sec:discussion}--\ref{sec:limitations} interpret the findings
@@ -392,17 +393,27 @@ coefficients as if they were on a common scale.
 
 This section sets out what the analysis sample looks like before any model is imposed on it. The
 order is deliberate: the summary table, then the primary (hours) margin, then the exposure measure
-that identifies the triple difference, and finally the secondary (employment) margin. Every figure
-here is a description of the data. None of them is an estimate, and none is adjusted for the
-controls listed in Section~\ref{sec:data}; the estimates begin in Section~\ref{sec:results}.
+that identifies the triple difference, then the commuting evidence bearing on the mechanism, and
+finally the secondary (employment) margin. Nothing here is adjusted for the controls listed in
+Section~\ref{sec:data}, and nothing here carries an identifying assumption; the estimates begin in
+Section~\ref{sec:results}.
+
+One convention applies throughout. All standard errors and confidence intervals in this section are
+clustered by individual, as they are in Section~\ref{sec:results}. This matters more than it may
+appear: the survey is a rotating panel in which a respondent is observed roughly four times overall
+and two to three times within a single year, so the independent-observations formulas normally used
+for a cell mean or a difference of proportions understate these standard errors by a factor of
+about $1.8$ to $2$. The point estimates are ordinary cell arithmetic --- a difference of means is
+still a difference of means --- but the intervals around them are not.
 
 \subsection{The sample in summary}\label{sec:desc-table}
 
 Table~\ref{tab:descriptives} describes the sample on either side of the treatment/control split.
 Two features matter for what follows. Mothers are \emph{more} likely to be employed than childless
 women ($0.7828$ versus $0.7574$) but work \emph{fewer} hours when they do ($38.68$ versus
-$40.06$), so the penalty this paper studies is visible in the raw data on the intensive margin and
-runs the other way on the extensive one. And mothers are the better-educated group, with $47.97\%$
+$40.06$), so the \emph{level} of the penalty is visible in the raw data on the intensive margin and
+runs the other way on the extensive one. Whether that level changed after 2021 --- which is the
+question this paper actually asks --- is not something Table~\ref{tab:descriptives} can show. And mothers are the better-educated group, with $47.97\%$
 holding an academic degree against $40.24\%$ of childless women, which is why the controls matter:
 the unconditional hours gap understates the conditional one. The largest single difference is
 marital status: $84.57\%$ of mothers are married against $46.55\%$ of childless women, with the
@@ -492,21 +503,15 @@ entire difference-in-differences of equation~\eqref{eq:did} computed without a s
 variable.
 
 This matters for how the later estimate should be read. The regression DiD of Table~\ref{tab:hours}
-is $0.2280$, within four hundredths of an hour of the raw figure. What the controls do not do, in
-other words, is manufacture or conceal an average effect: the near-absence of one is already
-present in the arithmetic of four averages.
+is $0.2280$ (SE $0.1809$), within four hundredths of an hour of the raw figure and with an almost
+identical standard error. What the controls do not do, in other words, is manufacture or conceal
+an average effect: the near-absence of one is already present in the arithmetic of four averages,
+and neither version is distinguishable from zero.
 
-The two differ in precision rather than in magnitude, and the difference matters. The raw
-difference has a standard error of $0.098$, which treats the $251{,}857$ observations as
-independent; the regression clusters by individual and returns $0.1809$, very nearly double. Taken
-at face value the raw figure would appear to show a significant increase, and it does not: the
-estimate this paper reports is the clustered one, and it is a null
-(Section~\ref{sec:res-hours}). We note this because the unadjusted arithmetic is easy to
-reproduce and easy to over-read.
-
-Note also that mothers remain well below childless women in both periods, and that the gap closes
-by a fraction of what it would take to eliminate it. The average mother's hours are not what moves
-in this paper; Section~\ref{sec:desc-exposure} shows what does.
+Note also that mothers remain well below childless women in both periods, and that whatever
+movement there is would close only a small fraction of that gap even if one took it at face value.
+The average mother's hours are not what moves in this paper; Section~\ref{sec:desc-exposure} shows
+what does.
 
 \subsection{Hours year by year}\label{sec:desc-pretrend}
 
@@ -524,9 +529,11 @@ so. Before the hours population was harmonized on reference-week work
 an artifact of the spurious zeros described there, which fell disproportionately on mothers and so
 manufactured exactly the kind of pre-existing divergence a reader should worry about.
 
-The upper panel also shows the post-period pattern that Section~\ref{sec:discussion} reads as
-gradual adjustment: the gap is $-1.37$ in 2021 and $-1.53$ in 2022 before narrowing to $-0.80$ in
-2023, the smallest value in the sample.
+The same panel shows the post-period path: the gap is $-1.37$ in 2021, widens slightly to $-1.53$
+in 2022, and then narrows to $-0.80$ in 2023, the smallest value in the sample. The movement is
+not monotone, and at these standard errors the three post-period years are not individually
+distinguishable from one another; it is the event study of Section~\ref{sec:res-hours}, not this
+raw series, that supports the gradual-adjustment reading in Section~\ref{sec:discussion}.
 
 \begin{figure}[htbp]
 \centering
@@ -545,20 +552,23 @@ Table~\ref{tab:pretrend}.
 
 \subsection{Exposure and the commuting channel}\label{sec:desc-exposure}
 
-The triple difference asks whether the hours gain is larger where work can be done from home.
-Figure~\ref{fig:dose-response} puts that question to the data directly, by computing the same raw
+The triple difference asks whether hours respond where work can be done from home.
+Figure~\ref{fig:dose-response} puts that question to the data directly, by computing the same
 difference-in-differences as Section~\ref{sec:desc-hours} separately within each quartile of
-occupational WFH exposure. The answer is not that the gain is larger at the top; it is that there
-is no gain anywhere else. The bottom three quartiles return $-0.32$, $0.27$ and $-0.02$ hours,
-none of them distinguishable from zero. The top quartile returns $1.55$ hours
-(95\% CI $[1.10, 2.00]$).
+occupational WFH exposure. The answer is not that the response is larger at the top; it is that
+there is no response anywhere else. The bottom three quartiles return $-0.32$, $0.27$ and $-0.02$
+hours, none of them distinguishable from zero. The top quartile returns $1.55$ hours
+(95\% CI $[0.74, 2.36]$).
 
 Two things follow. First, this is why Section~\ref{sec:desc-hours}'s average is near zero: it is a
-weighted average of three nulls and one substantial positive effect, and the three nulls dominate
-by construction. Second, the dose-response that the DDD coefficient of $3.224$ summarises as a
-single slope is real and visible without any regression --- but it is emphatically not linear in
-exposure, and the identifying contrast is a comparison of the most teleworkable quartile against
-the rest rather than a smooth gradient. The quartile boundaries make the same point: the bottom
+weighted average of three nulls and one substantial positive difference, and the three nulls
+dominate by construction. The decomposition is approximate rather than exact --- these quartiles
+additionally require a matched occupation code, so they rest on $251{,}968$ rows against
+Section~\ref{sec:desc-hours}'s $258{,}175$, and the quartile-weighted average is $0.29$ rather than
+$0.27$. Second, the dose-response that the DDD coefficient of $3.224$ summarises as a single slope
+is visible without any regression --- but it is emphatically not linear in exposure, and the
+identifying contrast is a comparison of the most teleworkable quartile against the rest rather than
+a smooth gradient. The quartile boundaries make the same point: the bottom
 three quartiles span exposure values of $0.00$ to $0.30$, while the top quartile spans $0.30$ to
 $0.75$. Most of the dispersion in the regressor lives in one tail, which is worth bearing in mind
 when reading a coefficient expressed per unit of exposure.
@@ -569,10 +579,12 @@ when reading a coefficient expressed per unit of exposure.
 \caption{Raw hours difference-in-differences by quartile of WFH exposure}\label{fig:dose-response}
 \begin{minipage}{0.8\textwidth}\small
 \vspace{0.3em}
-\emph{Notes:} Employed women aged 25--59. Each point is the raw
+\emph{Notes:} Women aged 25--59 who worked in the reference week and carry a matched occupation
+code. Each point is the
 $(\text{mothers post} - \text{mothers pre}) - (\text{childless post} - \text{childless pre})$
 difference within one exposure quartile, from unweighted cell means with no controls; bars are 95\%
-confidence intervals. Quartiles are of the \emph{occupation-level calibrated} exposure measure ---
+confidence intervals clustered by individual. Quartiles are of the \emph{occupation-level
+calibrated} exposure measure ---
 the same regressor the hours DDD uses, not the demographic-cell index of
 Section~\ref{sec:res-emp-ddd}, whose scale is different and whose coefficients are not comparable.
 Breakpoints are computed on pre-period rows and applied to all years.
@@ -595,10 +607,12 @@ women who were already commuting, rather than drawing a previously home-bound gr
 \caption{Share working outside the locality of residence, by year}\label{fig:mobility}
 \begin{minipage}{0.8\textwidth}\small
 \vspace{0.3em}
-\emph{Notes:} Women aged 25--59, unweighted shares with no controls. The dotted rule marks the
-excluded 2020 survey year and the series break there. This figure is descriptive evidence on a
-proposed mechanism, not a test of it: no specification in this paper uses locality of work as an
-outcome.
+\emph{Notes:} Women aged 25--59 with a recorded locality of work, unweighted shares with no
+controls. That population is \emph{broader} than the reference-week workers the hours figures use
+--- 56,323 against 47,728 in 2017 --- so this figure is not drawn on the same sample as the rest of
+the section. The dotted rule marks the excluded 2020 survey year and the series break there. This
+figure is descriptive evidence on a proposed mechanism, not a test of it: no specification in this
+paper uses locality of work as an outcome.
 \end{minipage}
 \end{figure}
 
@@ -606,22 +620,26 @@ outcome.
 
 Figures~\ref{fig:emp-childage-period} and~\ref{fig:emp-childage-adjusted} describe the secondary
 outcome. Employment among mothers traces a shallow inverted U in the age of the youngest child,
-from $75.9\%$ at ages 0--1 to a peak of $80.2\%$ at ages 5--9 and back to $76.7\%$ at ages 15--17,
-and the pre- and post-2021 profiles lie close together at every bin.
+from $75.9\%$ at ages 0--1 to a peak of $80.2\%$ at ages 5--9 and back to $76.7\%$ at ages 15--17.
+The pre- and post-2021 profiles are close where the youngest child is under five --- $0.3$ and
+$0.5$ percentage points apart in the 0--1 and 2--4 bins --- and separate by around four points in
+each of the three older bins. Whether that separation means anything is a question this figure
+cannot answer, for reasons given below.
 
 Figure~\ref{fig:emp-childage-adjusted} shows that the downward right-hand tail is largely
 compositional. Holding the controls at their sample means, the adjusted profile does not turn down
-after age 5--9: it continues to rise, reaching about $81.5\%$ in the 15--17 bin against a raw
+after age 5--9: it continues to rise, reaching $81.8\%$ in the 15--17 bin against a raw
 $76.7\%$. Mothers whose youngest child is nearly grown are themselves older and differently
 educated, and once that is accounted for their employment rate is the highest in the sample rather
 than among the lowest.
 
 A caution about what these two figures do and do not show. Both plot employment \emph{levels} among
-mothers. Neither contains a control group, a reference category, or an interaction with $\Post$, so
-the visible pre/post distance is not an estimate of anything and in particular is not a
-difference-in-differences. It should not be read against the employment DiD of
-Table~\ref{tab:emp-did}, which is estimated relative to childless women and with controls, and
-which is a precise null.
+mothers. Neither contains a comparison group --- there are no childless women in either figure ---
+so the visible pre/post distance is a difference in levels within one group, not an estimate of
+anything, and in particular not a difference-in-differences. The four-point separation in the older
+bins is therefore not evidence that employment rose for those mothers relative to anyone. It should
+not be read against the employment DiD of Table~\ref{tab:emp-did}, which is estimated relative to
+childless women and with controls, and which is a precise null.
 
 \begin{figure}[htbp]
 \centering
@@ -630,8 +648,10 @@ which is a precise null.
 \begin{minipage}{0.8\textwidth}\small
 \vspace{0.3em}
 \emph{Notes:} Mothers aged 25--59, unweighted employment rates with no controls; bars are 95\%
-binomial confidence intervals. Mothers only --- there is no control group in this figure, so the
-distance between the two profiles is a description of levels and not an estimated effect.
+confidence intervals clustered by individual, which are roughly twice the width of the binomial
+intervals the independence assumption would give. Mothers only --- there is no comparison group in
+this figure, so the distance between the two profiles is a description of levels and not an
+estimated effect.
 \end{minipage}
 \end{figure}
 
@@ -644,7 +664,8 @@ distance between the two profiles is a description of levels and not an estimate
 \emph{Notes:} Mothers aged 25--59. Adjusted rates are OLS predictions from a regression of
 employment on the youngest-child age bin and the standard controls, averaged over the sample with
 the controls held at their means. Segments join each bin's raw and adjusted rate. The vertical axis
-does not begin at zero.
+does not begin at zero. As in Figure~\ref{fig:emp-childage-period}, this is mothers only: the
+raw-to-adjusted distance is a statement about composition within that group, not an effect.
 \end{minipage}
 \end{figure}
 
@@ -1346,11 +1367,16 @@ imbalance in direction and approximate magnitude, not as insensitive to it.
 
 \paragraph{Inference.}
 The hours DDD clusters on about 40 occupation groups and the employment DDD on about 210
-demographic cells; no small-cluster correction is applied. The same person can in principle
-contribute observations to both the pre- and post-period, but an individual-level panel
-fixed-effects design was considered and rejected: only 1.9\% of sampled individuals are
-re-interviewed across the pre/post boundary, far too few for within-person identification to be
-credible.
+demographic cells; no small-cluster correction is applied. Clustering on the individual matters a
+good deal more than it may appear: the survey is a rotating panel, and the hours estimation sample
+of $258{,}175$ observations comes from only $64{,}602$ distinct respondents --- about four
+observations each, and two to three within a single survey year, with $96\%$ of rows belonging to
+someone who appears more than once. Treating those observations as independent would understate
+standard errors by a factor of roughly $1.8$, which is why every interval in this paper, including
+the descriptive ones in Section~\ref{sec:descriptives}, is clustered. What the panel structure does
+\emph{not} support is within-person identification: an individual-level fixed-effects design was
+considered and rejected because only 1.9\% of respondents are re-interviewed across the pre/post
+boundary, so almost none of the repetition spans the treatment.
 % Provenance: 1,514 of 80,560 distinct individuals (1.88%) appear in both the pre- and post-period.
 % Console output of check_idpuf_panel_structure() (scripts/validation.R); not exported to outputs/.
 % Confirmed against a full pipeline run, 2026-09-19.

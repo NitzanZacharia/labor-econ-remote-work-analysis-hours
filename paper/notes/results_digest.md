@@ -95,10 +95,11 @@ under 17. `Post` = year ≥ 2021. (`README.md` "Key variables"; `docs/HLD.md` §
   non-mothers pre 40.04 (n 50,144) / post 40.08 (n 43,838); mothers pre 38.54 (n 88,114) /
   post 38.84 (n 76,079). Pooled mean = **39.18 hours (n = 258,175)**
   (`outputs/comparative_stats_hours_summary.csv`; median 42, SD 11.82).
-- Raw 2×2 DiD (`outputs/hours_descriptives_raw_did.csv`): **0.2658, SE 0.0978**, 95% CI
-  [0.0741, 0.4575] — (38.84−38.54) − (40.08−40.04) = 0.31 − 0.04. Note the raw DiD is nominally
-  significant while the regression-adjusted one is not; the two differ by 0.038 hours, so this is
-  a standard-error difference (clustering by individual), not a coefficient difference.
+- Raw 2×2 DiD (`outputs/hours_descriptives_raw_did.csv`): **0.2658, SE 0.1810**, 95% CI
+  [−0.0890, 0.6206] — (38.84−38.54) − (40.08−40.04) = 0.31 − 0.04. **Clustered by IDPUF as of
+  2026-09-21**, so it now agrees with the regression DiD (0.2280, SE 0.1809) on both magnitude and
+  precision; both are nulls. Previously this SE was 0.0978, computed as if the four cell means were
+  independent, which made the raw DiD look significant when the regression's did not.
 - ⚠️ **Label discrepancy:** `outputs/descriptive_table_continuous.csv` still names these rows
   "Usual weekly hours (employed), mean/SD". The population is reference-week workers; the label
   lives in `scripts/descriptive_table.R` and was not updated. `paper.tex` Table 1 uses the correct
@@ -366,20 +367,26 @@ workers:
 | Childless | 40.039 | 50,144 | 40.079 | 43,838 | +0.040 |
 | Mothers | 38.539 | 88,114 | 38.844 | 76,079 | +0.305 |
 
-Raw DiD = **0.2658, SE 0.0978**, 95% CI [0.0741, 0.4575]. Note the raw DiD is nominally
-significant while the regression DiD (§1.1) is not; they differ by 0.038 hours, so the difference
-is in the standard error (clustering by individual), not the coefficient.
+Raw DiD = **0.2658, SE 0.1810**, 95% CI [−0.0890, 0.6206].
+
+> **All standard errors in this section are clustered by IDPUF as of 2026-09-21.** They previously
+> used independent-observations formulas — `sd/sqrt(n)` for a cell mean, `sqrt(se_a² + se_b²)` for
+> a difference, `sqrt(p(1−p)/n)` for a rate — which understated them by **~1.8× (hours)** and
+> **~2.0× (employment rates)**, because the LFS observes each respondent about four times overall
+> and two to three times within a single year. **Point estimates did not move**: every quantity
+> here is a saturated difference in means, so `feols` reproduces the same arithmetic. See
+> `scripts/clustered_se.R`. The by-year and dose-response tables below carry the corrected SEs.
 
 **Mother-minus-non-mother gap by year** (`outputs/hours_descriptives_hours_by_year.csv`):
 
 | Year | Gap | SE |
 |---|---|---|
-| 2017 | −1.373 | 0.1151 |
-| 2018 | −1.482 | 0.1180 |
-| 2019 | −1.672 | 0.1161 |
-| 2021 | −1.368 | 0.1208 |
-| 2022 | −1.533 | 0.1243 |
-| 2023 | −0.796 | 0.1238 |
+| 2017 | −1.373 | 0.1839 |
+| 2018 | −1.482 | 0.1866 |
+| 2019 | −1.672 | 0.1823 |
+| 2021 | −1.368 | 0.1873 |
+| 2022 | −1.533 | 0.1923 |
+| 2023 | −0.796 | 0.1922 |
 
 The pre-period is flat within about a third of an hour — the descriptive counterpart of §1.8's
 passing Wald test. Pre-harmonization the 2017 gap read −3.30; that value survives in the paper only
@@ -390,12 +397,12 @@ each quartile of the **occupation-level calibrated** measure:
 
 | Q | Exposure range | Raw DiD | SE | n |
 |---|---|---|---|---|
-| 1 | 0.000–0.097 | −0.3171 | 0.2227 | 61,571 |
-| 2 | 0.097–0.143 | 0.2700 | 0.1756 | 66,612 |
-| 3 | 0.143–0.300 | −0.0186 | 0.1806 | 74,911 |
-| 4 | 0.300–0.750 | **1.5514** | 0.2289 | 48,874 |
+| 1 | 0.000–0.097 | −0.3171 | 0.3950 | 61,571 |
+| 2 | 0.097–0.143 | 0.2700 | 0.3228 | 66,612 |
+| 3 | 0.143–0.300 | −0.0186 | 0.3297 | 74,911 |
+| 4 | 0.300–0.750 | **1.5514** | 0.4143 | 48,874 |
 
-Q4 95% CI [1.1027, 2.0001]. **Three quartiles are indistinguishable from zero and one is not** —
+Q4 95% CI [0.7395, 2.3634]. **Three quartiles are indistinguishable from zero and one is not** —
 this is the non-parametric version of §1.3's argument, and it is why §1.1's average is near zero.
 ⚠ The Q2/Q3 breakpoint moved (0.1230 → 0.1431) because `hours_dose_response.R` computes quartile
 breaks *after* filtering on non-missing hours, so at least one occupation changed quartile.

@@ -10,7 +10,12 @@ make_hours_panel <- function(seed = 1, per_cell = 60) {
     ShnatSeker = grid$ShnatSeker,
     Mother     = grid$Mother,
     Post       = as.integer(grid$ShnatSeker >= 2021),
-    Employed   = 1L
+    Employed   = 1L,
+    # Standard errors are now clustered by IDPUF (scripts/clustered_se.R), so the fixture has to
+    # carry one. `rep` indexes a synthetic person observed once per year within each Mother group,
+    # which mirrors the real LFS rotating panel (~3 rows per person per year) closely enough that
+    # the clustering actually does something rather than collapsing to iid.
+    IDPUF      = grid$Mother * 10000L + as.integer(grid$rep)
   )
   # A planted DiD: mothers gain 2 hours post-2021 on top of a common 1-hour rise.
   df$WorkHoursCont <- 38 - 2 * df$Mother + 1 * df$Post + 2 * df$Mother * df$Post +

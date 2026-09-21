@@ -18,15 +18,20 @@
 #      other would re-create exactly the conflation results_digest.md warns against. The two
 #      measures are on different scales and their coefficients are never comparable.
 #
-#   2. RAW CELL ARITHMETIC, NO REGRESSION. Keeping this descriptive is the point of the figure --
-#      it also means the file carries no `controls` argument to get out of step with
-#      DEFAULT_CONTROLS, and adds no feols() runtime to the pipeline.
+#   2. NO CONTROLS. Keeping this descriptive is the point of the figure, and it means the file
+#      carries no `controls` argument to get out of step with DEFAULT_CONTROLS. The per-quartile
+#      DiD and its SE are obtained from a saturated feols(y ~ Mother*Post) clustered by IDPUF --
+#      whose Mother:Post coefficient IS the four-cell arithmetic, so the quantity is unchanged --
+#      rather than from hand-computed cell SEs, which assumed the four cells were independent
+#      subsamples and understated the SE by roughly 1.6-1.85x. See scripts/clustered_se.R.
 #
 # Quartiles are fixed at four rather than parameterised, because the reused assign_wfh_quartile()
 # (robustness/age_balance_robustness.R) hardcodes labels = 1:4, and because quartiles are what the
 # Lee-bounds and age-balance specs already use.
 library(tidyverse)
+library(fixest)
 source(file.path("scripts", "paper_theme.R"))
+source(file.path("scripts", "clustered_se.R"))
 source(file.path("robustness", "age_balance_robustness.R"))
 
 build_hours_dose_response <- function(cleaned_df, exposure_index,
@@ -55,32 +60,44 @@ build_hours_dose_response <- function(cleaned_df, exposure_index,
 
   df <- assign_wfh_quartile(df, breaks)
 
+  # Cluster-robust cell means (scripts/clustered_se.R). feols(WorkHoursCont ~ 1) returns the cell
+  # mean exactly, so mean_hours is unchanged; only se moves.
   cell_means <- df %>%
     group_by(WFH_Exposure_Q, Mother, Post) %>%
-    summarise(
-      mean_hours = mean(WorkHoursCont, na.rm = TRUE),
-      sd         = sd(WorkHoursCont, na.rm = TRUE),
-      n          = sum(!is.na(WorkHoursCont)),
-      .groups    = "drop"
-    ) %>%
-    mutate(se = sd / sqrt(n)) %>%
+    group_modify(~ {
+      fit <- clustered_se(.x, WorkHoursCont ~ 1, "(Intercept)")
+      tibble(mean_hours = fit$estimate,
+             sd = sd(.x$WorkHoursCont, na.rm = TRUE),
+             n  = sum(!is.na(.x$WorkHoursCont)),
+             se = fit$se)
+    }) %>%
+    ungroup() %>%
     arrange(WFH_Exposure_Q, Mother, Post)
 
-  # (mothers post - mothers pre) - (non-mothers post - non-mothers pre), within quartile. The four
-  # cell means are independent subsamples, so the DiD's SE is the root sum of their squared SEs.
-  dose_data <- cell_means %>%
-    mutate(cell_key = paste0("m", Mother, "p", Post)) %>%
-    select(WFH_Exposure_Q, cell_key, mean_hours, se, n) %>%
-    pivot_wider(names_from = cell_key, values_from = c(mean_hours, se, n)) %>%
+  # (mothers post - mothers pre) - (non-mothers post - non-mothers pre), within quartile.
+  #
+  # The DiD and its SE both come from a saturated within-quartile feols(y ~ Mother*Post) clustered
+  # by IDPUF. The Mother:Post coefficient of that model IS the four-cell arithmetic above, so this
+  # remains a purely descriptive quantity -- no controls, no identifying assumption, exactly as
+  # this file's header intends. What it is not any more is the root sum of four squared cell SEs:
+  # that treated the four cells as independent subsamples, which they are not, since the same
+  # individuals recur across waves. It understated these SEs by roughly 1.6-1.85x.
+  did_by_q <- df %>%
+    group_by(WFH_Exposure_Q) %>%
+    group_modify(~ {
+      fit <- clustered_se(.x, WorkHoursCont ~ Mother * Post, "Mother:Post")
+      tibble(did = fit$estimate, se = fit$se, n = fit$n)
+    }) %>%
+    ungroup()
+
+  dose_data <- did_by_q %>%
     transmute(
       WFH_Exposure_Q,
       # unname(): quantile() labels its result "0%", "25%", ... and those names would otherwise
       # ride along as names on these columns.
       q_low  = unname(breaks)[WFH_Exposure_Q],
       q_high = unname(breaks)[WFH_Exposure_Q + 1],
-      did    = (mean_hours_m1p1 - mean_hours_m1p0) - (mean_hours_m0p1 - mean_hours_m0p0),
-      se     = sqrt(se_m1p1^2 + se_m1p0^2 + se_m0p1^2 + se_m0p0^2),
-      n      = n_m1p1 + n_m1p0 + n_m0p1 + n_m0p0
+      did, se, n
     ) %>%
     mutate(
       ci_low  = did - 1.96 * se,
@@ -98,13 +115,13 @@ build_hours_dose_response <- function(cleaned_df, exposure_index,
     scale_x_discrete(labels = setNames(dose_data$q_label, as.character(dose_data$WFH_Exposure_Q))) +
     labs(
       title    = "Raw hours difference-in-differences by WFH exposure quartile",
-      subtitle = "Employed women aged 25-59; mothers relative to childless women, post-2021 vs pre-2021",
+      subtitle = "Reference-week workers aged 25-59; mothers vs childless women, post-2021 vs pre-2021",
       x = "Quartile of occupation-level WFH exposure",
       y = "Raw DiD (hours per week)",
       # Wrapped by hand: an unwrapped caption overruns the panel at the ~5in width these figures
       # are printed at, and ggplot clips rather than reflowing it.
       caption = paste0(
-        "Bars are 95% confidence intervals. Cell means only: no controls, no regression.\n",
+        "Bars are 95% confidence intervals, clustered by individual. No controls.\n",
         "Bins are quartiles of the ", measure_label, ", the same measure the DDD uses.\n",
         "Breakpoints are computed on pre-period rows and applied to all years."
       )

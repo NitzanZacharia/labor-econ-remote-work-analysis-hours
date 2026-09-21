@@ -29,6 +29,7 @@ project_root <- find_project_root()
 old_wd <- setwd(project_root)
 
 source(file.path("scripts", "data_processing.R"))
+source(file.path("scripts", "clustered_se.R"))
 source(file.path("scripts", "paper_theme.R"))
 source(file.path("scripts", "comparative_statistics.R"))
 source(file.path("scripts", "descriptive_table.R"))

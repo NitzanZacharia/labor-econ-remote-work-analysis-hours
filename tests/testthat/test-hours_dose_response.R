@@ -18,7 +18,11 @@ make_dose_panel <- function(seed = 1, n_occ = 12, per_cell = 40) {
     ShnatSeker            = grid$ShnatSeker,
     Mother                = grid$Mother,
     Post                  = as.integer(grid$ShnatSeker >= 2021),
-    Employed              = 1L
+    Employed              = 1L,
+    # Required since the per-quartile DiD SE is now clustered by IDPUF; see the note in
+    # test-hours_descriptive_plots.R's generator. A synthetic person stays in one occupation
+    # across years, which is also what keeps clusters nested inside quartiles.
+    IDPUF                 = grid$occ * 100000L + grid$Mother * 10000L + as.integer(grid$rep)
   )
   occ_exposure <- exposure[df$MishlachYad_ISCO_08_2]
 

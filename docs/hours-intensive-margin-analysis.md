@@ -85,7 +85,7 @@ specifically).
 **There is no average intensive-margin effect.** This is a reasonably precise null rather than an
 uninformative one: at this standard error the minimum detectable effect is 2.8016 × 0.181 ≈ **0.51
 hours**, so average gains much above half an hour a week are ruled out. The raw 2×2 agrees (0.266,
-SE 0.098), so the null is not an artifact of the control set.
+SE 0.181), so the null is not an artifact of the control set. Both standard errors are clustered by IDPUF; the raw one is now essentially identical to the regression's.
 
 **Primary DDD** (`outputs/ddd_hours_table.csv`, calibrated occupation-level exposure, N=246,326,
 clustered by occupation):

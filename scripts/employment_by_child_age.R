@@ -6,6 +6,7 @@
 library(tidyverse)
 library(fixest)
 source(file.path("scripts", "paper_theme.R"))
+source(file.path("scripts", "clustered_se.R"))
 
 employment_by_child_age <- function(cleaned_df) {
   
@@ -57,11 +58,23 @@ employment_by_child_age <- function(cleaned_df) {
       n        = n(),
       .groups  = "drop"
     ) %>%
+    mutate(Period = if_else(Post == 1, "Post-2021", "Pre-2021"))
+
+  # Cluster-robust standard error for the plotted rate, NOT the binomial sqrt(p(1-p)/n). The
+  # binomial formula assumes independent draws and the LFS repeats individuals across waves, so it
+  # understated these by roughly the same 1.6x factor as the hours figures (see
+  # scripts/clustered_se.R). feols(Employed ~ 1) returns the cell rate exactly, so emp_rate is
+  # unchanged. Added so the pre/post profiles carry honest uncertainty: without bars, two lines a
+  # percentage point apart read as a finding.
+  emp_by_period <- emp_by_period %>%
+    left_join(
+      df_mothers %>%
+        group_by(ChildAgeBin, Post) %>%
+        group_modify(~ tibble(se = clustered_se(.x, Employed ~ 1, "(Intercept)")$se)) %>%
+        ungroup(),
+      by = c("ChildAgeBin", "Post")
+    ) %>%
     mutate(
-      Period = if_else(Post == 1, "Post-2021", "Pre-2021"),
-      # Binomial standard error for the plotted rate. Added so the pre/post profiles carry
-      # uncertainty: without bars, two lines a percentage point apart read as a finding.
-      se      = sqrt(emp_rate * (1 - emp_rate) / n),
       ci_low  = pmax(0, emp_rate - 1.96 * se),
       ci_high = pmin(1, emp_rate + 1.96 * se)
     )
@@ -215,6 +228,11 @@ employment_by_child_age <- function(cleaned_df) {
   invisible(list(
     emp_raw      = emp_raw,
     emp_by_period = emp_by_period,
+    # Raw and covariate-adjusted rates side by side. Exported because the paper quotes the adjusted
+    # 15-17 figure in §4.5 and, until this was added, that was the only number in the Descriptive
+    # Statistics section with no reproducible source on disk -- the adjusted profile existed only
+    # as an in-script prediction feeding the plot.
+    adjusted_rates = plot_df,
     model        = reg_age,
     plots        = list(raw = p_raw, period = p_period, adjusted = p_adj)
   ))
