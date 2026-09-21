@@ -77,10 +77,10 @@ message("Validating cleaned data...")
 validate_cleaned_df(cleaned_df)
 
 message("Checking IDPUF panel structure (cluster-SE unit vs. Mother/Post design)...")
-idpuf_panel_check <- check_idpuf_panel_structure(cleaned_df)
+check_idpuf_panel_structure(cleaned_df)   # reporting-only; returns invisibly, see §9
 
 message("Checking WFH_RefWeek's NA rationale against AvadBeshavua...")
-wfh_refweek_check <- check_wfh_refweek_avadbeshavua(cleaned_df)
+check_wfh_refweek_avadbeshavua(cleaned_df) # reporting-only; returns invisibly
 
 # ── 4. Comparative statistics ─────────────────────────────────────────────────
 message("Running comparative statistics...")
@@ -453,7 +453,7 @@ employment_ddd_table <- etable(
 print(employment_ddd_table)
 
 message("Checking Spec 1's collinearity at runtime (see comment above)...")
-spec1_collinearity_check <- check_spec1_collinearity(ddd_df, cell_fe_vars, DEFAULT_CONTROLS)
+check_spec1_collinearity(ddd_df, cell_fe_vars, DEFAULT_CONTROLS)  # prints its own report
 
 # ── 8c. Age-balance robustness chain (docs/decisions/age-balance-robustness-chain.md) ─────────
 # Off by default: these are diagnostic/comparison checks layered on top of the employment DDD (8b),
@@ -489,9 +489,8 @@ if (RUN_AGE_BALANCE_ROBUSTNESS) {
 
   # Hours-outcome (primary DDD) analogs -- see age_balance_robustness.R's §4 header comment for why
   # these use the occupation-level exposure_index rather than the cell-based exposure_cells as
-  # their actual regressor.
-  hours_exposure_index <- exposure_calibrated %>%
-    select(occupation_code = ISCO2, wfh_exposure = wfh_exposure_calibrated)
+  # their actual regressor. hours_exposure_index is the one built in §8a; this block reuses it
+  # rather than re-deriving it, so the two cannot drift apart.
 
   message("Running age-interacted comparison spec for the hours DDD (Mother:GilNK added)...")
   hours_ddd_age_interacted <- run_hours_ddd_age_interacted(cleaned_df, hours_exposure_index)
@@ -555,20 +554,20 @@ hours_dose_response <- build_hours_dose_response(cleaned_df, hours_exposure_inde
 # Repo-level diagnostic only. results_digest.md §1.5 records a 2026-09-15 decision that the
 # second-stage mechanism regression is out of scope for the paper's results, and that stands --
 # this figure is deliberately absent from the paper_figures list below. What it does close is the
-# separate open item at §7 item 1: exporting hours_ddd$mechanism_data finally puts the 37-occupation
-# frame behind the 2.639 slope on disk, replacing a stale employment-outcome artifact in
-# outputs/archive/ whose beta_j values are in probability units rather than hours.
+# separate open item at §7 item 1: exporting hours_ddd$mechanism_data puts the 37-occupation frame
+# behind the slope on disk, so the mechanism regression is reproducible rather than console-only.
 hours_mechanism <- build_mechanism_scatter(
   hours_ddd$mechanism_data,
   fit = hours_ddd$models$mechanism
 )
 
 # ── 9. Export results ─────────────────────────────────────────────────────────
-# idpuf_panel_check is deliberately NOT included here: its idpuf_years/idpuf_periods tables are
-# keyed by individual IDPUF, which is closer to raw identifiable microdata than the aggregate
-# tables everything else in this list produces -- per this project's disclosure-risk convention
+# check_idpuf_panel_structure()'s result is deliberately NOT included here -- which is also why §3
+# calls it without binding its return value. Its idpuf_years/idpuf_periods tables are keyed by
+# individual IDPUF, which is closer to raw identifiable microdata than the aggregate tables
+# everything else in this list produces -- per this project's disclosure-risk convention
 # (CLAUDE.md, Checkpoint 9), only its console-printed summary counts are surfaced, not a
-# persisted per-person roster.
+# persisted per-person roster. Do not "fix" the omission by capturing and exporting it.
 results_to_export <- list(
   comparative_stats = comp_stats,
   descriptive_table = desc_table,

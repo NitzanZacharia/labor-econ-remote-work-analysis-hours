@@ -1,4 +1,3 @@
-#gender_placebo
 # Checkpoint 5 (docs/ROADMAP.md): the Gender Placebo Test from the research doc (Part 2 §3 /
 # Part 4 §5) -- replicates the primary DiD model on men (fathers vs. childless men) instead of
 # women, to test whether the observed effect is specifically a *motherhood* penalty rather than a
@@ -10,8 +9,9 @@
 # tests whether *any* Mother:Post effect exists for men; it says nothing about whether men's
 # employment response also happens to track occupational WFH exposure, which is what the primary
 # DDD (main.R's ddd_employment_additive / ddd_employment_fe) actually claims. WFH_Exposure itself
-# is occupation-level, not sex-specific, so the same calibrated occupation scores (exposure_calibrated, built from WOMEN's realized
-# 2022-23 WFH -- see wfh_exposure_cells.R) are reused unchanged as the measurement instrument; only
+# is occupation-level, not sex-specific, so the same calibrated occupation scores
+# (exposure_calibrated, built from WOMEN's realized 2022-23 WFH -- see wfh_exposure_cells.R) are
+# reused unchanged as the measurement instrument; only
 # the cell shift-share weights are rebuilt on men's own pre-period (2017-2019) occupation
 # composition, via build_exposure_cells(cleaned_men, ...). This holds "how exposed is this
 # occupation" fixed and swaps only the population being tested, which is what a placebo requires.
@@ -24,7 +24,8 @@ source(file.path("scripts", "wfh_exposure_cells.R"))
 
 # Pure function: fits the DDD placebo (both the additive and interacted-cell-FE specs from
 # main.R's ddd_employment_additive / ddd_employment_fe) on an already-cleaned male subsample plus
-# an already-built occupation-level calibrated exposure table. Split out from run_gender_placebo() so it can be unit-tested directly
+# an already-built occupation-level calibrated exposure table. Split out from
+# run_gender_placebo() so it can be unit-tested directly
 # against a purpose-built synthetic panel (see test-gender_placebo.R), independent of the real CSV
 # read and of load_and_clean_data()'s file-based fixtures, which are sized for schema/parsing
 # tests, not for a fully-saturated triple-interaction formula to be identified.

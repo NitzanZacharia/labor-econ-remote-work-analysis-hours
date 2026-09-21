@@ -54,16 +54,13 @@ regression (see §5).
 **Sample:** women aged 25–59, survey years 2017, 2018, 2019, 2021, 2022, 2023. `Mother` = any child
 under 17. `Post` = year ≥ 2021. (`README.md` "Key variables"; `docs/HLD.md` §3 step 2.)
 
-**Stale / trap artifacts in `outputs/` — do NOT cite:**
-- `outputs/ddd_calibrated_table.csv`, `ddd_external_table.csv`, `ddd_realized_table.csv`
-  (+ their `_mechanism_data.csv` / `_dropped_occupations_data.csv`): committed 2026-09-11, produced
-  by the since-**removed** `ddd_regression.R` (occupation-level DDD on the *employment* outcome,
-  `Mother x Post x WFH_Exposure` = −0.0248* (0.0092), N = 297,878). Not part of any current
-  specification (`docs/decisions/employment-ddd-robustness-removal.md`). `main.R` no longer
-  exports anything under these names.
-- `outputs/ddd_primary.csv` (2026-09-11): pre-rename copy of `ddd_employment.csv`; numbers identical.
-- `outputs/hours_ddd_pivot_*.csv` (2026-09-11): pre-rename copies of `ddd_hours_table.csv` /
-  `hours_lee_bounds_*.csv`; numbers identical.
+**Stale / trap artifacts — deleted 2026-09-21.** Fourteen superseded CSVs (`ddd_calibrated_*`,
+`ddd_external_*`, `ddd_realized_*`, `ddd_primary.csv`, `hours_ddd_pivot_*`) were quarantined to
+`outputs/archive/` on 2026-09-19 and deleted outright on 2026-09-21. They came from the since-removed
+`ddd_regression.R` (an occupation-level DDD on the *employment* outcome), an old `ddd_primary`
+export key, and a removed `RUN_HOURS_DDD_PIVOT` flag; no current code path regenerates any of them.
+Git retains them if a number ever needs tracing. Nothing in `outputs/` is a trap artifact today —
+every file there is produced by the current pipeline.
 
 ---
 
@@ -277,7 +274,7 @@ under 17. `Post` = year ≥ 2021. (`README.md` "Key variables"; `docs/HLD.md` §
     (`docs/decisions/hours-population-harmonization.md`). Note the p-value moves across the 1%
     threshold: the effect is significant at 5%, not at 1%. §3.3's table below already carried the
     corrected row. The previously-cited
-    `outputs/archive/ddd_calibrated_mechanism_data.csv` was **stale** (committed 2026-09-11 by the
+    `ddd_calibrated_mechanism_data.csv` (since deleted) was **stale** (committed 2026-09-11 by the
     removed employment-outcome `ddd_regression.R`; its `beta_j` values are in
     employment-probability units, −0.19 to +0.13, not hours) and should not be used. Note this
     closes the *data* gap only: the scope decision above is unchanged, and this regression is
@@ -912,7 +909,7 @@ to the paper.**
    `occupation_code, wfh_exposure, beta_j, se_j` + CI columns). Refitting
    `lm(beta_j ~ wfh_exposure, weights = 1/se_j^2)` from that file reproduces **slope 2.1977,
    SE 0.9068, p 0.0207, n 37**, establishing the figures from disk rather than console
-   scrollback, and superseding the stale `outputs/archive/ddd_calibrated_mechanism_data.csv`
+   scrollback, and superseding the stale, since-deleted `ddd_calibrated_mechanism_data.csv`
    (employment-probability units). The §1.5 scope decision is unaffected — the data is now
    verifiable, but the regression is still not drafted into the paper. The Jewish/Arab analogs
    remain console-only.

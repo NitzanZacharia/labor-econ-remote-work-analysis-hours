@@ -9,7 +9,7 @@ source(file.path("scripts", "paper_theme.R"))
 source(file.path("scripts", "clustered_se.R"))
 
 employment_by_child_age <- function(cleaned_df) {
-  
+
   # ── 1. Prepare youngest-child age variable ───────────────────────────────
   # GilYeledTzairMBNK is already a categorical code:
   #   0 = no children, 1 = age 0–1, 2 = age 2–4,
@@ -22,7 +22,7 @@ employment_by_child_age <- function(cleaned_df) {
     "4" = "10–14",
     "5" = "15–17"
   )
-  
+
   df_mothers <- cleaned_df %>%
     filter(
       Mother == 1,
@@ -37,7 +37,7 @@ employment_by_child_age <- function(cleaned_df) {
         labels = child_age_labels
       )
     )
-  
+
   # ── 2. Raw employment rates by child-age bin ─────────────────────────────
   message("=== Raw employment rates by youngest-child age ===")
   emp_raw <- df_mothers %>%
@@ -48,7 +48,7 @@ employment_by_child_age <- function(cleaned_df) {
       .groups  = "drop"
     )
   print(emp_raw)
-  
+
   # ── 3. Pre/Post breakdown ────────────────────────────────────────────────
   message("=== Employment rates by youngest-child age × Pre/Post ===")
   emp_by_period <- df_mothers %>%
@@ -79,7 +79,7 @@ employment_by_child_age <- function(cleaned_df) {
       ci_high = pmin(1, emp_rate + 1.96 * se)
     )
   print(emp_by_period)
-  
+
   # ── 4. Regression: employment ~ child-age bin (with controls) ───────────
   controls <- DEFAULT_CONTROLS
 
@@ -88,12 +88,12 @@ employment_by_child_age <- function(cleaned_df) {
     paste(controls, collapse = " + "),
     sep = " + "
   ))
-  
+
   reg_age <- feols(formula_age, data = df_mothers, cluster = ~IDPUF)
-  
+
   message("=== Regression: employment ~ youngest-child age (controlled) ===")
   print(etable(reg_age, digits = 4))
-  
+
   # ── 5. Adjusted employment rates (margins from regression) ──────────────
   # Recycled predictions: for each bin, set every mother's ChildAgeBin to that
   # bin while keeping her own actual control values, predict, then average the
@@ -109,13 +109,11 @@ employment_by_child_age <- function(cleaned_df) {
   }) %>%
     mutate(ChildAgeBin = factor(ChildAgeBin, levels = levels(df_mothers$ChildAgeBin)))
 
-  # Merge raw n back in for label annotation
   plot_df <- emp_raw %>%
     left_join(adj_emp_by_bin, by = "ChildAgeBin")
-  
+
   # ── 6. Plot ──────────────────────────────────────────────────────────────
-  
-  # 6a. Raw employment rate by child-age bin
+
   p_raw <- ggplot(emp_raw, aes(x = ChildAgeBin, y = emp_rate)) +
     geom_col(fill = PAPER_PALETTE$estimate, alpha = 0.85, width = 0.65) +
     geom_text(
@@ -141,7 +139,6 @@ employment_by_child_age <- function(cleaned_df) {
     theme_paper() +
     theme(panel.grid.major.x = element_blank())
 
-  # 6b. Pre vs Post comparison (line chart)
   p_period <- ggplot(
     emp_by_period,
     aes(x = ChildAgeBin, y = emp_rate, colour = Period, group = Period)
@@ -170,7 +167,7 @@ employment_by_child_age <- function(cleaned_df) {
       )
     ) +
     theme_paper()
-  
+
   # 6c. Raw vs adjusted, as a dumbbell rather than dodged bars.
   # The whole point of this figure is the ~5pp divergence between the raw and adjusted profiles in
   # the older-child bins. Bars must be anchored at zero, which squeezed every one of those
@@ -210,7 +207,7 @@ employment_by_child_age <- function(cleaned_df) {
       plot.subtitle      = element_text(size = 9.5, colour = "grey40"),
       panel.grid.major.x = element_blank()
     )
-  
+
   # ── 7. Print plots ───────────────────────────────────────────────────────
   # Interactive convenience only. Under a headless `Rscript main.R` these print() calls used to
   # open R's default device and leak an Rplots.pdf into the repo root on every run (the
@@ -223,7 +220,7 @@ employment_by_child_age <- function(cleaned_df) {
     print(p_period)
     print(p_adj)
   }
-  
+
   # ── 8. Return results invisibly ─────────────────────────────────────────
   invisible(list(
     emp_raw      = emp_raw,

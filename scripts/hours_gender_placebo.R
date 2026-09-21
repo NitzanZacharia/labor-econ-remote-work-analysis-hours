@@ -1,4 +1,3 @@
-#hours_gender_placebo
 # Hours-outcome (intensive-margin) counterpart to gender_placebo.R's run_gender_placebo() /
 # run_gender_ddd_placebo(), added for the hours pivot (docs/decisions/hours-ddd-pivot.md) so the
 # project's now-primary dependent variable has the same gender-placebo validation coverage the

@@ -1,9 +1,8 @@
-# diagnostics.R
 library(tidyverse)
 library(fixest)
 
 run_diagnostics <- function(cleaned_df) {
-  
+
   # ── 1. 2x2 DiD table ─────────────────────────────────────────────────────
   # Employment rate by Mother/Post cells.
   # The DiD is meaningful if:
@@ -14,11 +13,11 @@ run_diagnostics <- function(cleaned_df) {
     group_by(Mother, Post) %>%
     summarise(emp_rate = mean(Employed, na.rm = TRUE), n = n(), .groups = "drop")
   print(did_table)
-  
+
   # ── 2. Employed variable distribution ────────────────────────────────────
   message("=== Employed variable counts ===")
   print(cleaned_df %>% count(Employed))
-  
+
   # ── 3. Parallel trends — event-study plot ────────────────────────────────
   # Pre-2021 interaction coefficients should be flat if parallel trends holds.
   # i(ShnatSeker, ref = 2019) supplies the year main effects for the Post=0
@@ -55,7 +54,7 @@ run_diagnostics <- function(cleaned_df) {
   }, error = function(e) {
     message("iplot failed: ", e$message)
   })
-  
+
   # ── 4. Missing-value audit ────────────────────────────────────────────────
   message("=== NA counts for regression variables ===")
   na_summary <- cleaned_df %>%
@@ -63,7 +62,7 @@ run_diagnostics <- function(cleaned_df) {
            MachozMegurim, TeudaGvoha) %>%
     summarise(across(everything(), ~sum(is.na(.))))
   print(na_summary)
-  
+
   # ── 5. Are missings on Employed systematic? ───────────────────────────────
   message("=== Missingness pattern for Employed ===")
   miss_pattern <- cleaned_df %>%
@@ -76,7 +75,7 @@ run_diagnostics <- function(cleaned_df) {
       .groups    = "drop"
     )
   print(miss_pattern)
-  
+
   # ── 6. Peek at rows where Employed is NA ─────────────────────────────────
   message("=== Sample rows with Employed = NA ===")
   cleaned_df %>%
@@ -89,7 +88,7 @@ run_diagnostics <- function(cleaned_df) {
     ) %>%
     head(20) %>%
     print(width = Inf)
-  
+
   invisible(list(
     did_table   = did_table,
     na_summary  = na_summary,

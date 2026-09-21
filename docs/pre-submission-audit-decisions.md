@@ -69,7 +69,8 @@ could fairly pick up.
   1st percentile is 179.9; nothing is below 5. No small-cell disclosure risk, so whether the
   repository is public does not matter for it.
 - **Orphan artifacts.** 14 files with no generating code moved to `outputs/archive/` with a README
-  explaining what produced each and what superseded it.
+  explaining what produced each and what superseded it. (That whole directory was deleted on
+  2026-09-21 — nothing regenerated them and git retains them.)
 - **The broken mismatch runner.** `run_mismatch.R` read a path that does not exist and could not
   run on any machine; repaired and verified.
 

@@ -28,7 +28,7 @@ load_and_clean_data <- function(folder_path, sex_filter = c("women", "men")) {
       between(GilNK, 3, 7),
       ShnatSeker %in% c(2017, 2018, 2019, 2021, 2022, 2023)
     )
-  
+
   # ── 3. Create new variables ──────────────────────────────────────────────────
   # ShaotAvodaBederechKlalNK bin -> median usual weekly hours (codebook: bin bounds)
   hour_bin_median <- c(`0` = 0, `1` = 4, `2` = 11, `3` = 18, `4` = 25.5, `5` = 32,
@@ -229,7 +229,7 @@ load_and_clean_data <- function(folder_path, sex_filter = c("women", "men")) {
       )
     )
 
-  
+
   # ── 4. Drop unwanted columns ─────────────────────────────────────────────────
   cols_to_drop <- c(
     "ShnotLimud", "SugBeitSeferAcharon", "AvadBeshavua2", "ChipesChodesh",
@@ -271,7 +271,7 @@ load_and_clean_data <- function(folder_path, sex_filter = c("women", "men")) {
     "MigzarTziburiAnafi", "TatTaasuka_Zman", "ChodeshKodem", "ChodeshKodemShaa",
     "MimaHaMigbala", "Mismachim", "Modaot", "OfenAcher", "Oved30", "PniyaLmaasik"
   )
-  
+
   # Regex pattern matching any column that starts with these prefixes
   prefix_pattern <- paste0(
     "(",
@@ -286,7 +286,7 @@ load_and_clean_data <- function(folder_path, sex_filter = c("women", "men")) {
     ), collapse = "|"),
     ")"
   )
-  
+
   df <- mutated_df %>%
     select(
       -any_of(cols_to_drop),
@@ -297,7 +297,7 @@ load_and_clean_data <- function(folder_path, sex_filter = c("women", "men")) {
       -(ChipusAvodaSherutTaasuka:ChipusAvodaOfenAcher),
       -(RamatDat:BituachLeumi)
     )
-  
+
   return(df)
 }
 

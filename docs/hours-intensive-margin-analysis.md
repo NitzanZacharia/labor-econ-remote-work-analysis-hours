@@ -110,7 +110,7 @@ gradient."**
 underlying data in `outputs/hours_mechanism_data.csv`):
 
 > slope = **2.198 (SE 0.907)**, n = 37 occupations (3 of 40 dropped for
-> degenerate per-occupation fits: ISCO 62, 63, 95 — the same three before and after the fix, so the pre/post slopes are comparable). Data now exported to `outputs/hours_mechanism_data.csv`; the previously-cited `outputs/ddd_calibrated_mechanism_data.csv` is a STALE employment-outcome artifact in probability units — do not use it.
+> degenerate per-occupation fits: ISCO 62, 63, 95 — the same three before and after the fix, so the pre/post slopes are comparable). Data now exported to `outputs/hours_mechanism_data.csv`. (An earlier version of this doc cited `ddd_calibrated_mechanism_data.csv`, a stale employment-outcome artifact in probability units; it was deleted on 2026-09-21.)
 
 This is a second, independent piece of evidence for the same relationship, estimated at the
 occupation level rather than pooled across individuals — the individual-level triple interaction and

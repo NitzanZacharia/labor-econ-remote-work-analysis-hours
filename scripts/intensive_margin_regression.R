@@ -1,4 +1,3 @@
-#intensive_margin_regression
 # Checkpoint 4 (docs/ROADMAP.md): the intensive-margin (weekly work hours) DiD, per the research
 # doc's core DiD spec (Part 2 §1 / Part 4 §2), which models both an employment indicator and
 # weekly work hours. As of the hours pivot (docs/decisions/hours-ddd-pivot.md), this is the
@@ -11,7 +10,6 @@ source(file.path("scripts", "data_processing.R"))
 
 run_intensive_margin_reg <- function(cleaned_df, controls = DEFAULT_CONTROLS) {
 
-  # ──  Build formula ─────────────────────────────────────────────────────────
   rhs <- paste(
     "Mother + Post + Mother:Post",
     paste(controls, collapse = " + "),
@@ -20,10 +18,8 @@ run_intensive_margin_reg <- function(cleaned_df, controls = DEFAULT_CONTROLS) {
 
   formula_hours <- as.formula(paste("WorkHoursCont ~", rhs))
 
-  # ──  Run regression (conditional on employment) ────────────────────────────
   reg_hours <- feols(formula_hours, data = filter(cleaned_df, Employed == 1), cluster = ~IDPUF)
 
-  # ──  Display and return results ─────────────────────────────────────────────
   table_hours <- etable(reg_hours,
                          headers = c("WorkHoursCont"),
                          digits = 4)

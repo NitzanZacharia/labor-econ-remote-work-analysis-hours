@@ -81,7 +81,7 @@ the first, so the decision stands and the figure remains a repo-level diagnostic
 
 What it does close is the separate open item at §7 item 1. `main.R` previously passed only
 `hours_ddd$table`, so the 37-occupation frame behind the slope reached no file and the narrative
-doc cited a **stale** `outputs/archive/ddd_calibrated_mechanism_data.csv` whose `beta_j` values are
+doc cited a **stale** `ddd_calibrated_mechanism_data.csv` (since deleted) whose `beta_j` values are
 in employment-probability units, not hours. `outputs/hours_mechanism_data.csv` now carries the real
 frame, and refitting from it reproduced **slope 2.6386 (SE 0.8993), n = 37** against the digest's
 then-recorded 2.639 (SE 0.899, n 37).

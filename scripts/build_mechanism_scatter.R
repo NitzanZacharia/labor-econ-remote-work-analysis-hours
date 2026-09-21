@@ -7,10 +7,8 @@
 # "[PRIMARY -- OUT OF SCOPE, DO NOT DRAFT]" into the paper's results. That decision stands. This
 # file exists to (a) draw the figure as a repo-level diagnostic and (b) put mechanism_data on disk,
 # which closes the separate open item recorded at results_digest.md section 7 item 1 -- the
-# underlying data having never been exported was one of the two reasons 1.5 was ruled out of scope,
-# and the stale outputs/archive/ddd_calibrated_mechanism_data.csv is an employment-outcome artifact
-# whose beta_j values are in probability units, not hours. The figure is deliberately NOT included
-# in paper/paper.tex.
+# underlying data having never been exported was one of the two reasons 1.5 was ruled out of scope.
+# The figure is deliberately NOT included in paper/paper.tex.
 library(tidyverse)
 source(file.path("scripts", "paper_theme.R"))
 
