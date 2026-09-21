@@ -9,8 +9,8 @@
 # Extended for the DDD placebo (Mother*Post*WFH_Exposure): the two-way basic_reg() placebo above
 # tests whether *any* Mother:Post effect exists for men; it says nothing about whether men's
 # employment response also happens to track occupational WFH exposure, which is what the primary
-# DDD (main.R:149-159) actually claims. WFH_Exposure itself is occupation-level, not sex-specific,
-# so the same calibrated occupation scores (exposure_calibrated, built from WOMEN's realized
+# DDD (main.R's ddd_employment_additive / ddd_employment_fe) actually claims. WFH_Exposure itself
+# is occupation-level, not sex-specific, so the same calibrated occupation scores (exposure_calibrated, built from WOMEN's realized
 # 2022-23 WFH -- see wfh_exposure_cells.R) are reused unchanged as the measurement instrument; only
 # the cell shift-share weights are rebuilt on men's own pre-period (2017-2019) occupation
 # composition, via build_exposure_cells(cleaned_men, ...). This holds "how exposed is this
@@ -23,8 +23,8 @@ source(file.path("scripts", "basic_regression.R"))
 source(file.path("scripts", "wfh_exposure_cells.R"))
 
 # Pure function: fits the DDD placebo (both the additive and interacted-cell-FE specs from
-# main.R:149-159) on an already-cleaned male subsample plus an already-built occupation-level
-# calibrated exposure table. Split out from run_gender_placebo() so it can be unit-tested directly
+# main.R's ddd_employment_additive / ddd_employment_fe) on an already-cleaned male subsample plus
+# an already-built occupation-level calibrated exposure table. Split out from run_gender_placebo() so it can be unit-tested directly
 # against a purpose-built synthetic panel (see test-gender_placebo.R), independent of the real CSV
 # read and of load_and_clean_data()'s file-based fixtures, which are sized for schema/parsing
 # tests, not for a fully-saturated triple-interaction formula to be identified.
@@ -114,7 +114,7 @@ run_gender_placebo <- function(folder_path, cleaned_men = NULL, cleaned_women = 
     validate_cleaned_df(cleaned_men, sex_filter = "men")
   }
 
-  # Human gate (docs/AUTONOMOUS_RUN_PLAN.md Checkpoint 5): report category sizes only -- a
+  # Human gate (Checkpoint 5, docs/ROADMAP.md): report category sizes only -- a
   # category that's sparse for women (e.g. single-father counts in MisparHorimYechidim) may be
   # near-empty for men. Whether a sparse category needs collapsing is a modeling decision for the
   # researchers, not something this function decides unilaterally.

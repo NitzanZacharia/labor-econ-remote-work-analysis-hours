@@ -28,11 +28,11 @@ test_that("one PDF is written per entry, named for its list key", {
   on.exit(unlink(out_dir, recursive = TRUE), add = TRUE)
 
   exported <- export_paper_figures(
-    list(hours_2x2 = make_test_plot(), hours_by_year = make_test_plot()),
+    list(mobility = make_test_plot(), hours_by_year = make_test_plot()),
     output_dir = out_dir
   )
 
-  expect_setequal(basename(exported), c("hours_2x2.pdf", "hours_by_year.pdf"))
+  expect_setequal(basename(exported), c("mobility.pdf", "hours_by_year.pdf"))
   for (f in exported) {
     expect_true(file.exists(f), info = f)
     expect_gt(file.size(f), 0)

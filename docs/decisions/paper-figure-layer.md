@@ -83,8 +83,13 @@ What it does close is the separate open item at §7 item 1. `main.R` previously 
 `hours_ddd$table`, so the 37-occupation frame behind the slope reached no file and the narrative
 doc cited a **stale** `outputs/archive/ddd_calibrated_mechanism_data.csv` whose `beta_j` values are
 in employment-probability units, not hours. `outputs/hours_mechanism_data.csv` now carries the real
-frame, and refitting from it reproduces **slope 2.6386 (SE 0.8993), n = 37** against the digest's
-recorded 2.639 (SE 0.899, n 37).
+frame, and refitting from it reproduced **slope 2.6386 (SE 0.8993), n = 37** against the digest's
+then-recorded 2.639 (SE 0.899, n 37).
+
+(Both figures are superseded. The later hours-population harmonization
+(`docs/decisions/hours-population-harmonization.md`) moved the slope to **2.1977 (SE 0.9068,
+p 0.0207, R² 0.1437), n = 37**, which is what the current artifact refits to. The numbers in the
+paragraph above are retained as the record of what was true on 2026-09-20.)
 
 One implementation note worth preserving: the drawn line comes from the passed `fit`, never from
 `geom_smooth(method = "lm")`. The second stage is precision-weighted (`weights = 1/se_j^2`) because

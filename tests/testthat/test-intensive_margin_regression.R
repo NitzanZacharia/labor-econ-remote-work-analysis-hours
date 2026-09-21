@@ -1,6 +1,6 @@
 # test-intensive_margin_regression.R
 # Checkpoint 4: contract tests for run_intensive_margin_reg(), mirroring
-# test-basic_regression.R's pattern (TESTING_BLUEPRINT.md §3): structure/class/coefficient-name
+# test-basic_regression.R's pattern: structure/class/coefficient-name
 # checks on the fixture data, plus an exact hand-computable DiD check on a synthetic saturated 2x2
 # design (no simulation/randomness needed).
 

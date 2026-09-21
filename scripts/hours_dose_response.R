@@ -36,7 +36,7 @@ source(file.path("robustness", "age_balance_robustness.R"))
 
 build_hours_dose_response <- function(cleaned_df, exposure_index,
                                       measure_label = "occupation-level calibrated WFH exposure") {
-  # Same join as run_hours_ddd_regression.R:39-44, so this figure and the DDD are computed on the
+  # Same join as run_hours_ddd_regression(), so this figure and the DDD are computed on the
   # same rows: inner_join drops the non-employed and disclosure-masked/unmapped ISCO codes.
   df <- cleaned_df %>%
     filter(Employed == 1) %>%

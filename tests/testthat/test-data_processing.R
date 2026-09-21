@@ -1,7 +1,7 @@
 # test-data_processing.R
-# Priority 1 (TESTING_BLUEPRINT.md §2): every recoding rule in load_and_clean_data(), plus the
-# schema-presence test for the 7 positional column-drop ranges. This is the highest-value test
-# file in the suite -- a silent error here corrupts every downstream number.
+# Highest-priority file in the suite: every recoding rule in load_and_clean_data(), plus the
+# schema-presence test for the positional column-drop ranges. A silent error here corrupts every
+# downstream number.
 
 cleaned <- load_and_clean_data(fixtures_dir)
 

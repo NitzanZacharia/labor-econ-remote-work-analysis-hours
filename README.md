@@ -12,7 +12,7 @@ Empirical analysis using Israeli Central Bureau of Statistics (CBS) Labor Force 
 - Correll et al. (2007): mothers face wage/hiring discrimination from a "less committed" stereotype; fathers see the opposite — a wage premium.
 - Kleven et al. (2019, Denmark): first childbirth causes a ~20% long-term income decline for women, via reduced hours, labor-market exit, or a shift to lower-paying family-friendly jobs.
 - Kleven et al. (2019, cross-country): the penalty is universal but its severity tracks cultural/gender norms, steepest where mothers are expected to stay home.
-- Harrington et al. (2025): rising remote work is shrinking the penalty — higher employment for mothers in demanding professions, less post-birth dropout, easier work/parenting integration.
+- Harrington & Kahn (2025): rising remote work is shrinking the penalty — higher employment for mothers in demanding professions, less post-birth dropout, easier work/parenting integration.
 
 **Why remote work might change it.** The pandemic pushed work-from-home from ~5% to ~25–30% of workdays. This could narrow the penalty (less commute friction, more schedule flexibility, reduced stigma around physical availability) or widen it (lower visibility, slower advancement, new remote-specific stigma) — which is why this is an empirical question rather than an assumed direction.
 
@@ -97,7 +97,7 @@ Runs the `testthat` suite in `tests/testthat/` (data processing, validation, sch
 
 ## Project structure
 
-`main.R`, `run_tests.R`, and `run_mismatch.R` are top-level entry-point scripts and stay at the repo root; every single-function file lives under `scripts/`. `robustness/` holds the Phase 1b/1c robustness-chain scripts for the secondary (employment) DDD (`balance_test.R`, `age_balance_robustness.R`, `pretrend_wald_test.R`) — each defines several related functions, so they don't fit `scripts/`'s one-function-per-file convention; `pretrend_wald_test.R` runs unconditionally (its F-statistics are the paper's parallel-trends evidence); the other two run under `RUN_AGE_BALANCE_ROBUSTNESS`, which defaults to `TRUE` as of 2026-09-19 so a default run reproduces everything the paper cites. A fourth robustness script, `phase2_robustness.R`, was deprecated and removed — see `docs/decisions/employment-ddd-robustness-removal.md`. `data/` holds small, versioned external inputs the pipeline needs (currently just the Dingel & Neiman teleworkability crosswalk).
+`main.R`, `run_tests.R`, and `run_mismatch.R` are top-level entry-point scripts and stay at the repo root; every single-function file lives under `scripts/`. `robustness/` holds the Phase 1b/1c robustness-chain scripts, covering both the primary (hours) and secondary (employment) DDDs (`balance_test.R`, `age_balance_robustness.R`, `pretrend_wald_test.R`) — each defines several related functions, so they don't fit `scripts/`'s one-function-per-file convention; `pretrend_wald_test.R` runs unconditionally (its F-statistics are the paper's parallel-trends evidence); the other two run under `RUN_AGE_BALANCE_ROBUSTNESS`, which defaults to `TRUE` as of 2026-09-19 so a default run reproduces everything the paper cites. A fourth robustness script, `phase2_robustness.R`, was deprecated and removed — see `docs/decisions/employment-ddd-robustness-removal.md`. `data/` holds small, versioned external inputs the pipeline needs (currently just the Dingel & Neiman teleworkability crosswalk).
 
 | File | Function | Purpose |
 |---|---|---|
@@ -117,6 +117,7 @@ Runs the `testthat` suite in `tests/testthat/` (data processing, validation, sch
 | `scripts/hours_ddd_regression.R` | `run_hours_ddd_regression()` | **Primary** triple-differences DDD on hours: `WorkHoursCont ~ Mother*Post*WFH_Exposure + controls`, pure occupation-level exposure, `Employed == 1` only, plus a precision-weighted second-stage mechanism regression. Called by default from `main.R` §8a, three times — once each for the calibrated, external, and realized exposure measures — see `docs/decisions/hours-ddd-pivot.md`. |
 | `scripts/hours_ddd_lee_bounds.R` | `run_hours_ddd_lee_bounds()` | Generalized Lee (2009) bounds for the above: selection counterfactual stratified by cell-based `WFH_Exposure` quartile, outcome regression on occupation-level `WFH_Exposure`. Called by default from `main.R` §8a. |
 | `scripts/imbens_manski_ci.R` | `imbens_manski_ci()` | Shared Imbens-Manski (2004) partial-identification CI solver, reused by both `intensive_margin_lee_bounds.R` and `hours_ddd_lee_bounds.R`. |
+| `scripts/clustered_se.R` | `clustered_se()` | Shared cluster-robust SE helper for the descriptive/figure layer (`employment_by_child_age.R`, `hours_descriptive_plots.R`, `hours_dose_response.R`). Adopting it changed only intervals, never point estimates — that invariant is the integrity check behind the §4 audit pass. |
 | `scripts/israeli_market_mismatch.R` | `check_market_mismatch()` | Descriptive-only exhibit comparing theoretical (Dingel & Neiman) vs. realized (2022-23) WFH by occupation — a thin wrapper around `calibrate_isco_exposure()`. Takes an `exposure_path` parameter (default: the real, locally-supplied `israeli_cbs_wfh_2digit.csv`) so it's testable without that file. Invoked via `run_mismatch.R`, not sourced by `main.R`. Runs on the women-only analysis sample, so its realized-WFH values differ slightly from the pipeline's broader-population calibration — see the warning under "Setup & running". |
 | `scripts/employment_by_child_age.R` | `employment_by_child_age()` | Employment rates and a controlled regression by youngest-child age bin, with raw/adjusted-rate plots. |
 | `scripts/Diagnostics.R` | `run_diagnostics()` | 2×2 DiD table, event-study pre-trend plot, and missing-value audits for the regression variables. |
@@ -148,7 +149,7 @@ Runs the `testthat` suite in `tests/testthat/` (data processing, validation, sch
 | `WorksOutsideLocality` | `1` if she commutes outside her locality of residence for work, derived from `DargatNayadut`; used in comparative statistics only, not as a regression control. |
 | `MishlachYad_ISCO_08_2` | 2-digit ISCO-08 occupation code; the join key for the WFH-exposure index and DDD regression. |
 
-`DEFAULT_CONTROLS` (defined once in `scripts/data_processing.R`, reused by `basic_regression.R`, `basic_reg_compared_data.R`, `intensive_margin_regression.R`, `employment_by_child_age.R`, `Diagnostics.R`, `hours_diagnostics.R`, and `hours_ddd_regression.R`): `MatzavMishpachti` (marital status), `Dat` (religion of the household head, per the CBS codebook: Jewish / Christian / Muslim / Druze / other — not religiosity), `GilNK` (age group), `MachozMegurim` (district of residence), `TeudaGvoha` (education) — all treated as categorical factors.
+`DEFAULT_CONTROLS` (defined once in `scripts/data_processing.R` and reused by every regression, diagnostic and robustness script that takes a control set — `test-controls-consistency.R` enforces that no file reintroduces a local copy): `MatzavMishpachti` (marital status), `Dat` (religion of the household head, per the CBS codebook: Jewish / Christian / Muslim / Druze / other — not religiosity), `GilNK` (age group), `MachozMegurim` (district of residence), `TeudaGvoha` (education) — all treated as categorical factors.
 
 ## Outputs
 
@@ -158,9 +159,7 @@ The handful of figures the paper actually includes are then written a **second**
 
 Because `paper.tex` references those figures with `../outputs/figures/`-relative paths and no `\graphicspath`, **the figures must exist before the paper compiles** — run `Rscript main.R` before editing `paper.tex`, and the paper only compiles from inside `paper/`.
 
-> **`paper/paper.tex`, `paper/notes/results_digest.md` and `docs/hours-intensive-margin-analysis.md` are all in sync with `outputs/`** as of Checkpoint 13 ([`docs/decisions/hours-population-harmonization.md`](docs/decisions/hours-population-harmonization.md)). The pre-trend test now passes (*F* = 0.949, *p* = 0.387), the hours DiD is a null (0.2280, SE 0.1809) and the headline DDD is 3.224 (SE 1.022) with Imbens–Manski $[1.021, 5.324]$. §8's "2017 anomaly" limitation has been replaced by a disclosure of the coding correction that removed it, and §6.3 is now built around the DDD rather than the DiD.
->
-> The per-subgroup mechanism slopes and all six subgroup *z*-tests were recomputed on 2026-09-21 and are current. One of them reversed: the **Arab-women mechanism slope moved from −19.29 to +7.572**, so the argument that the Arab DDD is "contradicted by its own mechanism check" is withdrawn in both docs. The paper never cited that check, so `paper.tex` is unaffected. Those slopes remain console-only — see `docs/hours-intensive-margin-analysis.md` §5.2 for what can and cannot be claimed from them.
+> **The paper, the results digest and the hours narrative doc are in sync with `outputs/`.** Headline figures: pre-trend *F* = 0.949 (*p* = 0.387), hours DiD 0.2280 (SE 0.1809, a null), headline DDD 3.224 (SE 1.022) with Imbens–Manski $[1.021, 5.324]$. `paper/notes/results_digest.md` is the authoritative record of every reported number and of what is and isn't claimable — including which quantities remain console-only.
 
 ## Known limitations
 
@@ -169,7 +168,7 @@ Because `paper.tex` references those figures with `../outputs/figures/`-relative
 
 ## Documentation map
 
-Before implementing anything, read (in this order): [`docs/ROADMAP.md`](docs/ROADMAP.md) (the checkpoint in question), [`docs/LLD.md`](docs/LLD.md) (schema/contracts), [`docs/HLD.md`](docs/HLD.md) (why the gap exists). For how to test something, `tests/testthat/` (run via `Rscript run_tests.R`) is the source of truth — [`docs/archive/TESTING_BLUEPRINT.md`](docs/archive/TESTING_BLUEPRINT.md) is an archived pre-restructure planning doc, kept for history only. The original research plan (research question, literature review, and initial empirical design) has been folded into the "Background" and "Research design" sections above; `docs/LLD.md`/`docs/HLD.md` reconcile it against the real codebase and are the authoritative reference for any gap between plan and implementation.
+Before implementing anything, read (in this order): [`docs/ROADMAP.md`](docs/ROADMAP.md) (the checkpoint in question), [`docs/LLD.md`](docs/LLD.md) (schema/contracts), [`docs/HLD.md`](docs/HLD.md) (why the gap exists). For how to test something, `tests/testthat/` (run via `Rscript run_tests.R`) is the source of truth. The original research plan (research question, literature review, and initial empirical design) has been folded into the "Background" and "Research design" sections above; `docs/LLD.md`/`docs/HLD.md` reconcile it against the real codebase and are the authoritative reference for any gap between plan and implementation.
 
 ## License
 

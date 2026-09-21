@@ -10,7 +10,7 @@
 # (following test-gender_placebo.R's run_gender_ddd_placebo pattern -- the fixtures are sized for
 # schema tests, not for a saturated triple-interaction to be identified) with the exposure
 # regressor built through the real pipeline (build_exposure_cells(), then left_join()ed back by
-# cell), and reproduces main.R's two feols calls verbatim (main.R:303-313, the ddd_employment_additive/
+# cell), and reproduces main.R's two feols calls verbatim (its ddd_employment_additive /
 # ddd_employment_fe block) so a future edit to the real formulas that isn't mirrored here will
 # visibly diverge.
 
@@ -22,7 +22,7 @@ make_ddd_panel <- function(delta = -2) {
 
   # Pre-period (2017-2019, Muasak == 1) rows -- one distinct occupation per demographic cell, so
   # build_exposure_cells() gives each cell a different WFH_Exposure once joined to a crosswalk
-  # with varying tele_ext, exactly as main.R:152-155 does.
+  # with varying tele_ext, exactly as main.R's exposure_cells construction does.
   pre <- purrr::pmap_dfr(cells, function(gilnk, moch, teuda) {
     tibble::tibble(
       ShnatSeker = 2018, Muasak = 1, Min = 2,

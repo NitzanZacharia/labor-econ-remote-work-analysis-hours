@@ -2,7 +2,7 @@
 # Generates the two synthetic fixture CSVs (sample_2019_Data.csv, sample_2021_Data.csv) used by
 # the test suite. 100% synthetic, invented values — no real CBS microdata. Only the columns
 # load_and_clean_data() actually references (by name, in filters/mutates/factor-conversion) or
-# needs as boundary markers for its 7 positional range-drops are included; everything else in the
+# needs as boundary markers for its column-drops are included; everything else in the
 # real raw CSVs is irrelevant to what these tests check. Re-run this script (`Rscript
 # tests/testthat/fixtures/generate_fixtures.R` from the repo root) to regenerate the CSVs if this
 # spec ever changes — the row-by-row plan here is also mirrored (by IDPUF) in
@@ -11,9 +11,13 @@ library(tidyverse)
 
 # ── Column order ─────────────────────────────────────────────────────────────
 # Columns 1-19: everything load_and_clean_data() reads/uses by name.
-# Columns 20-33: 7 adjacent boundary-column pairs, one pair per positional range-drop in
-# data_processing.R (-(a:b)). Adjacent placement means each range drops exactly its 2 boundary
+# Columns 20-33: 7 adjacent boundary-column pairs. Five correspond to the positional range-drops
+# in data_processing.R (-(a:b)); adjacent placement means each range drops exactly its 2 boundary
 # columns and nothing else, so none of columns 1-19 can accidentally get caught in a range.
+# The remaining two pairs (EizeChozemechushav/ChodeshKodemShaa, MimaHaMigbala/PniyaLmaasik) are
+# no longer positional -- they moved to name-based any_of() drops (data_processing.R:258-272)
+# because 2017_Data.csv lacks them entirely. They are kept here so the fixtures still exercise
+# that drop path.
 range_boundary_cols <- c(
   "Yeladim0_1Prat", "Yeladim15_17Prat",
   "MisparHachlafa", "YachasKirvaNK",

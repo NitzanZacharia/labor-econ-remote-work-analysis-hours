@@ -2,7 +2,7 @@
 
 **Status: OPEN. Raised by the pre-submission audit, 2026-09-19. Needs an author answer.**
 Tracked as D5 in `docs/pre-submission-audit-decisions.md`; the corresponding `% VERIFY` comment
-sits at `paper/references.bib:50` and is the last unresolved one there.
+sits at `paper/references.bib:52` and is the last unresolved one there.
 
 ## Why this file matters
 
@@ -61,7 +61,7 @@ defend.
 
 ## Where the answer should be recorded once known
 
-- `paper/references.bib:50` — replace the `% VERIFY` comment with the provenance.
+- `paper/references.bib:52` — replace the `% VERIFY` comment with the provenance.
 - `README.md` — the `data/` description, so a reader of the repo finds it.
 - `paper/paper.tex` Section 3.3 — one clause in the sentence introducing the external index, if
   the provenance is something a reader of the paper alone would want.

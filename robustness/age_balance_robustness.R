@@ -2,11 +2,11 @@
 # Follow-up to the Phase 1b balance test: GilNK (age group) is imbalanced between Mother==1 and
 # Mother==0 in the pre-period, concentrated in the lowest WFH_Exposure quartile, even though GilNK
 # is already an additive DEFAULT_CONTROLS term. Builds three COMPARISON specs against the primary
-# DDD's formulas (main.R:149 additive / :154 cell-FE) -- does NOT modify main.R.
+# DDD's formulas (main.R's ddd_employment_additive / ddd_employment_fe) -- does NOT modify main.R.
 #
 #   1. diagnose_gilnk_by_quartile() -- age gap by Mother status, per WFH_Exposure quartile.
 #   2. run_ddd_age_interacted()     -- adds Mother:GilNK (a fully saturated age x motherhood term)
-#      to both of main.R's formulas, on top of the existing DEFAULT_CONTROLS.
+#      to both of those formulas, on top of the existing DEFAULT_CONTROLS.
 #   3. build_gilnk_rake_weights() + run_ddd_reweighted() -- pre-period-derived weights that
 #      equalize each Mother group's GilNK distribution (within WFH_Exposure quartile) to the
 #      pooled pre-period quartile distribution, then applied to the full-period regression. For a
@@ -90,7 +90,7 @@ diagnose_gilnk_by_quartile <- function(cleaned_df, exposure_cells) {
   invisible(list(gap_by_quartile = gap, breaks = breaks, pre_df = pre_df))
 }
 
-# ── 2. Interacted-control spec: add Mother:GilNK to main.R:149/:154's formulas ──────────────────
+# ── 2. Interacted-control spec: add Mother:GilNK to the two employment-DDD formulas ───────────
 run_ddd_age_interacted <- function(cleaned_df, exposure_cells, controls = DEFAULT_CONTROLS) {
   cell_fe_vars   <- c("GilNK", "TeudaGvoha", "MachozMegurim")
   other_controls <- setdiff(controls, cell_fe_vars)

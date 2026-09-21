@@ -318,7 +318,7 @@ run_gender_placebo(folder_path: character(1), cleaned_men: tibble = NULL, cleane
 run_gender_ddd_placebo(cleaned_men: tibble, exposure_calibrated: tibble,
                         controls: character = DEFAULT_CONTROLS) ->
   list(exposure_cells_men = tibble, models = list(additive = fixest | NULL, fe = fixest | NULL))
-# Not called from main.R by default. Both feols() calls cluster on the (GilNK, TeudaGvoha,
+# Called from main.R via run_gender_placebo(). Both feols() calls cluster on the (GilNK, TeudaGvoha,
 # MachozMegurim) cell, matching main.R's secondary DDD -- WFH_Exposure is cell-constant here too.
 
 run_hours_gender_placebo(folder_path: character(1), cleaned_men: tibble = NULL,
@@ -331,7 +331,7 @@ run_hours_gender_placebo(folder_path: character(1), cleaned_men: tibble = NULL,
 run_hours_gender_ddd_placebo(cleaned_men: tibble, exposure_index: tibble,
                               controls: character = DEFAULT_CONTROLS) ->
   list(n_employed = integer(1), n_matched = integer(1), model = fixest | NULL)
-# Not called from main.R by default. Occupation-level exposure_index (not cell-based) -- no need
+# Called from main.R via run_hours_gender_placebo(). Occupation-level exposure_index (not cell-based) -- no need
 # to rebuild a cell-based exposure measure for men, since occupation-level exposure is sex-agnostic.
 # Employed==1 subsample, cluster = ~MishlachYad_ISCO_08_2, matching hours_ddd_regression.R.
 
@@ -374,7 +374,7 @@ check_isco_masking_sensitivity(cleaned_df: tibble, wfh_col: character(1) = "WFH"
 check_spec1_collinearity(ddd_df: tibble, cell_fe_vars: character, controls: character) ->
   invisible(list(r2_wfh_exposure_on_cells = numeric(1), vif_wfh_exposure = numeric(1),
                   condition_number = numeric(1)))
-# Runtime collinearity diagnostic for the primary DDD's Spec 1. Base R only (lm(), kappa()) --
+# Runtime collinearity diagnostic for the secondary (employment) DDD's Spec 1. Base R only (lm(), kappa()) --
 # deliberately no car dependency.
 
 check_wfh_first_stage_relevance(ddd_df: tibble, controls: character = DEFAULT_CONTROLS) ->
@@ -455,21 +455,80 @@ check_market_mismatch(cleaned_df: tibble, exposure_path: character(1) = "data/is
 export_all_results(results_list: list, output_dir: character(1) = "outputs") -> invisible(character)
 # Recursively walks results_list: data frames -> CSV, ggplots -> PNG, fixest/lm objects skipped.
 # Returns the vector of file paths written.
+
+# ── descriptive_table.R ───────────────────────────────────────────────────
+build_descriptive_table(cleaned_df: tibble) -> list(continuous: tibble, categorical: tibble)
+# The paper's Table 1. cat_vars = setdiff(DEFAULT_CONTROLS, "GilNK") -- GilNK is reported
+# continuously alongside age. Level labels are the CBS codebook's, confirmed with the authors.
+
+# ── clustered_se.R ────────────────────────────────────────────────────────
+clustered_se(df: data.frame, outcome: character(1), cluster: character(1) = "IDPUF") -> tibble
+# Cluster-robust SE/CI for a cell mean, via feols(y ~ 1). Returns NA-filled row for <2 rows.
+# Point estimates are unchanged by construction -- any movement in one is a bug.
+
+# ── ddd_mde_diagnostics.R ─────────────────────────────────────────────────
+compute_ddd_mde(model: fixest, coef_name: character(1), baseline: numeric(1),
+                 power: numeric(1) = 0.80, alpha: numeric(1) = 0.05) -> tibble
+# Closed-form MDE = (z_{1-a/2} + z_power) * SE, reported both absolutely and as a share of
+# baseline, on the scale the regressor actually varies over (not a unit change).
+
+# ── wfh_first_stage_check.R ───────────────────────────────────────────────
+check_wfh_first_stage_relevance(panel: tibble, controls: character = DEFAULT_CONTROLS) -> list
+# Shift-share relevance test: does WFH_Exposure predict realized WFH_RefWeek once Post == 1?
+# Static + year-interacted specs. Requires data_processing.R and ddd_collinearity_diagnostics.R.
+
+# ── hours_subgroup_comparison.R ───────────────────────────────────────────
+build_hours_subgroup_comparison(estimates: tibble, placebo: logical(1) = FALSE,
+                                 x_label: character(1) = NULL) -> list(data: tibble, plot: ggplot)
+# Coefficient-comparison figure for the Jewish/Arab and gender-placebo splits.
+
+# ── paper_theme.R ─────────────────────────────────────────────────────────
+theme_paper(base_size: numeric(1) = 11) -> theme        # + PAPER_PALETTE, a constant
+# One theme/palette for every figure. PAPER_PALETTE separates the mother_status and period hues
+# that previously collided across scripts.
+
+# ── hours_descriptive_plots.R ─────────────────────────────────────────────
+build_hours_descriptive_plots(cleaned_df: tibble, hours_by_period: tibble = NULL)
+  -> list(hours_by_year, hours_by_period, raw_did, plots)
+# hours_by_period is passed, not recomputed, so the figure and
+# outputs/hours_diagnostics_hours_by_period.csv are physically the same numbers.
+
+# ── hours_dose_response.R ─────────────────────────────────────────────────
+build_hours_dose_response(cleaned_df: tibble, exposure_index: tibble,
+                           measure_label: character(1) = "...") -> list(data, cell_means, plot)
+# Raw hours DiD within each quartile of OCCUPATION-level exposure -- the DDD's own regressor,
+# deliberately not the cell-based index. Cell arithmetic only, no regression.
+
+# ── build_mechanism_scatter.R ─────────────────────────────────────────────
+build_mechanism_scatter(mechanism_data: tibble, fit: lm = NULL) -> list(data, fit_line, plot)
+# Per-occupation beta_j vs. exposure. The drawn line comes from the passed precision-weighted
+# `fit`, never geom_smooth(). Repo diagnostic only -- deliberately NOT in paper.tex.
+
+# ── export_paper_figures.R ────────────────────────────────────────────────
+export_paper_figures(figures: list, output_dir: character(1) = "outputs/figures",
+                      strip_titles: logical(1) = TRUE, device = cairo_pdf) -> invisible(character)
+# Second export pass: vector PDFs at print size for the figures paper.tex includes.
+# Flat, non-recursive, keyed by filename -- paper.tex hard-codes ../outputs/figures/<key>.pdf,
+# so renaming a key breaks the LaTeX build.
 ```
 
-## HLD Gap Analysis
+## HLD Gap Analysis & Implementation Roadmap — both closed
 
-**Status: closed.** Every gap this table originally tracked (validation/threshold checks, the schema-drift check, the intensive-margin regression, the WFH-exposure index, the DDD mechanism regression, the Gender Placebo Test, and the persisted output/export layer) is now implemented — see `docs/HLD.md` §4.1 for the full current file list, and `docs/ROADMAP.md` for the checkpoint history. The one item below that was ever a genuine data-availability blocker (not an engineering gap) was resolved as a recorded decision rather than closed by acquiring new data:
+Every gap this document originally tracked is implemented, and the 9-step build order it specified
+has shipped in full. `docs/HLD.md` §4.1 holds the current file list; `docs/ROADMAP.md` holds the
+checkpoint history; `docs/decisions/` holds the rationale for work that went beyond the original
+spec (the calibrated exposure measure and cell-based DDD, the Lee-bounds corrections, the runtime
+diagnostics). **There is no pending roadmap item** — new work should get its own checkpoint entry
+or decision memo per `CLAUDE.md`'s convention rather than being implemented ad hoc.
 
-| Original gap | Resolution |
-|---|---|
-| Continuous `Age`/`Age²` controls — confirmed absent from the raw CBS extract entirely (no `Gil`/`ShnatLeda`-equivalent column exists) | **Decided, not built**: `docs/decisions/checkpoint8-age-age2-controls.md` formally replaces this control with the categorical `GilNK` already in use everywhere — matching Part 3 §3's own advisor feedback for categorical dummies. Not an open gap. |
+The one original gap that was a genuine data-availability blocker rather than an engineering one:
+continuous `Age`/`Age²` controls are absent from the raw CBS extract entirely (no
+`Gil`/`ShnatLeda`-equivalent column exists). Resolved as a recorded decision —
+`docs/decisions/checkpoint8-age-age2-controls.md` replaces the control with the categorical `GilNK`
+already in use everywhere, matching Part 3 §3's own advisor feedback for categorical dummies.
 
-Work has since gone **beyond** what this table or the original roadmap scoped — a statistically-calibrated exposure measure and a cell-based primary DDD (`wfh_exposure_cells.R`, `docs/decisions/calibrated-exposure-and-cell-ddd.md`), a Lee (2009) selection-bounds correction for the intensive margin (`docs/decisions/intensive-margin-lee-bounds.md`), and several runtime diagnostics (`validation.R`'s `check_idpuf_panel_structure()`/`check_wfh_refweek_avadbeshavua()`, `isco_masking_diagnostics.R`, `ddd_collinearity_diagnostics.R`). None of these are "gaps" in the sense this table originally meant (missing pieces of the research-doc spec) — they're refinements layered on top of a complete spec, each with its own decision memo. See `docs/HLD.md` §4.2 for the current list of documented limitations and deliberate decisions (survey weights not applied, Lee bounds' one-directional limitation, etc.) — that's the accurate analogue of this section today.
-
-## Implementation Roadmap
-
-**Status: complete.** The 9-step build order this section originally specified (validation guard → schema-drift check → intensive-margin regression → controls de-duplication → WFH-exposure index → DDD mechanism regression → Gender Placebo Test → Age/Age² decision → export layer) matches `docs/ROADMAP.md`'s 10 checkpoints and all of it has shipped. For what's been built since, see `docs/HLD.md` §4.1's file table and the decision memos in `docs/decisions/`. There is currently no pending roadmap item — new work should get its own checkpoint entry or decision memo (per `CLAUDE.md`'s convention) rather than being implemented ad hoc, so a future reader can find the rationale the way this section once made possible for the original 9.
+For the current list of documented limitations and deliberate decisions (survey weights not
+applied, the Lee bounds' one-directional limitation, etc.), see `docs/HLD.md` §4.2.
 
 ## Verification
 

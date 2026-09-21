@@ -112,7 +112,7 @@ baseline_arab <- basic_reg(filter(cleaned_df, Leom == 2))
 message("Running employment_by_child_age...")
 emp_res <- employment_by_child_age(cleaned_df)
 
-# ── 7. Debug ─────────────────────────────────────────────────────────
+# ── 7. Event studies & parallel-trends tests ──────────────────────────────────
 # Diagnostics.R's event-study plot draws to whatever device is active rather than opening its own
 # (see the comment there) -- wrap the call in an explicit device targeting outputs/ so a real run
 # produces a saved plot instead of leaking an auto-numbered Rplots*.pdf into the repo root.
@@ -536,7 +536,7 @@ if (RUN_NULL_VS_POWER_AUDIT) {
 # to TRUE on 2026-09-19 to fix.
 #
 # This is the first point in the pipeline where all the inputs exist: hours_diagnostics_results
-# (§2), emp_res (§3), hours_exposure_index and hours_ddd (§8a).
+# (§7), emp_res (§6), hours_exposure_index and hours_ddd (§8a).
 message("Building descriptive figures for the paper (hours 2x2, by-year, dose-response)...")
 
 # hours_by_period is passed rather than recomputed so this figure and

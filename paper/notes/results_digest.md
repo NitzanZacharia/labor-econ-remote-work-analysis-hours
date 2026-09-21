@@ -266,12 +266,17 @@ under 17. `Post` = year ≥ 2021. (`README.md` "Key variables"; `docs/HLD.md` §
 - **Function:** inside `run_hours_ddd_regression()` (Model 2): per-occupation `Mother:Post` from
   `run_intensive_margin_reg()` on that occupation's rows (β_j, se_j), then
   `lm(beta_j ~ wfh_exposure, weights = 1/se_j^2)`.
-- **Result:** slope = **2.639 (SE 0.899), p = 0.006**, R² = 0.197, n = 37 occupations (3 of 40
-  dropped for degenerate fits). Source: `docs/hours-intensive-margin-analysis.md` §2 (console
-  output only).
+- **Result:** slope = **2.198 (SE 0.907), p = 0.021**, R² = 0.144, n = 37 occupations (3 of 40
+  dropped for degenerate fits). Source: `outputs/hours_mechanism_data.csv` (refit verifiable from
+  disk; see below).
   - ✅ **Resolved 2026-09-20 (Checkpoint 12).** `main.R` §8e now exports the real frame as
-    `outputs/hours_mechanism_data.csv`, and refitting from it gives **slope 2.6386, SE 0.8993,
-    n = 37** — the recorded figures, now verifiable from disk. The previously-cited
+    `outputs/hours_mechanism_data.csv`, and refitting from it gives **slope 2.1977, SE 0.9068,
+    p = 0.0207, R² = 0.1437, n = 37** — verifiable from disk.
+  - ⚠️ **Corrected 2026-09-21.** The figures above previously read 2.639 / SE 0.899 / p 0.006 /
+    R² 0.197, which predate the hours-population harmonization
+    (`docs/decisions/hours-population-harmonization.md`). Note the p-value moves across the 1%
+    threshold: the effect is significant at 5%, not at 1%. §3.3's table below already carried the
+    corrected row. The previously-cited
     `outputs/archive/ddd_calibrated_mechanism_data.csv` was **stale** (committed 2026-09-11 by the
     removed employment-outcome `ddd_regression.R`; its `beta_j` values are in
     employment-probability units, −0.19 to +0.13, not hours) and should not be used. Note this
@@ -294,7 +299,7 @@ the mechanism is visible only once exposure is measured as Israeli jobs were act
 
 Source: `outputs/age_balance_robustness_hours_ddd_age_interacted.csv`,
 `outputs/age_balance_robustness_hours_ddd_reweighted.csv` (produced with
-`RUN_AGE_BALANCE_ROBUSTNESS <- TRUE`, flag reverted; `docs/hours-intensive-margin-analysis.md` §3).
+`RUN_AGE_BALANCE_ROBUSTNESS <- TRUE`, which is now the default; `docs/hours-intensive-margin-analysis.md` §3).
 
 | Spec | `Mother x Post x WFH_Exposure` | SE | Sig. | N |
 |---|---|---|---|---|
@@ -725,7 +730,7 @@ Source: `docs/decisions/checkpoint6-wfh-anchor-year.md` (Status: DECIDED — Pat
 
 ## 5. Limitations (verbatim)
 
-### 5.1 `README.md` — "Known limitations" (verbatim, complete)
+### 5.1 `README.md` — "Known limitations" (snapshot as of 2026-09-19; `README.md` has since been rewritten — check it for the current wording, which now enumerates three legitimate `weights =` uses rather than one)
 
 > - **Survey weights are intentionally not applied in any regression.** CBS weight columns
 >   (`MishkalSofi`, `MishkalShnati`, etc.) exist in the raw data and are deliberately excluded from
@@ -741,7 +746,7 @@ Source: `docs/decisions/checkpoint6-wfh-anchor-year.md` (Status: DECIDED — Pat
 >   specification, as documented decisions (see `docs/decisions/`), because the raw CBS extract
 >   lacks a 2020 file and any continuous age/birth-year variable.
 
-### 5.2 `docs/HLD.md` §4.2 "Known limitations & deliberate decisions" (verbatim table rows, Notes column)
+### 5.2 `docs/HLD.md` §4.2 "Known limitations & deliberate decisions" (snapshot as of 2026-09-19, Notes column; see the erratum below the table and `docs/HLD.md` for current wording)
 
 | Item | Notes (verbatim) |
 |---|---|
@@ -753,8 +758,12 @@ Source: `docs/decisions/checkpoint6-wfh-anchor-year.md` (Status: DECIDED — Pat
 | `IDPUF` cross-period repetition | Reported, not corrected — the same person can in principle contribute to both `Post==0` and `Post==1` rows. |
 | Secondary (extensive-margin) DDD's null `Mother:Post:WFH_Exposure` was underpowered — root cause diagnosed and partially fixed | Root cause: `WFH_Exposure` was built from exactly the same 3 variables used as the regression's own controls/FE, so its minimum detectable effect was ~51% of baseline employment — far larger than the actual point estimates. Fixed by building `WFH_Exposure` on a finer partition (+`MatzavMishpachti`, +`Dat`) than the regression's controls/FE, verified against real data to cut the MDE by ~37% (to ~32% of baseline) with negligible cell-size cost. Still underpowered at that level, but no longer aliased with its own controls by construction. `RUN_NULL_VS_POWER_AUDIT` flag, default `FALSE`. |
 
-(Note: the last row's "~32% of baseline" predates the `BirthContinent` addition; current is ~26% —
-see §2.3. The `GilNK` row's "~0.8, t≈−81" likewise predates it; current CSV says −0.974, t = −94.)
+(Erratum, three items in the table above are out of date:
+1. the last row's "~32% of baseline" predates the `BirthContinent` addition; current is ~26% — see §2.3;
+2. the `GilNK` row's "~0.8, t≈−81" likewise predates it; current CSV says −0.974, t = −94;
+3. the last row's "`RUN_NULL_VS_POWER_AUDIT` flag, default `FALSE`" is wrong — it was flipped to
+   `TRUE` on 2026-09-19, as was `RUN_AGE_BALANCE_ROBUSTNESS`. Both audit blocks run on a default
+   `Rscript main.R`.)
 
 ### 5.3 Lee-bounds directionality — `docs/decisions/intensive-margin-lee-bounds.md` (verbatim)
 
@@ -895,14 +904,14 @@ to the paper.**
 
 ## 7. Open items / things not confirmable from artifacts
 
-1. ~~Hours mechanism regression slope (2.639, SE 0.899, p 0.006, n 37) and its Jewish/Arab analogs —
+1. ~~Hours mechanism regression slope (2.198, SE 0.907, p 0.021, n 37) and its Jewish/Arab analogs —
    console only; the CSV the narrative doc cites is a stale employment-outcome artifact (§1.5).~~
    **Resolved 2026-09-15: §1.5 is out of scope — not to be drafted.**
    **Export gap closed 2026-09-20** (Checkpoint 12, `docs/decisions/paper-figure-layer.md`):
    `main.R` now exports `hours_ddd$mechanism_data` as `outputs/hours_mechanism_data.csv` (37 rows:
    `occupation_code, wfh_exposure, beta_j, se_j` + CI columns). Refitting
-   `lm(beta_j ~ wfh_exposure, weights = 1/se_j^2)` from that file reproduces **slope 2.6386,
-   SE 0.8993, n 37**, confirming the recorded 2.639/0.899/37 from disk rather than console
+   `lm(beta_j ~ wfh_exposure, weights = 1/se_j^2)` from that file reproduces **slope 2.1977,
+   SE 0.9068, p 0.0207, n 37**, establishing the figures from disk rather than console
    scrollback, and superseding the stale `outputs/archive/ddd_calibrated_mechanism_data.csv`
    (employment-probability units). The §1.5 scope decision is unaffected — the data is now
    verifiable, but the regression is still not drafted into the paper. The Jewish/Arab analogs

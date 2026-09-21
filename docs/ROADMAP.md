@@ -1,14 +1,18 @@
 # Implementation Roadmap
 
-Sequential, actionable checkpoints from the current codebase to the full empirical strategy in [`motherhood_penalty_wfh_research.md`](../motherhood_penalty_wfh_research.md), built on the gap analysis and proposed signatures in [`docs/LLD.md`](LLD.md). Each checkpoint is meant to be implemented and verified independently, in order — later checkpoints depend on earlier ones being done first (dependencies noted per checkpoint).
+Sequential, actionable checkpoints from the current codebase to the full empirical strategy in [`motherhood_penalty_wfh_research.md`](./motherhood_penalty_wfh_research.md), built on the gap analysis and proposed signatures in [`docs/LLD.md`](LLD.md). Each checkpoint is meant to be implemented and verified independently, in order — later checkpoints depend on earlier ones being done first (dependencies noted per checkpoint).
 
 Checkpoints 1-10 predate a later pivot: weekly work hours (the intensive margin) is now the project's **primary** dependent variable, and the binary employment indicator used as `Y_{it}` throughout Checkpoints 4/5/7 below is now the **secondary** specification. See Checkpoint 11 and [`docs/decisions/hours-ddd-pivot.md`](decisions/hours-ddd-pivot.md) for the pivot itself; the checkpoint write-ups below are left as historically accurate records of what was originally built; and are cross-referenced forward where relevant.
 
-Not covered here: general test-suite construction (unit/integration tests for the *existing* functions) — the live `tests/testthat/` suite (run via `Rscript run_tests.R`) is the source of truth for that; [`archive/TESTING_BLUEPRINT.md`](archive/TESTING_BLUEPRINT.md) is the original (now superseded) planning doc, kept for history.
+Not covered here: general test-suite construction (unit/integration tests for the *existing* functions) — the live `tests/testthat/` suite (run via `Rscript run_tests.R`) is the source of truth for that.
+
+> **This document is a historical record, not a work queue.** All 13 checkpoints are implemented; there is no pending roadmap item (`docs/LLD.md` says the same). Each checkpoint below carries a `**Status:**` line, and the write-ups are preserved as accurate records of what was built and why, including options that were considered and rejected. Numbers quoted inside a checkpoint are as-of that checkpoint — where a later change superseded one, the superseding value is noted inline. New work should get its own checkpoint entry or a decision memo in [`docs/decisions/`](decisions/) rather than editing history here.
 
 ---
 
 ## Checkpoint 1 — Data Validation & Quality Guard Layer
+
+**Status:** Implemented — `scripts/validation.R`'s `validate_cleaned_df()`, called from `main.R` §3.
 
 **Objective:** Add an explicit guard function that enforces `docs/LLD.md`'s hard-fail and soft-fail thresholds, so every later checkpoint builds on data that's been verified, not assumed, correct.
 
@@ -28,11 +32,14 @@ Confirm it completes with no `stop()` triggered and no unexpected warnings. Then
 
 ## Checkpoint 2 — Schema-Drift Check
 
+**Status:** Implemented — `scripts/validation.R`'s `check_schema_drift()`, called from `main.R` §3 before a non-cached load.
+
 **Objective:** Guard the fragile positional column-drop ranges in `data_processing.R` against a future CBS file-format change silently dropping or keeping the wrong columns.
 
 **Implementation Tasks:**
 - Add `check_schema_drift(folder_path)` to `validation.R`.
 - For each yearly CSV in `folder_path`, read only the header row and assert the named boundary columns of all 7 positional drop ranges (`RamatDat`/`BituachLeumi`, `Yeladim0_1Prat`/`Yeladim15_17Prat`, `MisparHachlafa`/`YachasKirvaNK`, `MisparNefashotGilAvodaV2007`/`MisparPrat`, `ChipusAvodaSherutTaasuka`/`ChipusAvodaOfenAcher`, `EizeChozemechushav`/`ChodeshKodemShaa`, `MimaHaMigbala`/`PniyaLmaasik`) occupy the same relative column position across every year's file.
+  - *Since superseded:* only **5** positional ranges remain. `EizeChozemechushav`/`ChodeshKodemShaa` and `MimaHaMigbala`/`PniyaLmaasik` were converted to name-based `any_of()` drops (`scripts/data_processing.R:258-272`); `docs/LLD.md` records the current set.
 - Call `check_schema_drift(folder_path)` in `main.R` before `load_and_clean_data()` runs.
 
 **Verification Step:**
@@ -44,6 +51,8 @@ Confirm it passes silently against the current 6 CSVs. Then negative-test: copy 
 ---
 
 ## Checkpoint 3 — Shared `controls` Constant
+
+**Status:** Implemented — `DEFAULT_CONTROLS` in `scripts/data_processing.R`, now the single source of truth repo-wide (`tests/testthat/test-controls-consistency.R` guards it).
 
 **Objective:** Eliminate the 3-way copy-pasted `controls` vector before Checkpoint 4 onward adds regression functions that would otherwise duplicate it a 4th and 5th time.
 
@@ -61,6 +70,8 @@ Diff the printed `etable()` coefficients/SEs for `basic_reg()` against a saved c
 ---
 
 ## Checkpoint 4 — Intensive-Margin Regression
+
+**Status:** Implemented — `scripts/intensive_margin_regression.R`'s `run_intensive_margin_reg()`. Since **designated primary** by Checkpoint 11.
 
 **Objective:** Implement the weekly-work-hours regression required by the research doc's core DiD specification (Part 2 §1 / Part 4 §2), alongside the employment-margin regression already in place. (Note: this hours regression has since become the project's *primary* specification, per Checkpoint 11 — at the time this checkpoint was written, it was the newly-added second regression.)
 
@@ -97,6 +108,8 @@ Note: this placebo is built on `basic_reg()` (the now-secondary, employment-outc
 ---
 
 ## Checkpoint 6 — WFH-Exposure Index
+
+**Status:** Implemented — `scripts/wfh_exposure_index.R`'s `build_wfh_exposure_index()`, anchored to 2021 per `docs/decisions/checkpoint6-wfh-anchor-year.md`.
 
 **Objective:** Build the occupation-level remote-work-exposure measure needed for the Triple-Differences mechanism test (Part 2 §2 / Part 4 §4).
 
@@ -146,6 +159,8 @@ Confirm both models fit without collinearity errors. Check `γ_1`'s sign matches
 ---
 
 ## Checkpoint 9 — Persisted Output/Export Layer
+
+**Status:** Implemented — `scripts/export_results.R`'s `export_all_results()`, called from `main.R` §9.
 
 **Objective:** Give the pipeline a durable output artifact so the research doc's "drafting findings" step (Part 1 §VI) has something to work from besides console scrollback.
 
@@ -200,7 +215,7 @@ Full motivation, the plot triage, and the design rationale are recorded in [`doc
 Two notes that matter for anyone extending this:
 
 - **`export_all_results()` is unchanged.** Paper figures are written twice on purpose — an 8x5in 150dpi PNG for browsing `outputs/`, and a vector PDF at ~5in for the paper. Keys in `main.R`'s `paper_figures` list are filenames that `paper.tex` hard-codes, so renaming one breaks the LaTeX build.
-- **The mechanism scatter is built and its data exported, but the figure is deliberately not in the paper** — `paper/notes/results_digest.md` §1.5's 2026-09-15 out-of-scope decision stands. Exporting `hours_ddd$mechanism_data` closes the separate open item at §7 item 1; refitting from `outputs/hours_mechanism_data.csv` reproduces slope 2.6386 (SE 0.8993), n = 37.
+- **The mechanism scatter is built and its data exported, but the figure is deliberately not in the paper** — `paper/notes/results_digest.md` §1.5's 2026-09-15 out-of-scope decision stands. Exporting `hours_ddd$mechanism_data` closes the separate open item at §7 item 1; refitting from `outputs/hours_mechanism_data.csv` reproduces slope 2.1977 (SE 0.9068, p 0.0207), n = 37.
 
 **Verification Step:**
 ```r
@@ -233,4 +248,4 @@ Rscript main.R        # exit 0; 31 CSVs + 6 PNGs change, all in the hours chain
 ```
 Every control artifact must stay byte-identical — the four `wfh_exposure_*.csv`, both Lee-bounds selection-rate files, and the entire employment margin. Any of those moving means the change leaked outside `WorkHoursCont`.
 
-**Downstream (not done here):** `paper/paper.tex` and `paper/notes/results_digest.md` still carry the pre-fix numbers, and `paper/paper.pdf` is inconsistent with `outputs/`. The 2017 anomaly paragraph in §8, the 2018-2019 restriction on the identifying assumption, and §4.3 in its entirety are now obsolete rather than merely renumbered.
+**Downstream (completed since):** `paper/paper.tex`, `paper/notes/results_digest.md` and `paper/paper.pdf` were subsequently brought in line with the post-fix `outputs/` (commits `cc759d4`, `605e56e`, `b53846f`, `bdad127`). The 2017 anomaly paragraph, the 2018-2019 restriction on the identifying assumption, and the old §4.3 were rewritten or removed rather than merely renumbered.

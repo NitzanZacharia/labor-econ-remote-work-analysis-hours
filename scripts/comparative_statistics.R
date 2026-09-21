@@ -86,8 +86,8 @@ run_comparative_stats <- function(cleaned_df) {
     ) +
     theme_paper()
   # Interactive convenience only. Under a headless `Rscript main.R` this print() opens R's default
-  # device and leaks an Rplots.pdf into the repo root; this function runs at main.R:74, so it is
-  # the FIRST such leak in the pipeline. The plot reaches disk as a PNG via export_all_results()
+  # device and leaks an Rplots.pdf into the repo root; this function is the first plotting call in
+  # main.R, so it is the FIRST such leak in the pipeline. The plot reaches disk as a PNG via export_all_results()
   # regardless. Same guard as employment_by_child_age.R's three prints.
   if (interactive()) print(p_mobility)
 

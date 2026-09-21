@@ -23,7 +23,7 @@
 - Raw CBS CSVs are gitignored and live outside the repo (real path is set locally in main.R's
   `folder_path`). Never assume they're present in a sandbox; check before running Rscript against them.
 - `DEFAULT_CONTROLS <- c("MatzavMishpachti","Dat","GilNK","MachozMegurim","TeudaGvoha")`, defined
-  once in `scripts/data_processing.R`, is the single source of truth once Checkpoint 3 lands —
+  once in `scripts/data_processing.R`, is the single source of truth —
   don't reintroduce a local copy in any new file.
 - CBS survey weights (`MishkalSofi`, `MishkalShnati`, etc.) are intentionally NOT applied in any
   outcome regression — see README.md's "Known limitations". This is a deliberate scope decision,
@@ -38,8 +38,7 @@
 - Before implementing anything, read: docs/ROADMAP.md (the checkpoint in question),
   docs/LLD.md (schema/contracts), docs/HLD.md (why the gap exists). Don't implement from the
   research doc directly — LLD/HLD already reconcile it against the real codebase. For how to test
-  something, the live `tests/testthat/` suite is the source of truth — `docs/archive/TESTING_BLUEPRINT.md`
-  is a pre-`scripts/`-restructure planning doc, kept only for history.
+  something, the live `tests/testthat/` suite is the source of truth.
 - Every change that touches a function used elsewhere (data_processing.R, the controls list)
   needs the full `Rscript run_tests.R` suite green before you consider the task done.
 - Whenever `paper/paper.tex` or `paper/references.bib` is modified in a session, recompile before

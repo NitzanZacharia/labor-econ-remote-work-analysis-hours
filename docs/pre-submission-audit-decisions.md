@@ -79,9 +79,14 @@ could fairly pick up.
 
 ### D1. The Conclusion is still the red draft block
 
-`paper/paper.tex:1083-1106`. The course rule quoted at `paper/archive/old_paper.tex:209-213`
+**Still open as of 2026-09-21.** The block is the Conclusion skeleton in `paper/paper.tex`, marked
+by the `SKELETON -- NOT SUBMITTABLE TEXT` comment and the two red
+`[SKELETON ONLY --- REPLACE WITH YOUR OWN TEXT BEFORE SUBMISSION]` /
+`[END SKELETON --- DELETE THIS BLOCK]` markers (grep `SKELETON` to find it; line numbers have moved
+twice). The course rule quoted at `paper/archive/old_paper.tex:209-213`
 requires this section to be written individually by the student, and the block in the file is
-explicitly labelled a model answer for self-comparison. It compiles into the PDF today.
+explicitly labelled a model answer for self-comparison. **It still compiles into the PDF today, in
+red.** `\usepackage{xcolor}` is carried solely for these markers and can go with them.
 
 **Options.** Write it yourself, which is the only compliant route. If useful, I can produce a
 skeleton of the claims the verified results support, for you to write against — that is not the
@@ -89,11 +94,11 @@ same as writing it.
 
 **Impact.** Submitting with the block present is an academic-integrity problem rather than a
 formatting one. Nothing else in this register outranks it. Removing it also frees
-`\usepackage{xcolor}` at line 18, which exists only for the red flag.
+`\usepackage{xcolor}` (commented `% draft-conclusion flag`), which exists only for the red flag.
 
 ### D2. The furlough sentence is an uncited data claim
 
-`paper/paper.tex:1001-1006`. You chose to keep it and supply a CBS source; the source has not
+`paper/paper.tex`'s Data section. You chose to keep it and supply a CBS source; the source has not
 arrived. The claim is that the employment indicator counts furloughed workers as employed. The
 codebook shipped with the extract shows `Muasak` has three codes — employed, unemployed, blank for
 not-in-labour-force — and no furlough code; the absence-reason variable the archived draft relied
@@ -129,7 +134,7 @@ check, potentially expensive to miss. Hand-formatting 15 entries is about an hou
 
 ### D4. The Kleven suffix order
 
-`paper/paper.tex:189` and `:193`. `apalike` labels the cross-country paper 2019a and the Denmark
+`paper/paper.tex`'s Literature Review citations of Kleven et al. `apalike` labels the cross-country paper 2019a and the Denmark
 paper 2019b by title sort, and the Literature Review cites b before a. I deliberately did not fix
 this: the paragraph is built on the Danish study and closes by returning to it, so reordering the
 sentences to satisfy the suffix would damage the argument.
@@ -156,7 +161,11 @@ from" is a fair examiner question with no answer in the repo today.
 
 ## Tier 3 — repo quality, now that the repository is graded
 
-### D6. The parallel-trends test is not reproducible on a default run
+### D6. The parallel-trends test is not reproducible on a default run — ✅ RESOLVED 2026-09-19
+
+**Option (a) was taken.** `run_pretrend_joint_test()` now runs unconditionally in `main.R` §7,
+right beside the event studies whose models it tests, and exports
+`outputs/pretrend_wald_{hours,employment}.csv`. The original write-up follows for the record.
 
 Both Wald F-statistics in the paper are correct and verified. But `run_pretrend_joint_test()` is
 called only inside the `RUN_AGE_BALANCE_ROBUSTNESS` block (`main.R:455,458`), its results are never
@@ -171,9 +180,14 @@ run and attach the log.
 which matters more now the repo is graded. (b) is honest but leaves a reader unable to reproduce a
 number the Limitations section leans on.
 
-### D7. Two feature flags default to `FALSE`
+### D7. Two feature flags default to `FALSE` — ✅ RESOLVED 2026-09-19
 
-`main.R:424,471`. Nine `age_balance_robustness_*` artifacts and the first-stage table are cited by
+**Both were flipped to `TRUE`.** `RUN_AGE_BALANCE_ROBUSTNESS` and `RUN_NULL_VS_POWER_AUDIT` now
+default on, so one `Rscript main.R` reproduces everything the paper cites; both flags are kept so
+the chains can still be switched off for a fast run. Verified: all artifacts regenerate
+byte-identically. The original write-up follows for the record.
+
+Nine `age_balance_robustness_*` artifacts and the first-stage table are cited by
 the paper but do not regenerate on a default run. All regenerate byte-identically with the flags
 on, verified.
 
@@ -183,9 +197,15 @@ command reproduces everything the paper cites.
 **Impact.** Flipping makes the default run a complete reproduction at the cost of a longer run.
 Leaving them needs a README table so a reader is not stuck.
 
-### D8. Dead code still sourced
+### D8. Dead code still sourced — ✅ MOSTLY RESOLVED 2026-09-19
 
-`main.R:9,16` source `basic_reg_compared_data.R` and `gender_placebo.R`; `basic_reg_comp()`,
+**The employment placebo was wired in.** `main.R` now calls `run_gender_placebo()` (which in turn
+calls `run_gender_ddd_placebo()`) and exports `gender_placebo_{did,ddd}_table.csv`, closing the
+digest's open item 7. `basic_reg_comp()` remains uncalled by the pipeline **by design** — it is a
+manual console tool documented in `README.md`, and is unit-tested. The original write-up follows
+for the record.
+
+`main.R` sources `basic_reg_compared_data.R` and `gender_placebo.R`; `basic_reg_comp()`,
 `run_gender_placebo()` and `run_gender_ddd_placebo()` are never called. The employment-outcome
 gender placebo therefore has no exported result, which is the digest's own open item 7.
 
@@ -209,9 +229,9 @@ magnitudes, which this close to submission is a real risk. Recommendation: leave
 
 ## Tier 4 — noted, no action unless you want it
 
-- **D11. Title-page date.** `paper/paper.tex:78` uses `\today`, so the printed date is whatever day
+- **D11. Title-page date.** `paper/paper.tex`'s title block uses `\today`, so the printed date is whatever day
   it was last compiled. Fix to the real submission date if that matters.
-- **D12. Figure path.** `paper/paper.tex:696` includes `../outputs/...`, so the paper compiles only
+- **D12. Figure path.** `paper/paper.tex`'s figures include `../outputs/...`, so the paper compiles only
   from inside `paper/`. Copying the PDF into `paper/` would make the folder self-contained.
 - **D13. `outputs/israeli_market_mismatch.csv`** was committed in `7967624` because `outputs/` is
   tracked and the repaired runner produces it. Reverse with `git rm --cached` if you prefer.

@@ -1,9 +1,9 @@
 # helper-setup.R
 # testthat auto-sources every helper-*.R file (with working directory set to tests/testthat/)
 # before running any test-*.R file. This locates the project root robustly (regardless of exactly
-# where testthat sets the working directory), sources the 6 function-bearing .R files (never
-# main.R itself — it does rm(list=ls()) and would wipe the test session), and exposes shared
-# fixtures/helpers used across test files.
+# where testthat sets the working directory), sources every function-bearing .R file in scripts/
+# and robustness/ (never main.R itself — it does rm(list=ls()) and would wipe the test session),
+# and exposes shared fixtures/helpers used across test files.
 
 find_project_root <- function(start = getwd()) {
   dir <- normalizePath(start, mustWork = TRUE)
@@ -18,7 +18,7 @@ find_project_root <- function(start = getwd()) {
 
 project_root <- find_project_root()
 
-# The 19 function-bearing files live in scripts/ and each other's internal source() calls (e.g.
+# The function-bearing files live in scripts/ and each other's internal source() calls (e.g.
 # data_processing.R referenced from basic_regression.R) use root-relative paths like
 # file.path("scripts", "data_processing.R") -- resolved against the current working directory, not
 # against the sourced file's own location. So instead of chdir=TRUE per file (which would cd into
