@@ -23,9 +23,14 @@ test_that("2019 is the omitted reference year in the hours event-study model", {
   expect_false(any(grepl("2019", coefs)))
 })
 
-test_that("run_hours_diagnostics is restricted to Employed == 1", {
+test_that("run_hours_diagnostics is restricted to the hours estimation sample", {
   with_null_device({
     out <- capture.output(res <- suppressWarnings(run_hours_diagnostics(cleaned)))
   })
-  expect_equal(sum(res$hours_by_period$n), sum(cleaned$Employed == 1, na.rm = TRUE))
+  # n counts the rows each cell mean is computed from, not every employed row. Those differ by the
+  # ~10%/year who were employed but absent from the reference week and so have no usual-hours value
+  # (docs/decisions/hours-population-harmonization.md). Asserting against the employed count would
+  # re-pin the inconsistency this was changed to remove.
+  expect_equal(sum(res$hours_by_period$n), sum(!is.na(cleaned$WorkHoursCont)))
+  expect_lt(sum(res$hours_by_period$n), sum(cleaned$Employed == 1, na.rm = TRUE))
 })

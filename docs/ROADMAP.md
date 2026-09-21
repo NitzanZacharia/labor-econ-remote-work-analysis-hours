@@ -208,3 +208,29 @@ Rscript run_tests.R   # 732 passing
 Rscript main.R        # writes outputs/figures/*.pdf + outputs/hours_mechanism_data.csv
 ```
 Then, from inside `paper/`: `pdflatex`, `bibtex`, `pdflatex`, `pdflatex`. Check `paper/paper.log` for `File ... not found` and undefined citations/references directly rather than trusting the hook's summary line — the figures must exist before the `.tex` edit compiles.
+
+---
+
+## Checkpoint 13 — Hours Population Harmonization (the 2017 Zero-Hours Defect)
+
+**Objective:** Remove a year-specific inconsistency in how `WorkHoursCont` was defined, and re-establish the intensive-margin results on a hours population that is identical across all six survey years.
+
+**Status:** Implemented. `WorkHoursCont` is now defined only for rows that are both `Employed == 1` and `AvadBeshavua == 1` (worked the reference week). Touches `scripts/data_processing.R`, both Lee-bounds scripts, `scripts/hours_diagnostics.R`, `scripts/validation.R` (new soft-fail check) and the test fixtures.
+
+Full diagnosis, rejected alternatives, and the complete before/after table are in [`docs/decisions/hours-population-harmonization.md`](decisions/hours-population-harmonization.md) — not duplicated here. In brief: the 2017 CBS file recorded usual hours as bin 0 ("no usual hours") for the employed-but-absent, who from 2018 on received a real code. Because absenteeism is mother-skewed (12.4% vs 7.3%), that produced a spurious `Mother x year` effect in the pre-period — and it was the sole source of the paper's headline parallel-trends violation.
+
+**The result that matters:** the hours pre-trend Wald test now **passes** (F = 23.69, p = 5.2e-11 -> F = 0.95, p = 0.387), and the 2017 event-study coefficient goes from -1.524*** to an insignificant +0.3515. The headline hours DDD survives at 3.2240 (SE 1.0223); the secondary hours DiD does not, falling from 0.8261*** to 0.2280 (SE 0.1809). Dropping 2017 entirely afterwards moves the DDD by 0.15 SE and the DiD by 0.44 SE, so 2017 is genuinely rehabilitated rather than merely less contaminated.
+
+Two notes for anyone extending this:
+
+- **The Lee-bounds change was required, not incidental.** Both bounds scripts `arrange()` by `WorkHoursCont` and dplyr sorts NA last; harmonization puts ~12% NA into the `Mother==1,Post==1` cell, which would have made the lower bound trim unobserved rows on an inflated denominator. Latent before, live after.
+- **Establish a no-op baseline before re-running.** `Rscript main.R` on an unchanged tree shows all 8 PDFs as modified (both base-`pdf()` devices *and* all six `cairo_pdf` figures are nondeterministic) while every CSV and PNG is byte-stable. Without that baseline the PDF churn is indistinguishable from signal.
+
+**Verification Step:**
+```r
+Rscript run_tests.R   # 740 passing
+Rscript main.R        # exit 0; 31 CSVs + 6 PNGs change, all in the hours chain
+```
+Every control artifact must stay byte-identical — the four `wfh_exposure_*.csv`, both Lee-bounds selection-rate files, and the entire employment margin. Any of those moving means the change leaked outside `WorkHoursCont`.
+
+**Downstream (not done here):** `paper/paper.tex` and `paper/notes/results_digest.md` still carry the pre-fix numbers, and `paper/paper.pdf` is inconsistent with `outputs/`. The 2017 anomaly paragraph in §8, the 2018-2019 restriction on the identifying assumption, and §4.3 in its entirety are now obsolete rather than merely renumbered.

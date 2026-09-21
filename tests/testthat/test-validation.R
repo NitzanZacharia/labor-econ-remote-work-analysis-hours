@@ -18,7 +18,10 @@ make_valid_df <- function(n = 20) {
     WorksOutsideLocality = rep(c(0L, 1L), length.out = n),
     WFH                  = rep(c(0, 1), length.out = n),
     WorkHoursCont        = rep(c(10, 20), length.out = n),
-    BirthContinent       = factor(rep(c("Israel", "Asia"), length.out = n))
+    BirthContinent       = factor(rep(c("Israel", "Asia"), length.out = n)),
+    # Raw usual-hours code, for the per-year coverage check. 7 is an ordinary code, so the default
+    # frame reports 0% unascertained in every year and the check stays silent.
+    ShaotAvodaBederechKlalNK = rep(7, n)
   )
 }
 
@@ -233,4 +236,30 @@ test_that("check_wfh_refweek_avadbeshavua warns when any inconsistent row is fou
     Post = 1, Employed = 1L, AvadMeHaBayit = NA_real_, AvadBeshavua = 0
   )
   expect_no_warning(suppressMessages(check_wfh_refweek_avadbeshavua(df_consistent)))
+})
+
+test_that("validate_cleaned_df warns when one survey year has unascertained usual-hours codes", {
+  # The signature of the 2017 defect (docs/decisions/hours-population-harmonization.md): one year
+  # where a material share of the EMPLOYED carry raw code 0 or 99, against ~0% elsewhere.
+  df <- make_valid_df(n = 120)
+  hit <- which(df$ShnatSeker == 2018 & df$Employed == 1)
+  df$ShaotAvodaBederechKlalNK[hit] <- 0
+  expect_warning(validate_cleaned_df(df), "unascertained usual-hours code")
+})
+
+test_that("validate_cleaned_df does not warn on the documented 2017 exception", {
+  # 2017 is the year the memo describes, so it is whitelisted -- re-reporting it on every run would
+  # be noise. A different year appearing is the thing worth flagging.
+  df <- make_valid_df(n = 120)
+  hit <- which(df$ShnatSeker == 2017 & df$Employed == 1)
+  df$ShaotAvodaBederechKlalNK[hit] <- 0
+  expect_no_warning(validate_cleaned_df(df))
+})
+
+test_that("validate_cleaned_df tolerates a frame with no raw hours column", {
+  # The check is guarded on column presence, so frames built before this column was part of the
+  # contract (and the men's exposure frame) still validate.
+  df <- make_valid_df(n = 20)
+  df$ShaotAvodaBederechKlalNK <- NULL
+  expect_silent(validate_cleaned_df(df))
 })

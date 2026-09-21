@@ -105,7 +105,15 @@ run_intensive_margin_lee_bounds <- function(cleaned_df, controls = DEFAULT_CONTR
   formula_hours <- as.formula(paste("WorkHoursCont ~", rhs))
   fit_on        <- function(df) feols(formula_hours, data = df, cluster = ~IDPUF)
 
-  employed_df <- filter(cleaned_df, Employed == 1)
+  # !is.na(WorkHoursCont) restricts this to the ESTIMATION sample, which matters for the trimming
+  # below rather than for point_reg (feols already listwise-deletes, so the point estimate is
+  # identical either way). Since the hours population was harmonized to reference-week workers
+  # (docs/decisions/hours-population-harmonization.md) the Mother==1,Post==1 cell contains ~12%
+  # NA-hours rows, and dplyr's arrange() sorts NA LAST regardless of direction -- so without this
+  # filter the lower bound would trim unobserved rows as though they were the highest-hours ones,
+  # and n_cell would be an inflated denominator for n_trim. Before harmonization there were zero
+  # NA-hours rows in that cell, which is why this was latent rather than wrong.
+  employed_df <- filter(cleaned_df, Employed == 1, !is.na(WorkHoursCont))
   point_reg   <- fit_on(employed_df)
 
   if (!excess || trim_prop <= 0) {

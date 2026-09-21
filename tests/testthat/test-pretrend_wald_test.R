@@ -74,6 +74,9 @@ test_that("run_pretrend_joint_test works against the real run_diagnostics()-prod
       SemelEretzLeda = 10, DargatNayadut = 1, MishlachYad_ISCO_08_2 = "100", MachozYishuvAvoda = 1,
       Leom = 1, MatzavMishpachti = if (ctrl_alt) 1 else 2, Dat = if (ctrl_alt) 1 else 2,
       MachozMegurim = if (ctrl_alt) 1 else 2, MisparHorimYechidim = 0,
+      # WorkHoursCont is gated on having worked the reference week; this test's outcome is
+      # Employed, but load_and_clean_data() builds the hours column regardless and needs the field.
+      AvadBeshavua = 1,
       AvadMeHaBayit = NA, KamaShaot = NA, ShaotAvodaLeMaase = 40, MishkalSofi = 1
     )
     for (col in range_boundary_cols) row[[col]] <- 0

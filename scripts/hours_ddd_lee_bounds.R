@@ -110,8 +110,13 @@ run_hours_ddd_lee_bounds <- function(cleaned_df, exposure_index, exposure_cells,
 
   # Employed, occupation-matched sample (mirrors hours_ddd_regression.R's join), carrying forward
   # each row's cell-based WFH_Exposure_Q from full_df.
+  # !is.na(WorkHoursCont) restricts to the ESTIMATION sample. Same reason as the identical filter
+  # in intensive_margin_lee_bounds.R: after the hours population was harmonized to reference-week
+  # workers (docs/decisions/hours-population-harmonization.md) the Mother==1,Post==1 cells carry
+  # ~12% NA-hours rows, and arrange() sorts NA last -- so the per-quartile lower bound would trim
+  # unobserved rows rather than the highest-hours ones, on an inflated n_cell_q denominator.
   employed_df <- full_df %>%
-    filter(Employed == 1) %>%
+    filter(Employed == 1, !is.na(WorkHoursCont)) %>%
     inner_join(
       exposure_index %>% select(MishlachYad_ISCO_08_2 = occupation_code, WFH_Exposure = wfh_exposure),
       by = "MishlachYad_ISCO_08_2"

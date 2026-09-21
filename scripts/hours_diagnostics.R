@@ -22,7 +22,12 @@ run_hours_diagnostics <- function(cleaned_df) {
   message("=== 2x2 DiD mean weekly hours (Employed == 1) ===")
   hours_by_period <- hours_df %>%
     group_by(Mother, Post) %>%
-    summarise(mean_hours = mean(WorkHoursCont, na.rm = TRUE), n = n(), .groups = "drop")
+    # n counts rows the mean is actually computed from, not all employed rows. With the hours
+    # population harmonized to reference-week workers those differ by ~10%, and the old n = n()
+    # reported a sample size inconsistent with its own mean -- and, via build_hours_descriptive_plots(),
+    # inconsistent with the se sitting next to it in the same exported frame.
+    summarise(mean_hours = mean(WorkHoursCont, na.rm = TRUE),
+              n = sum(!is.na(WorkHoursCont)), .groups = "drop")
   print(hours_by_period)
 
   # ── 2. Parallel trends -- event-study plot (hours) ───────────────────────────────────────────
