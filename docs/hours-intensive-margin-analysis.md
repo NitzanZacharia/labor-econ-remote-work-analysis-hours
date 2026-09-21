@@ -302,8 +302,8 @@ summary: `outputs/hours_did_subgroup_comparison_plot.png`,
 
 ### 5.2 Is the Arab DDD estimate (5.507) genuinely larger than the Jewish estimate (2.847), or a small-sample artifact?
 
-The raw point estimates suggest the mechanism is *more than twice as strong* for Arab women. Three
-pieces of evidence argue this reading is not supportable, and that the gap is best explained by
+The raw point estimates suggest the mechanism is roughly twice as strong for Arab women. Two
+of the three pieces of evidence below argue this reading is not supportable, and that the gap is best explained by
 Arab women's much smaller, more occupationally-concentrated subsample rather than a genuinely
 larger effect.
 
@@ -324,22 +324,34 @@ cross-occupation exposure gradient, not a broad group-level shift.
 **(b) The Arab DDD's own occupation-level mechanism check contradicts its sign.**
 `run_hours_ddd_regression()`'s second-stage mechanism regression (per-occupation `Mother:Post`
 estimates regressed on occupation `wfh_exposure`, precision-weighted) is the direct test of whether
-the triple interaction's implied cross-occupation gradient actually holds within the subgroup. ⚠ **The per-subgroup mechanism slopes below are PRE-HARMONIZATION values and have not been
-recomputed.** They are console-only (no CSV), and the full-sample slope moved from 2.639 to 2.198
-under the fix, so these should be expected to move too. They are retained because the *sign
-contrast* between the Jewish and Arab slopes is the argument, and that contrast is unlikely to
-reverse — but do not cite the magnitudes without re-running. For
-Jewish women it holds directionally: slope = **2.148 (SE 1.136), p = 0.067, R² = 0.093, n = 37**
-occupations (3 of 40 dropped) — positive, marginal, and consistent in sign with the full-sample
-calibrated mechanism regression (now **2.198, SE 0.907, n = 37**, §2). For Arab women, the same check
-runs in the **opposite direction**: slope = **-19.29 (SE 7.04), t = -2.74, p = 0.011, R² = 0.238,
-n = 26** occupations (**14 of 40 dropped** — a 35% attrition rate, vs. 7.5% for Jewish/the full
-sample). That is, among the occupations where an Arab-specific `Mother:Post` estimate could even be
-fit, higher-exposure occupations show a *smaller* motherhood hours effect, not a larger one — the
-opposite of what the individual-level triple interaction (5.507, positive) implies. An estimate
-whose own internal mechanism check contradicts its headline sign is not merely imprecise; it is
-actively uncorroborated by within-subgroup evidence, which is a stronger objection than "the
-confidence interval is wide."
+the triple interaction's implied cross-occupation gradient actually holds within the subgroup. **Recomputed 2026-09-21 against the harmonized data.** All three slopes below are current:
+
+| Subgroup | Slope | SE | t | p | R² | n | Dropped |
+|---|---|---|---|---|---|---|---|
+| Full sample | +2.198 | 0.907 | 2.42 | 0.021 | 0.144 | 37 | 3 (ISCO 62, 63, 95) |
+| Jewish women | +3.571 | 2.365 | 1.51 | 0.140 | 0.061 | 37 | 3 (ISCO 62, 63, 95) |
+| Arab women | **+7.572** | 2.383 | 3.18 | 0.004 | 0.305 | 25 | **15 (37.5%)** |
+
+> **⚠ THIS ARGUMENT HAS REVERSED. The Arab mechanism slope changed sign.** Before the
+> harmonization it was **−19.29 (SE 7.04), p = 0.011, n = 26**, and this section argued that "an
+> estimate whose own internal mechanism check contradicts its headline sign is not merely
+> imprecise; it is actively uncorroborated by within-subgroup evidence." **That is no longer
+> true.** At +7.572 the Arab mechanism slope is positive, significant, and consistent in sign with
+> the Arab triple interaction (+5.507) — the within-subgroup check now *corroborates* the Arab DDD
+> rather than contradicting it. Argument (b) must be withdrawn as an objection.
+>
+> The reversal also cuts the other way for the Jewish estimate, whose slope went from a marginal
+> +2.148 (p = 0.067) to an insignificant **+3.571 (p = 0.140)** with roughly double the standard
+> error. So the neat pre-fix picture — Jewish corroborated, Arab contradicted — has become: both
+> positive, Arab better identified within-subgroup than Jewish.
+
+What survives is the **occupational-coverage** objection, and it is if anything slightly stronger:
+an Arab-specific `Mother:Post` estimate can be fitted in only **25 of 40** occupations (37.5%
+attrition, against 7.5% for the full sample and for Jewish women). With 25 informative occupations
+and a much smaller subsample, a few high-leverage occupations can move the slope a long way — which
+is exactly what the pre/post-harmonization swing from −19.29 to +7.572 demonstrates about its
+stability. The Arab result remains imprecisely identified; it is no longer *contradicted* by its
+own mechanism check, but neither slope is stable enough to carry a heterogeneity claim.
 
 **(c) A plausible mechanical cause: occupational concentration.** The 14-of-40 (35%) occupation
 dropout rate for Arab women, versus 3-of-40 (7.5%) for Jewish/the full sample, is consistent with
@@ -357,12 +369,20 @@ to corroborate.
 **Conclusion for the paper.** Report the Arab DDD point estimate (5.507*, nominally significant on
 its own one-sample test) transparently, but do **not** characterize it as
 evidence that the WFH-exposure mechanism is stronger for Arab women than for Jewish women. The
-correct statement is: the Arab estimate is imprecisely estimated, statistically indistinguishable
-from the Jewish estimate, and contradicted by its own occupation-level mechanism check — a textbook
-small-sample/thin-occupational-coverage fragility, not a documented heterogeneous treatment effect.
-The Jewish-women estimate (2.847**, corroborated directionally by its own mechanism regression) is
-the more credible of the two ethnicity-specific results and should anchor any subgroup claim the
-paper makes.
+correct statement, **revised 2026-09-21**, is: the Arab estimate is imprecisely estimated,
+statistically indistinguishable from the Jewish estimate, and rests on only 25 of 40 occupations —
+a small-sample/thin-occupational-coverage fragility, not a documented heterogeneous treatment
+effect.
+
+Note what can **no longer** be said. The pre-harmonization version of this conclusion added "and
+contradicted by its own occupation-level mechanism check", which was the strongest of the three
+objections. It is now false: the Arab mechanism slope is +7.572 (p = 0.004), positive and
+consistent with the Arab DDD's own sign. Nor can the Jewish estimate still be described as
+"corroborated directionally by its own mechanism regression" — its slope is now insignificant
+(+3.571, p = 0.140). Both subgroup mechanism slopes are positive; neither is stable. The
+conclusion survives on arguments (a) and (c), but it is a weaker case than it was, and the
+paper's §6.4 — which rests on exactly those two and never cited the mechanism check — is
+unaffected.
 
 ### 5.3 Gender placebo: does the mechanism validate as motherhood-specific?
 
@@ -380,11 +400,12 @@ construction):
 | Comparison | DDD term | DiD term |
 |---|---|---|
 | All women (primary) vs. Men (placebo) | z = 3.461, **p = 0.0005** | z = 2.406, **p = 0.016** |
-| Jewish women vs. Men (placebo) | z = 3.354, **p = 0.0008** ⚠ | z = 4.605 ⚠ |
-| Arab women vs. Men (placebo) | z = 2.747, **p = 0.006** ⚠ | — (Arab DiD itself is ns, §5.2) |
+| Jewish women vs. Men (placebo) | z = 3.376, **p = 0.0007** | z = 2.538, **p = 0.011** |
+| Arab women vs. Men (placebo) | z = 2.541, **p = 0.011** | z = 0.637, p = 0.524 (ns) |
 
-⚠ The Jewish- and Arab-vs-men rows are **pre-harmonization and have not been recomputed**; only the
-all-women row is current. Do not cite them.
+All six rows recomputed 2026-09-21 from the current subgroup CSVs. **Note the Arab-vs-men DiD row
+is now insignificant** (z = 0.637) — so the blanket claim that every female subgroup is
+distinguishable from the placebo on both margins no longer holds, and is withdrawn below.
 
 **The placebo now behaves differently on the two margins, and the two must be reported separately.**
 

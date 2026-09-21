@@ -575,10 +575,25 @@ treatment effect.** Three arguments, all from §5.2:
 the DiD: z = −0.720, p = 0.471 — now NEGATIVE, since the Arab DiD point estimate sits below the Jewish one. Both DiDs are indistinguishable from zero (Arab −0.0724, SE 0.4785; Jewish 0.3021, SE 0.2027).
 (Arithmetic re-checked from the CSV values: ✓.)
 
-(b) **The Arab DDD's own mechanism check contradicts its sign.** Second-stage occupation regression
-for Arab women: slope = **−19.29 (SE 7.04), t = −2.74, p = 0.011**, R² = 0.238, **n = 26 occupations
-(14 of 40 dropped, 35%)**. Jewish women: slope = 2.148 (SE 1.136), p = 0.067, R² = 0.093, n = 37 (3
-dropped). Full sample: 2.639 (SE 0.899), p = 0.006, n = 37. All console-only (not exported).
+(b) ~~**The Arab DDD's own mechanism check contradicts its sign.**~~ **WITHDRAWN — this argument
+reversed when the slopes were recomputed 2026-09-21.** All three second-stage slopes, current:
+
+| Subgroup | Slope | SE | t | p | R² | n | Dropped |
+|---|---|---|---|---|---|---|---|
+| Full sample | +2.198 | 0.907 | 2.42 | 0.021 | 0.144 | 37 | 3 (ISCO 62, 63, 95) |
+| Jewish women | +3.571 | 2.365 | 1.51 | 0.140 | 0.061 | 37 | 3 (ISCO 62, 63, 95) |
+| Arab women | **+7.572** | 2.383 | 3.18 | 0.004 | 0.305 | 25 | 15 (37.5%) |
+
+The Arab slope was **−19.29 (SE 7.04), p = 0.011, n = 26** before the harmonization — significantly
+*negative*, which is what made this the strongest of the three objections. It is now significantly
+*positive* and consistent in sign with the Arab DDD itself (+5.507), so the within-subgroup check
+**corroborates** the Arab estimate rather than contradicting it. The Jewish slope moved the other
+way, from a marginal +2.148 (p = 0.067) to an insignificant +3.571 (p = 0.140) with roughly double
+the SE. Both subgroup slopes are positive; neither is well identified.
+
+That a slope can swing from −19.29 to +7.572 is itself the most useful thing here: it says these
+subgroup mechanism regressions, fitted on 25–37 occupation-level points, are not stable enough to
+adjudicate anything. Still console-only (no CSV) — recomputed by reproducing `main.R:325-328`.
 
 (c) **Mechanical cause — occupational concentration.** The 35% occupation dropout for Arab women vs
 7.5% for Jewish/full sample is consistent with Arab women's employment being concentrated in
@@ -617,8 +632,19 @@ significance.
   the female DiD was 0.8261*** and the male −0.3860*, so "opposite signs, both meaningful" held.
   It no longer does on the DiD margin.
 
-Jewish vs men and Arab vs men z-tests from the pre-fix run (3.354, 4.605, 2.747) have **not** been
-recomputed; do not cite them. Stated placebo limitations (§5.3): no
+**All six z-tests, recomputed 2026-09-21** from the current subgroup CSVs:
+
+| Comparison | DiD | DDD |
+|---|---|---|
+| All women vs men | z = 2.406, p = 0.0161 | z = 3.461, p = 0.0005 |
+| Jewish vs men | z = 2.538, p = 0.0111 | z = 3.376, p = 0.0007 |
+| Arab vs men | **z = 0.637, p = 0.524 (ns)** | z = 2.541, p = 0.0110 |
+| Arab vs Jewish | z = −0.720, p = 0.4712 | z = 0.942, p = 0.3464 |
+
+⚠ **The Arab-vs-men DiD is no longer significant** (was not separately reported pre-fix). So the
+old blanket claim that "every female subgroup is statistically distinguishable from the male
+placebo on both margins" is false — it holds on the DDD for all three, and on the DiD for the
+pooled and Jewish samples only. Stated placebo limitations (§5.3): no
 second-stage mechanism regression exists for men; men's labor supply has unmodeled institutional
 drivers (reserve duty, retirement timing); the test compares independently-fit models rather than a
 joint `× Sex` specification. **Update 2026-09-19: the employment-outcome gender placebo now runs.** `run_gender_placebo()` is

@@ -160,7 +160,7 @@ Because `paper.tex` references those figures with `../outputs/figures/`-relative
 
 > **`paper/paper.tex`, `paper/notes/results_digest.md` and `docs/hours-intensive-margin-analysis.md` are all in sync with `outputs/`** as of Checkpoint 13 ([`docs/decisions/hours-population-harmonization.md`](docs/decisions/hours-population-harmonization.md)). The pre-trend test now passes (*F* = 0.949, *p* = 0.387), the hours DiD is a null (0.2280, SE 0.1809) and the headline DDD is 3.224 (SE 1.022) with Imbens–Manski $[1.021, 5.324]$. §8's "2017 anomaly" limitation has been replaced by a disclosure of the coding correction that removed it, and §6.3 is now built around the DDD rather than the DiD.
 >
-> Two categories of figure in those docs are explicitly marked as **not** recomputed, because they are console-only and were never exported: the per-subgroup (Jewish/Arab) mechanism slopes, and the Jewish-vs-men / Arab-vs-men *z*-tests. Both carry ⚠ markers at their site. Everything else is current.
+> The per-subgroup mechanism slopes and all six subgroup *z*-tests were recomputed on 2026-09-21 and are current. One of them reversed: the **Arab-women mechanism slope moved from −19.29 to +7.572**, so the argument that the Arab DDD is "contradicted by its own mechanism check" is withdrawn in both docs. The paper never cited that check, so `paper.tex` is unaffected. Those slopes remain console-only — see `docs/hours-intensive-margin-analysis.md` §5.2 for what can and cannot be claimed from them.
 
 ## Known limitations
 
