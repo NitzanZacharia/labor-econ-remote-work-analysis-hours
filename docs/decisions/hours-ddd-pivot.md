@@ -27,7 +27,7 @@ own occupation-level robustness specs demonstrated the tradeoff concretely: ~9.7
 the cell-based design, but 17.4% of the sample dropped non-randomly along the employment margin.
 
 That objection does not apply to an **hours** outcome: `WorkHoursCont` is already, by construction,
-undefined for anyone with `Employed != 1` (`scripts/data_processing.R:184-193`) — conditioning the
+undefined for anyone with `Employed != 1` (see `data_processing.R`'s WorkHoursCont derivation) — conditioning the
 hours regression on employment is intrinsic to the question, not introduced by the exposure choice.
 This unlocks the pure occupation-level exposure (`exposure_calibrated`'s `wfh_exposure_calibrated`,
 ~40 ISCO-2 groups) as the DDD's regressor. Dropping non-employed rows to run this regression still
