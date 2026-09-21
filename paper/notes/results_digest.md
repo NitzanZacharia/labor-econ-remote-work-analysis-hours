@@ -1,21 +1,5 @@
 # Results Digest — WFH and the Motherhood Penalty (Israel, CBS LFS 2017–19 / 2021–23)
 
-> ## ⚠️ STALE FOR EVERY HOURS-DERIVED NUMBER — read this first
->
-> Checkpoint 13 (2026-09-21, [`docs/decisions/hours-population-harmonization.md`](../../docs/decisions/hours-population-harmonization.md))
-> harmonized the hours population across survey years, and a follow-up redefined the Lee-bounds
-> selection rate on the observed-hours sample. **Every hours figure below predates both.** The
-> employment margin, the WFH-exposure construction and Table 1's non-hours rows are unaffected and
-> remain valid.
->
-> `paper/paper.tex` has already been updated directly from the regenerated `outputs/` CSVs, so for
-> hours numbers **the paper is currently ahead of this digest**, inverting the usual
-> source-of-truth relationship. Do not transcribe an hours number from here into the paper.
-> Headline changes: pre-trend Wald *F* = 23.69 → **0.949** (*p* = 0.387, now passing); hours DiD
-> 0.8261\*\*\* → **0.2280** (null); hours DDD 3.4073\*\*\* → **3.224**\*\*; Imbens–Manski on the DDD
-> [1.5035, 5.2091] → **[1.021, 5.324]**. §5.4's parallel-trends caveat and §7's open items 3–4 are
-> obsolete. This digest needs a full hours pass before it is cited again.
-
 **Purpose.** Fact-extraction pass for the seminar paper. No prose, no LaTeX. Every number is
 tagged with the exact file it was read from. Where the only source is a console message quoted in
 a decision memo (never exported to `outputs/`), that is stated explicitly. Anything not confirmable
@@ -24,8 +8,22 @@ from a repo artifact is marked `[TODO: confirm]`; citation fields not verified a
 **Authors (paper byline):** Inbal Moryles and Nitzan Zacharia. (The research doc's byline spells
 the first author "Inbal Muriel" — that spelling is wrong; do not copy it into the paper.)
 
-**Digest date:** 2026-09-15. **Repo state:** branch `main`, HEAD `f6e64bc`. Live `outputs/*.csv`
-files were regenerated 2026-09-13 (commit `6043755`) unless noted as stale below.
+**Digest date:** 2026-09-15, **hours sections fully revised 2026-09-21**. **Repo state:** branch
+`2017-fix`. Live `outputs/*.csv` files were regenerated 2026-09-21 after Checkpoint 13
+([`docs/decisions/hours-population-harmonization.md`](../../docs/decisions/hours-population-harmonization.md))
+harmonized the hours population on reference-week work and a follow-up redefined the Lee-bounds
+selection rate on the observed-hours sample.
+
+> **What Checkpoint 13 changed, in one place.** The 2017 CBS file recorded zero usual hours for
+> respondents who were employed but absent from the reference week; every later year gave them a
+> real value. Absence is mother-skewed (12.4% of employed mothers vs 7.3% of childless women), so
+> those zeros landed on one side of the paper's comparison. Defining hours on reference-week
+> workers in every year fixes it, at the cost of ~10% of each year's employed sample and a
+> narrower estimand. Headline consequences: the hours pre-trend Wald test now **passes**
+> (F = 23.69 → **0.949**, p = 0.387); the hours DiD becomes a **null** (0.8261\*\*\* → **0.2280**);
+> the headline DDD **survives** (3.4073\*\*\* → **3.224**\*\*). All hours sections below carry the
+> post-fix values. §5.4's parallel-trends caveat is withdrawn. **The employment margin, the
+> WFH-exposure construction and Table 1's non-hours rows are untouched by all of this.**
 
 **Significance codes** (fixest `etable` convention, used throughout): `***` p<0.001, `**` p<0.01,
 `*` p<0.05, `.` p<0.1, `(ns)` p≥0.1.
@@ -75,31 +73,45 @@ under 17. `Post` = year ≥ 2021. (`README.md` "Key variables"; `docs/HLD.md` §
 
 - **Function / file:** `run_intensive_margin_reg()`, `scripts/intensive_margin_regression.R`
 - **Formula (verbatim from script):** `WorkHoursCont ~ Mother + Post + Mother:Post + MatzavMishpachti + Dat + GilNK + MachozMegurim + TeudaGvoha`
-- **Sample:** `filter(cleaned_df, Employed == 1)`; **cluster:** `~IDPUF`
+- **Sample:** `Employed == 1 & AvadBeshavua == 1` (reference-week workers — the harmonized hours
+  population, see `docs/decisions/hours-population-harmonization.md`); **cluster:** `~IDPUF`
 - **Source table:** `outputs/intensive_margin_table.csv`
 
 | Term | Coef | SE | Sig. |
 |---|---|---|---|
-| `Mother x Post` | **0.8261** | 0.1830 | *** |
-| `Mother` | −2.223 | 0.1485 | *** |
-| `Post` | 0.7289 | 0.1503 | *** |
-| Constant | 30.90 | 0.3198 | *** |
+| `Mother x Post` | **0.2280** | 0.1809 | (none) |
+| `Mother` | −1.739 | 0.1441 | *** |
+| `Post` | −0.0570 | 0.1481 | (none) |
+| Constant | 32.35 | 0.3182 | *** |
 
-- **N = 281,750**; R² = 0.03836.
+- **N = 251,857**; R² = 0.04049.
 - Full-precision estimate (from `outputs/hours_did_subgroup_comparison_data.csv`, row "All women
-  (primary)"): 0.826065, SE 0.182951, 95% CI [0.4675, 1.1846].
-- **Baseline means** (`outputs/hours_diagnostics_hours_by_period.csv`, employed only):
-  non-mothers pre 39.01 (n 53,779) / post 39.80 (n 47,447); mothers pre 36.85 (n 100,210) /
-  post 38.52 (n 86,964). Pooled employed mean = 38.24 hours (n = 288,400) — computed from that
-  file; matches the "38.24" in `docs/decisions/hours-ddd-pivot.md` "Real-data results".
-- Raw 2×2 DiD from those means: (38.52−36.85) − (39.80−39.01) = 1.67 − 0.79 = 0.88 (unadjusted;
-  regression-adjusted is 0.83).
+  (primary)"): 0.227954, SE 0.180893, 95% CI [−0.1266, 0.5825]. **t = 1.26 — not significant.**
+- **This is a null, and the paper characterizes it as a reasonably precise one.** At this SE the
+  minimum detectable effect is 2.8016 × 0.1809 ≈ **0.51 hours**, so average gains much above half
+  an hour a week are ruled out. The distinction between a precise and an underpowered null is the
+  same one §2.3 draws for the employment margin, and the paper applies it on both.
+- **Baseline means** (`outputs/hours_diagnostics_hours_by_period.csv`, reference-week workers):
+  non-mothers pre 40.04 (n 50,144) / post 40.08 (n 43,838); mothers pre 38.54 (n 88,114) /
+  post 38.84 (n 76,079). Pooled mean = **39.18 hours (n = 258,175)**
+  (`outputs/comparative_stats_hours_summary.csv`; median 42, SD 11.82).
+- Raw 2×2 DiD (`outputs/hours_descriptives_raw_did.csv`): **0.2658, SE 0.0978**, 95% CI
+  [0.0741, 0.4575] — (38.84−38.54) − (40.08−40.04) = 0.31 − 0.04. Note the raw DiD is nominally
+  significant while the regression-adjusted one is not; the two differ by 0.038 hours, so this is
+  a standard-error difference (clustering by individual), not a coefficient difference.
+- ⚠️ **Label discrepancy:** `outputs/descriptive_table_continuous.csv` still names these rows
+  "Usual weekly hours (employed), mean/SD". The population is reference-week workers; the label
+  lives in `scripts/descriptive_table.R` and was not updated. `paper.tex` Table 1 uses the correct
+  label. Cosmetic in the CSV, but do not copy the CSV's wording.
 
 ### 1.2 [PRIMARY] Lee (2009) bounds on the hours DiD
 
 - **Function / file:** `run_intensive_margin_lee_bounds()`, `scripts/intensive_margin_lee_bounds.R`;
   method memo `docs/decisions/intensive-margin-lee-bounds.md`.
-- **Construction:** `s_ab = P(Employed==1 | Mother=a, Post=b)`; counterfactual
+- **Construction:** `s_ab = P(hours observed | Mother=a, Post=b)` — employed **and** working the
+  reference week, i.e. the estimation sample rather than the employed population. (This was
+  `P(Employed==1)` until 2026-09-21; see the follow-up section of
+  `docs/decisions/hours-population-harmonization.md` for why it had to change.) Counterfactual
   `s11* = s10 + (s01 − s00)`; if `s11 > s11*`, trim share `p = 1 − s11*/s11` from the
   `Mother=1,Post=1` cell's `WorkHoursCont` distribution (top-trim → lower bound, bottom-trim →
   upper bound); refit the DiD on each trimmed sample.
@@ -107,39 +119,48 @@ under 17. `Post` = year ≥ 2021. (`README.md` "Key variables"; `docs/HLD.md` §
 
 | Mother | Post | selection rate | n |
 |---|---|---|---|
-| 0 | 0 | 0.7518 | 71,532 |
-| 0 | 1 | 0.7639 | 62,114 |
-| 1 | 0 | 0.7717 | 129,856 |
-| 1 | 1 | 0.7961 | 109,239 |
+| 0 | 0 | 0.7010 | 71,532 |
+| 0 | 1 | 0.7058 | 62,114 |
+| 1 | 0 | 0.6786 | 129,856 |
+| 1 | 1 | 0.6964 | 109,239 |
 
-  → `s11* = 0.7717 + (0.7639 − 0.7518) = 0.7838`; `s11 = 0.7961 > s11*` ⇒ excess selection;
-  implied trim ≈ 1 − 0.7838/0.7961 ≈ 1.5% — **derived from the selection rates above, not
+  → `s11* = 0.6786 + (0.7058 − 0.7010) = 0.6833`; `s11 = 0.6964 > s11*` ⇒ excess selection;
+  implied trim ≈ 1 − 0.6833/0.6964 ≈ **1.9%** — **derived from the selection rates above, not
   directly exported by the pipeline**; cite it as a derived figure (footnoted), not a sourced one.
+  These rates are lower than the pre-2026-09-21 figures because they condition on working the
+  reference week as well as on holding a job; the `n` column is unchanged (it counts all rows in
+  the cell).
 
 - **Bounds table** (`outputs/intensive_margin_lee_bounds_table.csv`):
 
 | Bound | `Mother:Post` | SE | 95% CI |
 |---|---|---|---|
-| Lower | 0.2133 | 0.1808 | [−0.1411, 0.5678] |
-| Point (untrimmed) | 0.8261 | 0.1830 | [0.4675, 1.1846] |
-| Upper | 1.3132 | 0.1814 | [0.9576, 1.6688] |
+| Lower | −0.5166 | 0.1781 | [−0.8657, −0.1675] |
+| Point (untrimmed) | 0.2280 | 0.1809 | [−0.1266, 0.5825] |
+| Upper | 0.8017 | 0.1789 | [0.4511, 1.1523] |
 
-- **95% Imbens–Manski CI for the identified set: [−0.084, 1.612]** — crosses zero. Source:
-  `docs/hours-intensive-margin-analysis.md` §3 (console output of `imbens_manski_ci()`; **not in
-  any CSV**). Sanity check: with `c_α ≈ 1.645` (bounds far apart relative to SE), 0.2133 −
-  1.645×0.1808 = −0.084 and 1.3132 + 1.645×0.1814 = 1.612 — consistent.
-- **Reading (per the narrative doc):** the plain hours DiD does **not** survive the selection
-  correction; it is "suggestive but fragile". The DDD (§1.3) is the substantive result.
+  Full precision: lower −0.516593 / 0.178096; point 0.227954 / 0.180893; upper 0.801657 / 0.178878.
+
+- **95% Imbens–Manski CI for the identified set: [−0.810, 1.096]**, `c_α = 1.644854` — crosses
+  zero. Recomputed 2026-09-21 by sourcing `scripts/imbens_manski_ci.R` against the bounds above;
+  **not in any CSV**.
+- **Reading:** the correction *widens the interval around a null* rather than overturning a
+  finding. The point estimate is already insignificant (§1.1), so the earlier framing — an
+  "honest two-step" in which a significant DiD fails a selection correction — no longer applies
+  and has been removed from the paper. Nothing in the paper's argument rests on the plain DiD.
+  The DDD (§1.3) is the substantive result.
 
 ### 1.3 [PRIMARY — HEADLINE] Hours DDD (occupation-level calibrated exposure)
 
 - **Function / file:** `run_hours_ddd_regression()`, `scripts/hours_ddd_regression.R`; called in
   `main.R` §8a with `hours_exposure_index = exposure_calibrated %>% select(occupation_code = ISCO2, wfh_exposure = wfh_exposure_calibrated)`.
 - **Formula (verbatim from script):** `WorkHoursCont ~ Mother*Post*WFH_Exposure + MatzavMishpachti + Dat + GilNK + MachozMegurim + TeudaGvoha`
-- **Sample:** `Employed == 1`, inner-joined to the occupation exposure index on
-  `MishlachYad_ISCO_08_2` (drops disclosure-masked / unmapped ISCO codes).
-  Per `docs/decisions/hours-ddd-pivot.md`: 281,622 of 288,400 employed rows (97.6%) matched an
-  exposure; 275,708 after listwise deletion on controls.
+- **Sample:** reference-week workers (`Employed == 1 & AvadBeshavua == 1`), inner-joined to the
+  occupation exposure index on `MishlachYad_ISCO_08_2` (drops disclosure-masked / unmapped ISCO
+  codes). N = 246,326 after listwise deletion on controls, against §1.1's 251,857 — the difference
+  is the unmatched-occupation rows. ⚠ The old "281,622 of 288,400 (97.6%) matched" coverage figure
+  was console-only and exists in no CSV at any commit; it has been **dropped from the paper**
+  rather than re-derived. If it is wanted back, it must be recomputed in the exposure merge.
 - **Cluster:** `~MishlachYad_ISCO_08_2` (occupation; Moulton reasoning, ~40 clusters).
 - **Exposure measure:** `wfh_exposure_calibrated` from `calibrate_isco_exposure()`
   (`scripts/wfh_exposure_cells.R`): Dingel & Neiman external teleworkability score, replaced by
@@ -153,29 +174,35 @@ under 17. `Post` = year ≥ 2021. (`README.md` "Key variables"; `docs/HLD.md` §
 
 | Term | Coef | SE | Sig. |
 |---|---|---|---|
-| **`Mother x Post x WFH_Exposure`** | **3.407** | **0.9302** | **\*\*\*** |
-| `Mother x Post` | 0.0153 | 0.2893 | (ns) |
-| `Mother x WFH_Exposure` | −1.429 | 1.143 | (ns) |
-| `Post x WFH_Exposure` | −0.8668 | 0.8280 | (ns) |
-| `WFH_Exposure` | 1.831 | 4.153 | (ns) |
-| `Mother` | −1.897 | 0.3650 | *** |
-| `Post` | 0.9153 | 0.2746 | ** |
+| **`Mother x Post x WFH_Exposure`** | **3.224** | **1.022** | **\*\*** |
+| `Mother x Post` | **−0.5385** | 0.3364 | (ns) |
+| `Mother x WFH_Exposure` | −1.295 | 1.053 | (ns) |
+| `Post x WFH_Exposure` | −0.5483 | 0.8102 | (ns) |
+| `WFH_Exposure` | 1.128 | 3.912 | (ns) |
+| `Mother` | −1.449 | 0.3512 | *** |
+| `Post` | 0.0535 | 0.2732 | (ns) |
 
-- **N = 275,708**; R² = 0.03906.
+- **N = 246,326**; R² = 0.04094.
 - Full-precision triple interaction (`outputs/hours_ddd_subgroup_comparison_data.csv`, "All women
-  (primary)"): 3.407286, SE 0.930163, 95% CI [1.5842, 5.2304].
-- **Interpretation note (narrative doc §2):** once exposure interactions enter, the bare
-  `Mother x Post` collapses from 0.826 to 0.015 (ns) — the DiD's average effect is "fully absorbed
-  into exposure heterogeneity".
+  (primary)"): 3.224042, SE 1.022271, 95% CI [1.2204, 5.2277].
+- **Interpretation note — this is the paper's central argument and it changed in kind.** The bare
+  `Mother x Post` in this column is **−0.5385**, i.e. the implied hours change for mothers at
+  *zero* exposure is if anything negative. Set against §1.1's near-zero average DiD, the reading
+  is **not** "a broad gain that is larger in teleworkable jobs" but "no gain outside teleworkable
+  jobs at all; the entire effect is the exposure gradient." The pre-2026-09-21 framing — the bare
+  term "collapsing" from 0.826 to 0.015 and being "absorbed into exposure heterogeneity" — is
+  obsolete: there is no average effect to absorb. §1.9's dose-response shows the same thing
+  non-parametrically (three quartiles at zero, one well above).
 - **MDE** (`compute_ddd_mde()`, `scripts/ddd_mde_diagnostics.R`, formula
-  `MDE = SE × (qnorm(0.975) + qnorm(0.80)) = SE × 2.8016`): **2.6059**, "6.8% of mean weekly hours
-  (38.24)". Source: `docs/decisions/hours-ddd-pivot.md` "Real-data results" (console message; the
-  `mde_hours` list is in `main.R`'s export list but no `mde_hours*.csv` exists in `outputs/` —
-  scalar lists are not written by `export_all_results()`). Arithmetic check: 0.9302 × 2.8016 =
-  2.606 ✓; 2.606/38.24 = 6.8% ✓.
-  - ⚠ `docs/hours-intensive-margin-analysis.md` §3 and §4 say the MDE is "68% of the 3.41 point
-    estimate". That is **wrong**: 2.606/3.407 = **76.5%**. The "6.8%" figure is of *mean hours*,
-    not of the point estimate. Use 76.5% (or "MDE = 2.61, point estimate 3.41 exceeds it").
+  `MDE = SE × (qnorm(0.975) + qnorm(0.80)) = SE × 2.8016`): **2.86398** — now exported to
+  `outputs/mde_hours.csv` (it was console-only when this digest was first written; see §7 item 3).
+  That file also gives baseline mean hours **39.1819** and `mde_pct_of_baseline` **7.309%**;
+  `within_mde = FALSE`.
+  - MDE as a share of the point estimate: 2.86398/3.22404 = **88.8%** (was 76.5%). The estimate is
+    still detectable but with materially less headroom than before — the paper says "inside the
+    design's power, though not by a wide margin" rather than "well inside".
+  - ⚠ Any doc still saying the MDE is "68% of the point estimate" is wrong twice over: it confuses
+    the 7.3%-of-mean-hours figure with the share-of-estimate figure, and both values have moved.
 
 ### 1.4 [PRIMARY] Generalized Lee bounds on the hours DDD + Imbens–Manski CI
 
@@ -192,30 +219,38 @@ under 17. `Post` = year ≥ 2021. (`README.md` "Key variables"; `docs/HLD.md` §
 
 | Q | s00 | s01 | s10 | s11 | s11* | n(M=1,P=1) | Excess? | trim_prop |
 |---|---|---|---|---|---|---|---|---|
-| 1 | 0.6284 | 0.6419 | 0.6045 | 0.6478 | 0.6180 | 21,655 | TRUE | 4.61% |
-| 2 | 0.7624 | 0.7867 | 0.7773 | 0.8037 | 0.8016 | 28,540 | TRUE | 0.25% |
-| 3 | 0.8167 | 0.8099 | 0.8651 | 0.8619 | 0.8584 | 34,293 | TRUE | 0.41% |
-| 4 | 0.8674 | 0.8514 | 0.8538 | 0.8501 | 0.8377 | 21,815 | TRUE | 1.45% |
+| 1 | 0.5830 | 0.5862 | 0.5497 | 0.5788 | 0.5529 | 21,655 | TRUE | 4.48% |
+| 2 | 0.7070 | 0.7120 | 0.6856 | 0.6977 | 0.6906 | 28,540 | TRUE | 1.01% |
+| 3 | 0.7542 | 0.7450 | 0.7554 | 0.7522 | 0.7462 | 34,293 | TRUE | 0.80% |
+| 4 | 0.8194 | 0.8029 | 0.7352 | 0.7399 | 0.7188 | 21,815 | TRUE | 2.85% |
 
-- **Rows trimmed** (`outputs/hours_lee_bounds_n_trimmed.csv`): Q1 632 of 13,718; Q2 56 of 22,490;
-  Q3 117 of 29,022; Q4 263 of 18,106 (total 1,068 of 83,336 employed, occupation-matched
-  post-period mothers).
+  As in §1.2, `s_ab` is now `P(hours observed)` rather than `P(Employed==1)`, so all four rates
+  are lower than the pre-2026-09-21 figures. The `n(M=1,P=1)` column is unchanged — it counts all
+  post-period mothers in the quartile, working or not, because the cell-based index is defined for
+  the non-employed too.
+- **Rows trimmed** (`outputs/hours_lee_bounds_n_trimmed.csv`): Q1 548 of 12,249; Q2 197 of 19,511;
+  Q3 202 of 25,317; Q4 449 of 15,743 (total **1,396 of 72,820** occupation-matched post-period
+  mothers with observed hours).
 - **Bounds table** (`outputs/hours_lee_bounds_table.csv`), term `Mother:Post:WFH_Exposure`:
 
 | Bound | Coef | SE | 95% CI |
 |---|---|---|---|
-| Lower | 3.4414 | 0.9927 | [1.4958, 5.3870] |
-| Point (untrimmed) | 3.4077 | 0.9564 | [1.5331, 5.2823] |
-| Upper | 3.4570 | 0.8975 | [1.6979, 5.2161] |
+| Lower | 3.1255 | 1.1440 | [0.8833, 5.3677] |
+| Point (untrimmed) | 3.2319 | 1.0538 | [1.1664, 5.2973] |
+| Upper | 3.4434 | 1.0220 | [1.4404, 5.4465] |
 
-  Note the "point" here (3.4077, SE 0.9564) differs slightly from §1.3's 3.407 (SE 0.9302) because
-  this function additionally requires a matched *cell*-based exposure (~1.3% of rows dropped) —
-  stated in the script header. N for these three fits is not exported `[TODO: confirm]`.
-- **95% Imbens–Manski CI for the identified set: [1.5035, 5.2091]** — excludes zero. Source:
-  `docs/decisions/hours-ddd-pivot.md` "Real-data results" and `docs/hours-intensive-margin-analysis.md`
-  §3 (console message from `imbens_manski_ci()`, `scripts/imbens_manski_ci.R`; **not in any CSV**).
-  Sanity check: bounds nearly coincide so `c_α ≈ 1.95`; 3.4414 − 1.952×0.9927 = 1.504 ✓;
-  3.4570 + 1.952×0.8975 = 5.209 ✓.
+  Full precision: lower 3.125517 / 1.143991; point 3.231854 / 1.053815; upper 3.443446 / 1.021983.
+  The "point" here (3.2319, SE 1.0538) differs slightly from §1.3's 3.224 (SE 1.022) because this
+  function additionally requires a matched *cell*-based exposure — stated in the script header.
+  N for these three fits is not exported `[TODO: confirm]`.
+- **95% Imbens–Manski CI for the identified set: [1.021, 5.324]**, `c_α = 1.839787` — excludes
+  zero. Recomputed 2026-09-21 by sourcing `scripts/imbens_manski_ci.R`; **not in any CSV**.
+  - ⚠ **Historical note worth keeping.** Between the harmonization and the selection-rate fix, the
+    bounds briefly *inverted* (lower 3.30763 above upper 3.30592 — an empty identified set), which
+    silently tripped the degenerate branch in `imbens_manski_ci()` and returned a plain
+    `c_α = 1.96` instead of a root-found one. Defining `s_ab` on the observed-hours sample fixed
+    both the ordering and the critical value. If a future change makes the bounds cross again,
+    that is the symptom to look for.
 
 ### 1.5 [PRIMARY — **OUT OF SCOPE, DO NOT DRAFT**] Second-stage occupation-level mechanism regression
 
@@ -246,11 +281,13 @@ under 17. `Post` = year ≥ 2021. (`README.md` "Key variables"; `docs/HLD.md` §
 
 | Exposure measure | `Mother x Post x WFH_Exposure` | SE | Sig. | N | Source |
 |---|---|---|---|---|---|
-| Calibrated (primary) | 3.407 | 0.9302 | *** | 275,708 | `outputs/ddd_hours_table.csv` |
-| External (Dingel–Neiman, `tele_ext`) | 0.9404 | 0.8649 | (ns) | 275,708 | `outputs/ddd_hours_external.csv` |
-| Realized (2021-anchored, `min_n = 200`) | 6.416 | 2.454 | * | 275,390 | `outputs/ddd_hours_realized.csv` |
+| Calibrated (primary) | 3.224 | 1.022 | ** | 246,326 | `outputs/ddd_hours_table.csv` |
+| External (Dingel–Neiman, `tele_ext`) | 0.6720 | 0.8838 | (ns) | 246,326 | `outputs/ddd_hours_external.csv` |
+| Realized (2021-anchored, `min_n = 200`) | 5.195 | 2.363 | * | 246,037 | `outputs/ddd_hours_realized.csv` |
 
-Narrative doc §3 framing: "directionally robust, not point-estimate robust."
+Framing: "directionally robust, not point-estimate robust." The external index stays positive and
+insignificant, which is the form the paper's "measurement is part of the result" argument needs —
+the mechanism is visible only once exposure is measured as Israeli jobs were actually done.
 
 ### 1.7 [PRIMARY] Age-balance robustness (hours DDD)
 
@@ -260,12 +297,20 @@ Source: `outputs/age_balance_robustness_hours_ddd_age_interacted.csv`,
 
 | Spec | `Mother x Post x WFH_Exposure` | SE | Sig. | N |
 |---|---|---|---|---|
-| Primary | 3.407 | 0.9302 | *** | 275,708 |
-| Age-interacted (`+ Mother:GilNK`) | 3.367 | 0.9553 | ** | 275,708 |
-| Reweighted (pre-period `GilNK` raking) | 2.836 | 0.9055 | ** | 271,621 |
+| Primary | 3.224 | 1.022 | ** | 246,326 |
+| Age-interacted (`+ Mother:GilNK`) | 3.205 | 1.055 | ** | 246,326 |
+| Reweighted (pre-period `GilNK` raking) | 2.597 | 1.050 | * | 242,552 |
 
-Incidental finding (age-interacted spec): `Mother x GilNK4` = −2.083*** (0.4874); `GilNK5` −0.4644
-(ns); `GilNK6` 1.063* (0.5247); `GilNK7` 1.337* (0.5957).
+⚠ **The reweighted spec is now significant at 5%, not 1%** — any text saying "still significant at
+the 1% level" is false and has been corrected in `paper.tex`. Attenuation is **19.4%**
+(1 − 2.597/3.224), up from ~17%, and at 2.597 the estimate sits only narrowly above the MDE of
+2.864. The paper now reads this as "robust to age imbalance in direction and approximate
+magnitude, not insensitive to it", and flags it as the largest single move any check produces.
+
+Incidental finding (age-interacted spec): `Mother x GilNK4` = −2.266*** (0.5058); `GilNK5` −1.150*
+(0.4759); `GilNK6` 0.4192 (ns); `GilNK7` 0.9627 (0.5566, 10% only). The profile now reads as
+rising from group 4 to group 7 with only groups 4 and 5 significant — the earlier
+"significant, non-monotonic" characterisation no longer fits.
 
 Underlying imbalance (`outputs/age_balance_robustness_age_imbalance_by_quartile.csv`, pre-period
 mean `GilNK` gap Mother − non-Mother by cell-exposure quartile): Q1 −0.974 (t = −94.0), Q2 −0.735
@@ -276,24 +321,86 @@ quotes "~0.8, t≈−81"; the current CSV says −0.974 / +0.057. The docs appea
 
 ### 1.8 [PRIMARY] Pre-trend / event study (hours)
 
-`outputs/hours_diagnostics_pretrend_table.csv` (`WorkHoursCont`, `Employed==1`, `Mother x ShnatSeker`,
-ref = 2019, cluster `IDPUF`, N = 281,750):
+`outputs/hours_diagnostics_pretrend_table.csv` (`WorkHoursCont`, reference-week workers,
+`Mother x ShnatSeker`, ref = 2019, cluster `IDPUF`, N = 251,857):
 
 | Year | Coef | SE | Sig. |
 |---|---|---|---|
-| 2017 | −1.524 | 0.2766 | *** |
-| 2018 | 0.1222 | 0.2140 | (ns) |
-| 2021 | 0.3069 | 0.2567 | (ns) |
-| 2022 | 0.1080 | 0.2620 | (ns) |
-| 2023 | 0.7435 | 0.2609 | ** |
+| 2017 | **0.3515** | 0.2570 | (ns) |
+| 2018 | 0.2013 | 0.2191 | (ns) |
+| 2021 | 0.3923 | 0.2612 | (ns) |
+| 2022 | 0.1213 | 0.2654 | (ns) |
+| 2023 | 0.7517 | 0.2650 | ** |
 
-Joint Wald test on 2017+2018: **F(2, 65,088) = 23.7, p = 5.2e-11**. Same test on the employment
-outcome: F(2, 79,069) = 0.63, p = 0.53. **Update 2026-09-19: both are now exported** as
-`outputs/pretrend_wald_hours.csv` and `outputs/pretrend_wald_employment.csv`, and
-`run_pretrend_joint_test()` runs unconditionally in `main.R` §7 rather than behind
-`RUN_AGE_BALANCE_ROBUSTNESS`. Exported values: 23.6854674914169 (p 5.21523147138e-11) and
-0.630649732652335 (p 0.532248548305119). Previously console-only. Implication stated there:
-parallel trends should be claimed on 2018–2019 only; 2017 disclosed as a limitation.
+(`Mother` main effect in the same model: −1.930, SE 0.1963, ***.)
+
+Joint Wald test on 2017+2018: **F(2, 63,198) = 0.949, p = 0.387 — DOES NOT REJECT.** Same test on
+the employment outcome: F(2, 79,069) = 0.63, p = 0.53 (unchanged; employment is unaffected by the
+hours fix). Both are exported: `outputs/pretrend_wald_hours.csv` and
+`outputs/pretrend_wald_employment.csv`. Full precision: 0.948655498493358
+(p 0.387266861630637) and 0.630649732652335 (p 0.532248548305119).
+
+**This is the single largest change in the digest, and it reverses a stated limitation.** The
+2017 coefficient was −1.524*** and the joint test rejected at p = 5.2e-11, on the strength of
+which the paper confined parallel trends to a 2018–2019 window. That was an artifact: the 2017
+CBS file recorded zero usual hours for the employed-but-absent, a population that is
+mother-skewed (12.4% of employed mothers vs 7.3% of childless women), so the spurious zeros
+depressed mothers' 2017 hours specifically. Harmonizing the hours population on reference-week
+work removes both the artifact and the apparent violation. **Parallel trends now hold on both
+margins over the full 2017–2019 pre-period**, and §5.4's verbatim caveat below is obsolete.
+
+Robustness of that claim: re-fitting post-harmonization on `ShnatSeker != 2017` moves the hours
+DiD by 0.44 SE (0.2280 → 0.3072) and the DDD by 0.15 SE (3.2240 → 3.3769), so 2017 now behaves
+like any other pre-period year rather than merely being less contaminated.
+
+### 1.9 [PRIMARY] Descriptive figures — §4 of the paper
+
+Added 2026-09-21. These numbers back `paper.tex` §4.2–§4.4 and had no section in this digest
+before; their only upstream record was `docs/decisions/paper-figure-layer.md`.
+
+**Raw 2×2** (`outputs/hours_descriptives_hours_by_period.csv`, `_raw_did.csv`), reference-week
+workers:
+
+| Group | Pre-2021 | n | Post-2021 | n | Change |
+|---|---|---|---|---|---|
+| Childless | 40.039 | 50,144 | 40.079 | 43,838 | +0.040 |
+| Mothers | 38.539 | 88,114 | 38.844 | 76,079 | +0.305 |
+
+Raw DiD = **0.2658, SE 0.0978**, 95% CI [0.0741, 0.4575]. Note the raw DiD is nominally
+significant while the regression DiD (§1.1) is not; they differ by 0.038 hours, so the difference
+is in the standard error (clustering by individual), not the coefficient.
+
+**Mother-minus-non-mother gap by year** (`outputs/hours_descriptives_hours_by_year.csv`):
+
+| Year | Gap | SE |
+|---|---|---|
+| 2017 | −1.373 | 0.1151 |
+| 2018 | −1.482 | 0.1180 |
+| 2019 | −1.672 | 0.1161 |
+| 2021 | −1.368 | 0.1208 |
+| 2022 | −1.533 | 0.1243 |
+| 2023 | −0.796 | 0.1238 |
+
+The pre-period is flat within about a third of an hour — the descriptive counterpart of §1.8's
+passing Wald test. Pre-harmonization the 2017 gap read −3.30; that value survives in the paper only
+as an explicit description of the artifact, never as a current figure.
+
+**Dose-response by exposure quartile** (`outputs/hours_dose_response_data.csv`), raw DiD within
+each quartile of the **occupation-level calibrated** measure:
+
+| Q | Exposure range | Raw DiD | SE | n |
+|---|---|---|---|---|
+| 1 | 0.000–0.097 | −0.3171 | 0.2227 | 61,571 |
+| 2 | 0.097–0.143 | 0.2700 | 0.1756 | 66,612 |
+| 3 | 0.143–0.300 | −0.0186 | 0.1806 | 74,911 |
+| 4 | 0.300–0.750 | **1.5514** | 0.2289 | 48,874 |
+
+Q4 95% CI [1.1027, 2.0001]. **Three quartiles are indistinguishable from zero and one is not** —
+this is the non-parametric version of §1.3's argument, and it is why §1.1's average is near zero.
+⚠ The Q2/Q3 breakpoint moved (0.1230 → 0.1431) because `hours_dose_response.R` computes quartile
+breaks *after* filtering on non-missing hours, so at least one occupation changed quartile.
+Pre/post-fix quartile values are therefore **not** a like-for-like comparison. This does not affect
+`compute_pre_period_quartile_breaks()`, which is hours-independent and whose quartiles are stable.
 
 ---
 
@@ -435,29 +542,37 @@ Point estimates (4 s.f.) from `outputs/hours_did_subgroup_comparison_data.csv` a
 
 | Subgroup | DiD `Mother:Post` | SE | 95% CI | N (DiD) | DDD `Mother:Post:WFH_Exposure` | SE | 95% CI | N (DDD) |
 |---|---|---|---|---|---|---|---|---|
-| All women (primary) | 0.8261*** | 0.1830 | [0.4675, 1.1846] | 281,750 | 3.4073*** | 0.9302 | [1.5842, 5.2304] | 275,708 |
-| Jewish women | 0.9029*** | 0.2047 | [0.5017, 1.3041] | 241,738 | 2.9238** | 0.8901 | [1.1792, 4.6683] | 236,554 |
-| Arab women | 0.1267 (ns) | 0.4798 | [−0.8137, 1.0671] | 26,876 | 6.0062* | 2.6426 | [0.8267, 11.1857] | 26,164 |
-| Men (placebo) | −0.3860* | 0.1909 | [−0.7600, −0.0119] | 276,343 | −1.8806 (ns) | 1.1226 | [−4.0810, 0.3197] | 266,087 |
+| All women (primary) | 0.2280 (ns) | 0.1809 | [−0.1266, 0.5825] | 251,857 | 3.2240** | 1.0223 | [1.2204, 5.2277] | 246,326 |
+| Jewish women | 0.3021 (ns) | 0.2027 | [−0.0952, 0.6994] | 214,449 | 2.8465** | 0.9125 | [1.0579, 4.6351] | 209,727 |
+| Arab women | −0.0724 (ns) | 0.4785 | [−1.0103, 0.8656] | 24,975 | 5.5069* | 2.6741 | [0.2657, 10.7481] | 24,307 |
+| Men (placebo) | −0.4002* | 0.1883 | [−0.7692, −0.0311] | 261,543 | −1.7620 (.) | 1.0153 | [−3.7519, 0.2279] | 251,779 |
+
+**Neither women's subgroup shows an average effect any more; both show an exposure gradient.** The
+"Jewish women carry the pooled DiD" framing is obsolete — the Jewish DiD (0.3021, SE 0.2027) is
+itself insignificant. What Jewish women carry is the pooled **DDD**.
 
 Per-group table sources: `outputs/intensive_margin_jewish_table.csv`,
 `outputs/intensive_margin_arab_table.csv`, `outputs/ddd_hours_jewish_table.csv`,
 `outputs/ddd_hours_arab_table.csv`, `outputs/hours_gender_placebo_did_table.csv`,
 `outputs/hours_gender_placebo_ddd_table.csv`. Other notable terms: Arab hours DiD `Post` =
-−1.579*** (0.3940) (Arab women's hours fell post-2021 overall); Arab hours DDD `Mother x WFH_Exposure`
-= −4.761* (1.902).
+**−2.162*** (0.3903)** (Arab women's hours fell post-2021 overall); Jewish hours DiD `Post` =
+0.1101 (0.1688, ns).
 
-**Sample-size gap:** Jewish 236,554 vs Arab 26,164 in the DDD (≈ 9.0×); 241,738 vs 26,876 in the
-DiD (≈ 9.0×). Arab DDD SE (2.643) is ≈ 3× the Jewish SE (0.890).
+**Sample-size gap:** Jewish 209,727 vs Arab 24,307 in the DDD (≈ 8.6×); 214,449 vs 24,975 in the
+DiD. Arab DDD SE (2.674) is ≈ 2.9× the Jewish SE (0.913).
 
-### 3.3 What `docs/hours-intensive-margin-analysis.md` §5.2 concludes about Arab (6.006) vs Jewish (2.924)
+⚠ The men's DDD is now marginally significant at the 10% level (`.`), where it was flatly
+insignificant before. It is still negative and still opposite-signed, so the placebo argument on
+the DDD is unaffected in substance — but do not write "insignificant" without the qualifier.
+
+### 3.3 Arab (5.507) vs Jewish (2.847): why we do not claim heterogeneity
 
 Verdict: **small-sample / thin-occupational-coverage fragility, NOT a documented heterogeneous
 treatment effect.** Three arguments, all from §5.2:
 
 (a) **Not statistically distinguishable.** Two-sample z (disjoint samples, covariance exactly zero):
-`z = (6.0062 − 2.9238) / sqrt(2.6426² + 0.8901²) = 3.0824 / 2.7885 = 1.105, p = 0.269`. Same test on
-the DiD: z = 1.488, p = 0.137. Arab DiD itself is indistinguishable from zero (0.1267, SE 0.4798).
+`z = (5.5069 − 2.8465) / sqrt(2.6741² + 0.9125²) = 2.6604 / 2.8255 = 0.942, p = 0.346`. Same test on
+the DiD: z = −0.720, p = 0.471 — now NEGATIVE, since the Arab DiD point estimate sits below the Jewish one. Both DiDs are indistinguishable from zero (Arab −0.0724, SE 0.4785; Jewish 0.3021, SE 0.2027).
 (Arithmetic re-checked from the CSV values: ✓.)
 
 (b) **The Arab DDD's own mechanism check contradicts its sign.** Second-stage occupation regression
@@ -470,19 +585,40 @@ dropped). Full sample: 2.639 (SE 0.899), p = 0.006, n = 37. All console-only (no
 education and health-aide occupations; with only 26 informative occupations, a few high-leverage
 ones can flip the mechanism slope.
 
-Verbatim conclusion (§5.2): "Report the Arab DDD point estimate (6.006*, nominally significant on
-its own one-sample test: z = 2.273, p = 0.023) transparently, but do **not** characterize it as
-evidence that the WFH-exposure mechanism is stronger for Arab women than for Jewish women. … The
-Jewish-women estimate (2.924**, corroborated directionally by its own mechanism regression) is the
-more credible of the two ethnicity-specific results and should anchor any subgroup claim the paper
-makes."
+Conclusion (restated post-2026-09-21 with current numbers; the original §5.2 wording quoted the
+pre-fix 6.006 / 2.924 pair): report the Arab DDD point estimate (**5.507\***, nominally significant
+on its own one-sample test) transparently, but do **not** characterize it as evidence that the
+WFH-exposure mechanism is stronger for Arab women than for Jewish women. The Jewish-women estimate
+(**2.847\*\***) is the more credible of the two ethnicity-specific results and should anchor any
+subgroup claim the paper makes. The argument is unchanged by the fix — the gap narrowed slightly
+(2.66 rather than 3.08 raw) and the z-test moved from 1.105 to 0.942, both comfortably short of
+significance.
 
 ### 3.4 Gender placebo (hours) — §5.3 of the same doc
 
-Women-vs-men z-tests (console arithmetic, re-checked): DDD all women vs men z = 3.627, p = 0.0003;
-DiD z = 4.584, p < 0.0001. Jewish vs men: DDD z = 3.354 (p = 0.0008), DiD z = 4.605. Arab vs men:
-DDD z = 2.747 (p = 0.006). Men's DiD `Father:Post` = −0.3860* (0.1909): small, significant, negative.
-Men's DDD −1.881 (ns, SE 1.123): negative point estimate. Stated placebo limitations (§5.3): no
+**The placebo now splits by margin, and the paper reports the two halves differently.** Recomputed
+2026-09-21 from the subgroup CSVs: **DDD** all women vs men **z = 3.461, p = 0.0005**; **DiD**
+**z = 2.406, p = 0.0161**. Men's DiD `Father:Post` = **−0.4002\*** (SE 0.1883); men's DDD
+**−1.7620** (SE 1.0153), negative and significant at the 10% level only.
+
+- **On the DDD the placebo does its job**, and more than the minimum: fathers show no positive
+  WFH-linked hours response, the point estimate is negative, and the two coefficients are
+  distinguishable. A macro trend common to all workers cannot produce a positive exposure gradient
+  for mothers alongside a negative one for fathers. This is where the paper's mechanism claim rests.
+- **On the plain DiD the placebo is ADVERSE and the paper says so explicitly.** Fathers move
+  −0.4002 (SE 0.1883) against mothers' insignificant 0.2280 (SE 0.1809) — the placebo is *larger in
+  magnitude and more significant than the treatment estimate*. The z-test still rejects, but for
+  the wrong reason: the difference is manufactured by the fathers' coefficient, not the mothers'.
+  A parenthood-common trend (parents of both sexes losing hours relative to non-parents, mothers by
+  less) is a live alternative on this margin. The paper concedes this in `sec:res-subgroup` and
+  frames it as a consistency check — the placebo agrees the female DiD is nothing — rather than
+  leaving a referee to compute it.
+- ⚠ **Do not reuse the old "the placebo strengthens it" framing unqualified.** It was written when
+  the female DiD was 0.8261*** and the male −0.3860*, so "opposite signs, both meaningful" held.
+  It no longer does on the DiD margin.
+
+Jewish vs men and Arab vs men z-tests from the pre-fix run (3.354, 4.605, 2.747) have **not** been
+recomputed; do not cite them. Stated placebo limitations (§5.3): no
 second-stage mechanism regression exists for men; men's labor supply has unmodeled institutional
 drivers (reserve duty, retirement timing); the test compares independently-fit models rather than a
 joint `× Sex` specification. **Update 2026-09-19: the employment-outcome gender placebo now runs.** `run_gender_placebo()` is
@@ -607,17 +743,31 @@ Additional hours-DDD-specific limitation (`scripts/hours_ddd_lee_bounds.R` heade
 few `Mother==1,Post==1` rows makes its `trim_prop` noisy (warning threshold 30 rows; all four
 quartiles here have >21,000, so not triggered).
 
-### 5.4 Parallel-trends caveat — `docs/hours-intensive-margin-analysis.md` §1 and §3 (verbatim)
+### 5.4 ~~Parallel-trends caveat~~ — **OBSOLETE, superseded 2026-09-21**
 
-> **Implication for identification**: the paper's parallel-trends assumption should be stated as
+The caveat this section recorded no longer applies. It read:
+
+> ~~**Implication for identification**: the paper's parallel-trends assumption should be stated as
 > resting on the 2018-2019 comparison, not the full 2017-2019 window, and the 2017 anomaly should
-> be disclosed as a limitation rather than smoothed over.
+> be disclosed as a limitation rather than smoothed over.~~
+>
+> ~~- The Lee-bounds counterfactual itself relies on the same parallel-trends assumption already
+>   dented by the 2017 finding in §1.~~
 
-> - The Lee-bounds counterfactual itself relies on the same parallel-trends assumption already
->   dented by the 2017 finding in §1.
+**Both clauses are withdrawn.** The 2017 anomaly was a data defect, not a trend: the 2017 CBS file
+coded the employed-but-absent as zero usual hours, and because absence is mother-skewed that
+produced a spurious `Mother × year` effect. Harmonizing the hours population on reference-week work
+(`docs/decisions/hours-population-harmonization.md`) removes it. Parallel trends now hold on both
+margins over the **full** 2017–2019 pre-period — hours F(2, 63,198) = 0.949, p = 0.387; employment
+F(2, 79,069) = 0.63, p = 0.53 — so neither the outcome equation nor the Lee-bounds counterfactual
+carries a 2018–2019 restriction any longer. See §1.8.
 
-Numbers: §1.8 above (2017 coefficient −1.524***, joint Wald F = 23.7, p = 5.2e-11 on hours;
-F = 0.63, p = 0.53 on employment).
+**What replaces it as a limitation** (and is what `paper.tex` §8 now says): the correction narrows
+the estimand to usual hours among women who were *working*, excluding roughly 10% of each year's
+employed sample. If absence from the reference week is itself related to WFH exposure — plausibly,
+if teleworkable jobs make it easier to work while unwell or while caring for a child — the
+restriction is not innocuous for the triple interaction. The absentee share is only mildly related
+to exposure across quartiles (12.4 / 8.6 / 8.2 / 10.1% in 2017), but this cannot be ruled out.
 
 ### 5.5 Other stated limitations (short pointers)
 
@@ -724,17 +874,17 @@ to the paper.**
    (employment-probability units). The §1.5 scope decision is unaffected — the data is now
    verifiable, but the regression is still not drafted into the paper. The Jewish/Arab analogs
    remain console-only.
-2. Imbens–Manski CIs for both Lee-bounds tables — console only, arithmetically consistent with the
+2. Imbens–Manski CIs for both Lee-bounds tables — console only; **recomputed 2026-09-21** by sourcing `scripts/imbens_manski_ci.R` against the regenerated bounds: DiD [−0.810, 1.096] (c_α 1.644854), DDD [1.021, 5.324] (c_α 1.839787). Still not written to any CSV. Arithmetically consistent with the
    exported per-bound SEs (§1.2, §1.4).
 3. ~~Hours-DDD MDE (2.6059) — console only; arithmetically verified from the exported SE (§1.3).~~
    **Resolved 2026-09-19:** `compute_ddd_mde()` now returns a one-row data frame, so all three
-   MDEs are exported: `outputs/mde_hours.csv` (2.60593, 6.81% of the 38.24 mean weekly hours,
+   MDEs are exported: `outputs/mde_hours.csv` (**2.86398, 7.31% of the 39.18 mean weekly hours** post-harmonization,
    `within_mde` FALSE — the effect is detectable) and, under `RUN_NULL_VS_POWER_AUDIT`,
    `null_vs_power_audit_mde_{additive,fe}.csv` (0.20312 and 0.20224, 26.25% and 26.14% of the
    0.7737 baseline, `within_mde` TRUE for both — the employment design cannot detect its own point
    estimate). The `within_mde` column makes the paper's "underpowered, not null" argument
    machine-checkable rather than a claim a reader has to recompute.
-   The narrative doc's "68% of the point estimate" was a mis-statement (76.5%), corrected in
+   The narrative doc's "68% of the point estimate" was a mis-statement; the current share-of-estimate figure is **88.8%** (2.86398/3.22404). Corrected in
    `docs/hours-intensive-margin-analysis.md` on the same day.
 4. ~~Pre-trend joint Wald F-tests — console only (§1.8).~~ **Resolved 2026-09-19:** the test now
    runs unconditionally and exports `outputs/pretrend_wald_{hours,employment}.csv`. The paper's
@@ -751,7 +901,7 @@ to the paper.**
    the DDD table reached no file even once the call was wired in (§3.4).
 8. Why the Jewish-women tables carry no `Dat` coefficients (§3.1). **Resolved 2026-09-15: no
    investigation; handled as a one-sentence footnote near the subgroup results (text in §3.1).**
-9. Lee-bounds trim proportion for the plain DiD (≈1.5%, inferred) and N of the three hours-DDD
+9. Lee-bounds trim proportion for the plain DiD (**≈1.9%** post-harmonization, inferred) and N of the three hours-DDD
    Lee-bounds fits — not exported (§1.2, §1.4). **2026-09-15: the ≈1.5% is used in the paper as a
    derived, footnoted figure; the DDD Lee-bounds N stays `[TODO: confirm]` — do not infer it.**
 10. Citation gaps — **resolved 2026-09-15 (§6):** Goldin locked to 2014 AER; Harrington & Kahn
