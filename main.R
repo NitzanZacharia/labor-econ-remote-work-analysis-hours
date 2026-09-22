@@ -705,13 +705,16 @@ paper_figures <- list(
   # its text renders smaller than theirs on the page.
   hours_ddd_event_study = list(plot = hours_ddd_event_study_plot$plot,     width = 5.0, height = 3.4),
   hours_dose_response   = list(plot = hours_dose_response$plot,            width = 5.0, height = 3.4),
-  # emp_res$plots$period is deliberately NOT here. The paper cut the pre/post panel for the same
-  # reason as the 2x2 above: its interpretable content -- the child-age gradient in employment
-  # levels -- is a strict subset of the raw series already drawn in emp_childage_adjusted, and its
-  # only unique content is the pre/post separation, which is not an estimate of anything: mothers
-  # only, no comparison group, no controls. That separation now sits in a §4.5 footnote with the
-  # caveat attached. Nothing outside §4.5 ever cited the figure.
-  emp_childage_adjusted = list(plot = emp_res$plots$adjusted,              width = 5.0, height = 3.6),
+  # No emp_res plot is here. The paper cut the pre/post panel first, for the same reason as the 2x2
+  # above -- its only unique content, the pre/post separation, is not an estimate of anything:
+  # mothers only, no comparison group, no controls -- and then cut the raw-vs-adjusted panel on the
+  # same standard. That one is mothers only with no comparison group too; it was cited exactly once,
+  # in the sentence that introduced it, and nothing downstream ever came back to it; and its five
+  # bins carried ten numbers and no uncertainty, which §4.5 now states in two paragraphs instead.
+  # The child-age bin (GilYeledTzairMBNK) enters no specification in this paper, so the profile the
+  # adjustment corrects is one nothing else estimates. Both plots still reach outputs/ as PNGs via
+  # export_all_results(), and the plotted rates are on disk in
+  # outputs/employment_by_child_age_adjusted_rates.csv, which §4.5 quotes.
   mobility              = list(plot = comp_stats$plots$mobility,           width = 5.0, height = 3.4)
 )
 export_paper_figures(paper_figures)

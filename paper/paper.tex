@@ -610,45 +610,29 @@ rather than a test of it, since no specification in this paper uses locality of 
 
 \subsection{The extensive margin by child age}\label{sec:desc-childage}
 
-Figure~\ref{fig:emp-childage-adjusted} describes the secondary outcome. Employment among mothers
-traces a shallow inverted U in the age of the youngest child, from $75.9\%$ at ages 0--1 to a peak
-of $80.2\%$ at ages 5--9 and back to $76.7\%$ at ages 15--17. The trough-to-peak range is about
-four percentage points, and even the trough sits above the $75.7\%$ employment rate of childless
-women in Table~\ref{tab:descriptives}. The extensive margin is where this sample has the least room
-to move, which is part of why hours, and not employment, is this paper's primary
-outcome.\footnote{Splitting the same profile by period rather than pooling it, the pre- and
-post-2021 profiles are within half a percentage point of each other where the youngest child is
-under five --- $0.3$ and $0.5$ points in the 0--1 and 2--4 bins --- and around four points apart in
-each of the three older bins. There is no comparison group in that comparison, so the distance is a
-difference in levels within one group and not an estimate of anything, and in particular not a
-difference-in-differences. The identified extensive-margin result is the DiD of
+Employment among mothers traces a shallow inverted U in the age of the youngest child, from
+$75.9\%$ at ages 0--1 to a peak of $80.2\%$ at ages 5--9 and back to $76.7\%$ at ages 15--17. The
+trough-to-peak range is about four percentage points, and even the trough sits above the $75.7\%$
+employment rate of childless women in Table~\ref{tab:descriptives}. The extensive margin is where
+this sample has the least room to move, which is part of why hours, and not employment, is this
+paper's primary outcome.\footnote{Splitting the same profile by period rather than pooling it, the
+pre- and post-2021 profiles are within half a percentage point of each other where the youngest
+child is under five --- $0.3$ and $0.5$ points in the 0--1 and 2--4 bins --- and around four points
+apart in each of the three older bins. There is no comparison group in that comparison, so the
+distance is a difference in levels within one group and not an estimate of anything, and in
+particular not a difference-in-differences. The identified extensive-margin result is the DiD of
 Table~\ref{tab:emp-did}.}
 
-The figure's second series shows that the downward right-hand tail is largely compositional.
-Holding the controls at their sample means, the adjusted profile does not turn down after age
-5--9: it continues to rise, reaching $81.8\%$ in the 15--17 bin against a raw $76.7\%$. Mothers
-whose youngest child is nearly grown are themselves older and differently educated, and once that
-is accounted for their employment rate is the highest in the sample rather than among the lowest.
-
-A caution about what this figure does and does not show. It plots employment \emph{levels} among
-mothers and contains no comparison group --- there are no childless women in it --- so the
-raw-to-adjusted distance is a statement about composition within one group, not an estimate of
-anything. It should not be read against the employment DiD of Table~\ref{tab:emp-did}, which is
-estimated relative to childless women and with controls, and which is a precise null.
-
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.8\textwidth]{../outputs/figures/emp_childage_adjusted.pdf}
-\caption{Raw versus covariate-adjusted employment rate by age of the youngest child}\label{fig:emp-childage-adjusted}
-\begin{minipage}{0.8\textwidth}\small
-\vspace{0.3em}
-\emph{Notes:} Mothers aged 25--59. Adjusted rates are OLS predictions from a regression of
-employment on the youngest-child age bin and the standard controls, averaged over the sample with
-the controls held at their means. Segments join each bin's raw and adjusted rate. The vertical axis
-does not begin at zero. This is mothers only --- there is no comparison group in the figure --- so
-the raw-to-adjusted distance is a statement about composition within that group, not an effect.
-\end{minipage}
-\end{figure}
+That profile is partly compositional. Regressing employment on the youngest-child age bin and the
+standard controls and averaging the predictions over the sample, the adjusted profile does not turn
+down after age 5--9: it rises monotonically to $81.8\%$ in the 15--17 bin against a raw $76.7\%$,
+while the 0--1 bin falls to $72.9\%$ against a raw $75.9\%$. Mothers whose youngest child is nearly
+grown are themselves older and differently educated, and once that is accounted for their
+employment rate is the highest in the sample rather than among the lowest. These are employment
+\emph{levels} among mothers with no comparison group, so the raw-to-adjusted distance is a
+statement about composition within one group, not an estimate of anything. It should not be read
+against the employment DiD of Table~\ref{tab:emp-did}, which is estimated relative to childless
+women and with controls, and which is a precise null.
 
 %======================================================================
 \section{Empirical Strategy}\label{sec:strategy}
