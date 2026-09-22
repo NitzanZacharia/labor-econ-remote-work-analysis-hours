@@ -13,9 +13,11 @@ source(file.path("scripts", "employment_by_child_age.R"))
 source(file.path("scripts", "validation.R"))
 source(file.path("scripts", "intensive_margin_regression.R"))
 source(file.path("scripts", "intensive_margin_lee_bounds.R"))
+source(file.path("scripts", "placebo_male_frame.R"))
 source(file.path("scripts", "gender_placebo.R"))
 source(file.path("scripts", "hours_gender_placebo.R"))
 source(file.path("scripts", "export_results.R"))
+source(file.path("scripts", "export_paper_figures.R"))
 
 # Load modules required for the WFH exposure index and DDD mechanism test
 source(file.path("scripts", "wfh_exposure_index.R"))
@@ -23,14 +25,25 @@ source(file.path("scripts", "wfh_exposure_cells.R"))
 source(file.path("scripts", "isco_masking_diagnostics.R"))
 source(file.path("scripts", "ddd_collinearity_diagnostics.R"))
 source(file.path("scripts", "hours_ddd_regression.R"))
+source(file.path("scripts", "tidy_event_study_coefs.R"))
+source(file.path("scripts", "hours_ddd_event_study.R"))
 source(file.path("scripts", "hours_ddd_lee_bounds.R"))
 source(file.path("scripts", "wfh_first_stage_check.R"))
 source(file.path("scripts", "ddd_mde_diagnostics.R"))
 source(file.path("scripts", "hours_subgroup_comparison.R"))
 
+# Paper figure layer (docs/decisions/paper-figure-layer.md): the shared theme/palette plus the
+# three descriptive builders added for the paper's Descriptive Statistics section.
+source(file.path("scripts", "paper_theme.R"))
+source(file.path("scripts", "hours_descriptive_plots.R"))
+source(file.path("scripts", "hours_dose_response.R"))
+source(file.path("scripts", "build_mechanism_scatter.R"))
+source(file.path("scripts", "build_event_study_plot.R"))
+
 # robustness/ is normally sourced only inside the RUN_AGE_BALANCE_ROBUSTNESS block, but
-# pretrend_wald_test.R is a diagnostic rather than a robustness spec: its two F-statistics are the
-# paper's parallel-trends evidence, so it runs unconditionally in §7 and is sourced here.
+# pretrend_wald_test.R is a diagnostic rather than a robustness spec: its F-statistics are the
+# paper's parallel-trends evidence, so it runs unconditionally -- §7 for the two DiD-level models,
+# §8a for the DDD event study, which cannot run any earlier because it needs §8's exposure measure.
 source(file.path("robustness", "pretrend_wald_test.R"))
 
 # ── 2. Configure paths ────────────────────────────────────────────────────────
@@ -69,10 +82,10 @@ message("Validating cleaned data...")
 validate_cleaned_df(cleaned_df)
 
 message("Checking IDPUF panel structure (cluster-SE unit vs. Mother/Post design)...")
-idpuf_panel_check <- check_idpuf_panel_structure(cleaned_df)
+check_idpuf_panel_structure(cleaned_df)   # reporting-only; returns invisibly, see §9
 
 message("Checking WFH_RefWeek's NA rationale against AvadBeshavua...")
-wfh_refweek_check <- check_wfh_refweek_avadbeshavua(cleaned_df)
+check_wfh_refweek_avadbeshavua(cleaned_df) # reporting-only; returns invisibly
 
 # ── 4. Comparative statistics ─────────────────────────────────────────────────
 message("Running comparative statistics...")
@@ -104,7 +117,7 @@ baseline_arab <- basic_reg(filter(cleaned_df, Leom == 2))
 message("Running employment_by_child_age...")
 emp_res <- employment_by_child_age(cleaned_df)
 
-# ── 7. Debug ─────────────────────────────────────────────────────────
+# ── 7. Event studies & parallel-trends tests ──────────────────────────────────
 # Diagnostics.R's event-study plot draws to whatever device is active rather than opening its own
 # (see the comment there) -- wrap the call in an explicit device targeting outputs/ so a real run
 # produces a saved plot instead of leaking an auto-numbered Rplots*.pdf into the repo root.
@@ -113,16 +126,24 @@ diagnostics_results <- run_diagnostics(cleaned_df)
 dev.off()
 
 # Primary (hours) pretrend/event-study check -- hours_diagnostics.R (docs/decisions/hours-ddd-pivot.md).
-pdf(file.path("outputs", "event_study_pretrend_hours.pdf"))
+# No pdf()/dev.off() wrapper, unlike the employment check above: run_hours_diagnostics() no longer
+# draws anything, it returns tidy coefficients that build_event_study_plot() turns into a ggplot
+# below (docs/decisions/ddd-event-study.md's "Porting the DiD event study").
 hours_diagnostics_results <- run_hours_diagnostics(cleaned_df)
-dev.off()
 
-# Joint Wald tests on the pre-2020 Mother:year coefficients. These run unconditionally, right
-# beside the event studies whose models they test: parallel trends requires the pre-period
+hours_event_study_plot <- build_event_study_plot(
+  hours_diagnostics_results$pretrend_coefs,
+  title    = "Hours event study: Mother × Year",
+  subtitle = "Weekly work hours, employed women aged 25–59; 95% CIs, individual-clustered SEs",
+  y_label  = "Mother × Year (95% CI)",
+  se_note  = "standard errors clustered by individual"
+)
+
+# Joint Wald tests on the pre-2020 Mother:year coefficients. Unconditional, and deliberately placed
+# right beside the event studies whose models they test: parallel trends requires the pre-period
 # coefficients to be jointly, not just individually, indistinguishable from zero, and both
-# F-statistics are reported in the paper (Results §5.3 and Limitations). They used to sit inside
-# the RUN_AGE_BALANCE_ROBUSTNESS block, so a default `Rscript main.R` produced neither, and the
-# paper's parallel-trends evidence was not reproducible by the documented command.
+# F-statistics are reported in the paper (Results §5.3 and Limitations). Keep them out of any
+# feature flag -- a default `Rscript main.R` has to reproduce the paper's identification evidence.
 message("Running joint Wald test on pre-2020 Mother:year pre-trend coefficients (employment)...")
 pretrend_wald <- run_pretrend_joint_test(diagnostics_results$pretrend_model)
 
@@ -130,9 +151,8 @@ message("Running joint Wald test on pre-2020 Mother:year pre-trend coefficients 
 pretrend_wald_hours <- run_pretrend_joint_test(hours_diagnostics_results$pretrend_model)
 
 # Results are exported once, at the very end of the script (── 9 ──), so that §8's WFH-exposure
-# measures and DDD regressions are captured in the same outputs/ artifact set as everything above
-# -- previously this export call ran here, before this section existed, so none of its results
-# ever reached disk (Checkpoint 9/10 gap).
+# measures and DDD regressions land in the same outputs/ artifact set as everything above. Do not
+# move an export call up here: anything defined after it would silently never reach disk.
 
 # ── 8. WFH-Exposure Measures & DDD Regression ─────────────────────────────────
 # Four separate measures, four separate purposes. They are NOT combined into one "best" index fed
@@ -216,23 +236,14 @@ exposure_realized <- build_wfh_exposure_index(exposure_population_df, ref_year =
 # hours_ddd_lee_bounds.R's header comment for why two different exposure measures serve two
 # different roles.
 #
-# exposure_cell_vars is DELIBERATELY FINER than cell_fe_vars below (adds MatzavMishpachti, Dat,
-# BirthContinent -- MatzavMishpachti/Dat are already DEFAULT_CONTROLS; BirthContinent
-# (data_processing.R's country-of-birth-by-continent derivation) is not a regression control at
-# all, added here specifically because it explains real variance in the underlying occupation
-# exposure score itself. All three are pre-period demographic variables observed for everyone
-# regardless of employment status, so adding them doesn't reintroduce occupation-level exposure's
-# employment-conditioning problem). See docs/decisions/null-vs-power-audit.md for why this matters:
-# when the exposure measure was built on EXACTLY cell_fe_vars (the old design), it was collinear
-# enough with its own controls/FE that the employment DDD's minimum detectable effect for
-# Mother:Post:WFH_Exposure was ~51% of the baseline employment rate -- roughly 4x the actual point
-# estimate, meaning the null result was uninformative, not evidence of a true null. Verified against
-# real data (docs/decisions/exposure-cell-granularity-fix.md): adding MatzavMishpachti+Dat cut the
-# MDE by ~37% (4,580 cells, only 2 below n=100). Adding BirthContinent on top of that (this update)
-# cuts it a further ~18% (8,884 cells, median cell size 1,776, only 9 below n=100) -- a different
-# mechanism than the first cut: BirthContinent measurably reduces WFH_Exposure's own measurement
-# noise (raises its R^2 against the underlying occupation exposure score from 0.322 to 0.375 on the
-# pre-period employed population), rather than only decorrelating it from cell_fe_vars.
+# exposure_cell_vars is DELIBERATELY FINER than cell_fe_vars below, and must stay that way. Making
+# the two identical is the old design, whose exposure regressor was collinear enough with its own
+# controls/FE that the employment DDD's MDE was ~51% of baseline -- an uninformative null rather
+# than evidence of one. The extra three (MatzavMishpachti, Dat, BirthContinent) are all pre-period
+# demographic variables observed regardless of employment status, so they do not reintroduce
+# occupation-level exposure's employment-conditioning problem.
+# Full argument, cell-size tables and the measured MDE reductions:
+# docs/decisions/exposure-cell-granularity-fix.md.
 exposure_cell_vars <- c("Min", "GilNK", "TeudaGvoha", "MachozMegurim", "MatzavMishpachti", "Dat",
                          "BirthContinent")
 exposure_cells <- build_exposure_cells(
@@ -242,23 +253,15 @@ exposure_cells <- build_exposure_cells(
 )
 
 # ── 8a. Primary DDD (hours): pure occupation-level exposure (docs/decisions/hours-ddd-pivot.md) ─
-# PRIMARY DDD as of the 2026-09-12 hours pivot (docs/decisions/hours-ddd-pivot.md) -- the
-# extensive-margin DDD in 8b below is the secondary specification. Motivation: 8b's
-# Mother:Post:WFH_Exposure remains underpowered even after the exposure-cell-granularity fixes (MDE
-# ~26% of baseline employment, docs/decisions/exposure-cell-granularity-fix.md), and cell-level WLS
-# aggregation was confirmed unable to recover further power (same memo's "Considered and rejected"
-# section). This pivots the outcome to hours worked (WorkHoursCont, defined only for Employed==1)
-# and the exposure regressor to the PURE occupation-level measure (exposure_calibrated's
-# wfh_exposure_calibrated) -- safe here specifically because WorkHoursCont's own conditioning on
-# employment is intrinsic to the question, unlike 8b's Employed outcome, where an occupation-level
-# regressor would condition the DDD's own outcome on itself (see
-# docs/decisions/exposure-cell-granularity-fix.md's rejection of that approach for the extensive
-# margin). Dropping non-employed rows to run this regression still introduces a real
-# selection-on-a-mediator problem, bounded via run_hours_ddd_lee_bounds()'s generalization of
-# intensive_margin_lee_bounds.R's Lee (2009) trimming bounds, stratified by quartiles of the
-# demographic-cell-based WFH_Exposure (defined for the full sample) -- see hours_ddd_lee_bounds.R's
-# header comment for why two different exposure measures are used. Unconditional (no feature flag)
-# as of the pivot -- this is the project's default primary analysis, not an opt-in diagnostic.
+# PRIMARY specification; the extensive-margin DDD in 8b below is secondary. Unconditional -- this
+# is the project's default analysis, not an opt-in diagnostic.
+#
+# The one thing to know at this call site: the exposure regressor here is the PURE occupation-level
+# measure, which is safe for a hours outcome (WorkHoursCont's conditioning on employment is
+# intrinsic to the question) but would NOT be safe for 8b's Employed outcome, where it would
+# condition the DDD's outcome on itself. Dropping non-employed rows still introduces a real
+# selection-on-a-mediator problem; run_hours_ddd_lee_bounds() below bounds it.
+# Why the pivot happened, and the power arithmetic behind it: docs/decisions/hours-ddd-pivot.md.
 message("Running primary DDD (hours, pure occupation-level exposure, Employed==1 subsample)...")
 hours_exposure_index <- exposure_calibrated %>%
   select(occupation_code = ISCO2, wfh_exposure = wfh_exposure_calibrated)
@@ -268,6 +271,35 @@ message("Computing minimum detectable effect for the hours DDD's triple interact
 baseline_hours <- mean(cleaned_df$WorkHoursCont[cleaned_df$Employed == 1], na.rm = TRUE)
 mde_hours <- compute_ddd_mde(hours_ddd$model, baseline_rate = baseline_hours,
                              regressor = hours_ddd$exposure_vector)
+
+# Parallel-trends check for the PRIMARY estimand. §7's two Wald tests are both DiD-level
+# (Mother x year): they ask whether mothers and non-mothers trended together, averaging over WFH
+# exposure. The DDD's identifying assumption is the stricter one -- that the mother/non-mother gap
+# trended together ACROSS exposure levels -- and an exposure-correlated pre-period divergence that
+# nets to zero across occupations passes §7 while violating it. Hence a third pretrend model, on the
+# triple interaction itself. Placed here rather than in §7 because it needs hours_exposure_index.
+#
+# Same exposure measure, same subsample, same occupation-level clustering as hours_ddd above, so the
+# test is on the assumption that specific model rests on rather than on a neighbouring one.
+message("Running DDD event study (hours, Mother x year x WFH_Exposure)...")
+hours_ddd_event_study <- run_hours_ddd_event_study(cleaned_df, hours_exposure_index)
+
+# keep/label are passed explicitly: the default `keep` is anchored to the DiD-level ":Mother$" terms
+# and would match none of this model's triple-interaction coefficients. See pretrend_wald_test.R's
+# header for why the anchor matters.
+message("Running joint Wald test on pre-2020 DDD event-study pre-trend coefficients (primary)...")
+pretrend_wald_hours_ddd <- run_pretrend_joint_test(
+  hours_ddd_event_study$model,
+  keep  = sprintf("ShnatSeker::(2017|2018):%s$", hours_ddd_event_study$term_suffix),
+  label = "Joint Wald, H0: pre-2020 Mother:year:WFH_Exposure coefficients = 0"
+)
+
+hours_ddd_event_study_plot <- build_event_study_plot(
+  hours_ddd_event_study$coefs,
+  ref_year = hours_ddd_event_study$ref_year,
+  title    = "Hours DDD event study: Mother × Year × WFH Exposure",
+  subtitle = "Weekly work hours, employed women aged 25–59; 95% CIs, occupation-clustered SEs"
+)
 
 message("Running generalized Lee bounds for the hours DDD (stratified by WFH_Exposure quartile)...")
 hours_lee_bounds <- run_hours_ddd_lee_bounds(
@@ -326,11 +358,8 @@ hours_gender_placebo <- run_hours_gender_placebo(
   exposure_index = hours_exposure_index
 )
 
-# Employment-outcome placebo, the secondary-margin twin of the call above. Wired in 2026-09-19:
-# it had existed and been unit-tested since Checkpoint 5 but was never called, so the paper could
-# report a placebo for the primary (hours) margin and none for the secondary one, and
-# results_digest.md §7 item 7 listed it as having no exported result. Both frames are reused
-# rather than reloaded -- cleaned_men_for_exposure is already in memory.
+# Employment-outcome placebo, the secondary-margin twin of the call above, so both margins carry
+# the same falsification check. Reuses cleaned_men_for_exposure rather than reloading it.
 message("Running employment gender placebo (men, 'Mother' read as 'Father')...")
 gender_placebo <- run_gender_placebo(
   folder_path,
@@ -349,7 +378,10 @@ hours_did_subgroup_comparison <- build_hours_subgroup_comparison(
   ),
   term     = "Mother:Post",
   title    = "Hours DiD (Mother x Post) by subgroup",
-  subtitle = "Weekly hours worked, Employed==1; 95% CI, clustered by IDPUF"
+  subtitle = "Weekly hours worked, Employed==1; 95% CI, clustered by IDPUF",
+  # Styled apart from the three women subgroups: men are a different population, not another
+  # slice of the study sample, and the placebo's value lies in running the opposite way.
+  placebo  = "Men (placebo)"
 )
 hours_ddd_subgroup_comparison <- build_hours_subgroup_comparison(
   models = list(
@@ -360,23 +392,20 @@ hours_ddd_subgroup_comparison <- build_hours_subgroup_comparison(
   ),
   term     = "Mother:Post:WFH_Exposure",
   title    = "Hours DDD (Mother x Post x WFH_Exposure) by subgroup",
-  subtitle = "Weekly hours worked, Employed==1; 95% CI, clustered by occupation"
+  subtitle = "Weekly hours worked, Employed==1; 95% CI, clustered by occupation",
+  placebo  = "Men (placebo)"
 )
 
 # ── 8b. Secondary DDD (employment): cell-based exposure, defined for the full sample ──────────
-# Two specs, reported side by side. Now the SECONDARY specification, per the hours pivot above --
-# still run and reported unconditionally (not gated behind a flag), consistent with basic_reg()/
-# employment_by_child_age() elsewhere in this pipeline, which are also unconditional employment
-# analyses. cell_fe_vars (Spec 1's additive controls / Spec 2's fixed effect) is intentionally
-# COARSER than exposure_cell_vars above -- WFH_Exposure now varies within every cell_fe_vars cell
-# (across MatzavMishpachti/Dat/BirthContinent categories), which is what restores identifying power
-# for Mother:Post:WFH_Exposure (see the comment above exposure_cells and
-# docs/decisions/exposure-cell-granularity-fix.md). Spec 1's WFH_Exposure still carries some
-# overlap with cell_fe_vars (it's built partly from those same 3 variables) --
-# check_spec1_collinearity() below reports the live R²/VIF/condition number rather than a static
-# comment. Spec 2's fully interacted cell FE no longer spans the same partition WFH_Exposure was
-# built on, so (verified against real data) WFH_Exposure's bare main effect is NOT dropped by
-# collinearity here anymore, unlike the old design where exposure and FE cells were identical.
+# Two specs, reported side by side. SECONDARY since the hours pivot, but still unconditional --
+# consistent with basic_reg()/employment_by_child_age(), the pipeline's other employment analyses.
+#
+# cell_fe_vars (Spec 1's additive controls / Spec 2's fixed effect) is intentionally COARSER than
+# exposure_cell_vars above: that gap is what makes WFH_Exposure vary within every FE cell, and so
+# what gives Mother:Post:WFH_Exposure any identifying power at all. Spec 1 still carries some
+# overlap with cell_fe_vars; check_spec1_collinearity() below reports the live R²/VIF/condition
+# number rather than asserting it here.
+# Why the two partitions differ: docs/decisions/exposure-cell-granularity-fix.md.
 message("Running secondary (employment) DDD (cell-based exposure, calibrated, full sample)...")
 ddd_df <- cleaned_df %>%
   left_join(exposure_cells, by = exposure_cell_vars)
@@ -388,33 +417,24 @@ message(sprintf(
 cell_fe_vars    <- c("GilNK", "TeudaGvoha", "MachozMegurim")
 other_controls  <- setdiff(DEFAULT_CONTROLS, cell_fe_vars)
 
-# WFH_Exposure is assigned at exposure_cell_vars's finer granularity (~4,580 distinct cells), not
-# at the individual level -- clustering at IDPUF would still understate the true SE on
-# WFH_Exposure/Mother:WFH_Exposure/Post:WFH_Exposure/Mother:Post:WFH_Exposure (a classic Moulton
-# problem: errors are correlated within a shift-share cell via the shared exposure value and shared
-# unobserved cell shocks, and individual-level clustering doesn't see that correlation at all).
-# Clustering here is on the COARSER cell_fe_vars grouping (~210 distinct cells) rather than the
-# exposure cell itself -- clustering coarser than the level a regressor is assigned at is still
-# valid (and conservative, if anything) for the same Moulton reasoning, since every cell_fe_vars
-# group is a union of one or more exposure cells. ~210 clusters is above the usual >=40-50 rule of
-# thumb for asymptotic cluster-robust inference, but still not large -- a small-cluster correction
-# (e.g. wild-cluster bootstrap via fwildclusterboot) would need a new dependency and is flagged
-# separately rather than added here.
+# Clustered on the cell, never on IDPUF. WFH_Exposure is assigned at cell granularity, not per
+# individual, so individual-level clustering cannot see the within-cell error correlation a shared
+# exposure value induces -- a classic Moulton problem that understates the SE on exactly the
+# coefficient this design exists to estimate. Clustering on the COARSER cell_fe_vars grouping
+# (~210 cells) rather than the exposure cell is deliberate and conservative: every cell_fe_vars
+# group is a union of exposure cells. ~210 clusters clears the usual >=40-50 rule of thumb but is
+# not large; a small-cluster correction would need a new dependency and is deliberately not added.
+# Full reasoning: docs/decisions/calibrated-exposure-and-cell-ddd.md.
 cell_cluster_formula <- as.formula(paste("~", paste(cell_fe_vars, collapse = "^")))
 
-# Mother:GilNK, added 2026-09-11 per docs/decisions/age-balance-robustness-chain.md's real-data
-# finding: GilNK is imbalanced between Mother==1/0 in the pre-period, with the gap's SIZE varying
-# by WFH_Exposure quartile -- an additive GilNK term can't correct for an imbalance that itself
-# varies with the regressor of interest. Confirmed against real data (robustness/
-# age_balance_robustness.R's run_ddd_age_interacted()) that adding this term does NOT change the
-# Mother:Post:WFH_Exposure conclusion (stays insignificant, similar magnitude either way) -- so
-# this isn't rescuing or overturning the WFH-mechanism result, it's a distinct, independently real
-# finding this term surfaces: once included, the base Mother effect and Mother:GilNK terms
-# themselves become significant and age-increasing in the cell-FE spec, which the purely-additive
-# GilNK control had been masking. In Spec 2, GilNK's own main effect is absorbed into the cell FE,
-# but Mother:GilNK is NOT collinear with it (the FE groups by GilNK^TeudaGvoha^MachozMegurim
-# jointly, not by an individual's own Mother status within that cell), so it still adds
-# non-redundant information there.
+# Mother:GilNK is here because GilNK is imbalanced between Mother==1/0 in the pre-period AND the
+# gap's SIZE varies by WFH_Exposure quartile -- an additive GilNK term cannot correct an imbalance
+# that itself varies with the regressor of interest. It does NOT change the
+# Mother:Post:WFH_Exposure conclusion either way, so it is not rescuing the result; it earns its
+# place by surfacing a separate real finding the additive control was masking.
+# In Spec 2 GilNK's main effect is absorbed by the cell FE, but Mother:GilNK is not collinear with
+# it (the FE groups by GilNK^TeudaGvoha^MachozMegurim, not by Mother within cell), so it still adds
+# information. Evidence and the surfaced finding: docs/decisions/age-balance-robustness-chain.md.
 ddd_employment_additive <- feols(
   as.formula(paste("Employed ~ Mother * Post * WFH_Exposure + Mother:GilNK +",
                     paste(DEFAULT_CONTROLS, collapse = " + "))),
@@ -441,23 +461,16 @@ employment_ddd_table <- etable(
 print(employment_ddd_table)
 
 message("Checking Spec 1's collinearity at runtime (see comment above)...")
-spec1_collinearity_check <- check_spec1_collinearity(ddd_df, cell_fe_vars, DEFAULT_CONTROLS)
+check_spec1_collinearity(ddd_df, cell_fe_vars, DEFAULT_CONTROLS)  # prints its own report
 
 # ── 8c. Age-balance robustness chain (docs/decisions/age-balance-robustness-chain.md) ─────────
-# Off by default: these are diagnostic/comparison checks layered on top of the employment DDD (8b),
+# ON by default. These are diagnostic/comparison checks layered on top of the employment DDD (8b),
 # not a replacement for it -- whether run_ddd_age_interacted()/run_ddd_reweighted() should REPLACE
-# 8b as the (now-secondary) spec is a separate, still-open methodological decision (see the
-# decision memo), not something this flag resolves. Previously this whole chain
-# (robustness/balance_test.R, age_balance_robustness.R, pretrend_wald_test.R) existed only as
-# unit-tested functions with no orchestrator ever calling them against real data -- the
-# age-imbalance claim in age_balance_robustness.R's own header comment was asserted, not verified,
-# until this wiring.
-# Default changed FALSE -> TRUE on 2026-09-19. The paper's robustness table (tab:robust) and its
-# age-imbalance sentence both cite artifacts this block produces, so with the flag off a reader
-# following the README could not reproduce them: `Rscript main.R` yielded an incomplete set and the
-# missing pieces were only discoverable by reading this file. The flag is kept, rather than
-# removed, so the chain can still be switched off for a fast run. Verified 2026-09-19: all nine
-# age_balance_robustness_* artifacts regenerate byte-identically with it on.
+# 8b is a separate, still-open methodological decision (see the memo), not something this flag
+# resolves. The default is TRUE because the paper's robustness table (tab:robust) and its
+# age-imbalance sentence both cite artifacts produced here, and a reader following the README must
+# be able to reproduce them from `Rscript main.R` alone. The flag is kept, not removed, so the
+# chain can still be switched off for a fast run.
 RUN_AGE_BALANCE_ROBUSTNESS <- TRUE
 if (RUN_AGE_BALANCE_ROBUSTNESS) {
   source(file.path("robustness", "balance_test.R"))
@@ -477,9 +490,8 @@ if (RUN_AGE_BALANCE_ROBUSTNESS) {
 
   # Hours-outcome (primary DDD) analogs -- see age_balance_robustness.R's §4 header comment for why
   # these use the occupation-level exposure_index rather than the cell-based exposure_cells as
-  # their actual regressor.
-  hours_exposure_index <- exposure_calibrated %>%
-    select(occupation_code = ISCO2, wfh_exposure = wfh_exposure_calibrated)
+  # their actual regressor. hours_exposure_index is the one built in §8a; this block reuses it
+  # rather than re-deriving it, so the two cannot drift apart.
 
   message("Running age-interacted comparison spec for the hours DDD (Mother:GilNK added)...")
   hours_ddd_age_interacted <- run_hours_ddd_age_interacted(cleaned_df, hours_exposure_index)
@@ -492,19 +504,14 @@ if (RUN_AGE_BALANCE_ROBUSTNESS) {
 }
 
 # ── 8d. Null-vs-power audit (docs/decisions/null-vs-power-audit.md) ───────────────────────────
-# Off by default, diagnostic layered on top of the employment DDD (8b), not a replacement for it --
-# same framing as 8c. Exists to answer a question the null Mother:Post:WFH_Exposure result alone
-# can't: is this design well-powered enough to detect a plausible effect, or is the null
-# uninformative? Two checks: (1) does WFH_Exposure actually predict realized WFH_RefWeek at all
-# once measurable (Post==1) -- the shift-share design's core relevance assumption, asserted in
-# docs/decisions/calibrated-exposure-and-cell-ddd.md but never tested directly against real WFH
-# data until now; (2) the closed-form minimum detectable effect for both employment-DDD specs, so
-# the observed point estimates (0.103 additive / 0.131 cell-FE) can be read against how small a
-# true effect this design could even reliably detect.
-# Default changed FALSE -> TRUE on 2026-09-19, same reasoning as the flag above: the paper's
-# first-stage figures (0.6557, SE 0.0954, n = 110,051, and the 2022/2023 interactions) come from
-# this block, so a default run has to produce them. Verified: the artifact regenerates
-# byte-identically with the flag on.
+# ON by default, same framing as 8c: a diagnostic on top of the employment DDD (8b), not a
+# replacement. Exists to answer what the null Mother:Post:WFH_Exposure result alone cannot -- is
+# this design well-powered enough to detect a plausible effect, or is the null uninformative?
+# Two checks: (1) does WFH_Exposure actually predict realized WFH_RefWeek once measurable
+# (Post==1), the shift-share design's core relevance assumption; (2) the closed-form minimum
+# detectable effect for both employment-DDD specs, so the observed point estimates can be read
+# against how small an effect this design could reliably detect at all.
+# Default is TRUE because the paper's first-stage figures come from this block.
 RUN_NULL_VS_POWER_AUDIT <- TRUE
 if (RUN_NULL_VS_POWER_AUDIT) {
   message("Checking WFH_Exposure's first-stage relevance against realized WFH_RefWeek...")
@@ -518,12 +525,45 @@ if (RUN_NULL_VS_POWER_AUDIT) {
                                   regressor = ddd_df$WFH_Exposure)
 }
 
+# ── 8e. Descriptive figure set for the paper ──────────────────────────────────
+# Unconditional, like §8a and unlike the two audit blocks above -- paper/paper.tex compiles against
+# these figures, and a flag that defaults off would be the same defect both flags above were flipped
+# to TRUE on 2026-09-19 to fix.
+#
+# This is the first point in the pipeline where all the inputs exist: hours_diagnostics_results
+# (§7), emp_res (§6), hours_exposure_index and hours_ddd (§8a).
+message("Building descriptive figures for the paper (hours 2x2, by-year, dose-response)...")
+
+# hours_by_period is passed rather than recomputed so this figure and
+# outputs/hours_diagnostics_hours_by_period.csv are physically the same numbers. If
+# hours_diagnostics.R's cell-mean computation ever changes, the figure follows it automatically --
+# but only for as long as this argument keeps being passed.
+hours_descriptives <- build_hours_descriptive_plots(
+  cleaned_df,
+  hours_by_period = hours_diagnostics_results$hours_by_period
+)
+
+# Binned on the occupation-level calibrated measure -- the same regressor the hours DDD uses, NOT
+# the demographic-cell index. The two are on different scales and must never be mixed.
+hours_dose_response <- build_hours_dose_response(cleaned_df, hours_exposure_index)
+
+# Repo-level diagnostic only. results_digest.md §1.5 records a 2026-09-15 decision that the
+# second-stage mechanism regression is out of scope for the paper's results, and that stands --
+# this figure is deliberately absent from the paper_figures list below. What it does close is the
+# separate open item at §7 item 1: exporting hours_ddd$mechanism_data puts the 37-occupation frame
+# behind the slope on disk, so the mechanism regression is reproducible rather than console-only.
+hours_mechanism <- build_mechanism_scatter(
+  hours_ddd$mechanism_data,
+  fit = hours_ddd$models$mechanism
+)
+
 # ── 9. Export results ─────────────────────────────────────────────────────────
-# idpuf_panel_check is deliberately NOT included here: its idpuf_years/idpuf_periods tables are
-# keyed by individual IDPUF, which is closer to raw identifiable microdata than the aggregate
-# tables everything else in this list produces -- per this project's disclosure-risk convention
+# check_idpuf_panel_structure()'s result is deliberately NOT included here -- which is also why §3
+# calls it without binding its return value. Its idpuf_years/idpuf_periods tables are keyed by
+# individual IDPUF, which is closer to raw identifiable microdata than the aggregate tables
+# everything else in this list produces -- per this project's disclosure-risk convention
 # (CLAUDE.md, Checkpoint 9), only its console-printed summary counts are surfaced, not a
-# persisted per-person roster.
+# persisted per-person roster. Do not "fix" the omission by capturing and exporting it.
 results_to_export <- list(
   comparative_stats = comp_stats,
   descriptive_table = desc_table,
@@ -535,8 +575,13 @@ results_to_export <- list(
   employment_by_child_age = emp_res,
   diagnostics = diagnostics_results,
   hours_diagnostics = hours_diagnostics_results,
+  # The DiD event-study figure (§7), keyed so it lands as hours_event_study_plot.png. Its
+  # coefficients already reach outputs/ as hours_diagnostics_pretrend_coefs.csv via the
+  # hours_diagnostics entry above, so only the plot is passed here.
+  hours_event_study = list(plot = hours_event_study_plot$plot),
   pretrend_wald_employment = pretrend_wald$table,
   pretrend_wald_hours = pretrend_wald_hours$table,
+  pretrend_wald_hours_ddd = pretrend_wald_hours_ddd$table,
   isco_masking_sensitivity = isco_masking_check,
   wfh_exposure_external = exposure_external,
   wfh_exposure_calibrated = exposure_calibrated,
@@ -544,6 +589,28 @@ results_to_export <- list(
   wfh_exposure_cells = exposure_cells,
   ddd_hours_table = hours_ddd$table,
   mde_hours = mde_hours$table,
+
+  # DDD event study (§8a). Both frames are aggregate -- one row per survey year -- so neither runs
+  # into the disclosure convention documented above. $coefs is the tidy estimate/SE/p/CI frame and
+  # $table is etable()'s formatted full-model view; the model object itself is skipped by
+  # export_all_results(), as with every other fixest fit in this list. The plot's own $data is
+  # deliberately not passed: it is $coefs plus the pinned reference-year row, so exporting it would
+  # put two near-identical frames in outputs/ and leave the reader to guess which one is the result.
+  # Naming: these keys become the filenames, so the plot is keyed `plot` under
+  # `hours_ddd_event_study` to land as hours_ddd_event_study_plot.png.
+  hours_ddd_event_study = list(
+    coefs = hours_ddd_event_study$coefs,
+    table = hours_ddd_event_study$table,
+    plot  = hours_ddd_event_study_plot$plot
+  ),
+
+  # Paper descriptive figures (§8e). Every frame here is aggregate, per the disclosure convention
+  # above: hours_by_period is 4 cells, hours_by_year is 6 years x 3 series, dose_response's
+  # cell_means is 16 cells, and hours_mechanism$data is one coefficient per ISCO-2 occupation (37
+  # rows, the un-fittable ones already dropped inside run_hours_ddd_regression()). Nothing row-level.
+  hours_descriptives  = hours_descriptives,
+  hours_dose_response = hours_dose_response,
+  hours_mechanism     = hours_mechanism,
   hours_lee_bounds_table = hours_lee_bounds$table,
   hours_lee_bounds_quartiles = hours_lee_bounds$diagnostics$quartile_selection_rates,
   hours_lee_bounds_n_trimmed = hours_lee_bounds$diagnostics$n_trimmed_by_quartile,
@@ -608,3 +675,46 @@ if (RUN_NULL_VS_POWER_AUDIT) {
 
 message("Exporting results to outputs/...")
 export_all_results(results_to_export)
+
+# Paper figures, again and deliberately. export_all_results() has already written every plot above
+# as an 8x5in 150dpi PNG for browsing; this second pass rewrites the handful paper/paper.tex
+# actually includes as vector PDFs at the size they are printed at (~0.8\textwidth). Text sized for
+# a 5in-wide PDF looks small in the 8in PNG -- that is expected, and the PNG is not what compiles.
+#
+# Keys here are filenames: paper.tex hard-codes ../outputs/figures/<key>.pdf, so renaming one
+# breaks the LaTeX build. Two of employment_by_child_age()'s three plots are intentionally omitted
+# -- the plain raw bar chart and the pre/post panel -- and both stay repo artifacts only. The
+# mechanism scatter is omitted for the scope reason recorded at §8e.
+message("Exporting paper figures (vector PDF) to outputs/figures/...")
+paper_figures <- list(
+  # hours_descriptives$plots$period_2x2 is deliberately NOT here. The paper cut the 2x2 figure:
+  # its content is a strict subset of the by-year panel below (whose lower panel recovers the same
+  # DiD to within 0.011 hours), and its caption reported the UNCLUSTERED raw SE of 0.098, which
+  # reads as significant against the clustered 0.1809 the paper actually reports as a null. The
+  # plot still reaches outputs/ as a PNG via export_all_results() for browsing; it just has no
+  # business being the figure a reader sees next to a null result.
+  hours_by_year         = list(plot = hours_descriptives$plots$by_year,    width = 5.0, height = 5.0),
+  # paper.tex \includegraphics this as Figure fig:pretrend (Results §5.3), replacing the
+  # whole-device outputs/event_study_pretrend_hours.pdf the iplot() version used to write. Same
+  # dimensions as the DDD event study below: the two sit a page apart in the paper and are meant to
+  # be read against each other, so they must not differ in scale.
+  hours_event_study     = list(plot = hours_event_study_plot$plot,         width = 5.0, height = 3.4),
+  # paper.tex \includegraphics this as Figure fig:pretrend-ddd (Results §5.3). Sized to match
+  # hours_dose_response below rather than to the plot's own natural aspect: every paper figure is
+  # printed at 0.8\textwidth, so a PDF authored wider than its neighbours is scaled down further and
+  # its text renders smaller than theirs on the page.
+  hours_ddd_event_study = list(plot = hours_ddd_event_study_plot$plot,     width = 5.0, height = 3.4),
+  hours_dose_response   = list(plot = hours_dose_response$plot,            width = 5.0, height = 3.4),
+  # No emp_res plot is here. The paper cut the pre/post panel first, for the same reason as the 2x2
+  # above -- its only unique content, the pre/post separation, is not an estimate of anything:
+  # mothers only, no comparison group, no controls -- and then cut the raw-vs-adjusted panel on the
+  # same standard. That one is mothers only with no comparison group too; it was cited exactly once,
+  # in the sentence that introduced it, and nothing downstream ever came back to it; and its five
+  # bins carried ten numbers and no uncertainty, which §4.5 now states in two paragraphs instead.
+  # The child-age bin (GilYeledTzairMBNK) enters no specification in this paper, so the profile the
+  # adjustment corrects is one nothing else estimates. Both plots still reach outputs/ as PNGs via
+  # export_all_results(), and the plotted rates are on disk in
+  # outputs/employment_by_child_age_adjusted_rates.csv, which §4.5 quotes.
+  mobility              = list(plot = comp_stats$plots$mobility,           width = 5.0, height = 3.4)
+)
+export_paper_figures(paper_figures)

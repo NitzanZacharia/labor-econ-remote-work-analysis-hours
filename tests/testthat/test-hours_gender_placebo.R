@@ -14,38 +14,10 @@ test_that("run_hours_gender_placebo skips the DDD placebo gracefully when no exp
   expect_null(res$ddd_placebo)
 })
 
-# 10 occupations with distinct, evenly-spaced occupation-level exposure -- same template as
-# test-hours_ddd_regression.R's make_hours_ddd_fixtures(), with Min = 1 (male subsample) added.
+# The synthetic male panel comes from helper-setup.R's make_hours_ddd_panel(), shared with
+# test-hours_ddd_regression.R; min_sex = 1 adds the Min column the male subsample needs.
 make_hours_gender_ddd_fixtures <- function(delta = -3) {
-  n_occ     <- 10
-  occ_codes <- 300 + seq_len(n_occ)
-  exposure_index <- tibble::tibble(
-    occupation_code = occ_codes,
-    wfh_exposure    = seq(0.05, 0.95, length.out = n_occ)
-  )
-
-  n <- 400
-  occ_i <- sample(seq_len(n_occ), n, replace = TRUE)
-  panel <- tibble::tibble(
-    Min = 1,
-    MishlachYad_ISCO_08_2 = occ_codes[occ_i],
-    .wfh                  = exposure_index$wfh_exposure[occ_i],
-    MatzavMishpachti = factor(sample(1:5, n, replace = TRUE)),
-    Dat              = factor(sample(1:5, n, replace = TRUE)),
-    GilNK            = factor(sample(3:7, n, replace = TRUE)),
-    MachozMegurim    = factor(sample(1:7, n, replace = TRUE)),
-    TeudaGvoha       = factor(sample(c("A", "B", "C"), n, replace = TRUE)),
-    Mother   = sample(0:1, n, replace = TRUE),
-    Post     = sample(0:1, n, replace = TRUE),
-    Employed = 1L
-  ) %>%
-    dplyr::mutate(
-      WorkHoursCont = 40 + delta * Mother * Post * .wfh + stats::rnorm(dplyr::n(), 0, 0.5),
-      IDPUF = dplyr::row_number()
-    ) %>%
-    dplyr::select(-.wfh)
-
-  list(panel = panel, exposure_index = exposure_index)
+  make_hours_ddd_panel(delta = delta, min_sex = 1)
 }
 
 test_that("run_hours_gender_ddd_placebo recovers the correct sign of a known injected effect", {

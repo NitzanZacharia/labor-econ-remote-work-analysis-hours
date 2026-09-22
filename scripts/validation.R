@@ -84,6 +84,44 @@ validate_cleaned_df <- function(cleaned_df, sex_filter = c("women", "men")) {
     }
   }
 
+  # Usual-hours coverage by survey year. This is the check that would have caught the defect fixed
+  # in docs/decisions/hours-population-harmonization.md: the 2017 CBS file recorded usual hours as
+  # bin 0 ("no usual hours") for the employed-but-absent, who from 2018 on received a real code, so
+  # 9.77% of 2017's employed carried an unascertained usual-hours code against ~0% in every other
+  # year -- and because absenteeism is mother-skewed, that landed as a spurious pre-period gap.
+  #
+  # Deliberately keyed on the RAW code rather than on is.na(WorkHoursCont): post-harmonization the
+  # NA rate is ~10% in every year by design (the absentees), so an NA-based check would be both
+  # noisy and blind to the thing it is meant to catch. Codes 0 and 99 are the two "no usable usual
+  # hours" codes.
+  #
+  # 2017 is a documented exception, not a bug to re-report on every run -- it is the very year the
+  # memo above describes. A *new* year appearing here means the coding changed again.
+  hours_coverage_exceptions <- c(2017)
+  if (all(c("ShaotAvodaBederechKlalNK", "ShnatSeker", "Employed") %in% names(cleaned_df))) {
+    unascertained <- cleaned_df %>%
+      filter(Employed == 1) %>%
+      group_by(ShnatSeker) %>%
+      summarise(
+        pct_unascertained = 100 * mean(ShaotAvodaBederechKlalNK %in% c(0, 99), na.rm = TRUE),
+        .groups = "drop"
+      ) %>%
+      filter(pct_unascertained > 2, !(ShnatSeker %in% hours_coverage_exceptions))
+
+    if (nrow(unascertained) > 0) {
+      warning(sprintf(
+        paste0("validate_cleaned_df: %d survey year(s) have >2%% of employed rows with an ",
+               "unascertained usual-hours code (raw code 0 or 99): %s. Every other year sits near ",
+               "0%%. See docs/decisions/hours-population-harmonization.md -- this is the signature ",
+               "of a year-specific change in how usual hours were coded, which biases the ",
+               "intensive-margin pre-period."),
+        nrow(unascertained),
+        paste(sprintf("%d: %.2f%%", unascertained$ShnatSeker, unascertained$pct_unascertained),
+              collapse = "; ")
+      ))
+    }
+  }
+
   invisible(TRUE)
 }
 

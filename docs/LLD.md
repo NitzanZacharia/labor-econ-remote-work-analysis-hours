@@ -127,7 +127,7 @@ See the "Analysis-critical derived columns" table below for each column's exact 
 | `WFH_Arrangement` | factor (3 levels) | `On-site` (91,480), `Hybrid` (15,685), `Fully remote` (9,655) | 68.659% | Binned from `WFH_Share`: `0` → On-site, `(0, 0.9)` → Hybrid, `>= 0.9` → Fully remote |
 | `ISCO_masked` | logical | `{TRUE, FALSE}` | **0.000%** | `TRUE` where the raw `MishlachYad_ISCO_08_2` held a CBS disclosure mask (`XX`, `7X`, …) rather than a code. 2.365% of the analysis sample; 7.5% of all employed in the raw 2021 file, since masking concentrates in thin occupation cells |
 | `ISCO1` | numeric | `[1, 9]` | 18.052% | 1-digit ISCO-08 major group, recovered from the first character of the raw code so partially-masked values (`7X` → `7`) survive. Non-`NA` for 231 employed 2021 rows that `MishlachYad_ISCO_08_2` loses entirely |
-| `WorkHoursCont` | numeric | `[0, 78.5]` | 0.001% (3 rows) | Bin-median lookup for `ShaotAvodaBederechKlalNK` codes 0–10; codes 11/12 imputed from the median of the matching bin range, computed separately within each `Post` period (not pooled across 2017–2023 — pooling would blend the pre/post hour distributions and dampen any real period-specific intensity shift); `NA` for code 99. **Primary outcome variable** (project-wide, as of `docs/decisions/hours-ddd-pivot.md`) — defined only for `Employed == 1` rows. |
+| `WorkHoursCont` | numeric | `[4, 78.5]` | 30.736% | Bin-median lookup for `ShaotAvodaBederechKlalNK` codes 1–10; codes 11/12 imputed from the median of the matching bin range, computed separately within each `Post` period (not pooled across 2017–2023 — pooling would blend the pre/post hour distributions and dampen any real period-specific intensity shift); `NA` for codes 0 and 99. **Primary outcome variable** (project-wide, as of `docs/decisions/hours-ddd-pivot.md`) — defined only for rows that are both `Employed == 1` **and** `AvadBeshavua == 1` (worked the reference week). That second gate harmonizes the hours population across survey years: the 2017 file coded the employed-but-absent as bin 0 ("no usual hours") while 2018+ gave them a real code, and since absenteeism is mother-skewed that produced a spurious 2017 pre-period gap. See `docs/decisions/hours-population-harmonization.md`. The NA rate is therefore ~23% non-employed plus ~8% employed-but-absent, in every year by design — not missingness to investigate. |
 | `TeudaGvoha` | factor (6 levels) | `Below High School`, `High School (no matriculation)`, `Matriculation (Bagrut)`, `Post-secondary, non-academic`, `Academic Degree (BA/MA/PhD)`, `Other/No Certificate` | 2.135% | Collapsed from 11 raw codes; `NA` reserved for raw code 99 ("unknown") |
 | `BirthContinent` | factor (6 levels) | `Africa`, `Asia`, `Europe`, `Israel`, `North America`, `Other` | 0.218% | Collapsed from 16 raw `SemelEretzLeda` codes; `NA` reserved for raw code 16 (ambiguous "unknown"/"other" in CBS's own codebook) |
 | `WorksOutsideLocality` | integer | `{0, 1}` | 16.552% | From `DargatNayadut`: `1`→`0`, `2`–`7`→`1`, `0`/`8`/`NA`→`NA` |
@@ -153,6 +153,7 @@ Regression-control columns (`MatzavMishpachti`, `Dat`, `GilNK`, `MachozMegurim`,
 | Any *regression control's* NA rate | warn if `> 5%` | None currently exceed this — `TeudaGvoha` at 2.1% is the highest control-level NA rate observed; a control crossing 5% would meaningfully shrink the regression's effective sample via `fixest`'s listwise deletion |
 | Any *comparative-stats-only* variable's NA rate | warn if `> 70%` (informational only below that) | `WFH` at 63.9% is structurally expected (pre-2021 undefined by design), not a data-quality problem — the threshold should sit above it so `WFH` doesn't false-positive, while still catching a genuinely broken variable |
 | `WorksOutsideLocality` NA rate | no warn below `~20%` | Its 16.6% NA is structurally expected (`DargatNayadut` codes 0/8 = didn't work / unknown), consistent across years |
+| Unascertained usual-hours codes, **per survey year** | warn if any year has `> 2%` of `Employed == 1` rows at raw code 0 or 99, excluding the documented 2017 exception | The signature of the defect fixed in `docs/decisions/hours-population-harmonization.md`: 2017 sat at 9.77% against ~0% everywhere else, because that file coded the employed-but-absent as bin 0. Keyed on the **raw** code, not `is.na(WorkHoursCont)` — post-harmonization the NA rate is ~10%/year by design, so an NA-based rule would be both noisy and blind to the thing it is meant to catch. A *new* year crossing the threshold means the coding changed again |
 
 ### Null-handling logic, by variable class
 
@@ -254,6 +255,61 @@ run_hours_ddd_regression(cleaned_df: tibble, exposure_index: tibble,
 # precision-weighted (1/se_j^2) against occupation-level exposure -- mirrors the removed
 # run_ddd_regression()'s Model 2.
 
+# ── hours_ddd_event_study.R / tidy_event_study_coefs.R / build_event_study_plot.R ──────────
+# Year-by-year event-study version of the primary DDD above, plus its ggplot builder. Exists because
+# the two pretrend models under Diagnostics.R / hours_diagnostics.R are both DiD-level
+# (Mother x year): the DDD's identifying assumption is that the mother/non-mother gap trended
+# together ACROSS exposure levels, which a test averaging over exposure cannot detect a violation of.
+# Wired into main.R section 8a (not section 7 -- it needs section 8's exposure measure),
+# unconditional. See docs/decisions/ddd-event-study.md.
+run_hours_ddd_event_study(cleaned_df: tibble, exposure_index: tibble,
+                          controls: character = DEFAULT_CONTROLS,
+                          ref_year: numeric(1) = 2019) ->
+  invisible(list(
+    table = etable_df, model = fixest,
+    coefs = tibble,   # term, year, estimate, std_error, t_stat, p_value, ci_low, ci_high, period
+    ref_year = numeric(1), term_suffix = character(1),   # "MotherWFH"
+    n_employed = integer(1), n_matched = integer(1)
+  ))
+# WorkHoursCont ~ Mother*WFH_Exposure + i(ShnatSeker, ref) + i(ShnatSeker, Mother, ref)
+#   + i(ShnatSeker, WFH_Exposure, ref) + i(ShnatSeker, MotherWFH, ref) + controls,
+# cluster = ~MishlachYad_ISCO_08_2, Employed==1 only, same occupation-level exposure join as
+# run_hours_ddd_regression(). MotherWFH is a materialized Mother*WFH_Exposure column because
+# fixest's i(f, var) takes a variable, not an expression. Coefficients of interest are named
+# "ShnatSeker::<year>:MotherWFH"; all three lower-order year interactions are required for the
+# estimate to be a triple difference at all. p_value/ci_* use t on degrees_freedom(model, "t")
+# (G-1 ~ 40 clusters), matching etable()'s own printed values rather than a normal approximation.
+# term_suffix is returned so main.R can build run_pretrend_joint_test()'s `keep` regex from it
+# instead of re-typing the literal at the call site.
+
+tidy_event_study_coefs(model: fixest, term_suffix: character(1), ref_year: numeric(1),
+                        factor_var: character(1) = "ShnatSeker") -> tibble
+# One row per non-reference year: term, year, estimate, std_error, t_stat, p_value, ci_low, ci_high,
+# period ("Pre"/"Post" relative to ref_year). Selects terms by the ANCHORED pattern
+# ^<factor_var>::(\d{4}):<term_suffix>$ -- unanchored, term_suffix "Mother" would also collect
+# ":MotherWFH", silently mixing two estimands (same hazard as pretrend_wald_test.R's `keep`).
+# p_value/ci_* use t on degrees_freedom(model, "t"), reproducing etable()'s printed values.
+# stop()s if no term matches, rather than returning a 0-row frame that exports an empty CSV.
+# Shared by run_hours_ddd_event_study() (term_suffix "MotherWFH") and run_hours_diagnostics()
+# (term_suffix "Mother"), so the two event studies cannot drift apart in their inference.
+
+build_event_study_plot(coefs: tibble, ref_year: numeric(1) = 2019,
+                       treatment_year: numeric(1) = 2021,
+                       title: character(1) = NULL, subtitle: character(1) = NULL,
+                       y_label: character(1) = "Mother x Year x WFH Exposure (95% CI)",
+                       se_note: character(1) = "occupation-clustered standard errors") ->
+  invisible(list(data = tibble, plot = ggplot))   # NULL if coefs is NULL/0-row
+# Draws BOTH of the paper's event studies: Figure 6 (DiD, from run_hours_diagnostics()'s
+# pretrend_coefs, se_note "standard errors clustered by individual") and Figure 7 (DDD, from
+# run_hours_ddd_event_study()'s coefs, default se_note). se_note is a parameter because the two
+# cluster at different levels and the caption states which.
+# Pointrange + 95% CI by year, geom_hline(0), dotted vertical rule at the (ref_year+treatment_year)/2
+# midpoint so it lands in the empty 2020 gap rather than on a plotted estimate. ref_year is
+# re-inserted as a hollow, zero-width zero (it has no row in coefs -- it is the omitted category).
+# x breaks are restricted to observed years so the axis does not invent a 2020 tick. stop()s if coefs
+# lacks a required column; returns NULL (with a message) if coefs is absent -- matching
+# build_hours_subgroup_comparison()/build_mechanism_scatter().
+
 run_hours_ddd_lee_bounds(cleaned_df: tibble, exposure_index: tibble, exposure_cells: tibble,
                           controls: character = DEFAULT_CONTROLS) ->
   invisible(list(
@@ -304,8 +360,11 @@ run_hours_diagnostics(cleaned_df: tibble) ->
     # WorkHoursCont ~ Mother + i(ShnatSeker,ref=2019) + i(ShnatSeker,Mother,ref=2019) + controls,
     # data = filter(cleaned_df, Employed == 1)
   ))
-# Primary (hours) outcome analog -- same iplot()/device-management caveat as run_diagnostics()
-# above. Omits run_diagnostics()'s Employed-NA-specific missingness audits (no hours analog).
+# Primary (hours) outcome analog. Also returns pretrend_coefs (tidy_event_study_coefs() on the
+# Mother x year terms) -- main.R draws it with build_event_study_plot() as the paper's Figure 6.
+# Unlike run_diagnostics(), this function has NO graphics side effect: the iplot() call it used to
+# make was removed with that port, so main.R wraps it in no device. Omits run_diagnostics()'s
+# Employed-NA-specific missingness audits (no hours analog).
 
 # ── gender_placebo.R / hours_gender_placebo.R ─────────────────────────────────
 run_gender_placebo(folder_path: character(1), cleaned_men: tibble = NULL, cleaned_women: tibble = NULL,
@@ -317,7 +376,7 @@ run_gender_placebo(folder_path: character(1), cleaned_men: tibble = NULL, cleane
 run_gender_ddd_placebo(cleaned_men: tibble, exposure_calibrated: tibble,
                         controls: character = DEFAULT_CONTROLS) ->
   list(exposure_cells_men = tibble, models = list(additive = fixest | NULL, fe = fixest | NULL))
-# Not called from main.R by default. Both feols() calls cluster on the (GilNK, TeudaGvoha,
+# Called from main.R via run_gender_placebo(). Both feols() calls cluster on the (GilNK, TeudaGvoha,
 # MachozMegurim) cell, matching main.R's secondary DDD -- WFH_Exposure is cell-constant here too.
 
 run_hours_gender_placebo(folder_path: character(1), cleaned_men: tibble = NULL,
@@ -330,7 +389,7 @@ run_hours_gender_placebo(folder_path: character(1), cleaned_men: tibble = NULL,
 run_hours_gender_ddd_placebo(cleaned_men: tibble, exposure_index: tibble,
                               controls: character = DEFAULT_CONTROLS) ->
   list(n_employed = integer(1), n_matched = integer(1), model = fixest | NULL)
-# Not called from main.R by default. Occupation-level exposure_index (not cell-based) -- no need
+# Called from main.R via run_hours_gender_placebo(). Occupation-level exposure_index (not cell-based) -- no need
 # to rebuild a cell-based exposure measure for men, since occupation-level exposure is sex-agnostic.
 # Employed==1 subsample, cluster = ~MishlachYad_ISCO_08_2, matching hours_ddd_regression.R.
 
@@ -373,7 +432,7 @@ check_isco_masking_sensitivity(cleaned_df: tibble, wfh_col: character(1) = "WFH"
 check_spec1_collinearity(ddd_df: tibble, cell_fe_vars: character, controls: character) ->
   invisible(list(r2_wfh_exposure_on_cells = numeric(1), vif_wfh_exposure = numeric(1),
                   condition_number = numeric(1)))
-# Runtime collinearity diagnostic for the primary DDD's Spec 1. Base R only (lm(), kappa()) --
+# Runtime collinearity diagnostic for the secondary (employment) DDD's Spec 1. Base R only (lm(), kappa()) --
 # deliberately no car dependency.
 
 check_wfh_first_stage_relevance(ddd_df: tibble, controls: character = DEFAULT_CONTROLS) ->
@@ -436,10 +495,20 @@ run_hours_ddd_reweighted(cleaned_df: tibble, exposure_cells: tibble, exposure_in
 # WorkHoursCont ~ Mother*Post*WFH_Exposure + controls, weights = rake_weight,
 # cluster = ~MishlachYad_ISCO_08_2.
 
-run_pretrend_joint_test(pretrend_model: fixest) -> invisible(wald_result)
-# Joint Wald test, H0: a fitted pretrend model's pre-2020 Mother:year interactions are jointly
-# zero. Fully generic -- run once for the secondary DDD's pretrend model (Diagnostics.R) and once
-# for the primary DDD's (hours_diagnostics.R).
+run_pretrend_joint_test(pretrend_model: fixest,
+                         keep: character(1) = "ShnatSeker::(2017|2018):Mother$",
+                         label: character(1) = "Joint Wald, H0: pre-2020 Mother:year coefficients = 0")
+  -> invisible(wald_result + list(table = data.frame))
+# Joint Wald test, H0: a fitted pretrend model's pre-2020 interactions of interest are jointly zero.
+# Fully generic -- run three times: the secondary DDD's DiD pretrend model (Diagnostics.R), the
+# primary outcome's DiD pretrend model (hours_diagnostics.R), and the primary DDD's own
+# triple-interaction event study (hours_ddd_event_study.R, which passes
+# keep = "ShnatSeker::(2017|2018):MotherWFH$" and its own label).
+# The default `keep` is ANCHORED with `$` on purpose: unanchored, "...:Mother" also matches
+# "...:MotherWFH", so a DDD event-study model would silently be tested on 4 restrictions spanning
+# two estimands while still looking like a well-formed 2-restriction pretrend test. `label` is
+# parameterized because it is written into the exported one-row table, and three F-statistics now
+# reach outputs/. See docs/decisions/ddd-event-study.md.
 
 # All wired into main.R behind RUN_AGE_BALANCE_ROBUSTNESS (default TRUE as of 2026-09-19) -- see
 # docs/decisions/age-balance-robustness-chain.md.
@@ -454,21 +523,80 @@ check_market_mismatch(cleaned_df: tibble, exposure_path: character(1) = "data/is
 export_all_results(results_list: list, output_dir: character(1) = "outputs") -> invisible(character)
 # Recursively walks results_list: data frames -> CSV, ggplots -> PNG, fixest/lm objects skipped.
 # Returns the vector of file paths written.
+
+# ── descriptive_table.R ───────────────────────────────────────────────────
+build_descriptive_table(cleaned_df: tibble) -> list(continuous: tibble, categorical: tibble)
+# The paper's Table 1. cat_vars = setdiff(DEFAULT_CONTROLS, "GilNK") -- GilNK is reported
+# continuously alongside age. Level labels are the CBS codebook's, confirmed with the authors.
+
+# ── clustered_se.R ────────────────────────────────────────────────────────
+clustered_se(df: data.frame, outcome: character(1), cluster: character(1) = "IDPUF") -> tibble
+# Cluster-robust SE/CI for a cell mean, via feols(y ~ 1). Returns NA-filled row for <2 rows.
+# Point estimates are unchanged by construction -- any movement in one is a bug.
+
+# ── ddd_mde_diagnostics.R ─────────────────────────────────────────────────
+compute_ddd_mde(model: fixest, coef_name: character(1), baseline: numeric(1),
+                 power: numeric(1) = 0.80, alpha: numeric(1) = 0.05) -> tibble
+# Closed-form MDE = (z_{1-a/2} + z_power) * SE, reported both absolutely and as a share of
+# baseline, on the scale the regressor actually varies over (not a unit change).
+
+# ── wfh_first_stage_check.R ───────────────────────────────────────────────
+check_wfh_first_stage_relevance(panel: tibble, controls: character = DEFAULT_CONTROLS) -> list
+# Shift-share relevance test: does WFH_Exposure predict realized WFH_RefWeek once Post == 1?
+# Static + year-interacted specs. Requires data_processing.R and ddd_collinearity_diagnostics.R.
+
+# ── hours_subgroup_comparison.R ───────────────────────────────────────────
+build_hours_subgroup_comparison(estimates: tibble, placebo: logical(1) = FALSE,
+                                 x_label: character(1) = NULL) -> list(data: tibble, plot: ggplot)
+# Coefficient-comparison figure for the Jewish/Arab and gender-placebo splits.
+
+# ── paper_theme.R ─────────────────────────────────────────────────────────
+theme_paper(base_size: numeric(1) = 11) -> theme        # + PAPER_PALETTE, a constant
+# One theme/palette for every figure. PAPER_PALETTE separates the mother_status and period hues
+# that previously collided across scripts.
+
+# ── hours_descriptive_plots.R ─────────────────────────────────────────────
+build_hours_descriptive_plots(cleaned_df: tibble, hours_by_period: tibble = NULL)
+  -> list(hours_by_year, hours_by_period, raw_did, plots)
+# hours_by_period is passed, not recomputed, so the figure and
+# outputs/hours_diagnostics_hours_by_period.csv are physically the same numbers.
+
+# ── hours_dose_response.R ─────────────────────────────────────────────────
+build_hours_dose_response(cleaned_df: tibble, exposure_index: tibble,
+                           measure_label: character(1) = "...") -> list(data, cell_means, plot)
+# Raw hours DiD within each quartile of OCCUPATION-level exposure -- the DDD's own regressor,
+# deliberately not the cell-based index. Cell arithmetic only, no regression.
+
+# ── build_mechanism_scatter.R ─────────────────────────────────────────────
+build_mechanism_scatter(mechanism_data: tibble, fit: lm = NULL) -> list(data, fit_line, plot)
+# Per-occupation beta_j vs. exposure. The drawn line comes from the passed precision-weighted
+# `fit`, never geom_smooth(). Repo diagnostic only -- deliberately NOT in paper.tex.
+
+# ── export_paper_figures.R ────────────────────────────────────────────────
+export_paper_figures(figures: list, output_dir: character(1) = "outputs/figures",
+                      strip_titles: logical(1) = TRUE, device = cairo_pdf) -> invisible(character)
+# Second export pass: vector PDFs at print size for the figures paper.tex includes.
+# Flat, non-recursive, keyed by filename -- paper.tex hard-codes ../outputs/figures/<key>.pdf,
+# so renaming a key breaks the LaTeX build.
 ```
 
-## HLD Gap Analysis
+## HLD Gap Analysis & Implementation Roadmap — both closed
 
-**Status: closed.** Every gap this table originally tracked (validation/threshold checks, the schema-drift check, the intensive-margin regression, the WFH-exposure index, the DDD mechanism regression, the Gender Placebo Test, and the persisted output/export layer) is now implemented — see `docs/HLD.md` §4.1 for the full current file list, and `docs/ROADMAP.md` for the checkpoint history. The one item below that was ever a genuine data-availability blocker (not an engineering gap) was resolved as a recorded decision rather than closed by acquiring new data:
+Every gap this document originally tracked is implemented, and the 9-step build order it specified
+has shipped in full. `docs/HLD.md` §4.1 holds the current file list; `docs/ROADMAP.md` holds the
+checkpoint history; `docs/decisions/` holds the rationale for work that went beyond the original
+spec (the calibrated exposure measure and cell-based DDD, the Lee-bounds corrections, the runtime
+diagnostics). **There is no pending roadmap item** — new work should get its own checkpoint entry
+or decision memo per `CLAUDE.md`'s convention rather than being implemented ad hoc.
 
-| Original gap | Resolution |
-|---|---|
-| Continuous `Age`/`Age²` controls — confirmed absent from the raw CBS extract entirely (no `Gil`/`ShnatLeda`-equivalent column exists) | **Decided, not built**: `docs/decisions/checkpoint8-age-age2-controls.md` formally replaces this control with the categorical `GilNK` already in use everywhere — matching Part 3 §3's own advisor feedback for categorical dummies. Not an open gap. |
+The one original gap that was a genuine data-availability blocker rather than an engineering one:
+continuous `Age`/`Age²` controls are absent from the raw CBS extract entirely (no
+`Gil`/`ShnatLeda`-equivalent column exists). Resolved as a recorded decision —
+`docs/decisions/checkpoint8-age-age2-controls.md` replaces the control with the categorical `GilNK`
+already in use everywhere, matching Part 3 §3's own advisor feedback for categorical dummies.
 
-Work has since gone **beyond** what this table or the original roadmap scoped — a statistically-calibrated exposure measure and a cell-based primary DDD (`wfh_exposure_cells.R`, `docs/decisions/calibrated-exposure-and-cell-ddd.md`), a Lee (2009) selection-bounds correction for the intensive margin (`docs/decisions/intensive-margin-lee-bounds.md`), and several runtime diagnostics (`validation.R`'s `check_idpuf_panel_structure()`/`check_wfh_refweek_avadbeshavua()`, `isco_masking_diagnostics.R`, `ddd_collinearity_diagnostics.R`). None of these are "gaps" in the sense this table originally meant (missing pieces of the research-doc spec) — they're refinements layered on top of a complete spec, each with its own decision memo. See `docs/HLD.md` §4.2 for the current list of documented limitations and deliberate decisions (survey weights not applied, Lee bounds' one-directional limitation, etc.) — that's the accurate analogue of this section today.
-
-## Implementation Roadmap
-
-**Status: complete.** The 9-step build order this section originally specified (validation guard → schema-drift check → intensive-margin regression → controls de-duplication → WFH-exposure index → DDD mechanism regression → Gender Placebo Test → Age/Age² decision → export layer) matches `docs/ROADMAP.md`'s 10 checkpoints and all of it has shipped. For what's been built since, see `docs/HLD.md` §4.1's file table and the decision memos in `docs/decisions/`. There is currently no pending roadmap item — new work should get its own checkpoint entry or decision memo (per `CLAUDE.md`'s convention) rather than being implemented ad hoc, so a future reader can find the rationale the way this section once made possible for the original 9.
+For the current list of documented limitations and deliberate decisions (survey weights not
+applied, the Lee bounds' one-directional limitation, etc.), see `docs/HLD.md` §4.2.
 
 ## Verification
 

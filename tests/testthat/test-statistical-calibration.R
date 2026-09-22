@@ -16,6 +16,19 @@
 # around it is already covered by test-balance_test.R's structural tests; what's untested
 # anywhere else is whether the t-test ITSELF is calibrated.
 
+# The calibration test below reproduces run_balance_test()'s t-test rather than calling it, for the
+# speed reason above. That reproduction is only meaningful while the two stay the same call, and
+# nothing else in the suite would notice if balance_test.R switched to a different test or dropped
+# the Welch default. This pins them together at zero runtime cost -- if it fails, fix the
+# reproduction below to match the source before trusting the rejection rate.
+test_that("run_balance_test() still uses the Welch t.test this file's calibration check reproduces", {
+  txt <- paste(readLines(file.path(project_root, "robustness", "balance_test.R"), warn = FALSE),
+               collapse = "\n")
+  expect_true(grepl("t.test(gilnk_num(GilNK) ~ Mother", txt, fixed = TRUE))
+  # var.equal is left at its FALSE default -- i.e. Welch, not pooled-variance Student.
+  expect_false(grepl("var\\.equal\\s*=\\s*TRUE", txt))
+})
+
 test_that("the GilNK Welch t-test (as used by run_balance_test()) rejects at approximately its nominal rate under a true null", {
   gilnk_num <- function(x) as.numeric(as.character(x))
 

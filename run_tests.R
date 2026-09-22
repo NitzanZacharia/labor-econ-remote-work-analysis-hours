@@ -1,7 +1,7 @@
 # run_tests.R
 # One-command entry point for the test suite. Run from the repo root: Rscript run_tests.R
 # Exits with status 0 if every test passed, non-zero otherwise (so this composes with CI/scripts
-# that check the exit code, per docs/AUTONOMOUS_RUN_PLAN.md's per-checkpoint gate).
+# that check the exit code).
 library(testthat)
 
 # Several functions under test (run_comparative_stats(), employment_by_child_age(),

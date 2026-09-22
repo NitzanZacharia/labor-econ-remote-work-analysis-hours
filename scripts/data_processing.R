@@ -28,7 +28,7 @@ load_and_clean_data <- function(folder_path, sex_filter = c("women", "men")) {
       between(GilNK, 3, 7),
       ShnatSeker %in% c(2017, 2018, 2019, 2021, 2022, 2023)
     )
-  
+
   # ── 3. Create new variables ──────────────────────────────────────────────────
   # ShaotAvodaBederechKlalNK bin -> median usual weekly hours (codebook: bin bounds)
   hour_bin_median <- c(`0` = 0, `1` = 4, `2` = 11, `3` = 18, `4` = 25.5, `5` = 32,
@@ -181,10 +181,39 @@ load_and_clean_data <- function(folder_path, sex_filter = c("women", "men")) {
     # makes the variable itself correctly undefined for the population it was never meant to
     # describe. The code-11/12 donor pool is restricted to Employed == 1 rows for the same reason
     # ("median hours among regular ... workers", per the comment above).
+    #
+    # ALSO gated on AvadBeshavua == 1 (worked in the reference week), which harmonizes the hours
+    # population across survey years -- see docs/decisions/hours-population-harmonization.md.
+    # The problem this solves: bin 0 is not a "bad" code, it means "no usual hours / did not work",
+    # and CBS uses it in every year (16,821 non-employed rows in 2017, 15,601 in 2018, ...). What
+    # is 2017-specific is that the 2017 file ALSO used it for the employed-but-absent: AvadBeshavua
+    # partitions 2017's employed perfectly, with all 5,169 bin-0 rows at code 4 (did not work that
+    # week) and all 47,729 others at code 1. From 2018 on, that same population was given a real
+    # usual-hours code instead. The absentee group is ~10% of the employed in every year
+    # (9.8/10.3/10.6/12.0/9.9/10.4% for 2017-2023), so the population is stable -- only its coding
+    # changed.
+    #
+    # Gating on bin 0 alone would therefore NOT fix this: it would leave 2017 conditioning on
+    # "worked that week" while the other five years did not. Since absenteeism is mother-skewed
+    # (12.4% of employed mothers vs 7.3% of non-mothers), that is differential selection on exactly
+    # the dimension this project's estimand contrasts, and it overshoots -- the 2017 raw gap lands
+    # at -1.373 against 2018's -1.571 and 2019's -1.678, i.e. past them rather than onto them.
+    # Restricting every year to the reference-week workers instead makes the hours population
+    # identical across years, at the cost of ~10% of each year's hours sample and a slightly
+    # narrower estimand: usual hours among those who worked the reference week.
+    #
+    # The bin-0 branch below is redundant on today's data (every 2017 bin-0 row is AvadBeshavua==4,
+    # so the gate above already catches it) and is kept only as a guard: a bin-0 row that DID work
+    # the reference week would otherwise still be handed a literal 0 by the %in% 0:10 branch.
+    # Note hour_bin_median's `0` = 0 entry (top of this file) is not wrong in itself -- 0 is the
+    # right ACTUAL hours for someone who did not work. It is wrong only as a USUAL-hours value,
+    # which is what this variable is.
     group_by(Post) %>%
     mutate(
       WorkHoursCont = case_when(
         Employed != 1                      ~ NA_real_,
+        AvadBeshavua != 1                  ~ NA_real_,
+        ShaotAvodaBederechKlalNK == 0      ~ NA_real_,
         ShaotAvodaBederechKlalNK %in% 0:10 ~ .hour_bin_val,
         ShaotAvodaBederechKlalNK == 11      ~ median(.hour_bin_val[Employed == 1 & ShaotAvodaBederechKlalNK %in% 1:5], na.rm = TRUE),
         ShaotAvodaBederechKlalNK == 12      ~ median(.hour_bin_val[Employed == 1 & ShaotAvodaBederechKlalNK %in% 6:10], na.rm = TRUE),
@@ -200,7 +229,7 @@ load_and_clean_data <- function(folder_path, sex_filter = c("women", "men")) {
       )
     )
 
-  
+
   # ── 4. Drop unwanted columns ─────────────────────────────────────────────────
   cols_to_drop <- c(
     "ShnotLimud", "SugBeitSeferAcharon", "AvadBeshavua2", "ChipesChodesh",
@@ -242,7 +271,7 @@ load_and_clean_data <- function(folder_path, sex_filter = c("women", "men")) {
     "MigzarTziburiAnafi", "TatTaasuka_Zman", "ChodeshKodem", "ChodeshKodemShaa",
     "MimaHaMigbala", "Mismachim", "Modaot", "OfenAcher", "Oved30", "PniyaLmaasik"
   )
-  
+
   # Regex pattern matching any column that starts with these prefixes
   prefix_pattern <- paste0(
     "(",
@@ -257,7 +286,7 @@ load_and_clean_data <- function(folder_path, sex_filter = c("women", "men")) {
     ), collapse = "|"),
     ")"
   )
-  
+
   df <- mutated_df %>%
     select(
       -any_of(cols_to_drop),
@@ -268,7 +297,7 @@ load_and_clean_data <- function(folder_path, sex_filter = c("women", "men")) {
       -(ChipusAvodaSherutTaasuka:ChipusAvodaOfenAcher),
       -(RamatDat:BituachLeumi)
     )
-  
+
   return(df)
 }
 

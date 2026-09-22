@@ -1,7 +1,7 @@
 # test-data_processing.R
-# Priority 1 (TESTING_BLUEPRINT.md §2): every recoding rule in load_and_clean_data(), plus the
-# schema-presence test for the 7 positional column-drop ranges. This is the highest-value test
-# file in the suite -- a silent error here corrupts every downstream number.
+# Highest-priority file in the suite: every recoding rule in load_and_clean_data(), plus the
+# schema-presence test for the positional column-drop ranges. A silent error here corrupts every
+# downstream number.
 
 cleaned <- load_and_clean_data(fixtures_dir)
 
@@ -35,15 +35,44 @@ test_that("WorkHoursCont: bins 0-10 map to their fixed range median, among emplo
   # not the bin median, so it must be excluded here rather than making this loop's `all(vals == ...)`
   # spuriously fail. 2019020/2019021 are dedicated employed exemplars for codes 1/2 specifically
   # because the only other fixture rows with those codes (2019002, 2019003) are non-employed.
-  hour_bin_median <- c(`0` = 0, `1` = 4, `2` = 11, `3` = 18, `4` = 25.5, `5` = 32,
+  # Loop starts at 1, not 0: bin 0 means "no usual hours / did not work" and is now NA by design
+  # (see the dedicated test below and docs/decisions/hours-population-harmonization.md).
+  hour_bin_median <- c(`1` = 4, `2` = 11, `3` = 18, `4` = 25.5, `5` = 32,
                         `6` = 37, `7` = 42, `8` = 47, `9` = 54.5, `10` = 78.5)
-  for (code in 0:10) {
+  for (code in 1:10) {
     vals <- cleaned$WorkHoursCont[cleaned$ShaotAvodaBederechKlalNK == code &
                                      !is.na(cleaned$ShaotAvodaBederechKlalNK) &
-                                     cleaned$Employed == 1]
+                                     cleaned$Employed == 1 &
+                                     cleaned$AvadBeshavua == 1]
     expect_gt(length(vals), 0)
     expect_true(all(vals == hour_bin_median[[as.character(code)]]))
   }
+})
+
+test_that("WorkHoursCont: hours-bin 0 -> NA even for employed rows", {
+  # Bin 0 is "no usual hours / did not work". The 2017 CBS file used it for the employed-but-absent,
+  # who from 2018 on were given a real usual-hours code instead; mapping it to a literal 0 put
+  # ~5,169 spurious zeros into the 2017 pre-period, disproportionately mothers.
+  vals <- cleaned$WorkHoursCont[cleaned$ShaotAvodaBederechKlalNK == 0 &
+                                   !is.na(cleaned$ShaotAvodaBederechKlalNK) &
+                                   cleaned$Employed == 1]
+  expect_gt(length(vals), 0)
+  expect_true(all(is.na(vals)))
+})
+
+test_that("WorkHoursCont: defined only for reference-week workers (population harmonization)", {
+  # The hours population is "employed AND worked the reference week", identically in every survey
+  # year. Without this gate 2017 would condition on having worked while 2018-2023 would not, which
+  # is differential selection on the Mother dimension (absentees are ~12% of employed mothers
+  # against ~7% of non-mothers).
+  absent <- cleaned$Employed == 1 & cleaned$AvadBeshavua != 1
+  expect_gt(sum(absent), 0)
+  expect_true(all(is.na(cleaned$WorkHoursCont[absent])))
+
+  # ... and non-missing hours occur nowhere else.
+  observed <- !is.na(cleaned$WorkHoursCont)
+  expect_true(all(cleaned$Employed[observed] == 1))
+  expect_true(all(cleaned$AvadBeshavua[observed] == 1))
 })
 
 test_that("WorkHoursCont: code 99 -> NA", {
@@ -110,6 +139,9 @@ test_that("WorkHoursCont's code-11 imputation differs by Post period when the su
       ShaotAvodaBederechKlalNK = ShaotAvodaBederechKlalNK, TeudaGvoha = 1,
       SemelEretzLeda = 10, DargatNayadut = 1, MishlachYad_ISCO_08_2 = "100",
       Leom = 1, MatzavMishpachti = 1, Dat = 1, MachozMegurim = 1, MisparHorimYechidim = 0,
+      # Worked the reference week: WorkHoursCont is gated on this, so these rows must set it or
+      # they would all come back NA and the imputation this test checks would never be exercised.
+      AvadBeshavua = 1,
       AvadMeHaBayit = NA, KamaShaot = NA, ShaotAvodaLeMaase = NA
     )
     for (col in range_boundary_cols) row[[col]] <- 0

@@ -4,6 +4,7 @@
 # employment averages for mothers vs. non-mothers, and work-mobility trends over
 # time (mothers of young children vs. others). Not used as regression input.
 library(tidyverse)
+source(file.path("scripts", "paper_theme.R"))
 
 run_comparative_stats <- function(cleaned_df) {
 
@@ -30,13 +31,16 @@ run_comparative_stats <- function(cleaned_df) {
   message("=== Employed (collapsed Y variable) breakdown ===")
   print(cleaned_df %>% count(Employed, name = "n") %>% mutate(pct = n / sum(n) * 100))
 
+  # Assigned rather than printed inline so it can be returned: this is the pooled hours summary
+  # the paper's descriptive section quotes, and it previously existed only in console scrollback.
   message("=== WorkHoursCont summary, among Employed == 1 ===")
-  print(cleaned_df %>% filter(Employed == 1) %>% summarise(
+  hours_summary <- cleaned_df %>% filter(Employed == 1) %>% summarise(
     n      = sum(!is.na(WorkHoursCont)),
     mean   = mean(WorkHoursCont, na.rm = TRUE),
     median = median(WorkHoursCont, na.rm = TRUE),
     sd     = sd(WorkHoursCont, na.rm = TRUE)
-  ))
+  )
+  print(hours_summary)
 
   # ── 3. Employment averages: mothers vs. non-mothers ────────────────────────
   message("=== Employment rate: mothers vs. non-mothers ===")
@@ -59,11 +63,15 @@ run_comparative_stats <- function(cleaned_df) {
 
   p_mobility <- ggplot(
     mobility_by_year,
-    aes(x = ShnatSeker, y = pct_outside, colour = MotherLabel, group = MotherLabel)
+    # group splits each series at the excluded 2020 survey year, so the line breaks there instead
+    # of drawing a straight segment across a year the analysis has no data for.
+    aes(x = ShnatSeker, y = pct_outside, colour = MotherLabel,
+        group = interaction(MotherLabel, ShnatSeker >= 2021))
   ) +
+    geom_vline(xintercept = 2020, linetype = "dotted", colour = PAPER_PALETTE$reference) +
     geom_line(linewidth = 0.9) +
     geom_point(size = 2.2) +
-    scale_colour_manual(values = c("Mothers" = "#D85A30", "Non-mothers" = "#378ADD")) +
+    scale_colour_manual(values = PAPER_PALETTE$mother_status) +
     scale_x_continuous(breaks = sort(unique(mobility_by_year$ShnatSeker))) +
     labs(
       title    = "Share working outside locality of residence, over time",
@@ -71,23 +79,21 @@ run_comparative_stats <- function(cleaned_df) {
       x        = "Survey year",
       y        = "% working outside residence locality",
       colour   = NULL,
-      caption  = "2020 excluded from the survey years analyzed."
+      caption  = paste(
+        "2020 excluded from the survey years analyzed; the dotted rule marks it and the lines",
+        "break there\nrather than interpolating across a year with no data."
+      )
     ) +
-    theme_minimal(base_size = 12) +
-    theme(
-      plot.title      = element_text(size = 13, face = "bold"),
-      plot.subtitle   = element_text(size = 10, colour = "grey40"),
-      legend.position = "top",
-      panel.grid.minor = element_blank()
-    )
+    theme_paper()
   # Interactive convenience only. Under a headless `Rscript main.R` this print() opens R's default
-  # device and leaks an Rplots.pdf into the repo root; this function runs at main.R:74, so it is
-  # the FIRST such leak in the pipeline. The plot reaches disk as a PNG via export_all_results()
+  # device and leaks an Rplots.pdf into the repo root; this function is the first plotting call in
+  # main.R, so it is the FIRST such leak in the pipeline. The plot reaches disk as a PNG via export_all_results()
   # regardless. Same guard as employment_by_child_age.R's three prints.
   if (interactive()) print(p_mobility)
 
   invisible(list(
     missing_pct       = missing_pct,
+    hours_summary     = hours_summary,
     emp_by_mother     = emp_by_mother,
     mobility_by_year  = mobility_by_year,
     plots             = list(mobility = p_mobility)

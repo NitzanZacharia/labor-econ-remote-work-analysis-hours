@@ -9,8 +9,8 @@
 # rejected for the extensive margin specifically because occupation is undefined for the
 # non-employed, and Employed (the extensive DDD's own outcome) would then be conditioned on itself
 # (docs/decisions/exposure-cell-granularity-fix.md). WorkHoursCont is already, by construction,
-# undefined for anyone with Employed != 1 (data_processing.R:184-193) -- conditioning the hours
-# regression on employment is baked into the question itself, not introduced by this exposure
+# undefined for anyone with Employed != 1 (data_processing.R's WorkHoursCont derivation) --
+# conditioning the hours regression on employment is baked into the question itself, not introduced by this exposure
 # choice. Dropping non-employed rows still introduces a real selection-on-a-mediator problem for
 # the hours estimate (if WFH differentially pulls marginal mothers into employment, the post-period
 # employed-mother sample isn't compositionally comparable to the pre-period one) -- that's bounded

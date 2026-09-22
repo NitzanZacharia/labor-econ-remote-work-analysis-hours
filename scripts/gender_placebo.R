@@ -1,4 +1,3 @@
-#gender_placebo
 # Checkpoint 5 (docs/ROADMAP.md): the Gender Placebo Test from the research doc (Part 2 §3 /
 # Part 4 §5) -- replicates the primary DiD model on men (fathers vs. childless men) instead of
 # women, to test whether the observed effect is specifically a *motherhood* penalty rather than a
@@ -9,9 +8,10 @@
 # Extended for the DDD placebo (Mother*Post*WFH_Exposure): the two-way basic_reg() placebo above
 # tests whether *any* Mother:Post effect exists for men; it says nothing about whether men's
 # employment response also happens to track occupational WFH exposure, which is what the primary
-# DDD (main.R:149-159) actually claims. WFH_Exposure itself is occupation-level, not sex-specific,
-# so the same calibrated occupation scores (exposure_calibrated, built from WOMEN's realized
-# 2022-23 WFH -- see wfh_exposure_cells.R) are reused unchanged as the measurement instrument; only
+# DDD (main.R's ddd_employment_additive / ddd_employment_fe) actually claims. WFH_Exposure itself
+# is occupation-level, not sex-specific, so the same calibrated occupation scores
+# (exposure_calibrated, built from WOMEN's realized 2022-23 WFH -- see wfh_exposure_cells.R) are
+# reused unchanged as the measurement instrument; only
 # the cell shift-share weights are rebuilt on men's own pre-period (2017-2019) occupation
 # composition, via build_exposure_cells(cleaned_men, ...). This holds "how exposed is this
 # occupation" fixed and swaps only the population being tested, which is what a placebo requires.
@@ -21,10 +21,12 @@ source(file.path("scripts", "data_processing.R"))
 source(file.path("scripts", "validation.R"))
 source(file.path("scripts", "basic_regression.R"))
 source(file.path("scripts", "wfh_exposure_cells.R"))
+source(file.path("scripts", "placebo_male_frame.R"))
 
 # Pure function: fits the DDD placebo (both the additive and interacted-cell-FE specs from
-# main.R:149-159) on an already-cleaned male subsample plus an already-built occupation-level
-# calibrated exposure table. Split out from run_gender_placebo() so it can be unit-tested directly
+# main.R's ddd_employment_additive / ddd_employment_fe) on an already-cleaned male subsample plus
+# an already-built occupation-level calibrated exposure table. Split out from
+# run_gender_placebo() so it can be unit-tested directly
 # against a purpose-built synthetic panel (see test-gender_placebo.R), independent of the real CSV
 # read and of load_and_clean_data()'s file-based fixtures, which are sized for schema/parsing
 # tests, not for a fully-saturated triple-interaction formula to be identified.
@@ -102,62 +104,24 @@ run_gender_ddd_placebo <- function(cleaned_men, exposure_calibrated, controls = 
 run_gender_placebo <- function(folder_path, cleaned_men = NULL, cleaned_women = NULL,
                                 exposure_calibrated = NULL,
                                 exposure_csv_path = file.path("data", "israeli_cbs_wfh_2digit.csv")) {
-  # cleaned_men is accepted rather than always reloaded, mirroring run_hours_gender_placebo(): once
-  # main.R calls this in the default pipeline it already holds a cleaned male frame (built for the
-  # exposure population), and reloading it from the raw CSVs would repeat the single most expensive
-  # step in the run for no gain. Passing NULL keeps the old standalone behaviour.
-  if (is.null(cleaned_men)) {
-    message("Loading data for men (sex_filter = 'men')...")
-    cleaned_men <- load_and_clean_data(folder_path, sex_filter = "men")
-
-    message("Validating cleaned data (male subsample)...")
-    validate_cleaned_df(cleaned_men, sex_filter = "men")
-  }
-
-  # Human gate (docs/AUTONOMOUS_RUN_PLAN.md Checkpoint 5): report category sizes only -- a
-  # category that's sparse for women (e.g. single-father counts in MisparHorimYechidim) may be
-  # near-empty for men. Whether a sparse category needs collapsing is a modeling decision for the
-  # researchers, not something this function decides unilaterally.
-  message("=== Regression control category sizes, male subsample (report only) ===")
-  for (col in DEFAULT_CONTROLS) {
-    message("--- ", col, " ---")
-    print(table(cleaned_men[[col]], useNA = "ifany"))
-  }
+  inputs <- prepare_placebo_male_inputs(
+    folder_path,
+    cleaned_men         = cleaned_men,
+    cleaned_women       = cleaned_women,
+    exposure_calibrated = exposure_calibrated,
+    exposure_csv_path   = exposure_csv_path,
+    caller              = "run_gender_placebo"
+  )
+  cleaned_men         <- inputs$cleaned_men
+  exposure_calibrated <- inputs$exposure_calibrated
 
   message("Running basic_reg() on the male subsample ('Mother' column read as 'has children <17' ",
           "-- i.e. Father, for this population)...")
   result_basic <- basic_reg(cleaned_men)
 
   # ── DDD placebo: Employed ~ Mother*Post*WFH_Exposure + controls, male subsample ─────────────
-  # exposure_calibrated is an occupation-level attribute, not a sex-specific one -- if the caller
-  # already has one (e.g. main.R's own exposure_calibrated), pass it in directly to avoid
-  # recomputing it. Otherwise build it here from cleaned_women (cached RDS if present, else a
-  # fresh load) + the external CSV; if neither is available, skip the DDD placebo entirely rather
-  # than erroring, so this function's original (Checkpoint 5) contract -- always returns
-  # cleaned_men/result -- still holds unconditionally.
-  if (is.null(exposure_calibrated)) {
-    if (!file.exists(exposure_csv_path)) {
-      message("run_gender_placebo: no exposure_calibrated supplied and '", exposure_csv_path,
-              "' not found from the current working directory -- skipping the DDD placebo. Pass ",
-              "exposure_calibrated directly (e.g. main.R's own exposure_calibrated) or set ",
-              "exposure_csv_path if running from somewhere other than the project root.")
-    } else {
-      if (is.null(cleaned_women)) {
-        women_rds <- file.path(folder_path, "cleaned_df.rds")
-        if (file.exists(women_rds)) {
-          message("Loading cached women's data (for the occupation-level calibrated exposure score)...")
-          cleaned_women <- readRDS(women_rds)
-        } else {
-          message("No cached women's data found -- loading and cleaning it (sex_filter = 'women')...")
-          cleaned_women <- load_and_clean_data(folder_path, sex_filter = "women")
-        }
-      }
-      message("Building occupation-level calibrated WFH exposure (from women's realized 2022-23 WFH)...")
-      exposure_external   <- build_exposure_isco2(path = exposure_csv_path)
-      exposure_calibrated <- calibrate_isco_exposure(cleaned_women, exposure_external)
-    }
-  }
-
+  # Skipped rather than errored when no exposure table could be built, so this function's original
+  # (Checkpoint 5) contract -- always returns cleaned_men/result -- still holds unconditionally.
   ddd_placebo <- NULL
   if (!is.null(exposure_calibrated)) {
     message("Running DDD placebo (Employed ~ Mother*Post*WFH_Exposure + controls), male subsample...")

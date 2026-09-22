@@ -28,7 +28,9 @@
 # ── The bound construction, generalized from intensive_margin_lee_bounds.R ─────────────────────
 # For each quartile q of the cell-based WFH_Exposure (computed on the FULL cell-matched sample,
 # employed and non-employed alike):
-#   s_ab(q) = P(Employed==1 | Mother==a, Post==b, WFH_Exposure_Q==q)     for a,b in {0,1}
+#   s_ab(q) = P(hours observed | Mother==a, Post==b, WFH_Exposure_Q==q)  for a,b in {0,1}
+#             (employed AND worked the reference week -- the estimation sample, not the employed;
+#              see docs/decisions/hours-population-harmonization.md)
 #   s11_counterfactual(q) = s10(q) + (s01(q) - s00(q))
 # If s11(q) exceeds this counterfactual, trim_prop(q) = 1 - s11_counterfactual(q)/s11(q) is trimmed
 # from that quartile's own Mother==1 & Post==1 slice of the EMPLOYED, occupation-matched sample
@@ -76,14 +78,19 @@ run_hours_ddd_lee_bounds <- function(cleaned_df, exposure_index, exposure_cells,
 
   quartiles <- sort(unique(full_df$WFH_Exposure_Q))
 
+  # Share whose OUTCOME IS OBSERVED, not share employed -- same reasoning as the identical change in
+  # intensive_margin_lee_bounds.R: the hours population is reference-week workers, so deriving the
+  # trim proportion from the employment rate would apply it to a different denominator than the one
+  # it was computed on.
   get_rate <- function(m, p, q) {
-    sub <- full_df$Employed[full_df$Mother == m & full_df$Post == p & full_df$WFH_Exposure_Q == q]
+    sub <- full_df$WorkHoursCont[full_df$Mother == m & full_df$Post == p &
+                                   full_df$WFH_Exposure_Q == q]
     if (length(sub) == 0) {
       stop("run_hours_ddd_lee_bounds: no rows found for Mother == ", m, ", Post == ", p,
            ", WFH_Exposure_Q == ", q, " -- all four (Mother, Post) cells must be present in ",
            "every quartile to compute the selection counterfactual.")
     }
-    mean(sub == 1)
+    mean(!is.na(sub))
   }
 
   quartile_diag <- map_dfr(quartiles, function(q) {
@@ -97,7 +104,7 @@ run_hours_ddd_lee_bounds <- function(cleaned_df, exposure_index, exposure_cells,
            excess_selection = excess, trim_prop = trim_prop)
   })
 
-  message("run_hours_ddd_lee_bounds: selection (employment) rates and trim proportions by WFH_Exposure quartile:")
+  message("run_hours_ddd_lee_bounds: selection (observed-hours) rates and trim proportions by WFH_Exposure quartile:")
   print(as.data.frame(quartile_diag), digits = 4)
 
   thin <- filter(quartile_diag, n_mother1_post1 < MIN_CELL_WARN)
@@ -110,8 +117,13 @@ run_hours_ddd_lee_bounds <- function(cleaned_df, exposure_index, exposure_cells,
 
   # Employed, occupation-matched sample (mirrors hours_ddd_regression.R's join), carrying forward
   # each row's cell-based WFH_Exposure_Q from full_df.
+  # !is.na(WorkHoursCont) restricts to the ESTIMATION sample. Same reason as the identical filter
+  # in intensive_margin_lee_bounds.R: after the hours population was harmonized to reference-week
+  # workers (docs/decisions/hours-population-harmonization.md) the Mother==1,Post==1 cells carry
+  # ~12% NA-hours rows, and arrange() sorts NA last -- so the per-quartile lower bound would trim
+  # unobserved rows rather than the highest-hours ones, on an inflated n_cell_q denominator.
   employed_df <- full_df %>%
-    filter(Employed == 1) %>%
+    filter(Employed == 1, !is.na(WorkHoursCont)) %>%
     inner_join(
       exposure_index %>% select(MishlachYad_ISCO_08_2 = occupation_code, WFH_Exposure = wfh_exposure),
       by = "MishlachYad_ISCO_08_2"

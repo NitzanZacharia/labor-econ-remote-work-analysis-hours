@@ -3,7 +3,7 @@
 # a black box through intensive_margin_lee_bounds.R and hours_ddd_lee_bounds.R, and even then only
 # the delta == 0 ("no excess selection") branch is asserted anywhere (c_alpha == qnorm(0.975)).
 # This file closes that gap directly: the delta > 0 branch's actual c_alpha/CI values, and the
-# denom <= 0 / non-finite-denominator fallback branch (imbens_manski_ci.R:16-19), neither of which
+# denom <= 0 / non-finite-denominator fallback branch (its early-return guard), neither of which
 # is exercised by any other test in this suite.
 
 test_that("delta == 0 (no excess selection) collapses to the ordinary +-z*se interval", {

@@ -1,8 +1,8 @@
 # balance_test.R
 # Phase 1b: pre-period covariate balance between Mother==1 and Mother==0, checked separately
-# within WFH_Exposure quartiles (built the same way as the primary DDD's cell-based exposure,
-# main.R:120-128), restricted to the pre-period (ShnatSeker < 2020, i.e. 2017-2019 -- 2020 itself
-# is never in the sample). A straightforward covariate-balance table, not a new modeling
+# within WFH_Exposure quartiles (built the same way as the secondary/employment DDD's cell-based
+# exposure -- main.R's exposure_cells construction), restricted to the pre-period
+# (ShnatSeker < 2020, i.e. 2017-2019 -- 2020 itself is never in the sample). A straightforward covariate-balance table, not a new modeling
 # framework: GilNK is treated as an ordinal numeric code (mean + Welch t-test by Mother, per
 # quartile); the remaining DEFAULT_CONTROLS (MatzavMishpachti, Dat, MachozMegurim, TeudaGvoha) are
 # nominal factors, so "mean" isn't meaningful -- each is reported as a %-distribution by Mother,

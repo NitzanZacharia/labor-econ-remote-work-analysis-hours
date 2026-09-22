@@ -100,7 +100,7 @@ calibrate_isco_exposure <- function(cleaned_df, exposure_isco2, wfh_col = "WFH",
 }
 
 # Build shift-share exposure by demographic cells based on pre-crisis years (2017-2019)
-build_exposure_cells <- function(raw_all, exposure_isco2, 
+build_exposure_cells <- function(raw_all, exposure_isco2,
                                  cell_vars = c("Min", "GilNK", "TeudaGvoha", "MachozMegurim")) {
   raw_all %>%
     filter(ShnatSeker %in% 2017:2019, Muasak == 1, !is.na(MishlachYad_ISCO_08_2)) %>%

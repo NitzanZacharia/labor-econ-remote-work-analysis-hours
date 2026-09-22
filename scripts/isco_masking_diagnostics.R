@@ -57,8 +57,8 @@ check_isco_masking_sensitivity <- function(cleaned_df, wfh_col = "WFH", ref_year
   # is constant on ISCO_masked and contributes nothing (correctly absorbed by its own FE, not an
   # error). But feols refuses to fit at all on fewer than 2 total rows (a real possibility on a
   # small/thin ref_year x Employed x !is.na(ISCO1) x !is.na(wfh_col) slice) -- the same class of
-  # "too little data to compute anything" case calibrate_isco_exposure() already guards for, so it
-  #'s handled the same way here: skip the fit, report why, and let the descriptive comparison
+  # "too little data to compute anything" case calibrate_isco_exposure() already guards for, so
+  # it's handled the same way here: skip the fit, report why, and let the descriptive comparison
   # above stand on its own.
   reg <- NULL
   if (nrow(df) < 2) {

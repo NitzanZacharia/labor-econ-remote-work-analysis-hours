@@ -2,7 +2,7 @@
 # Generates the two synthetic fixture CSVs (sample_2019_Data.csv, sample_2021_Data.csv) used by
 # the test suite. 100% synthetic, invented values — no real CBS microdata. Only the columns
 # load_and_clean_data() actually references (by name, in filters/mutates/factor-conversion) or
-# needs as boundary markers for its 7 positional range-drops are included; everything else in the
+# needs as boundary markers for its column-drops are included; everything else in the
 # real raw CSVs is irrelevant to what these tests check. Re-run this script (`Rscript
 # tests/testthat/fixtures/generate_fixtures.R` from the repo root) to regenerate the CSVs if this
 # spec ever changes — the row-by-row plan here is also mirrored (by IDPUF) in
@@ -11,9 +11,13 @@ library(tidyverse)
 
 # ── Column order ─────────────────────────────────────────────────────────────
 # Columns 1-19: everything load_and_clean_data() reads/uses by name.
-# Columns 20-33: 7 adjacent boundary-column pairs, one pair per positional range-drop in
-# data_processing.R (-(a:b)). Adjacent placement means each range drops exactly its 2 boundary
+# Columns 20-33: 7 adjacent boundary-column pairs. Five correspond to the positional range-drops
+# in data_processing.R (-(a:b)); adjacent placement means each range drops exactly its 2 boundary
 # columns and nothing else, so none of columns 1-19 can accidentally get caught in a range.
+# The remaining two pairs (EizeChozemechushav/ChodeshKodemShaa, MimaHaMigbala/PniyaLmaasik) are
+# no longer positional -- they moved to name-based any_of() drops (data_processing.R:258-272)
+# because 2017_Data.csv lacks them entirely. They are kept here so the fixtures still exercise
+# that drop path.
 range_boundary_cols <- c(
   "Yeladim0_1Prat", "Yeladim15_17Prat",
   "MisparHachlafa", "YachasKirvaNK",
@@ -42,7 +46,7 @@ make_row <- function(IDPUF, ShnatSeker, Min, GilNK, MisparYeladimAd17MB, GilYele
                       SemelEretzLeda, DargatNayadut, MishlachYad_ISCO_08_2, MachozYishuvAvoda,
                       Leom, MatzavMishpachti, Dat, MachozMegurim, MisparHorimYechidim,
                       AvadMeHaBayit = NA, KamaShaot = NA, ShaotAvodaLeMaase = NA,
-                      MishkalSofi = 1) {
+                      MishkalSofi = 1, AvadBeshavua = 1) {
   row <- tibble(
     IDPUF = IDPUF, ShnatSeker = ShnatSeker, Min = Min, GilNK = GilNK,
     MisparYeladimAd17MB = MisparYeladimAd17MB, GilYeledTzairMBNK = GilYeledTzairMBNK,
@@ -53,6 +57,11 @@ make_row <- function(IDPUF, ShnatSeker, Min, GilNK, MisparYeladimAd17MB, GilYele
     MachozYishuvAvoda = MachozYishuvAvoda,
     Leom = Leom, MatzavMishpachti = MatzavMishpachti, Dat = Dat, MachozMegurim = MachozMegurim,
     MisparHorimYechidim = MisparHorimYechidim,
+    # Worked in the reference week (1) vs employed but absent (4). Gates WorkHoursCont in
+    # data_processing.R: the hours population is "employed AND worked the reference week",
+    # identically in every survey year (docs/decisions/hours-population-harmonization.md).
+    # Defaults to 1 so only the rows deliberately exercising the absentee branch spell it out.
+    AvadBeshavua = AvadBeshavua,
     AvadMeHaBayit = AvadMeHaBayit, KamaShaot = KamaShaot,
     ShaotAvodaLeMaase = ShaotAvodaLeMaase,
     # CBS's own final survey design weight. load_and_clean_data() doesn't reference it by name
@@ -75,8 +84,9 @@ make_row <- function(IDPUF, ShnatSeker, Min, GilNK, MisparYeladimAd17MB, GilYele
 # DargatNayadut (0-8), Muasak (1/2/NA), Leom (1/2/3) — plus 3 rows designed to be filtered out
 # (Min!=2, GilNK out of 3:7 range).
 fixture_2019 <- bind_rows(
+  # bin 0 + absent: the real 2017 pattern (every 2017 employed bin-0 row is AvadBeshavua==4).
   make_row(2019001, 2019, 2, 3, 0, 0, 1, NA, 0, 0, 10, 1, 100, 1, 1, 1, 1, 1, 0,
-            ShaotAvodaLeMaase = 40),
+            ShaotAvodaLeMaase = 40, AvadBeshavua = 4),
   make_row(2019002, 2019, 2, 4, 1, 1, 2, NA, 1, 1, 1, 2, 101, 2, 2, 2, 2, 2, 1),
   make_row(2019003, 2019, 2, 5, 0, 0, NA, NA, 2, 2, 2, 3, 102, 3, 3, 3, 3, 3, 0),
   make_row(2019004, 2019, 2, 6, 2, 2, 1, NA, 3, 3, 3, 4, 103, 4, 1, 4, 4, 4, 2),
@@ -90,7 +100,10 @@ fixture_2019 <- bind_rows(
   make_row(2019012, 2019, 2, 4, 1, 5, 1, NA, 11, 0, 12, 3, 111, 5, 1, 2, 2, 5, 1),
   make_row(2019013, 2019, 2, 5, 0, 0, 1, NA, 12, 1, 13, 4, 112, 6, 1, 3, 3, 6, 0),
   make_row(2019014, 2019, 2, 6, 1, 1, 1, NA, 99, 2, 14, 5, 113, 7, 1, 4, 4, 7, 1),
-  make_row(2019015, 2019, 2, 7, 0, 0, 1, NA, 0, 3, 15, 6, 114, 1, 1, 5, 5, 1, 0),
+  make_row(2019015, 2019, 2, 7, 0, 0, 1, NA, 0, 3, 15, 6, 114, 1, 1, 5, 5, 1, 0,
+            AvadBeshavua = 4),
+  # bin 0 but DID work the reference week -- the case the defensive bin-0 branch in
+  # data_processing.R exists for; without it this row would be handed a literal 0.
   make_row(2019016, 2019, 2, 3, 1, 2, 1, NA, 0, 4, 16, 7, "XX", 2, 1, 1, 1, 2, 1,
             ShaotAvodaLeMaase = 35),
   # filtered out: wrong sex
@@ -108,6 +121,19 @@ fixture_2019 <- bind_rows(
   # derivation edge-case purpose).
   make_row(2019020, 2019, 2, 4, 0, 0, 1, NA, 1, 1, 1, 1, 120, 1, 1, 1, 1, 1, 0),
   make_row(2019021, 2019, 2, 5, 0, 0, 1, NA, 2, 2, 2, 2, 121, 2, 1, 2, 2, 2, 0),
+  # Employed, absent from the reference week, but carrying a NORMAL hours code (8, not 0). Exercises
+  # the AvadBeshavua gate on its own, independently of the bin-0 branch -- without this row the two
+  # are indistinguishable, since every other absentee fixture row is also bin 0.
+  #
+  # Code 8 specifically: this row is Employed==1 with a code in 6:10, so it joins the code-12
+  # imputation donor pool (data_processing.R's median over .hour_bin_val, which is computed from the
+  # raw code and so is NOT affected by the AvadBeshavua gate). The pool is currently one row each at
+  # codes 6/7/8/9/10 -> 37, 42, 47, 54.5, 78.5, median 47. Adding a second 47 keeps the median at
+  # exactly 47, so the pinned expectation in test-data_processing.R is preserved. Any other code
+  # would shift it. 2019009 remains the employed exemplar for code 8 in the "bins map to median"
+  # loop, since that loop now filters on AvadBeshavua == 1.
+  make_row(2019022, 2019, 2, 6, 0, 0, 1, NA, 8, 5, 3, 3, 122, 3, 1, 3, 3, 3, 0,
+            AvadBeshavua = 4),
   # Checkpoint 5 (Gender Placebo Test): Min==1 (men) rows. Invisible to every existing test that
   # calls load_and_clean_data(fixtures_dir) with the default sex_filter="women" (excluded by the
   # same Min filter that already excludes IDPUF 2019017 above) -- only surfaced when

@@ -1,4 +1,3 @@
-#export_results
 # Checkpoint 9 (docs/ROADMAP.md): persisted output layer so the research doc's "drafting findings"
 # step (Part 1 §VI) has something to work from besides console scrollback. Every existing analysis
 # function already returns invisible(list(...)) -- this walks whatever heterogeneous structure is

@@ -1,5 +1,5 @@
 # test-pipeline_smoke.R
-# Priority 4 / TESTING_BLUEPRINT.md §4: main.R can't be unit-tested directly (it's a script, not a
+# Integration smoke test: main.R can't be unit-tested directly (it's a script, not a
 # function -- rm(list=ls()), a hardcoded path, saveRDS/readRDS caching). This mirrors its actual
 # sequence against the fixtures instead: load -> comparative stats -> pooled regression ->
 # Jewish/Arab stratified regressions -> child-age descriptives -> diagnostics.
@@ -83,8 +83,8 @@ test_that("the WFH-exposure + secondary (employment) DDD pipeline (main.R's sect
   exposure_realized <- build_wfh_exposure_index(cleaned, ref_year = 2021, min_n = 0)
   expect_gt(nrow(exposure_realized), 0)
 
-  # Mirror main.R's ACTUAL exposure-cell definition (main.R:219-225), not build_exposure_cells()'s
-  # 4-variable default. Those are not the same design: with the default, the exposure cells are
+  # Mirror main.R's ACTUAL exposure-cell definition (its exposure_cell_vars), not
+  # build_exposure_cells()'s 4-variable default. Those are not the same design: with the default, the exposure cells are
   # built from exactly the variables that also serve as the regression's fixed effects, which is
   # the aliased specification whose MDE was ~51% of baseline and which the granularity fix
   # deliberately abandoned (docs/decisions/exposure-cell-granularity-fix.md). A smoke test that
@@ -159,7 +159,7 @@ test_that("the primary (hours) DDD pipeline (main.R's section 8a) runs end-to-en
   out <- capture.output(exposure_calibrated <- suppressWarnings(
     calibrate_isco_exposure(cleaned, exposure_external)
   ))
-  # Same 7-variable partition main.R uses (main.R:219-225), not the 4-variable default -- these
+  # Same 7-variable partition main.R uses (its exposure_cell_vars), not the 4-variable default -- these
   # cells stratify the Lee-bounds selection counterfactual below, so the definition matters here
   # too. See the longer note in the §8b smoke test above.
   exposure_cells <- build_exposure_cells(
@@ -200,4 +200,33 @@ test_that("the primary (hours) DDD pipeline (main.R's section 8a) runs end-to-en
   )
   expect_true(is.null(hours_lee_bounds) ||
                 nrow(hours_lee_bounds$diagnostics$quartile_selection_rates) > 0)
+
+  # ── main.R §8e: the descriptive figure set ──────────────────────────────────────────────────
+  # Mirrored here so this file keeps tracking main.R's real sequence. Correctness of each builder
+  # lives in its own test file; what is checked here is that they compose against pipeline-shaped
+  # inputs -- in particular that hours_descriptives accepts run_hours_diagnostics()' own frame,
+  # which is the contract keeping the figure and its CSV in agreement.
+  out <- capture.output(hours_diag <- suppressWarnings(run_hours_diagnostics(cleaned)))
+  out <- capture.output(hours_descriptives <- build_hours_descriptive_plots(
+    cleaned, hours_by_period = hours_diag$hours_by_period
+  ))
+  expect_s3_class(hours_descriptives$plots$period_2x2, "ggplot")
+  expect_s3_class(hours_descriptives$plots$by_year, "ggplot")
+  expect_equal(
+    dplyr::arrange(hours_descriptives$hours_by_period, Mother, Post)$mean_hours,
+    dplyr::arrange(hours_diag$hours_by_period, Mother, Post)$mean_hours
+  )
+
+  # Same quartile-degeneracy caveat as the Lee-bounds call above: the fixtures are unlikely to
+  # support four non-empty exposure bins, so a clean failure is tolerated.
+  dose <- tryCatch(
+    suppressWarnings(build_hours_dose_response(cleaned, exposure_index)),
+    error = function(e) NULL
+  )
+  expect_true(is.null(dose) || inherits(dose$plot, "ggplot"))
+
+  if (!is.null(hours_ddd)) {
+    mech <- build_mechanism_scatter(hours_ddd$mechanism_data, fit = hours_ddd$models$mechanism)
+    expect_true(is.null(mech) || inherits(mech$plot, "ggplot"))
+  }
 })

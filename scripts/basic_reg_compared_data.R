@@ -1,12 +1,10 @@
-#basic_regression_compared_data
 # Secondary/extensive-margin (Employed) outcome, post-hours-pivot (docs/decisions/hours-ddd-pivot.md).
 library(tidyverse)
 library(fixest)
 source(file.path("scripts", "data_processing.R"))
 
 basic_reg_comp <- function(cleaned_data) {
-  
-  # ──  Define control variables ──────────────────────────────────────────────
+
   controls <- DEFAULT_CONTROLS
 
   rhs <- paste(
@@ -14,18 +12,15 @@ basic_reg_comp <- function(cleaned_data) {
     paste(controls, collapse = " + "),
     sep = " + "
   )
-  
+
   formula_employed <- as.formula(paste("Employed ~", rhs))
-  
-  # ──  Run on full sample (includes imputed Employed) ────────────────────────
+
   reg_employed <- feols(formula_employed, data = cleaned_data, cluster = ~IDPUF)
-  
-  # ──  Run on Muasak-observed only (robustness check) ───────────────────────
-  reg_employed_muasak <- feols(formula_employed, 
-                               data = filter(cleaned_data, !is.na(Muasak)), 
+
+  reg_employed_muasak <- feols(formula_employed,
+                               data = filter(cleaned_data, !is.na(Muasak)),
                                cluster = ~IDPUF)
-  
-  # ──  Display side-by-side ──────────────────────────────────────────────────
+
   table_basic <- etable(
     reg_employed,
     reg_employed_muasak,
@@ -33,7 +28,7 @@ basic_reg_comp <- function(cleaned_data) {
     digits   = 4
   )
   print(table_basic)
-  
+
   return(invisible(list(
     table  = table_basic,
     models = list(
