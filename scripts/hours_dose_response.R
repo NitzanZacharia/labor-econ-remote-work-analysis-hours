@@ -86,7 +86,12 @@ build_hours_dose_response <- function(cleaned_df, exposure_index,
     group_by(WFH_Exposure_Q) %>%
     group_modify(~ {
       fit <- clustered_se(.x, WorkHoursCont ~ Mother * Post, "Mother:Post")
-      tibble(did = fit$estimate, se = fit$se, n = fit$n)
+      # mean_exposure: the quartile's average regressor value on the estimation rows, so the DDD's
+      # per-unit coefficient can be turned into an implied top-minus-bottom-quartile effect
+      # (coef x (mean_Q4 - mean_Q1)) and set beside the raw per-quartile DiD -- the paper's one
+      # functional-form check on the linear-in-exposure specification.
+      tibble(did = fit$estimate, se = fit$se, n = fit$n,
+             mean_exposure = mean(.x$WFH_Exposure, na.rm = TRUE))
     }) %>%
     ungroup()
 
@@ -97,6 +102,7 @@ build_hours_dose_response <- function(cleaned_df, exposure_index,
       # ride along as names on these columns.
       q_low  = unname(breaks)[WFH_Exposure_Q],
       q_high = unname(breaks)[WFH_Exposure_Q + 1],
+      mean_exposure,
       did, se, n
     ) %>%
     mutate(

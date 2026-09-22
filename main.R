@@ -37,6 +37,11 @@ source(file.path("scripts", "hours_subgroup_comparison.R"))
 source(file.path("scripts", "paper_theme.R"))
 source(file.path("scripts", "hours_descriptive_plots.R"))
 source(file.path("scripts", "hours_dose_response.R"))
+# Two descriptives added by the 2026-09-22 editorial audit (paper/notes/editorial-audit-2026-09-22.md,
+# items B2 and I1): the Israeli realized-WFH share by year, and the reference-week absence share by
+# exposure quartile.
+source(file.path("scripts", "wfh_share_by_year.R"))
+source(file.path("scripts", "absence_by_exposure_quartile.R"))
 source(file.path("scripts", "build_mechanism_scatter.R"))
 source(file.path("scripts", "build_event_study_plot.R"))
 
@@ -320,6 +325,42 @@ hours_ddd_external <- run_hours_ddd_regression(
 message("Running primary DDD robustness variant (hours, realized Israeli index, 2021 anchor)...")
 hours_ddd_realized <- run_hours_ddd_regression(cleaned_df, exposure_realized)
 
+# Three further sensitivity rows for the paper's robustness table, added by the 2026-09-22
+# editorial audit (paper/notes/editorial-audit-2026-09-22.md, items G6, I5 and F3). None needs a
+# new function: run_hours_ddd_regression() is generic over its data frame and its exposure index.
+#
+# (G6) Unswapped occupations only. calibrate_isco_exposure() swaps 10 of 40 occupations to their
+# realized 2022-23 share, which sits inside the post-period; on the 30 it leaves alone the
+# calibrated and external scores coincide by construction, so a triple interaction that survives
+# here is not manufactured by the post-period calibration. The inner_join inside the function
+# drops the swapped occupations' rows, leaving 30 clusters.
+message("Running primary DDD robustness variant (hours, unswapped occupations only)...")
+hours_ddd_unswapped <- run_hours_ddd_regression(
+  cleaned_df,
+  exposure_calibrated %>%
+    filter(!swap) %>%
+    select(occupation_code = ISCO2, wfh_exposure = wfh_exposure_calibrated)
+)
+
+# (I5) Excluding the 2023 survey year, whose fourth quarter includes the start of the October 2023
+# war. 2023 carries the largest coefficient in both event studies; this row shows what the estimate
+# looks like without it. A whole-year exclusion rather than Q4 only, because the survey-month field
+# is dropped at cleaning and retaining it would change the cleaned schema.
+message("Running primary DiD and DDD excluding the 2023 survey year...")
+intensive_ex2023 <- run_intensive_margin_reg(filter(cleaned_df, ShnatSeker != 2023))
+hours_ddd_ex2023 <- run_hours_ddd_regression(filter(cleaned_df, ShnatSeker != 2023),
+                                             hours_exposure_index)
+
+# (F3) Two-way clustering, individual and occupation, on the primary fit. A re-summary of the
+# existing model rather than a refit: the point estimates are unchanged by construction and only
+# the standard errors move.
+message("Re-summarising the primary hours DDD with two-way (individual + occupation) clustering...")
+hours_ddd_twoway_table <- etable(
+  summary(hours_ddd$model, cluster = ~IDPUF + MishlachYad_ISCO_08_2),
+  headers = c("Hours DDD, two-way clustered"), digits = 4
+)
+print(hours_ddd_twoway_table)
+
 # ── Hours subgroup comparisons (demographic heterogeneity) ────────────────────────────────────
 # Two independent checks for the now-primary hours DiD/DDD, mirroring coverage that already
 # existed for the (now-secondary) employment outcome (basic_reg_jewish/basic_reg_arab, section 5
@@ -547,6 +588,18 @@ hours_descriptives <- build_hours_descriptive_plots(
 # the demographic-cell index. The two are on different scales and must never be mixed.
 hours_dose_response <- build_hours_dose_response(cleaned_df, hours_exposure_index)
 
+# Israeli realized-WFH share among employed women by year (post-period only: the CBS items begin in
+# 2021), for the Introduction's comparison with the US workday shares. Audit item B2.
+wfh_share_by_year <- build_wfh_share_by_year(cleaned_df)
+print(as.data.frame(wfh_share_by_year))
+
+# Reference-week absence share by exposure quartile, on the same quartile edges as Figure 2, for
+# the Limitations paragraph on the narrowed hours estimand. Audit item I1.
+absence_by_exposure_quartile <- build_absence_by_exposure_quartile(
+  cleaned_df, hours_exposure_index, breaks = hours_dose_response$breaks
+)
+print(as.data.frame(absence_by_exposure_quartile$by_quartile))
+
 # Repo-level diagnostic only. results_digest.md §1.5 records a 2026-09-15 decision that the
 # second-stage mechanism regression is out of scope for the paper's results, and that stands --
 # this figure is deliberately absent from the paper_figures list below. What it does close is the
@@ -616,6 +669,16 @@ results_to_export <- list(
   hours_lee_bounds_n_trimmed = hours_lee_bounds$diagnostics$n_trimmed_by_quartile,
   ddd_hours_external = hours_ddd_external$table,
   ddd_hours_realized = hours_ddd_realized$table,
+  # 2026-09-22 editorial-audit additions (all aggregate: etable views or a handful of cells).
+  ddd_hours_unswapped      = hours_ddd_unswapped$table,
+  ddd_hours_ex2023         = hours_ddd_ex2023$table,
+  intensive_margin_ex2023  = intensive_ex2023$table,
+  ddd_hours_twoway_cluster = hours_ddd_twoway_table,
+  wfh_share_by_year        = wfh_share_by_year,
+  absence_by_exposure_quartile = list(
+    by_quartile = absence_by_exposure_quartile$by_quartile,
+    by_cell     = absence_by_exposure_quartile$by_cell
+  ),
   intensive_margin_jewish_table   = intensive_jewish$table,
   intensive_margin_arab_table     = intensive_arab$table,
   ddd_hours_jewish_table          = hours_ddd_jewish$table,

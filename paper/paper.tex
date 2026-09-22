@@ -1,7 +1,14 @@
 % paper.tex -- seminar paper draft.
-% EDITORIAL PASS 2026-09-22 (paper/notes/editorial-audit-2026-09-22.md, section M step 1): text-only
-% edits. No number was recomputed; every figure below carries the provenance stated in the next
-% block. Items that need a pipeline run are left as "% TODO(<audit item>)" comments in place.
+% EDITORIAL PASS 2026-09-22 (paper/notes/editorial-audit-2026-09-22.md, section M). Step 1 was
+% text-only. Step 2 added six artifacts from a full pipeline re-run the same day, all in outputs/:
+%   - ddd_hours_unswapped.csv (DDD on the 30 unswapped occupations), ddd_hours_ex2023.csv and
+%     intensive_margin_ex2023.csv (DDD and DiD without 2023), ddd_hours_twoway_cluster.csv;
+%   - wfh_share_by_year.csv (Israeli realized-WFH shares, Introduction);
+%   - absence_by_exposure_quartile_{by_quartile,by_cell}.csv (Limitations footnote);
+%   - hours_dose_response_data.csv gained a mean_exposure column (the Q4-Q1 scaling in 5.2).
+% The per-SD / per-IQR scalings in 5.2 and Table 2 come from mde_hours.csv's regressor_sd /
+% regressor_iqr columns, which pre-date the audit. Every pre-existing CSV reproduced byte for byte.
+% Remaining "% TODO(<item>)" comments are author decisions (C3 citations, D3 earnings, J/D11).
 % EVERY hours-derived figure below was re-verified 2026-09-21 against a full pipeline re-run after
 % the hours population was harmonized across survey years (docs/decisions/hours-population-
 % harmonization.md, Checkpoint 13) and the Lee-bounds selection rate was redefined on the
@@ -110,7 +117,8 @@ the COVID-19-driven shift to remote work as the ``post'' period and an Israeli-c
 occupational WFH-exposure index as the third difference. Employed mothers' hours did not change on
 average ($\Mother \times \Post = 0.23$, SE $0.18$). The effect is instead \emph{confined} to
 teleworkable work: the triple interaction is $3.22$ hours per unit of exposure (SE $1.02$,
-$p<0.01$), while the implied change at zero exposure is if anything negative. The estimate survives
+$p<0.01$) --- about $1.7$ hours a week between the most and least teleworkable quartiles of
+occupations --- while the implied change at zero exposure is if anything negative. The estimate survives
 a generalized trimming-bounds correction for selection into the estimation sample (95\% confidence
 interval for the identified set $[1.02, 5.32]$), and fathers show no corresponding gradient.
 Employment shows no average change, and the employment DDD is too imprecise to be informative. We
@@ -153,10 +161,10 @@ below.
 
 Our design exploits the pandemic as the moment at which remote work became a mainstream practice.
 In the United States, working from home rose from roughly 5\% of paid workdays before 2020 to
-25--30\% afterward \citep{barrero2021}.
-% TODO(B2): add the Israeli aggregate realized-WFH share for 2021--23, computable from the
-% pipeline's occupation-level realized shares, so the claim is not carried by US figures alone.
-We compare mothers and childless women across a pre-period of 2017--2019 and a post-period of
+25--30\% afterward \citep{barrero2021}. The Israeli survey began asking about remote work only in
+2021, so there is no Israeli pre-period figure; in 2021--2023, between $13\%$ and $16\%$ of employed
+women aged 25--59 reported usually working from home, and $21$--$22\%$ of those at work in the
+survey's reference week had worked from home during it. We compare mothers and childless women across a pre-period of 2017--2019 and a post-period of
 2021--2023, excluding 2020 (Section~\ref{sec:data}). A difference-in-differences on this contrast
 estimates the change in the hours penalty. A triple-differences model that interacts it with an
 occupation's WFH exposure tests whether remote work is the \emph{mechanism}, by asking whether the
@@ -165,12 +173,13 @@ change is larger in jobs that can actually be done from home.
 Our findings are as follows. Mothers' hours did not rise on average: the DiD is $0.23$ hours
 (SE $0.18$), a reasonably precise null. The effect lives entirely in the interaction with
 occupational WFH exposure --- $3.22$ additional weekly hours per unit of exposure ($p<0.01$) ---
-while the implied change for mothers at zero exposure is if anything negative. The estimate
-survives a selection correction and two age-balance specifications, and fathers show no positive
-exposure gradient. On the employment margin the DiD is a precise zero and the DDD is too imprecise
-to be informative.
-% TODO(A5/B6): once the per-SD and top-versus-bottom-quartile scalings of the calibrated index are
-% computed, add one sentence here putting the effect against the 1.74-hour intensive-margin penalty.
+while the implied change for mothers at zero exposure is if anything negative. Scaled to the
+regressor's actual dispersion, that is $0.64$ hours per standard deviation of exposure, or about
+$1.7$ hours between the top and bottom quartiles of occupations --- the same order as the
+$1.74$-hour intensive-margin penalty itself. The estimate survives a selection correction, two
+age-balance specifications, the exclusion of the occupations whose exposure was calibrated on
+post-period data, and the exclusion of 2023, and fathers show no positive exposure gradient. On the
+employment margin the DiD is a precise zero and the DDD is too imprecise to be informative.
 
 The remainder of the paper proceeds as follows. Section~\ref{sec:lit} places the question in the
 literature. Section~\ref{sec:data} describes the data, the sample, and the construction of the WFH
@@ -611,8 +620,10 @@ errors are clustered at that level --- individual-level clustering would underst
 leaves forty clusters. The reported $p$-values use \texttt{fixest}'s default small-sample
 convention, a $t$ reference distribution with $G - 1 = 39$ degrees of freedom and a cluster-count
 adjustment to the variance; no further small-cluster correction, such as a wild cluster bootstrap,
-is applied, and Section~\ref{sec:limitations} says what that leaves open. The employment DDD is
-clustered on the age-by-education-by-district cell (about 210 clusters).
+is applied, and Section~\ref{sec:limitations} says what that leaves open. Clustering two ways, by
+individual and by occupation, leaves the headline standard error unchanged
+(Section~\ref{sec:res-robust}). The employment DDD is clustered on the age-by-education-by-district
+cell (about 210 clusters).
 
 \subsection{Selection into employment: Lee bounds}\label{sec:lee}
 
@@ -726,10 +737,15 @@ Column~(2) of Table~\ref{tab:hours} interacts the DiD with the calibrated occupa
 exposure index. The triple interaction is $3.224$\sym{**} (SE $1.022$, $N = 246{,}326$): among
 mothers who are working, those in more WFH-exposed occupations saw a larger post-2021 increase in
 weekly hours relative to childless women in the same occupations --- about $3.2$ additional hours
-per unit of exposure.
-% TODO(A5): report the SD and IQR of the calibrated index on this sample, the effect per SD, and
-% the implied top-minus-bottom-quartile difference (3.224 x [mean exposure Q4 - Q1]) set beside the
-% raw top-quartile DiD of 1.55 hours in Figure 2 -- that comparison is the functional-form check.
+per unit of exposure. A unit is not a movement the data contain, so the coefficient needs a scale.
+On the estimation sample the calibrated index has a standard deviation of $0.199$ and an
+interquartile range of $0.203$, so the estimate is $0.64$ hours per standard deviation of exposure
+and $0.65$ hours per interquartile range. Between the quartiles of Figure~\ref{fig:dose-response},
+whose mean exposures are $0.06$ at the bottom and $0.59$ at the top, the regression implies a
+difference of $1.71$ hours a week. The raw quartile difference-in-differences of that figure put the
+same contrast at $1.87$ hours ($1.55$ against $-0.32$), within a fifth of an hour of the linear
+model's implication; that agreement is the paper's one check on the linear-in-exposure functional
+form, and it holds even though the regressor's dispersion is concentrated in the top quartile.
 
 The column's second row is as informative as its first. At zero exposure --- an occupation that
 cannot be done from home at all --- the implied change for mothers is $\Mother \times \Post =
@@ -742,9 +758,10 @@ DiD would have supported, and it is the claim Figure~\ref{fig:dose-response} sho
 quartiles at zero and one well above it.
 
 The estimate is $3.15$ standard errors from zero. The design's minimum detectable effect is
-$2.864$ hours per unit of exposure ($7.3\%$ of mean weekly hours), so an effect of the size
-observed is detectable, though without a great deal of room to spare; the reweighted specification
-of Section~\ref{sec:res-robust} shows what that margin means in practice.
+$2.864$ hours per unit of exposure, or $0.57$ hours per standard deviation ($7.3\%$ of mean weekly
+hours), so an effect of the size observed is detectable, though without a great deal of room to
+spare; the reweighted specification of Section~\ref{sec:res-robust} shows what that margin means
+in practice.
 
 \begin{table}[htbp]
 \centering
@@ -772,7 +789,8 @@ Constant & $32.35$\sym{***} & $32.12$\sym{***} \\
  & $(0.3182)$ & $(1.540)$ \\
 \midrule
 MDE for triple interaction & & 2.8640 \\
-% TODO(A5): add rows "SD of WFH_Exposure (estimation sample)" and "Effect per SD of exposure".
+SD of exposure, estimation sample & & 0.1986 \\
+Triple interaction per SD of exposure & & 0.640 \\
 Observations & 251{,}857 & 246{,}326 \\
 $R^2$ & 0.04049 & 0.04094 \\
 Clustering & individual & 2-digit occupation (40) \\
@@ -914,10 +932,14 @@ are computed on men and women together, not on the women in the regression. Only
 occupations are swapped, and only where the gap exceeds $0.5$ and a one-sided test at the 95\%
 level rejects sampling noise. All ten swaps are \emph{downward}: they remove occupations from the
 treated tail rather than adding any to it. And the outcome is usual hours, not the WFH indicator
-the calibration uses, so the two are different variables. What the construction cannot do is make
-the calibrated index a pre-treatment measure, and Section~\ref{sec:limitations} says so.
-% TODO(G6): re-estimate the DDD on the 30 unswapped occupations, where the calibrated and external
-% indices coincide by construction, and report it here and in Table 4.
+the calibration uses, so the two are different variables. The direct test is to drop the ten
+swapped occupations and re-estimate on the thirty where the calibrated and external indices
+coincide by construction, so that no post-period information enters the regressor at all. On that
+sample the triple interaction is $4.309$\sym{**} (SE $1.192$, $N = 132{,}046$, 30 clusters) ---
+larger than the headline, not smaller. The post-period calibration does not produce the result; if
+anything the ten swapped occupations, which together account for nearly half the estimation sample,
+dilute it. What the calibration cannot be made into is a pre-treatment measure, and
+Section~\ref{sec:limitations} says so.
 
 \paragraph{Age balance.}
 Adding a $\Mother \times$ age-group interaction leaves the estimate essentially unchanged
@@ -930,6 +952,14 @@ mother/non-mother gap in the age-group code is $-0.974$ in the lowest exposure q
 ($t = -94.0$), $-0.735$ in the second, $-0.169$ in the third, and $+0.057$ in the highest. The
 reweighted attenuation is the largest single move any check produces, and it is worth reporting for
 that reason.
+
+\paragraph{Sample and inference.}
+Excluding the 2023 survey year, whose final quarter includes the start of the October 2023 war
+(Section~\ref{sec:limitations}), the triple interaction is $2.979$\sym{*} (SE $1.170$,
+$N = 208{,}833$): smaller, since 2023 carries the largest event-study coefficient, but still
+significant at the 5\% level, while the plain hours DiD stays a null ($0.0710$, SE $0.1975$).
+Clustering two ways, by individual and by occupation, leaves the headline standard error unchanged
+at $1.022$: the occupation-level dependence already dominates the individual-level one.
 
 \begin{table}[htbp]
 \centering
@@ -947,11 +977,18 @@ Specification & Coefficient & SE & $N$ \\
 \emph{Age-balance} & & & \\
 \quad Age-interacted ($+\,\Mother \times$ age group) & $3.205$\sym{**} & 1.055 & 246{,}326 \\
 \quad Reweighted (pre-period age-group raking) & $2.597$\sym{*} & 1.050 & 242{,}552 \\
+\midrule
+\emph{Sample and inference} & & & \\
+\quad Unswapped occupations only (30 of 40) & $4.309$\sym{**} & 1.192 & 132{,}046 \\
+\quad Excluding survey year 2023 & $2.979$\sym{*} & 1.170 & 208{,}833 \\
+\quad Two-way clustering, individual and occupation & $3.224$\sym{**} & 1.022 & 246{,}326 \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}\small
-\item All rows: weekly hours, women working in the reference week, standard controls, clustered by
-occupation.
+\item All rows: weekly hours, women working in the reference week, standard controls, calibrated
+exposure unless stated, clustered by occupation unless stated. The unswapped-occupations row drops
+the ten occupations whose exposure was swapped to its realized 2022--23 value, so the calibrated
+and external indices coincide on the rows that remain.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
@@ -1122,17 +1159,19 @@ were corrected sharply downward, because Israeli institutional practice kept the
 regardless of task content, while ICT professionals remained high on both measures. The triple
 interaction is identified off exactly this contrast, which grounds ``exposure'' in checkable
 occupational content. That the raw external index yields a positive but insignificant estimate is
-consistent with that reading, though Section~\ref{sec:res-robust} sets out why it is not the only
-one.
+consistent with that reading, and the check of Section~\ref{sec:res-robust} that drops the ten
+calibrated occupations altogether --- and finds a larger estimate on the thirty that remain ---
+shows the calibration is not what produces the result.
 
-The magnitude is economically meaningful where it applies. The raw difference-in-differences in the
-most teleworkable quartile of occupations is $1.55$ hours a week, of the same order as the
-$1.74$-hour intensive-margin penalty estimated in Table~\ref{tab:hours}; in the other three
-quartiles it is zero. For mothers in teleworkable jobs, then, the post-2021 change is a large
-fraction of the penalty itself, and for the rest it is nothing.
-% TODO(A5/H3): replace the raw quartile figure with the regression-implied top-minus-bottom-quartile
-% effect once computed, and, if Aksoy et al. (2023) is added per C3, set it beside their estimate of
-% commute time saved per WFH day (roughly 70 minutes; two WFH days a week is about 2.3 hours).
+The magnitude is economically meaningful where it applies. The regression implies a difference of
+$1.7$ hours a week between mothers in the most and least teleworkable quartiles of occupations,
+and the raw quartile differences of Figure~\ref{fig:dose-response} put the same contrast at $1.9$.
+Set against the $1.74$-hour intensive-margin penalty of Table~\ref{tab:hours}, mothers in
+teleworkable jobs recovered most of the penalty after 2021, and mothers elsewhere recovered none of
+it. An hour and three-quarters a week is also the order of magnitude that two remote days' saved
+commuting would free, which is the most literal form the time-constraint mechanism can take.
+% TODO(C3): if Aksoy et al. (2023, AEA P&P) is verified and added to references.bib, cite their
+% estimate of commute time saved per WFH day here in place of the unreferenced comparison.
 
 The timing is also informative. The event study rises gradually from an insignificant 2021 estimate
 to a significant one in 2023, consistent with WFH adoption and household time reallocation being a
@@ -1176,9 +1215,16 @@ costless. The estimand is usual hours among women who were working, not among al
 job, and roughly $10\%$ of each year's employed sample is excluded on that basis. If absence from
 work in the reference week is itself related to WFH exposure --- for instance if teleworkable jobs
 make it easier to work while unwell or while caring for a child --- then the restriction is not
-innocuous for the triple interaction, and nothing in this paper rules that out.
-% TODO(I1): supply the absentee share by exposure quartile in a footnote if it is to be claimed
-% that the relation is mild; the unquantified claim was removed.
+innocuous for the triple interaction. It is related: absence runs at $14.4\%$ of the employed in the
+least teleworkable quartile of occupations against $8.5$--$9.6\%$ in the other three, and among
+mothers it fell after 2021 in the top quartile (from $12.1\%$ to $10.4\%$) while rising in the
+bottom one (from $15.5\%$ to $16.9\%$).\footnote{Reference-week absence among employed women aged
+25--59 with a matched occupation, by the quartiles of Figure~\ref{fig:dose-response}: $14.4\%$,
+$8.5\%$, $9.5\%$ and $9.6\%$ from the least to the most teleworkable quartile. Among childless women
+the top-quartile share is $6.1\%$ in both periods.} Movement across the absence margin is therefore
+part of what selection into the observed-hours sample means in this design, which is why the bounds
+of Section~\ref{sec:lee} define selection on that sample rather than on employment. They trim that
+selection; they do not make the restriction innocuous by assumption.
 
 \paragraph{Lee bounds: direction and monotonicity.}
 The trimming construction only handles \emph{excess} selection in the post-period mother cell ---
@@ -1214,12 +1260,13 @@ quarter in which the war that began on 7 October 2023 disrupted the Israeli labo
 reserve call-ups, which bear on men's hours and therefore on the placebo, and school closures and
 evacuations, which bear on mothers'. The gradual-adjustment reading of Section~\ref{sec:discussion}
 does not depend on 2023 alone --- 2021 and 2022 are individually significant on the triple
-difference --- but the 2023 point should be held more loosely than the others. Early 2021 likewise
-included a third lockdown with partial school closure, so the post-period is ``post-acute'' more
-cleanly in its later years than in its first.
-% TODO(I5): the cleaning step drops the survey-month field (ChodeshSeker). Retain it and
-% re-estimate the hours DiD and DDD excluding October-December 2023, or at minimum excluding 2023
-% (ShnatSeker != 2023), and report as a robustness row.
+difference --- and the estimate survives dropping the year: without 2023 the triple interaction is
+$2.979$ (SE $1.170$), significant at the 5\% level rather than the 1\%, and the plain DiD remains a
+null (Section~\ref{sec:res-robust}). The 2023 point should nonetheless be held more loosely than the
+others. The extract carries no survey-month field after cleaning, so the exclusion is of the whole
+year rather than of its final quarter. Early 2021 likewise included a third lockdown with partial
+school closure, so the post-period is ``post-acute'' more cleanly in its later years than in its
+first.
 
 \paragraph{Who is childless.}
 The control group is any woman aged 25--59 with no child under 17 in the household. It therefore

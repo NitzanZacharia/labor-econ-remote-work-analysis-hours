@@ -292,6 +292,31 @@ Framing: "directionally robust, not point-estimate robust." The external index s
 insignificant, which is the form the paper's "measurement is part of the result" argument needs —
 the mechanism is visible only once exposure is measured as Israeli jobs were actually done.
 
+**Added 2026-09-22 (editorial audit, `paper/notes/editorial-audit-2026-09-22.md` step 2).** Three
+more rows in the paper's robustness table, all from `run_hours_ddd_regression()` call sites in
+`main.R` §8a with no new econometric machinery:
+
+| Specification | `Mother x Post x WFH_Exposure` | SE | Sig. | N | Source |
+|---|---|---|---|---|---|
+| Unswapped occupations only (30 of 40; calibrated == external on these rows) | 4.309 | 1.192 | ** | 132,046 | `outputs/ddd_hours_unswapped.csv` |
+| Excluding survey year 2023 | 2.979 | 1.170 | * | 208,833 | `outputs/ddd_hours_ex2023.csv` |
+| Two-way clustering (IDPUF + occupation), same fit | 3.224 | 1.022 | ** | 246,326 | `outputs/ddd_hours_twoway_cluster.csv` |
+
+The plain hours DiD without 2023 is 0.0710 (SE 0.1975), N = 213,385
+(`outputs/intensive_margin_ex2023.csv`). The unswapped row is the direct answer to "the result
+appears only once post-period data enter the regressor": on the thirty occupations where no
+post-period information enters, the estimate is larger, not smaller. All ten swaps are downward
+(`outputs/wfh_exposure_calibrated.csv`, `swap == TRUE`).
+
+Two descriptives were added at the same time. `outputs/wfh_share_by_year.csv`: realized WFH among
+employed women 25–59, usual location 15.7% / 13.0% / 12.7% (2021/2022/2023) and reference-week
+21.3% / 21.9% / 22.2% (denominator: those at work that week); NA before 2021 by construction.
+`outputs/absence_by_exposure_quartile_by_quartile.csv`: reference-week absence 14.4% / 8.5% /
+9.5% / 9.6% from Q1 to Q4 of the occupation-level index (the `by_cell` file splits by Mother ×
+Post; mothers' Q4 share falls 12.1% → 10.4% while Q1 rises 15.5% → 16.9%). The dose-response frame
+`outputs/hours_dose_response_data.csv` gained `mean_exposure` (Q1 0.060, Q4 0.592), which gives
+the paper's implied Q4−Q1 effect of 3.224 × 0.531 = 1.71 hours against the raw 1.87.
+
 ### 1.7 [PRIMARY] Age-balance robustness (hours DDD)
 
 Source: `outputs/age_balance_robustness_hours_ddd_age_interacted.csv`,

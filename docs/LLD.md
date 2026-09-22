@@ -563,9 +563,24 @@ build_hours_descriptive_plots(cleaned_df: tibble, hours_by_period: tibble = NULL
 
 # ── hours_dose_response.R ─────────────────────────────────────────────────
 build_hours_dose_response(cleaned_df: tibble, exposure_index: tibble,
-                           measure_label: character(1) = "...") -> list(data, cell_means, plot)
+                           measure_label: character(1) = "...") -> list(data, cell_means, breaks, plot)
 # Raw hours DiD within each quartile of OCCUPATION-level exposure -- the DDD's own regressor,
-# deliberately not the cell-based index. Cell arithmetic only, no regression.
+# deliberately not the cell-based index. Cell arithmetic only, no regression. `data` carries
+# each quartile's mean_exposure (added 2026-09-22) so the DDD's per-unit coefficient can be
+# turned into an implied top-minus-bottom-quartile effect.
+
+# ── wfh_share_by_year.R ───────────────────────────────────────────────────
+build_wfh_share_by_year(cleaned_df: tibble,
+                        wfh_cols: character = c("WFH", "WFH_RefWeek")) -> tibble
+# One row per (measure, ShnatSeker) with share, IDPUF-clustered se and n among Employed == 1.
+# Both CBS items begin in 2021, so pre-period years produce no row. Added 2026-09-22 (audit B2).
+
+# ── absence_by_exposure_quartile.R ────────────────────────────────────────
+build_absence_by_exposure_quartile(cleaned_df: tibble, exposure_index: tibble,
+                                   breaks: numeric(5) = NULL) -> list(by_quartile, by_cell, breaks)
+# Share of Employed == 1 rows with AvadBeshavua != 1 by occupation-exposure quartile (and by
+# quartile x Mother x Post), IDPUF-clustered. Pass build_hours_dose_response()$breaks so the
+# quartiles match Figure 2; NULL recomputes the same pre-period edges. Added 2026-09-22 (audit I1).
 
 # ── build_mechanism_scatter.R ─────────────────────────────────────────────
 build_mechanism_scatter(mechanism_data: tibble, fit: lm = NULL) -> list(data, fit_line, plot)
