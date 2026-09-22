@@ -1212,39 +1212,36 @@ transparently but do not claim heterogeneity on its basis.
 \section{Limitations}\label{sec:limitations}
 %======================================================================
 
-\paragraph{Parallel trends and the narrowed estimand.}
-Joint pre-trend tests do not reject on either margin, and the triple difference's own pre-trend
-test does not reject either (Figures~\ref{fig:pretrend} and~\ref{fig:pretrend-ddd}). The last of
-these is the test that matters for the headline estimate, and it is also the weakest: with forty
-occupation clusters its pre-period standard errors are of the same order as the effect being
-tested, so it cannot exclude a pre-trend the size of the estimate. It is evidence of no visible
-violation, not proof of none. Those tests pass on the harmonized hours sample of
-Section~\ref{sec:data}; the 2017 coding convention, left uncorrected, would have manufactured a
-spurious pre-period divergence that fell on mothers specifically, and the sensitivity of a
-parallel-trends diagnostic to a single year's coding is itself worth knowing. The correction is not
-costless. The estimand is usual hours among women who were working, not among all women holding a
-job, and roughly $10\%$ of each year's employed sample is excluded on that basis. If absence from
-work in the reference week is itself related to WFH exposure --- for instance if teleworkable jobs
-make it easier to work while unwell or while caring for a child --- then the restriction is not
-innocuous for the triple interaction. It is related: absence runs at $14.4\%$ of the employed in the
-least teleworkable quartile of occupations against $8.5$--$9.6\%$ in the other three, and among
-mothers it fell after 2021 in the top quartile (from $12.1\%$ to $10.4\%$) while rising in the
-bottom one (from $15.5\%$ to $16.9\%$).\footnote{Reference-week absence among employed women aged
-25--59 with a matched occupation, by the quartiles of Figure~\ref{fig:dose-response}: $14.4\%$,
-$8.5\%$, $9.5\%$ and $9.6\%$ from the least to the most teleworkable quartile. Among childless women
-the top-quartile share is $6.1\%$ in both periods.} Movement across the absence margin is therefore
-part of what selection into the observed-hours sample means in this design, which is why the bounds
-of Section~\ref{sec:lee} define selection on that sample rather than on employment. They trim that
-selection; they do not make the restriction innocuous by assumption.
+\paragraph{Parallel trends.}
+Joint pre-trend tests do not reject on either margin, nor does the triple difference's own
+(Figures~\ref{fig:pretrend} and~\ref{fig:pretrend-ddd}), all on the harmonized hours sample of
+Section~\ref{sec:data}. The last of these is the test that matters for the headline estimate, and
+it is also the weakest: with forty occupation clusters its pre-period standard errors are of the
+same order as the effect being tested, so it cannot exclude a pre-trend the size of the estimate.
+It is evidence of no visible violation, not proof of none.
+
+\paragraph{The narrowed hours estimand.}
+Hours are usual hours among women who were working, not among all women holding a job, and roughly
+$10\%$ of each year's employed sample is excluded on that basis. The exclusion is not innocuous for
+the triple interaction if absence from work is itself related to WFH exposure, and it is: absence
+runs at $14.4\%$ of the employed in the least teleworkable quartile of occupations against
+$8.5$--$9.6\%$ in the other three, and among mothers it fell after 2021 in the top quartile while
+rising in the bottom one.\footnote{Reference-week absence among employed women aged 25--59 with a
+matched occupation, by the quartiles of Figure~\ref{fig:dose-response}: $14.4\%$, $8.5\%$, $9.5\%$
+and $9.6\%$ from the least to the most teleworkable quartile. Among mothers the top-quartile share
+fell from $12.1\%$ to $10.4\%$ after 2021 and the bottom-quartile share rose from $15.5\%$ to
+$16.9\%$; among childless women the top-quartile share is $6.1\%$ in both periods.} Movement across
+the absence margin is therefore part of what selection into the observed-hours sample means here,
+which is why the bounds of Section~\ref{sec:lee} define selection on that sample rather than on
+employment. They trim it; they do not assume it away.
 
 \paragraph{Lee bounds: direction and monotonicity.}
-The trimming construction only handles \emph{excess} selection in the post-period mother cell ---
-the direction the project's own hypothesis predicts. Under-selection in that cell (fewer employed
-mothers than the counterfactual implies) is a missing-data problem, not an excess-observed-data
-problem, and is not addressed. The construction assumes monotone selection to justify trimming from
-a single tail, and computes selection rates unweighted, consistent with the rest of the analysis. A
-finding of small excess selection should be read as ``this construction found little to correct,''
-not as proof that the selection concern is absent.
+The trimming construction handles only \emph{excess} selection in the post-period mother cell ---
+the direction the hypothesis predicts --- and not under-selection, which is a missing-data problem
+rather than an excess-observed-data one. It assumes monotone selection to justify trimming from a
+single tail, and computes selection rates unweighted, consistent with the rest of the analysis.
+Small excess selection means the construction found little to correct, not that the selection
+concern is absent.
 
 \paragraph{Survey weights.}
 CBS survey weights are intentionally not applied in any outcome regression. This is a scope
@@ -1254,61 +1251,57 @@ the cell-based exposure index, where occupation exposure is aggregated to demogr
 the survey weight; that is not a representativeness correction for the outcome regressions.
 
 \paragraph{Exposure is partly post-treatment.}
-Neither of the two exposure measures that deliver a significant estimate is fully pre-treatment.
-The calibrated index draws on 2022--23 realized WFH for its swap test, and the realized index is
-anchored to 2021 rather than to the 2020 variable the original research plan specified, because no
-2020 extract exists; by 2021 occupations had had a year to adapt, and if adaptation was uneven a
-2021-based index could rank occupations differently than a 2020-based one would have.
-Section~\ref{sec:res-robust} sets out why the calibration is unlikely to manufacture the result ---
-pooled-sex shares, ten downward swaps, a different variable from the outcome --- but the fully
-pre-treatment external index yields a positive and insignificant estimate, and a reader who weights
-that measure more heavily than we do will read the headline as directionally supported rather than
-established.
+Neither exposure measure that delivers a significant estimate is fully pre-treatment. The
+calibrated index draws on 2022--23 realized WFH for its swap test, and the realized index is
+anchored to 2021 rather than the 2020 the research plan specified, because no 2020 extract exists;
+by 2021 occupations had had a year to adapt, unevenly. Section~\ref{sec:res-robust} sets out why
+the calibration is unlikely to manufacture the result, but the fully pre-treatment external index
+yields a positive and insignificant estimate, and a reader who weights that measure more heavily
+than we do will read the headline as directionally supported rather than established.
 
 \paragraph{The 2023 survey year.}
 The 2023 coefficient is the largest in both event studies, and the 2023 survey year includes the
-quarter in which the war that began on 7 October 2023 disrupted the Israeli labor market: mass
-reserve call-ups, which bear on men's hours and therefore on the placebo, and school closures and
-evacuations, which bear on mothers'. The gradual-adjustment reading of Section~\ref{sec:discussion}
-does not depend on 2023 alone --- 2021 and 2022 are individually significant on the triple
-difference --- and the estimate survives dropping the year: without 2023 the triple interaction is
-$2.979$ (SE $1.170$), significant at the 5\% level rather than the 1\%, and the plain DiD remains a
-null (Section~\ref{sec:res-robust}). The 2023 point should nonetheless be held more loosely than the
-others. The extract carries no survey-month field after cleaning, so the exclusion is of the whole
-year rather than of its final quarter. Early 2021 likewise included a third lockdown with partial
+quarter in which the war that began on 7 October 2023 disrupted the labor market: mass reserve
+call-ups, which bear on men's hours and so on the placebo, and school closures and evacuations,
+which bear on mothers'. The timing reading of Section~\ref{sec:discussion} does not rest on 2023
+alone, since 2021 and 2022 are individually significant on the triple difference, and the estimate
+survives dropping the year (Section~\ref{sec:res-robust}); the 2023 point should nonetheless be
+held more loosely than the others. Early 2021 likewise included a third lockdown with partial
 school closure, so the post-period is ``post-acute'' more cleanly in its later years than in its
 first.
+% The exclusion is of the whole year: the survey-month field (ChodeshSeker) is dropped at cleaning,
+% so a fourth-quarter-only exclusion would need a schema change (audit item I5).
 
 \paragraph{Who is childless.}
-The control group is any woman aged 25--59 with no child under 17 in the household. It therefore
-includes women whose children are 17 or older and women who will become mothers later in the
-window. \citet{harrington2025}'s design shares this feature. If some of the control group is
-affected by the treatment in the same direction as mothers, the DiD is biased toward zero, which
-works against finding the effect we report rather than for it.
+The control group is any woman aged 25--59 with no child under 17 in the household, so it includes
+women whose children are grown and women who become mothers within the window;
+\citet{harrington2025}'s design shares this feature. If part of the control group responds to the
+treatment as mothers do, the DiD is biased toward zero, against the effect we report rather than
+for it.
 
 \paragraph{Age controls and age imbalance.}
 Age enters as a categorical age-group code, because the extract has no continuous age or
 birth-year variable. Mothers and non-mothers are imbalanced on this code in the pre-period, and the
-imbalance tracks exposure quartile; the age-interacted and reweighted specifications address this
+imbalance tracks exposure quartile; the age-interacted and reweighted specifications address it
 and the estimate survives, but the reweighted attenuation ($3.224 \to 2.597$) is the largest
-single move any robustness check produces. The result should be read as robust to age imbalance in
-direction and approximate magnitude, not as insensitive to it.
+single move any check produces, so the result is robust to age imbalance in direction and
+approximate magnitude, not insensitive to it.
 
 \paragraph{Exposure is measured coarsely.}
-Exposure is assigned at the two-digit occupation level, forty groups, and \citet{buzaglo2023} show
-that within-firm sorting matters as much as occupation for Israeli gender gaps. Within-occupation
-heterogeneity in teleworkability is classical measurement error in the regressor, which attenuates
-the triple interaction toward zero; the estimate is if anything a lower bound on the effect of
-actual teleworkability. Occupation codes masked by the CBS for disclosure control are dropped when
-building exposure; a proxy check finds no strong evidence that this biases the exposure measure,
-though that is weak rather than conclusive evidence.
+Exposure is assigned at the two-digit occupation level, forty groups, and \citet{buzaglo2023}
+shows that within-firm sorting matters as much as occupation for Israeli gender gaps.
+Within-occupation heterogeneity in teleworkability is classical measurement error in the
+regressor, which attenuates the triple interaction toward zero, so the estimate is if anything a
+lower bound on the effect of actual teleworkability. Occupation codes masked by the CBS for
+disclosure control are dropped when building exposure; a proxy check finds no strong evidence of
+bias from this, though that evidence is weak.
 
 \paragraph{Inference.}
-The hours DDD clusters on forty occupation groups and the employment DDD on about 210 demographic
-cells. The reported $p$-values carry \texttt{fixest}'s default $t(G-1)$ reference distribution
-(Section~\ref{sec:inference}) but no wild cluster bootstrap, and with forty clusters the
-occupation-clustered standard errors should be read as approximate. The panel structure does not
-support within-person identification, since only 1.9\% of respondents span the pre/post boundary.
+The hours DDD clusters on forty occupation groups. The reported $p$-values carry
+\texttt{fixest}'s default $t(G-1)$ reference distribution (Section~\ref{sec:inference}) but no
+wild cluster bootstrap, so the occupation-clustered standard errors should be read as approximate.
+The panel does not support within-person identification: only 1.9\% of respondents span the
+pre/post boundary.
 
 %======================================================================
 \section{Conclusion}\label{sec:conclusion}
