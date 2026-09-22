@@ -1,0 +1,2 @@
+"statistic","F_stat","df1","df2","p_value","vcov"
+"Joint Wald, H0: pre-2020 Mother:year:WFH_Exposure coefficients = 0",0.0410265767809198,2,39,0.959844987647363,"Clustered (MishlachYad_ISCO_08_2)"

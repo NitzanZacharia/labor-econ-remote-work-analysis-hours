@@ -25,6 +25,7 @@ source(file.path("scripts", "wfh_exposure_cells.R"))
 source(file.path("scripts", "isco_masking_diagnostics.R"))
 source(file.path("scripts", "ddd_collinearity_diagnostics.R"))
 source(file.path("scripts", "hours_ddd_regression.R"))
+source(file.path("scripts", "hours_ddd_event_study.R"))
 source(file.path("scripts", "hours_ddd_lee_bounds.R"))
 source(file.path("scripts", "wfh_first_stage_check.R"))
 source(file.path("scripts", "ddd_mde_diagnostics.R"))
@@ -36,10 +37,12 @@ source(file.path("scripts", "paper_theme.R"))
 source(file.path("scripts", "hours_descriptive_plots.R"))
 source(file.path("scripts", "hours_dose_response.R"))
 source(file.path("scripts", "build_mechanism_scatter.R"))
+source(file.path("scripts", "build_ddd_event_study_plot.R"))
 
 # robustness/ is normally sourced only inside the RUN_AGE_BALANCE_ROBUSTNESS block, but
-# pretrend_wald_test.R is a diagnostic rather than a robustness spec: its two F-statistics are the
-# paper's parallel-trends evidence, so it runs unconditionally in §7 and is sourced here.
+# pretrend_wald_test.R is a diagnostic rather than a robustness spec: its F-statistics are the
+# paper's parallel-trends evidence, so it runs unconditionally -- §7 for the two DiD-level models,
+# §8a for the DDD event study, which cannot run any earlier because it needs §8's exposure measure.
 source(file.path("robustness", "pretrend_wald_test.R"))
 
 # ── 2. Configure paths ────────────────────────────────────────────────────────
@@ -258,6 +261,35 @@ message("Computing minimum detectable effect for the hours DDD's triple interact
 baseline_hours <- mean(cleaned_df$WorkHoursCont[cleaned_df$Employed == 1], na.rm = TRUE)
 mde_hours <- compute_ddd_mde(hours_ddd$model, baseline_rate = baseline_hours,
                              regressor = hours_ddd$exposure_vector)
+
+# Parallel-trends check for the PRIMARY estimand. §7's two Wald tests are both DiD-level
+# (Mother x year): they ask whether mothers and non-mothers trended together, averaging over WFH
+# exposure. The DDD's identifying assumption is the stricter one -- that the mother/non-mother gap
+# trended together ACROSS exposure levels -- and an exposure-correlated pre-period divergence that
+# nets to zero across occupations passes §7 while violating it. Hence a third pretrend model, on the
+# triple interaction itself. Placed here rather than in §7 because it needs hours_exposure_index.
+#
+# Same exposure measure, same subsample, same occupation-level clustering as hours_ddd above, so the
+# test is on the assumption that specific model rests on rather than on a neighbouring one.
+message("Running DDD event study (hours, Mother x year x WFH_Exposure)...")
+hours_ddd_event_study <- run_hours_ddd_event_study(cleaned_df, hours_exposure_index)
+
+# keep/label are passed explicitly: the default `keep` is anchored to the DiD-level ":Mother$" terms
+# and would match none of this model's triple-interaction coefficients. See pretrend_wald_test.R's
+# header for why the anchor matters.
+message("Running joint Wald test on pre-2020 DDD event-study pre-trend coefficients (primary)...")
+pretrend_wald_hours_ddd <- run_pretrend_joint_test(
+  hours_ddd_event_study$model,
+  keep  = sprintf("ShnatSeker::(2017|2018):%s$", hours_ddd_event_study$term_suffix),
+  label = "Joint Wald, H0: pre-2020 Mother:year:WFH_Exposure coefficients = 0"
+)
+
+hours_ddd_event_study_plot <- build_ddd_event_study_plot(
+  hours_ddd_event_study$coefs,
+  ref_year = hours_ddd_event_study$ref_year,
+  title    = "Hours DDD event study: Mother × Year × WFH Exposure",
+  subtitle = "Weekly work hours, employed women aged 25–59; 95% CIs, occupation-clustered SEs"
+)
 
 message("Running generalized Lee bounds for the hours DDD (stratified by WFH_Exposure quartile)...")
 hours_lee_bounds <- run_hours_ddd_lee_bounds(
@@ -535,6 +567,7 @@ results_to_export <- list(
   hours_diagnostics = hours_diagnostics_results,
   pretrend_wald_employment = pretrend_wald$table,
   pretrend_wald_hours = pretrend_wald_hours$table,
+  pretrend_wald_hours_ddd = pretrend_wald_hours_ddd$table,
   isco_masking_sensitivity = isco_masking_check,
   wfh_exposure_external = exposure_external,
   wfh_exposure_calibrated = exposure_calibrated,
@@ -542,6 +575,20 @@ results_to_export <- list(
   wfh_exposure_cells = exposure_cells,
   ddd_hours_table = hours_ddd$table,
   mde_hours = mde_hours$table,
+
+  # DDD event study (§8a). Both frames are aggregate -- one row per survey year -- so neither runs
+  # into the disclosure convention documented above. $coefs is the tidy estimate/SE/p/CI frame and
+  # $table is etable()'s formatted full-model view; the model object itself is skipped by
+  # export_all_results(), as with every other fixest fit in this list. The plot's own $data is
+  # deliberately not passed: it is $coefs plus the pinned reference-year row, so exporting it would
+  # put two near-identical frames in outputs/ and leave the reader to guess which one is the result.
+  # Naming: these keys become the filenames, so the plot is keyed `plot` under
+  # `hours_ddd_event_study` to land as hours_ddd_event_study_plot.png.
+  hours_ddd_event_study = list(
+    coefs = hours_ddd_event_study$coefs,
+    table = hours_ddd_event_study$table,
+    plot  = hours_ddd_event_study_plot$plot
+  ),
 
   # Paper descriptive figures (§8e). Every frame here is aggregate, per the disclosure convention
   # above: hours_by_period is 4 cells, hours_by_year is 6 years x 3 series, dose_response's
@@ -633,6 +680,11 @@ paper_figures <- list(
   # plot still reaches outputs/ as a PNG via export_all_results() for browsing; it just has no
   # business being the figure a reader sees next to a null result.
   hours_by_year         = list(plot = hours_descriptives$plots$by_year,    width = 5.0, height = 5.0),
+  # paper.tex \includegraphics this as Figure fig:pretrend-ddd (Results §5.3). Sized to match
+  # hours_dose_response below rather than to the plot's own natural aspect: every paper figure is
+  # printed at 0.8\textwidth, so a PDF authored wider than its neighbours is scaled down further and
+  # its text renders smaller than theirs on the page.
+  hours_ddd_event_study = list(plot = hours_ddd_event_study_plot$plot,     width = 5.0, height = 3.4),
   hours_dose_response   = list(plot = hours_dose_response$plot,            width = 5.0, height = 3.4),
   emp_childage_period   = list(plot = emp_res$plots$period,                width = 5.0, height = 3.6),
   emp_childage_adjusted = list(plot = emp_res$plots$adjusted,              width = 5.0, height = 3.6),

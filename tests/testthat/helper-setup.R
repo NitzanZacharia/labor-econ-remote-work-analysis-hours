@@ -47,6 +47,7 @@ source(file.path("scripts", "isco_masking_diagnostics.R"))
 source(file.path("scripts", "ddd_collinearity_diagnostics.R"))
 source(file.path("scripts", "israeli_market_mismatch.R"))
 source(file.path("scripts", "hours_ddd_regression.R"))
+source(file.path("scripts", "hours_ddd_event_study.R"))
 source(file.path("scripts", "hours_ddd_lee_bounds.R"))
 source(file.path("scripts", "wfh_first_stage_check.R"))
 source(file.path("scripts", "ddd_mde_diagnostics.R"))
@@ -54,6 +55,7 @@ source(file.path("scripts", "hours_subgroup_comparison.R"))
 source(file.path("scripts", "hours_descriptive_plots.R"))
 source(file.path("scripts", "hours_dose_response.R"))
 source(file.path("scripts", "build_mechanism_scatter.R"))
+source(file.path("scripts", "build_ddd_event_study_plot.R"))
 source(file.path("scripts", "export_results.R"))
 source(file.path("scripts", "export_paper_figures.R"))
 source(file.path("scripts", "Diagnostics.R"))
@@ -95,14 +97,24 @@ extract_controls_vector <- function(file_path) {
 }
 
 # A synthetic occupation-level hours panel with a known injected DDD effect, shared by
-# test-hours_ddd_regression.R and test-hours_gender_placebo.R. The two files previously carried
-# character-identical copies of this that differed only in the Min column, so a fix to one silently
-# left the other behind; `min_sex = 1L` produces the male-subsample variant the placebo needs.
+# test-hours_ddd_regression.R, test-hours_gender_placebo.R and test-hours_ddd_event_study.R. The
+# first two files previously carried character-identical copies of this that differed only in the
+# Min column, so a fix to one silently left the other behind; `min_sex = 1L` produces the
+# male-subsample variant the placebo needs.
 #
 # 10 occupations with distinct, evenly-spaced exposure. Mother/Post are assigned independently per
 # row rather than per occupation: the regression needs within-occupation variation in both, and
 # occupation-level assignment would make an occupation entirely Mother or entirely non-Mother.
-make_hours_ddd_panel <- function(delta = -3, n = 400, n_occ = 10, min_sex = NULL) {
+#
+# `with_years` adds the ShnatSeker column the event-study specification needs, drawn consistently
+# with each row's existing Post value (Post == 0 -> a pre-2020 year, Post == 1 -> a post year), so
+# the two columns cannot disagree the way an independently sampled year column would. Trailing, and
+# defaulting to FALSE, so the two original callers are untouched -- the same convention `min_sex`
+# follows above.
+make_hours_ddd_panel <- function(delta = -3, n = 400, n_occ = 10, min_sex = NULL,
+                                 with_years = FALSE,
+                                 pre_years = c(2017, 2018, 2019),
+                                 post_years = c(2021, 2022, 2023)) {
   occ_codes <- 300 + seq_len(n_occ)
   exposure_index <- tibble::tibble(
     occupation_code = occ_codes,
@@ -129,6 +141,17 @@ make_hours_ddd_panel <- function(delta = -3, n = 400, n_occ = 10, min_sex = NULL
     dplyr::select(-.wfh)
 
   if (!is.null(min_sex)) panel <- dplyr::mutate(panel, Min = min_sex, .before = 1)
+
+  if (isTRUE(with_years)) {
+    panel <- dplyr::mutate(
+      panel,
+      ShnatSeker = ifelse(
+        Post == 1,
+        sample(post_years, dplyr::n(), replace = TRUE),
+        sample(pre_years,  dplyr::n(), replace = TRUE)
+      )
+    )
+  }
 
   list(panel = panel, exposure_index = exposure_index)
 }

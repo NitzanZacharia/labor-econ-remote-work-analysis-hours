@@ -38,6 +38,84 @@ test_that("run_pretrend_joint_test's keep pattern does not pick up post-2020 Mot
   expect_equal(w$df1, 2)  # confirms none of the 3 post-period terms leaked into the joint test
 })
 
+# ── The DDD event study's triple-interaction restriction set ─────────────────────────────────
+# run_pretrend_joint_test() gained keep/label parameters when scripts/hours_ddd_event_study.R added
+# a third pretrend model. These tests pin the two properties that made the change necessary, both of
+# which are silent-wrong-answer bugs rather than errors if they regress.
+
+make_ddd_pretrend_model <- function() {
+  set.seed(4)
+  n <- 3000
+  df <- data.frame(
+    ShnatSeker = sample(c(2017, 2018, 2019, 2021, 2022, 2023), n, replace = TRUE),
+    Mother     = sample(0:1, n, replace = TRUE),
+    occ        = sample(sprintf("%02d", 11:40), n, replace = TRUE)
+  )
+  df$WFH_Exposure <- as.numeric(factor(df$occ)) / 30
+  df$MotherWFH    <- df$Mother * df$WFH_Exposure
+  df$WorkHoursCont <- rnorm(n, 40)
+  fixest::feols(
+    WorkHoursCont ~ Mother * WFH_Exposure + i(ShnatSeker, ref = 2019) +
+      i(ShnatSeker, Mother, ref = 2019) + i(ShnatSeker, WFH_Exposure, ref = 2019) +
+      i(ShnatSeker, MotherWFH, ref = 2019),
+    data = df, cluster = ~occ
+  )
+}
+
+test_that("the default keep pattern is anchored, so a DDD event-study model's MotherWFH terms cannot leak in", {
+  m <- make_ddd_pretrend_model()
+  coefs <- names(coef(m))
+
+  # Sanity: this model has BOTH families of pre-period terms, which is the whole hazard.
+  expect_length(grep("^ShnatSeker::(2017|2018):Mother$", coefs), 2)
+  expect_length(grep("^ShnatSeker::(2017|2018):MotherWFH$", coefs), 2)
+
+  # Unanchored, "ShnatSeker::(2017|2018):Mother" matches all 4 -- so the pre-change function would
+  # have tested two different estimands at once while still looking like a well-formed pre-trend
+  # test. The anchor is what keeps the default restricted to the DiD-level terms.
+  expect_length(grep("ShnatSeker::(2017|2018):Mother", coefs), 4)
+  w <- suppressMessages(run_pretrend_joint_test(m))
+  expect_equal(w$df1, 2)
+})
+
+test_that("a caller-supplied keep selects exactly the pre-period triple-interaction terms", {
+  m <- make_ddd_pretrend_model()
+  w <- suppressMessages(run_pretrend_joint_test(
+    m,
+    keep  = "ShnatSeker::(2017|2018):MotherWFH$",
+    label = "Joint Wald, H0: pre-2020 Mother:year:WFH_Exposure coefficients = 0"
+  ))
+
+  expect_equal(w$df1, 2)
+  # 30 occupation clusters => G - 1 = 29 denominator df. Asserted because the DDD event study's
+  # clustering level is what makes this a small-G test, and a silent switch to IDPUF-style clustering
+  # would change the inference without changing df1.
+  expect_equal(w$df2, 29)
+  expect_true(w$p >= 0 && w$p <= 1)
+  expect_true(is.finite(w$stat))
+})
+
+test_that("label is what reaches the exported one-row table", {
+  m <- make_ddd_pretrend_model()
+  lab <- "Joint Wald, H0: pre-2020 Mother:year:WFH_Exposure coefficients = 0"
+  w <- suppressMessages(run_pretrend_joint_test(
+    m, keep = "ShnatSeker::(2017|2018):MotherWFH$", label = lab
+  ))
+
+  # Three Wald F-statistics now land in outputs/ as one-row frames. If the label did not follow the
+  # restriction set, the DDD's row would be filed under the DiD's hypothesis and the CSVs would be
+  # indistinguishable.
+  expect_s3_class(w$table, "data.frame")
+  expect_equal(nrow(w$table), 1)
+  expect_equal(w$table$statistic, lab)
+  expect_equal(w$table$df1, 2)
+
+  # And the default keeps the historical label, so the two existing exported rows are unchanged.
+  w_default <- suppressMessages(run_pretrend_joint_test(make_pretrend_model()))
+  expect_equal(w_default$table$statistic,
+               "Joint Wald, H0: pre-2020 Mother:year coefficients = 0")
+})
+
 # ── Integration: couple this to the REAL run_diagnostics()-produced model ────────────────────
 # The two tests above are valuable for their exact, hand-verifiable df/regex checks, but they run
 # entirely against make_pretrend_model()'s own independently hand-built formula -- if

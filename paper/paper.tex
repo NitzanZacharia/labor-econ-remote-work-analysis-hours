@@ -752,6 +752,10 @@ limitations are stated in Section~\ref{sec:limitations}.
 
 We estimate event-study versions of equation~\eqref{eq:did} with $\Mother \times$ year
 interactions (reference year 2019) for both outcomes and test the pre-period coefficients jointly.
+Because those test the difference-in-differences assumption rather than the triple-differences one,
+we also estimate the event-study version of equation~\eqref{eq:ddd} itself --- $\Post$ replaced by
+survey-year interactions at every level, so that $\Mother \times$ year $\times \WFH$ is recovered
+separately for each year --- and apply the same joint test to its pre-period coefficients.
 We re-estimate the hours DDD with an added $\Mother \times$ age-group interaction and with
 pre-period age-group raking weights, in response to the age imbalance noted above; with the
 external and realized exposure indices in place of the calibrated one; and, as a gender placebo,
@@ -907,8 +911,11 @@ Before turning to the estimates, Table~\ref{tab:pretrend} and Figure~\ref{fig:pr
 hours event study. Relative to 2019, neither pre-period $\Mother \times$ year coefficient is
 distinguishable from zero --- $0.3515$ in 2017 and $0.2013$ in 2018 --- and a joint Wald test on
 the two does not reject ($F(2, 63{,}198) = 0.949$, $p = 0.387$). The same test on the employment
-outcome also passes ($F(2, 79{,}069) = 0.63$, $p = 0.53$), so the identifying assumption is
-supported on both margins and over the full pre-period. In the post-period the effect builds
+outcome also passes ($F(2, 79{,}069) = 0.63$, $p = 0.53$), so the difference-in-differences
+identifying assumption is supported on both margins and over the full pre-period. Both of these are
+tests of equation~\eqref{eq:did}. The triple difference rests on a different and stricter
+assumption, which requires an event study of its own; that test is reported below in
+Table~\ref{tab:pretrend-ddd} and Figure~\ref{fig:pretrend-ddd}. In the post-period the effect builds
 gradually --- $0.3923$ in 2021, $0.1213$ in 2022, and $0.7517$\sym{**} in 2023.
 Figure~\ref{fig:pretrend} plots the same coefficients with their confidence intervals, and
 Figure~\ref{fig:hours-by-year} shows the corresponding raw gaps with no regression adjustment at
@@ -1067,6 +1074,83 @@ margin's failure might suggest is easy: the minimum detectable effect is $2.8640
 ($7.3\%$ of mean weekly hours, or $88.8\%$ of the point estimate). The contrast with the employment
 DDD --- whose MDE is eight to ten times \emph{its} point estimate --- still holds, but this design
 detects an effect of the size observed without a great deal of room to spare.
+
+\paragraph{Pre-trends for the triple difference.}
+The pre-trend tests of Table~\ref{tab:pretrend} license equation~\eqref{eq:did}, not
+equation~\eqref{eq:ddd}. They ask whether mothers and childless women trended together; the triple
+difference requires the stricter condition that the mother/non-mother gap trended together
+\emph{across levels of WFH exposure}. These are not the same assumption, and the
+difference-in-differences version is not the conservative one: because it averages over exposure, a
+pre-period divergence correlated with exposure but netting to zero across occupations would leave
+the test of Table~\ref{tab:pretrend} untouched while invalidating the headline estimate. We
+therefore estimate the event-study analogue of equation~\eqref{eq:ddd} --- replacing $\Post$ with a
+full set of survey-year interactions at every level of the interaction, so that the triple
+difference is recovered separately for each year against 2019 --- on the same sample, the same
+exposure index, and the same occupation-level clustering as column~(2) of Table~\ref{tab:hours}.
+
+Table~\ref{tab:pretrend-ddd} and Figure~\ref{fig:pretrend-ddd} report the result, and it is
+supportive. Neither pre-period coefficient is close to significant, and neither is far from zero in
+level: $0.5866$ in 2017 and $0.3134$ in 2018, against post-period estimates five to thirteen times
+larger. The joint Wald test does not reject, and does not come near rejecting
+($F(2, 39) = 0.041$, $p = 0.960$). The post-period path is flat, then steps up in 2021 and rises:
+$3.011$\sym{*}, $3.545$\sym{**}, $4.020$\sym{**}, all three individually significant and straddling
+the pooled $3.224$ of Table~\ref{tab:hours}, which is what a treatment beginning in 2021 looks like
+rather than a pre-existing trend carried through the sample.
+
+One caveat belongs with this test rather than in a footnote. Clustering at the level the exposure
+regressor actually varies at leaves forty occupation clusters, so the pre-period standard errors
+($2.2367$ and $1.7449$) are of the same order as the effect being tested. Each pre-period confidence
+interval therefore contains values larger in magnitude than $3.224$: the test is consistent with
+parallel trends and shows no sign of a violation, but it does not have the power to rule out a
+pre-trend as large as the estimate itself. This is the same small-cluster limitation the headline
+estimate carries, and we read it as supporting evidence rather than as a closed question.
+
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Event study: $\Mother \times$ year $\times$ $\WFH$, weekly hours (reference
+2019)}\label{tab:pretrend-ddd}
+\begin{tabular}{lcc}
+\toprule
+Year & Coefficient & SE \\
+\midrule
+2017 & $0.5866$ & 2.2367 \\
+2018 & $0.3134$ & 1.7449 \\
+2021 & $3.0114$\sym{*} & 1.2327 \\
+2022 & $3.5454$\sym{**} & 1.0850 \\
+2023 & $4.0203$\sym{**} & 1.3397 \\
+\midrule
+Joint test, 2017--2018 & \multicolumn{2}{c}{$F(2, 39) = 0.041$, $p = 0.960$} \\
+Observations & \multicolumn{2}{c}{246{,}326} \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\small
+\item Employed women matched to a two-digit occupation and working in the reference week; standard
+controls; calibrated occupation-level exposure; standard errors clustered by two-digit occupation
+(40 clusters). The specification includes the year main effects and both two-way year interactions
+($\Mother \times$ year and $\WFH \times$ year) alongside the triple interaction reported here;
+omitting any of them would make the estimate a two-way difference rather than a triple one.
+Coefficients are hours per unit of exposure, where exposure runs from zero to one. Neither
+pre-period coefficient is significant and the joint test does not reject.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../outputs/figures/hours_ddd_event_study.pdf}
+\caption{Event study for the triple difference: $\Mother \times$ year $\times$ $\WFH$ interactions
+for weekly hours, reference year 2019}\label{fig:pretrend-ddd}
+\begin{minipage}{0.8\textwidth}\small
+\vspace{0.3em}
+\emph{Notes:} Point estimates of Table~\ref{tab:pretrend-ddd}; vertical bars are 95\% confidence
+intervals from occupation-clustered standard errors. The hollow point at 2019 is the omitted
+reference year, pinned at zero by construction rather than estimated. The gap between 2019 and 2021
+is the excluded 2020 survey year; the dotted rule marks the treatment boundary. Compare
+Figure~\ref{fig:pretrend}, which plots the difference-in-differences analogue and tests a weaker
+assumption.
+\end{minipage}
+\end{figure}
 
 \paragraph{Lee bounds for the DDD.}
 Table~\ref{tab:lee-ddd} applies the generalized selection correction. Excess selection into the
@@ -1309,7 +1393,13 @@ transparently but do not claim heterogeneity on its basis.
 \paragraph{Parallel trends, and a measurement correction that produced them.}
 Joint pre-trend tests do not reject on either margin --- $F(2, 63{,}198) = 0.949$, $p = 0.387$ for
 hours and $F(2, 79{,}069) = 0.63$, $p = 0.53$ for employment --- so the identifying assumption is
-supported over the full 2017--2019 pre-period rather than a truncated version of it.
+supported over the full 2017--2019 pre-period rather than a truncated version of it. The triple
+difference's own pre-trend test, on the event-study version of equation~\eqref{eq:ddd}
+(Table~\ref{tab:pretrend-ddd}), does not reject either ($F(2, 39) = 0.041$, $p = 0.960$). That test
+is the one that matters for the headline estimate, and it is also the weakest of the three: with
+forty occupation clusters its pre-period standard errors are of the same order as the effect being
+tested, so it cannot exclude a pre-trend the size of the estimate. It is evidence of no visible
+violation, not proof of none.
 
 That is worth stating carefully, because it is true only after a correction. As described in
 Section~\ref{sec:data}, the 2017 file records zero usual hours for respondents who were employed

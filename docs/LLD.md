@@ -255,6 +255,45 @@ run_hours_ddd_regression(cleaned_df: tibble, exposure_index: tibble,
 # precision-weighted (1/se_j^2) against occupation-level exposure -- mirrors the removed
 # run_ddd_regression()'s Model 2.
 
+# ── hours_ddd_event_study.R / build_ddd_event_study_plot.R ──────────────────
+# Year-by-year event-study version of the primary DDD above, plus its ggplot builder. Exists because
+# the two pretrend models under Diagnostics.R / hours_diagnostics.R are both DiD-level
+# (Mother x year): the DDD's identifying assumption is that the mother/non-mother gap trended
+# together ACROSS exposure levels, which a test averaging over exposure cannot detect a violation of.
+# Wired into main.R section 8a (not section 7 -- it needs section 8's exposure measure),
+# unconditional. See docs/decisions/ddd-event-study.md.
+run_hours_ddd_event_study(cleaned_df: tibble, exposure_index: tibble,
+                          controls: character = DEFAULT_CONTROLS,
+                          ref_year: numeric(1) = 2019) ->
+  invisible(list(
+    table = etable_df, model = fixest,
+    coefs = tibble,   # term, year, estimate, std_error, t_stat, p_value, ci_low, ci_high, period
+    ref_year = numeric(1), term_suffix = character(1),   # "MotherWFH"
+    n_employed = integer(1), n_matched = integer(1)
+  ))
+# WorkHoursCont ~ Mother*WFH_Exposure + i(ShnatSeker, ref) + i(ShnatSeker, Mother, ref)
+#   + i(ShnatSeker, WFH_Exposure, ref) + i(ShnatSeker, MotherWFH, ref) + controls,
+# cluster = ~MishlachYad_ISCO_08_2, Employed==1 only, same occupation-level exposure join as
+# run_hours_ddd_regression(). MotherWFH is a materialized Mother*WFH_Exposure column because
+# fixest's i(f, var) takes a variable, not an expression. Coefficients of interest are named
+# "ShnatSeker::<year>:MotherWFH"; all three lower-order year interactions are required for the
+# estimate to be a triple difference at all. p_value/ci_* use t on degrees_freedom(model, "t")
+# (G-1 ~ 40 clusters), matching etable()'s own printed values rather than a normal approximation.
+# term_suffix is returned so main.R can build run_pretrend_joint_test()'s `keep` regex from it
+# instead of re-typing the literal at the call site.
+
+build_ddd_event_study_plot(coefs: tibble, ref_year: numeric(1) = 2019,
+                           treatment_year: numeric(1) = 2021,
+                           title: character(1) = NULL, subtitle: character(1) = NULL,
+                           y_label: character(1) = "Mother x Year x WFH Exposure (95% CI)") ->
+  invisible(list(data = tibble, plot = ggplot))   # NULL if coefs is NULL/0-row
+# Pointrange + 95% CI by year, geom_hline(0), dotted vertical rule at the (ref_year+treatment_year)/2
+# midpoint so it lands in the empty 2020 gap rather than on a plotted estimate. ref_year is
+# re-inserted as a hollow, zero-width zero (it has no row in coefs -- it is the omitted category).
+# x breaks are restricted to observed years so the axis does not invent a 2020 tick. stop()s if coefs
+# lacks a required column; returns NULL (with a message) if coefs is absent -- matching
+# build_hours_subgroup_comparison()/build_mechanism_scatter().
+
 run_hours_ddd_lee_bounds(cleaned_df: tibble, exposure_index: tibble, exposure_cells: tibble,
                           controls: character = DEFAULT_CONTROLS) ->
   invisible(list(
@@ -437,10 +476,20 @@ run_hours_ddd_reweighted(cleaned_df: tibble, exposure_cells: tibble, exposure_in
 # WorkHoursCont ~ Mother*Post*WFH_Exposure + controls, weights = rake_weight,
 # cluster = ~MishlachYad_ISCO_08_2.
 
-run_pretrend_joint_test(pretrend_model: fixest) -> invisible(wald_result)
-# Joint Wald test, H0: a fitted pretrend model's pre-2020 Mother:year interactions are jointly
-# zero. Fully generic -- run once for the secondary DDD's pretrend model (Diagnostics.R) and once
-# for the primary DDD's (hours_diagnostics.R).
+run_pretrend_joint_test(pretrend_model: fixest,
+                         keep: character(1) = "ShnatSeker::(2017|2018):Mother$",
+                         label: character(1) = "Joint Wald, H0: pre-2020 Mother:year coefficients = 0")
+  -> invisible(wald_result + list(table = data.frame))
+# Joint Wald test, H0: a fitted pretrend model's pre-2020 interactions of interest are jointly zero.
+# Fully generic -- run three times: the secondary DDD's DiD pretrend model (Diagnostics.R), the
+# primary outcome's DiD pretrend model (hours_diagnostics.R), and the primary DDD's own
+# triple-interaction event study (hours_ddd_event_study.R, which passes
+# keep = "ShnatSeker::(2017|2018):MotherWFH$" and its own label).
+# The default `keep` is ANCHORED with `$` on purpose: unanchored, "...:Mother" also matches
+# "...:MotherWFH", so a DDD event-study model would silently be tested on 4 restrictions spanning
+# two estimands while still looking like a well-formed 2-restriction pretrend test. `label` is
+# parameterized because it is written into the exported one-row table, and three F-statistics now
+# reach outputs/. See docs/decisions/ddd-event-study.md.
 
 # All wired into main.R behind RUN_AGE_BALANCE_ROBUSTNESS (default TRUE as of 2026-09-19) -- see
 # docs/decisions/age-balance-robustness-chain.md.
