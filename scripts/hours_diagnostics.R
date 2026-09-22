@@ -14,6 +14,7 @@
 # analog and are intentionally omitted.
 library(tidyverse)
 library(fixest)
+source(file.path("scripts", "tidy_event_study_coefs.R"))
 
 run_hours_diagnostics <- function(cleaned_df) {
   hours_df <- filter(cleaned_df, Employed == 1)
@@ -30,7 +31,7 @@ run_hours_diagnostics <- function(cleaned_df) {
               n = sum(!is.na(WorkHoursCont)), .groups = "drop")
   print(hours_by_period)
 
-  # ── 2. Parallel trends -- event-study plot (hours) ───────────────────────────────────────────
+  # ── 2. Parallel trends -- event study (hours) ────────────────────────────────────────────────
   # Same construction as run_diagnostics()'s pretrend model, WorkHoursCont in place of Employed,
   # fit on the Employed == 1 subsample. i(ShnatSeker, ref = 2019) supplies the year main effects
   # for the Post = 0 group; ref = 2019 sets the omitted reference period in both i() terms.
@@ -46,21 +47,27 @@ run_hours_diagnostics <- function(cleaned_df) {
   pretrend_table_hours <- etable(reg_pretrend_hours, digits = 4)
   print(pretrend_table_hours)
 
-  # Draws to whatever graphics device is already active -- deliberately no dev.new()/dev.off()
-  # here, matching Diagnostics.R's own convention (see that file's header comment for why).
-  tryCatch({
-    # reg_pretrend_hours's formula has two i() terms in this order: i(ShnatSeker, ref=2019) (year
-    # main effects, index 1) then i(ShnatSeker, Mother, ref=2019) (the Mother x Year interaction,
-    # index 2 -- the actual parallel-trends test this plot is titled for). i.select = 2 selects
-    # that second term; without it, iplot() would silently plot the year main effects instead.
-    iplot(reg_pretrend_hours, i.select = 2, main = "Event-study (hours): Mother x Year (ref = 2019)")
-  }, error = function(e) {
-    message("iplot failed: ", e$message)
-  })
+  # Tidy one-row-per-year frame of the Mother x Year interactions -- the actual parallel-trends
+  # test this section exists for. main.R hands it to build_event_study_plot(); it also reaches
+  # outputs/ as a CSV, which the etable() character matrix above cannot serve as.
+  #
+  # This replaced an iplot(reg_pretrend_hours, i.select = 2, ...) call that drew the same
+  # coefficients to whatever device was active. Two reasons it went: iplot() returns nothing, so
+  # the figure could only be captured by wrapping this whole function in a pdf()/dev.off() pair in
+  # main.R and could never reach export_paper_figures(); and i.select = 2 is a positional index
+  # into the formula's i() terms, so inserting or reordering a term would have silently plotted the
+  # year main effects under a "Mother x Year" title. tidy_event_study_coefs() selects by anchored
+  # coefficient name instead, which cannot drift that way.
+  pretrend_coefs_hours <- tidy_event_study_coefs(
+    reg_pretrend_hours, term_suffix = "Mother", ref_year = 2019
+  )
+  print(as.data.frame(pretrend_coefs_hours %>%
+                        select(year, estimate, std_error, p_value, ci_low, ci_high, period)))
 
   invisible(list(
     hours_by_period = hours_by_period,
     pretrend_table   = pretrend_table_hours,
+    pretrend_coefs   = pretrend_coefs_hours,
     pretrend_model   = reg_pretrend_hours
   ))
 }

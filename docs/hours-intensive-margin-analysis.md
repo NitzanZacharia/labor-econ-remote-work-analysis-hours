@@ -24,8 +24,8 @@ the reference week. No separate missing-data correction is needed for `WorkHours
 sample-selection concern it does create (conditioning hours on working) is handled directly by the
 Lee-bounds analysis in §3, not by imputation.
 
-**Event-study pre-trend** (`outputs/hours_diagnostics_pretrend_table.csv`,
-`outputs/event_study_pretrend_hours.pdf`). Coefficients are `Mother x ShnatSeker`, reference year
+**Event-study pre-trend** (`outputs/hours_diagnostics_pretrend_coefs.csv`,
+`outputs/figures/hours_event_study.pdf`). Coefficients are `Mother x ShnatSeker`, reference year
 2019:
 
 | Year | Coefficient | SE | Significant? |

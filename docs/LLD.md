@@ -255,7 +255,7 @@ run_hours_ddd_regression(cleaned_df: tibble, exposure_index: tibble,
 # precision-weighted (1/se_j^2) against occupation-level exposure -- mirrors the removed
 # run_ddd_regression()'s Model 2.
 
-# ── hours_ddd_event_study.R / build_ddd_event_study_plot.R ──────────────────
+# ── hours_ddd_event_study.R / tidy_event_study_coefs.R / build_event_study_plot.R ──────────
 # Year-by-year event-study version of the primary DDD above, plus its ggplot builder. Exists because
 # the two pretrend models under Diagnostics.R / hours_diagnostics.R are both DiD-level
 # (Mother x year): the DDD's identifying assumption is that the mother/non-mother gap trended
@@ -282,11 +282,27 @@ run_hours_ddd_event_study(cleaned_df: tibble, exposure_index: tibble,
 # term_suffix is returned so main.R can build run_pretrend_joint_test()'s `keep` regex from it
 # instead of re-typing the literal at the call site.
 
-build_ddd_event_study_plot(coefs: tibble, ref_year: numeric(1) = 2019,
-                           treatment_year: numeric(1) = 2021,
-                           title: character(1) = NULL, subtitle: character(1) = NULL,
-                           y_label: character(1) = "Mother x Year x WFH Exposure (95% CI)") ->
+tidy_event_study_coefs(model: fixest, term_suffix: character(1), ref_year: numeric(1),
+                        factor_var: character(1) = "ShnatSeker") -> tibble
+# One row per non-reference year: term, year, estimate, std_error, t_stat, p_value, ci_low, ci_high,
+# period ("Pre"/"Post" relative to ref_year). Selects terms by the ANCHORED pattern
+# ^<factor_var>::(\d{4}):<term_suffix>$ -- unanchored, term_suffix "Mother" would also collect
+# ":MotherWFH", silently mixing two estimands (same hazard as pretrend_wald_test.R's `keep`).
+# p_value/ci_* use t on degrees_freedom(model, "t"), reproducing etable()'s printed values.
+# stop()s if no term matches, rather than returning a 0-row frame that exports an empty CSV.
+# Shared by run_hours_ddd_event_study() (term_suffix "MotherWFH") and run_hours_diagnostics()
+# (term_suffix "Mother"), so the two event studies cannot drift apart in their inference.
+
+build_event_study_plot(coefs: tibble, ref_year: numeric(1) = 2019,
+                       treatment_year: numeric(1) = 2021,
+                       title: character(1) = NULL, subtitle: character(1) = NULL,
+                       y_label: character(1) = "Mother x Year x WFH Exposure (95% CI)",
+                       se_note: character(1) = "occupation-clustered standard errors") ->
   invisible(list(data = tibble, plot = ggplot))   # NULL if coefs is NULL/0-row
+# Draws BOTH of the paper's event studies: Figure 6 (DiD, from run_hours_diagnostics()'s
+# pretrend_coefs, se_note "standard errors clustered by individual") and Figure 7 (DDD, from
+# run_hours_ddd_event_study()'s coefs, default se_note). se_note is a parameter because the two
+# cluster at different levels and the caption states which.
 # Pointrange + 95% CI by year, geom_hline(0), dotted vertical rule at the (ref_year+treatment_year)/2
 # midpoint so it lands in the empty 2020 gap rather than on a plotted estimate. ref_year is
 # re-inserted as a hollow, zero-width zero (it has no row in coefs -- it is the omitted category).
@@ -344,8 +360,11 @@ run_hours_diagnostics(cleaned_df: tibble) ->
     # WorkHoursCont ~ Mother + i(ShnatSeker,ref=2019) + i(ShnatSeker,Mother,ref=2019) + controls,
     # data = filter(cleaned_df, Employed == 1)
   ))
-# Primary (hours) outcome analog -- same iplot()/device-management caveat as run_diagnostics()
-# above. Omits run_diagnostics()'s Employed-NA-specific missingness audits (no hours analog).
+# Primary (hours) outcome analog. Also returns pretrend_coefs (tidy_event_study_coefs() on the
+# Mother x year terms) -- main.R draws it with build_event_study_plot() as the paper's Figure 6.
+# Unlike run_diagnostics(), this function has NO graphics side effect: the iplot() call it used to
+# make was removed with that port, so main.R wraps it in no device. Omits run_diagnostics()'s
+# Employed-NA-specific missingness audits (no hours analog).
 
 # ── gender_placebo.R / hours_gender_placebo.R ─────────────────────────────────
 run_gender_placebo(folder_path: character(1), cleaned_men: tibble = NULL, cleaned_women: tibble = NULL,

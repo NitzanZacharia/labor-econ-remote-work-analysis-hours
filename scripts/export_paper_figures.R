@@ -4,9 +4,8 @@
 #
 # Why this is a second exporter rather than an option on export_all_results():
 #   1. Raster vs vector. export_results.R:19 hard-codes ggsave(width = 8, height = 5, dpi = 150).
-#      A 150 dpi PNG is fine for browsing outputs/ but visibly soft in print next to the vector
-#      event-study PDF the paper already includes (its \includegraphics of
-#      event_study_pretrend_hours.pdf). Paper figures are vector.
+#      A 150 dpi PNG is fine for browsing outputs/ but visibly soft in print. Paper figures are
+#      vector.
 #   2. Flat names, deliberately. export_all_results() recurses because it is handed whatever
 #      heterogeneous shape the pipeline produced, and derives filenames from the nesting path.
 #      These filenames are hard-coded inside paper.tex, so under recursion an innocuous refactor of

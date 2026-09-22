@@ -37,6 +37,7 @@ library(tidyverse)
 library(fixest)
 source(file.path("scripts", "data_processing.R"))
 source(file.path("scripts", "ddd_collinearity_diagnostics.R"))
+source(file.path("scripts", "tidy_event_study_coefs.R"))
 
 # The event-study coefficient suffix and the reference year are exposed as arguments rather than
 # hardcoded because robustness/pretrend_wald_test.R has to build a `keep` regex that matches exactly
@@ -90,42 +91,10 @@ run_hours_ddd_event_study <- function(cleaned_df, exposure_index, controls = DEF
   # Tidy frame of just the triple-interaction terms, one row per non-reference year. This is what
   # the plot builder consumes and what reaches outputs/ as a CSV -- etable()'s table is a formatted
   # character matrix covering every coefficient in the model, which is fine for reading but useless
-  # as data. SEs come from se() (the clustered vcov above), not from the model's internals, so the
-  # exported numbers are the same ones etable() printed.
+  # as data. The extraction is shared with run_hours_diagnostics()'s DiD-level event study; see
+  # tidy_event_study_coefs.R for why it is one implementation rather than two.
   term_suffix <- "MotherWFH"
-  term_pattern <- sprintf("^ShnatSeker::(\\d{4}):%s$", term_suffix)
-  es_terms <- grep(term_pattern, names(coef(reg_es)), value = TRUE)
-
-  if (length(es_terms) == 0) {
-    # Defensive, not expected: every term could only vanish if the formula or fixest's naming
-    # changed. Erroring here (rather than returning an empty frame that quietly exports a 0-row CSV
-    # and plots nothing) is the right trade -- this is the function's entire output.
-    stop("run_hours_ddd_event_study: no '", term_suffix, "' event-study coefficients found in the ",
-         "fitted model. Coefficient names present: ", paste(names(coef(reg_es)), collapse = ", "))
-  }
-
-  est <- coef(reg_es)[es_terms]
-  ses <- se(reg_es)[es_terms]
-
-  coefs <- tibble(
-    term     = es_terms,
-    year     = as.integer(sub(term_pattern, "\\1", es_terms)),
-    estimate = unname(est),
-    std_error = unname(ses)
-  ) %>%
-    mutate(
-      t_stat  = estimate / std_error,
-      # fixest's clustered vcov gives a t distribution on G - 1 df, not a normal. Using qt/pt here
-      # rather than 1.96/pnorm keeps the exported p-values and CIs consistent with what etable()
-      # prints above for the same coefficients, and matters at ~40 clusters (t_.975 = 2.02, not 1.96).
-      p_value = 2 * pt(abs(t_stat), df = degrees_freedom(reg_es, type = "t"), lower.tail = FALSE),
-      ci_low  = estimate - qt(0.975, df = degrees_freedom(reg_es, type = "t")) * std_error,
-      ci_high = estimate + qt(0.975, df = degrees_freedom(reg_es, type = "t")) * std_error,
-      # Pre/post relative to the treatment boundary. ref_year itself is omitted from the model, so
-      # it never appears here -- the plot builder re-inserts it as a pinned zero.
-      period  = if_else(year < ref_year, "Pre", "Post")
-    ) %>%
-    arrange(year)
+  coefs <- tidy_event_study_coefs(reg_es, term_suffix = term_suffix, ref_year = ref_year)
 
   message("=== Hours DDD event study: Mother x year x WFH_Exposure (ref = ", ref_year, ") ===")
   print(as.data.frame(coefs %>% select(year, estimate, std_error, p_value, ci_low, ci_high, period)))

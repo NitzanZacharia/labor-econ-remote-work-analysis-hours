@@ -15,7 +15,12 @@ known_removed <- c(
   "scripts/ddd_regression.R",             # employment-DDD robustness variants, removed 2026-09-12
   "robustness/phase2_robustness.R",       # never wired in; removed 2026-09-12
   "tests/testthat/test-ddd_regression.R", # went with the script above
-  "outputs/figures/hours_2x2.pdf"         # figure cut from the paper 2026-09-21
+  "outputs/figures/hours_2x2.pdf",        # figure cut from the paper 2026-09-21
+  # The hours DiD event study's old whole-device PDF. Replaced 2026-09-22 by
+  # outputs/figures/hours_event_study.pdf when run_hours_diagnostics() stopped drawing via iplot()
+  # and main.R started building the figure with build_event_study_plot() -- see
+  # docs/decisions/ddd-event-study.md's "Porting the DiD event study".
+  "outputs/event_study_pretrend_hours.pdf"
 )
 
 test_that("every repo-relative path referenced in a .R or .md file resolves", {

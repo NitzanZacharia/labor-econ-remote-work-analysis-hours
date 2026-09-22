@@ -1,36 +1,43 @@
-# build_ddd_event_study_plot.R
-# ggplot event-study plot for run_hours_ddd_event_study()'s triple-interaction coefficients.
+# build_event_study_plot.R
+# ggplot event-study plot, given a tidy one-row-per-year coefficient frame from
+# tidy_event_study_coefs(). Drives both of the paper's event studies: the DiD-level
+# Mother x year one (run_hours_diagnostics()) and the triple-interaction
+# Mother x year x WFH_Exposure one (run_hours_ddd_event_study()).
 #
-# Separate from the estimator (scripts/hours_ddd_event_study.R) for the same reason
-# build_hours_subgroup_comparison() and build_mechanism_scatter() are separate from the models they
-# draw: a builder that takes an already-tidied frame is testable without fitting anything, and
-# main.R's two exporters can then treat it like every other plot in the pipeline.
+# Separate from the estimators for the same reason build_hours_subgroup_comparison() and
+# build_mechanism_scatter() are separate from the models they draw: a builder that takes an
+# already-tidied frame is testable without fitting anything, and main.R's two exporters can then
+# treat it like every other plot in the pipeline.
 #
-# This is the project's first ggplot event study. The two existing ones (run_diagnostics(),
-# run_hours_diagnostics()) use fixest's base-graphics iplot(), which draws to whatever device is
-# active and returns nothing -- so its output cannot be passed to export_all_results() or
-# export_paper_figures(), which is why those two plots reach outputs/ only as whole-device PDFs
-# wrapped in an explicit pdf()/dev.off() pair in main.R section 7. Returning a ggplot object instead
-# means this figure is exported by exactly the same two code paths as every other figure, with no
-# device management at the call site.
+# It replaced fixest's base-graphics iplot(), which draws to whatever device is active and returns
+# nothing -- so its output could not be passed to export_all_results() or export_paper_figures(),
+# and reached outputs/ only as a whole-device PDF wrapped in an explicit pdf()/dev.off() pair in
+# main.R. Returning a ggplot means both event studies are exported by the same two code paths as
+# every other figure, share the project's theme and palette, and carry no device management at the
+# call site. iplot() also selected its series by positional index (i.select), which silently plots
+# the wrong term when the formula is reordered.
+#
+# run_diagnostics()'s employment-outcome event study still uses iplot(): it is a repo diagnostic
+# that the paper does not print, so it was left on the old path rather than ported for symmetry.
 library(tidyverse)
 source(file.path("scripts", "paper_theme.R"))
 
-build_ddd_event_study_plot <- function(coefs,
-                                      ref_year       = 2019,
-                                      treatment_year = 2021,
-                                      title          = NULL,
-                                      subtitle       = NULL,
-                                      y_label         = "Mother x Year x WFH Exposure (95% CI)") {
+build_event_study_plot <- function(coefs,
+                                   ref_year       = 2019,
+                                   treatment_year = 2021,
+                                   title          = NULL,
+                                   subtitle       = NULL,
+                                   y_label        = "Mother x Year x WFH Exposure (95% CI)",
+                                   se_note        = "occupation-clustered standard errors") {
   if (is.null(coefs) || !is.data.frame(coefs) || nrow(coefs) == 0) {
-    message("build_ddd_event_study_plot: no event-study coefficients supplied -- returning NULL.")
+    message("build_event_study_plot: no event-study coefficients supplied -- returning NULL.")
     return(NULL)
   }
 
   required <- c("year", "estimate", "std_error", "ci_low", "ci_high")
   missing_cols <- setdiff(required, names(coefs))
   if (length(missing_cols) > 0) {
-    stop("build_ddd_event_study_plot: `coefs` is missing required column(s): ",
+    stop("build_event_study_plot: `coefs` is missing required column(s): ",
          paste(missing_cols, collapse = ", "))
   }
 
@@ -81,9 +88,12 @@ build_ddd_event_study_plot <- function(coefs,
       subtitle = subtitle,
       x        = "Survey year",
       y        = y_label,
+      # se_note is parameterized because the two event studies this builds cluster at different
+      # levels -- occupation for the DDD (the level exposure varies at), individual for the DiD --
+      # and a caption naming the wrong one would misdescribe the intervals it sits under.
       caption  = paste0(
         ref_year, " is the omitted reference year (pinned at zero, hollow point). ",
-        "Intervals are 95% CIs from occupation-clustered standard errors."
+        "Intervals are 95% CIs from ", se_note, "."
       )
     ) +
     theme_paper()

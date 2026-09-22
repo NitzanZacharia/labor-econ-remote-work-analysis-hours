@@ -1,10 +1,12 @@
 # Decision Memo: DDD Event Study (Mother × Year × WFH_Exposure) and Its Own Pre-Trend Test
 
-**Status: IMPLEMENTED** (2026-09-21). New: `scripts/hours_ddd_event_study.R`
-(`run_hours_ddd_event_study()`), `scripts/build_ddd_event_study_plot.R`
-(`build_ddd_event_study_plot()`). Modified: `robustness/pretrend_wald_test.R`
-(`run_pretrend_joint_test()` gains `keep`/`label` parameters), `main.R` §8a. Wired in
-unconditionally — no feature flag, matching §8a's existing convention.
+**Status: IMPLEMENTED** (2026-09-21; DiD event study ported to the same builder 2026-09-22). New:
+`scripts/hours_ddd_event_study.R` (`run_hours_ddd_event_study()`),
+`scripts/build_event_study_plot.R` (`build_event_study_plot()`),
+`scripts/tidy_event_study_coefs.R` (`tidy_event_study_coefs()`). Modified:
+`robustness/pretrend_wald_test.R` (`run_pretrend_joint_test()` gains `keep`/`label` parameters),
+`scripts/hours_diagnostics.R` (drops `iplot()`, returns `pretrend_coefs`), `main.R` §7 and §8a.
+Wired in unconditionally — no feature flag, matching §8a's existing convention.
 
 ## Motivation: the primary estimand had no pre-trend test of its own
 
@@ -86,14 +88,41 @@ DiD's hypothesis string would be unattributable.
   function serving two estimands with two clustering levels selected by argument. A separate
   estimator beside `hours_ddd_regression.R` keeps each pretrend model adjacent to the specification
   it tests.
-- **`iplot()` instead of a ggplot builder.** The two existing event studies use fixest's base-graphics
-  `iplot()`, which returns nothing and draws to the active device — which is why they reach `outputs/`
-  only as whole-device PDFs wrapped in an explicit `pdf()`/`dev.off()` pair in `main.R` §7, and why
-  neither can be handed to `export_all_results()` or `export_paper_figures()`. A returned ggplot is
-  exported by the same two code paths as every other figure in the project, with no device management
-  at the call site. Also: `iplot(i.select = 4)` would have been required to select the triple-
-  interaction term, a positional index into the formula that silently plots the wrong series when the
-  formula is reordered (`hours_diagnostics.R`'s own header records having been bitten by `i.select`).
+- **`iplot()` instead of a ggplot builder.** The two existing event studies used fixest's
+  base-graphics `iplot()`, which returns nothing and draws to the active device — which is why they
+  reached `outputs/` only as whole-device PDFs wrapped in an explicit `pdf()`/`dev.off()` pair in
+  `main.R` §7, and why neither could be handed to `export_all_results()` or
+  `export_paper_figures()`. A returned ggplot is exported by the same two code paths as every other
+  figure in the project, with no device management at the call site. Also: `iplot(i.select = 4)`
+  would have been required to select the triple-interaction term, a positional index into the
+  formula that silently plots the wrong series when the formula is reordered.
+
+## Porting the DiD event study (2026-09-22)
+
+The paper's Figure 6 (the hours DiD event study) was the last `iplot()` figure it printed, and
+putting it beside the new Figure 7 made the gap obvious: it carried a baked-in plot title that
+duplicated the LaTeX caption, a raw `ShnatSeker` variable name as its x-axis label, a 2020 tick with
+no estimate under it, and none of the project's theme or palette. Two figures a page apart, meant to
+be read against each other, in two different visual languages.
+
+`run_hours_diagnostics()` now returns `pretrend_coefs` instead of drawing, `main.R` §7 drops its
+`pdf()`/`dev.off()` wrapper, and `build_event_study_plot()` draws both figures. Three consequences
+worth recording:
+
+- **The builder was renamed** from `build_ddd_event_study_plot()`, and gained an `se_note`
+  parameter. It is no longer DDD-specific, and the two figures cluster at different levels — the
+  caption has to say which, so a default left unchanged on the DiD figure would have advertised
+  occupation-clustered intervals that are clustered by individual.
+- **The tidy-coefficient extraction moved to `tidy_event_study_coefs.R`** rather than being copied.
+  Both event studies need the same anchored term selection and the same t-on-(G−1) arithmetic; a
+  second copy is where the DiD figure's inference would quietly drift from the DDD figure's.
+- **`outputs/event_study_pretrend_hours.pdf` is deleted** (and recorded in
+  `test-reference-integrity.R`'s `known_removed`), with `paper.tex` now including
+  `outputs/figures/hours_event_study.pdf` like every other paper figure.
+
+`run_diagnostics()`'s employment-outcome event study was deliberately **not** ported. It is a repo
+diagnostic the paper does not print, so it keeps `iplot()` and its `pdf()` wrapper; porting it would
+have been symmetry for its own sake.
 ## In the paper
 
 Added to `paper/paper.tex` (2026-09-22) as Table `tab:pretrend-ddd` and Figure `fig:pretrend-ddd` in

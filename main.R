@@ -25,6 +25,7 @@ source(file.path("scripts", "wfh_exposure_cells.R"))
 source(file.path("scripts", "isco_masking_diagnostics.R"))
 source(file.path("scripts", "ddd_collinearity_diagnostics.R"))
 source(file.path("scripts", "hours_ddd_regression.R"))
+source(file.path("scripts", "tidy_event_study_coefs.R"))
 source(file.path("scripts", "hours_ddd_event_study.R"))
 source(file.path("scripts", "hours_ddd_lee_bounds.R"))
 source(file.path("scripts", "wfh_first_stage_check.R"))
@@ -37,7 +38,7 @@ source(file.path("scripts", "paper_theme.R"))
 source(file.path("scripts", "hours_descriptive_plots.R"))
 source(file.path("scripts", "hours_dose_response.R"))
 source(file.path("scripts", "build_mechanism_scatter.R"))
-source(file.path("scripts", "build_ddd_event_study_plot.R"))
+source(file.path("scripts", "build_event_study_plot.R"))
 
 # robustness/ is normally sourced only inside the RUN_AGE_BALANCE_ROBUSTNESS block, but
 # pretrend_wald_test.R is a diagnostic rather than a robustness spec: its F-statistics are the
@@ -125,9 +126,18 @@ diagnostics_results <- run_diagnostics(cleaned_df)
 dev.off()
 
 # Primary (hours) pretrend/event-study check -- hours_diagnostics.R (docs/decisions/hours-ddd-pivot.md).
-pdf(file.path("outputs", "event_study_pretrend_hours.pdf"))
+# No pdf()/dev.off() wrapper, unlike the employment check above: run_hours_diagnostics() no longer
+# draws anything, it returns tidy coefficients that build_event_study_plot() turns into a ggplot
+# below (docs/decisions/ddd-event-study.md's "Porting the DiD event study").
 hours_diagnostics_results <- run_hours_diagnostics(cleaned_df)
-dev.off()
+
+hours_event_study_plot <- build_event_study_plot(
+  hours_diagnostics_results$pretrend_coefs,
+  title    = "Hours event study: Mother × Year",
+  subtitle = "Weekly work hours, employed women aged 25–59; 95% CIs, individual-clustered SEs",
+  y_label  = "Mother × Year (95% CI)",
+  se_note  = "standard errors clustered by individual"
+)
 
 # Joint Wald tests on the pre-2020 Mother:year coefficients. Unconditional, and deliberately placed
 # right beside the event studies whose models they test: parallel trends requires the pre-period
@@ -284,7 +294,7 @@ pretrend_wald_hours_ddd <- run_pretrend_joint_test(
   label = "Joint Wald, H0: pre-2020 Mother:year:WFH_Exposure coefficients = 0"
 )
 
-hours_ddd_event_study_plot <- build_ddd_event_study_plot(
+hours_ddd_event_study_plot <- build_event_study_plot(
   hours_ddd_event_study$coefs,
   ref_year = hours_ddd_event_study$ref_year,
   title    = "Hours DDD event study: Mother × Year × WFH Exposure",
@@ -565,6 +575,10 @@ results_to_export <- list(
   employment_by_child_age = emp_res,
   diagnostics = diagnostics_results,
   hours_diagnostics = hours_diagnostics_results,
+  # The DiD event-study figure (§7), keyed so it lands as hours_event_study_plot.png. Its
+  # coefficients already reach outputs/ as hours_diagnostics_pretrend_coefs.csv via the
+  # hours_diagnostics entry above, so only the plot is passed here.
+  hours_event_study = list(plot = hours_event_study_plot$plot),
   pretrend_wald_employment = pretrend_wald$table,
   pretrend_wald_hours = pretrend_wald_hours$table,
   pretrend_wald_hours_ddd = pretrend_wald_hours_ddd$table,
@@ -680,6 +694,11 @@ paper_figures <- list(
   # plot still reaches outputs/ as a PNG via export_all_results() for browsing; it just has no
   # business being the figure a reader sees next to a null result.
   hours_by_year         = list(plot = hours_descriptives$plots$by_year,    width = 5.0, height = 5.0),
+  # paper.tex \includegraphics this as Figure fig:pretrend (Results §5.3), replacing the
+  # whole-device outputs/event_study_pretrend_hours.pdf the iplot() version used to write. Same
+  # dimensions as the DDD event study below: the two sit a page apart in the paper and are meant to
+  # be read against each other, so they must not differ in scale.
+  hours_event_study     = list(plot = hours_event_study_plot$plot,         width = 5.0, height = 3.4),
   # paper.tex \includegraphics this as Figure fig:pretrend-ddd (Results §5.3). Sized to match
   # hours_dose_response below rather than to the plot's own natural aspect: every paper figure is
   # printed at 0.8\textwidth, so a PDF authored wider than its neighbours is scaled down further and
