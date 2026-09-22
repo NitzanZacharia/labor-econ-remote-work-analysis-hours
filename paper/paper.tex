@@ -8,7 +8,9 @@
 %   - hours_dose_response_data.csv gained a mean_exposure column (the Q4-Q1 scaling in 5.2).
 % The per-SD / per-IQR scalings in 5.2 and Table 2 come from mde_hours.csv's regressor_sd /
 % regressor_iqr columns, which pre-date the audit. Every pre-existing CSV reproduced byte for byte.
-% Remaining "% TODO(<item>)" comments are author decisions (C3 citations, D3 earnings, J/D11).
+% Step 3 (same day) added four Crossref-verified citations (bib header lists them), the earnings
+% sentence in 3.1 (the codebook has no earnings amount), and single-spaced the regression tables.
+% The only remaining "% TODO(<item>)" comment is J/D11: the Conclusion and the fixed date.
 % EVERY hours-derived figure below was re-verified 2026-09-21 against a full pipeline re-run after
 % the hours population was harmonized across survey years (docs/decisions/hours-population-
 % harmonization.md, Checkpoint 13) and the Lee-bounds selection rate was redefined on the
@@ -217,16 +219,22 @@ virtual presence in demanding professions. The prediction for the intensive marg
 direct. Mothers in occupations where the work can be done from home should supply more hours after
 the shift, relative to childless women in the same occupations, with no necessary change in whether
 they are employed at all; mothers in occupations that cannot be done from home should show no such
-response. Remote work may also cut the other way, through lower visibility and slower advancement,
-and which effect dominates is an empirical question. Goldin's framework tells us where to look for
-the answer: in the gradient of the response across occupations by teleworkability, not in its
-average.
+response. Two strands of evidence say the ingredients are real. \citet{maspallais2017} show that
+workers, and women in particular, are willing to give up wages for the option to work from home,
+so the flexibility is valued; \citet{cortespan2019} show that the gender gap among the skilled is
+concentrated where long hours are rewarded and narrows where substitutes for household time are
+cheap, which is the intensive-margin form of the same mechanism. Remote work may also cut the
+other way, through lower visibility and slower advancement, and which effect dominates is an
+empirical question. Goldin's framework tells us where to look for the answer: in the gradient of
+the response across occupations by teleworkability, not in its average.
 
 \paragraph{Does remote work narrow the gap in practice?}
-The evidence on whether flexible arrangements realize this potential is mixed. In a field
-experiment on Italian white-collar workers, \citet{angelici2024} find that randomly assigned
-flexible working arrangements shifted the division of household tasks and raised women's reported
-well-being. Evidence from the acute pandemic period is more ambiguous. \citet{adamsprassl2020} show
+The evidence on whether flexible arrangements realize this potential is mixed. The experimental
+anchor is \citet{bloom2015}, who find that randomly assigned home working raised work supplied
+without a fall in output; in a field experiment on Italian white-collar workers,
+\citet{angelici2024} find that randomly assigned flexible working arrangements shifted the
+division of household tasks and raised women's reported well-being. Evidence from the acute
+pandemic period is more ambiguous. \citet{adamsprassl2020} show
 that WFH-feasible jobs were better shielded from the 2020 employment and earnings shock, but that
 women in those jobs simultaneously absorbed a larger share of the additional childcare burden
 created by school closures, so the same arrangement that protected employment could degrade its
@@ -235,10 +243,6 @@ For Israel, \citet{yaish2021} document that the 2020 lockdown reallocated paid a
 within dual-earner households in gender-unequal ways. This paper adjudicates between these
 directions using post-acute (2021--2023) data rather than the initial-shock period that most of
 this literature studies.
-% TODO(C3): candidate intensive-margin citations to verify and add to references.bib before citing
-% here: Mas and Pallais (2017, AER, "Valuing Alternative Work Arrangements"); Cortes and Pan (2019,
-% JOLE, "When Time Binds"); Aksoy et al. (2023, AEA P&P, "Time Savings When Working from Home");
-% Bloom et al. (2015, QJE, "Does Working from Home Work?").
 
 \paragraph{Measuring who can work from home.}
 \citet{dingel2020} classify occupations by whether their tasks can be performed entirely at home,
@@ -287,8 +291,8 @@ hours) and impute the two irregular-hours codes from observed medians within the
 Mid-distribution bins are about five hours wide, so the outcome is a bin-median approximation, and
 an effect smaller than one bin width --- such as the headline estimate below --- is best read as a
 shift in the share of women crossing a bin boundary rather than as a fine-grained change in hours.
-% TODO(D3): state why hours and not earnings. The cleaning step drops a field named like a computed
-% wage (SacharMechushavmechushav); check the codebook and either use it or say why not.
+Hours are the only intensive-margin outcome the survey supports: the extract records how a wage is
+paid and by whom, but not its amount, so an earnings analysis would need a linked income source.
 Hours are defined for women who are employed \emph{and} worked in the survey's reference week.
 
 That second restriction changes the estimand and is worth stating. In the 2017 file, respondents
@@ -481,7 +485,7 @@ Section~\ref{sec:discussion}.
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.8\textwidth]{../outputs/figures/hours_by_year.pdf}
+\includegraphics[width=0.7\textwidth]{../outputs/figures/hours_by_year.pdf}
 \caption{Weekly hours by survey year: levels and the motherhood gap}\label{fig:hours-by-year}
 \begin{minipage}{0.8\textwidth}\small
 \vspace{0.3em}
@@ -693,7 +697,7 @@ with no regression adjustment at all.
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.8\textwidth]{../outputs/figures/hours_event_study.pdf}
+\includegraphics[width=0.7\textwidth]{../outputs/figures/hours_event_study.pdf}
 \caption{Event study: $\Mother \times$ year interactions for weekly hours, reference year
 2019}\label{fig:pretrend}
 \begin{minipage}{0.8\textwidth}\small
@@ -767,6 +771,7 @@ in practice.
 \centering
 \begin{threeparttable}
 \caption{Intensive-margin DiD and DDD: weekly hours, reference-week workers}\label{tab:hours}
+\renewcommand{\baselinestretch}{1}\small
 \begin{tabular}{lcc}
 \toprule
  & (1) DiD & (2) DDD, calibrated exposure \\
@@ -840,7 +845,7 @@ estimate carries, and we read it as supporting evidence rather than as a closed 
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.8\textwidth]{../outputs/figures/hours_ddd_event_study.pdf}
+\includegraphics[width=0.7\textwidth]{../outputs/figures/hours_ddd_event_study.pdf}
 \caption{Event study for the triple difference: $\Mother \times$ year $\times$ $\WFH$ interactions
 for weekly hours, reference year 2019}\label{fig:pretrend-ddd}
 \begin{minipage}{0.8\textwidth}\small
@@ -875,6 +880,8 @@ paper.
 \centering
 \begin{threeparttable}
 \caption{Generalized Lee bounds on the hours DDD ($\Mother \times \Post \times \WFH$)}\label{tab:lee-ddd}
+\renewcommand{\baselinestretch}{1}\small
+\setlength{\tabcolsep}{3pt} % eight columns; the default 6pt overran the text width by ~40pt
 \begin{tabular}{lccccccc}
 \toprule
 \multicolumn{8}{l}{\emph{Panel A: selection rates and trimming by cell-exposure quartile}} \\
@@ -965,6 +972,7 @@ at $1.022$: the occupation-level dependence already dominates the individual-lev
 \centering
 \begin{threeparttable}
 \caption{Hours DDD: sensitivity of $\Mother \times \Post \times \WFH$}\label{tab:robust}
+\renewcommand{\baselinestretch}{1}\small
 \begin{tabular}{lccc}
 \toprule
 Specification & Coefficient & SE & $N$ \\
@@ -1038,6 +1046,8 @@ gradient, and there is none.
 \centering
 \begin{threeparttable}
 \caption{Hours DiD and DDD by subgroup, and the gender placebo}\label{tab:subgroup}
+\renewcommand{\baselinestretch}{1}\small
+\setlength{\tabcolsep}{4pt} % seven columns; the default 6pt overran the text width by ~15pt
 \begin{tabular}{lcccccc}
 \toprule
  & \multicolumn{3}{c}{DiD: $\Mother \times \Post$} & \multicolumn{3}{c}{DDD: $\Mother \times \Post \times \WFH$} \\
@@ -1098,6 +1108,7 @@ design, where occupation-level exposure is available.
 \centering
 \begin{threeparttable}
 \caption{Extensive margin: employment DiD and DDD}\label{tab:extensive}
+\renewcommand{\baselinestretch}{1}\small
 \begin{tabular}{lcc}
 \toprule
  & (1) DiD & (2) DDD, cell-based exposure \\
@@ -1168,10 +1179,10 @@ $1.7$ hours a week between mothers in the most and least teleworkable quartiles 
 and the raw quartile differences of Figure~\ref{fig:dose-response} put the same contrast at $1.9$.
 Set against the $1.74$-hour intensive-margin penalty of Table~\ref{tab:hours}, mothers in
 teleworkable jobs recovered most of the penalty after 2021, and mothers elsewhere recovered none of
-it. An hour and three-quarters a week is also the order of magnitude that two remote days' saved
-commuting would free, which is the most literal form the time-constraint mechanism can take.
-% TODO(C3): if Aksoy et al. (2023, AEA P&P) is verified and added to references.bib, cite their
-% estimate of commute time saved per WFH day here in place of the unreferenced comparison.
+it. The size is also what the most literal form of the time-constraint mechanism would produce:
+\citet{aksoy2023} put the commuting time saved at about 72 minutes per day worked from home, so two
+remote days a week free roughly two and a half hours, and a mother who returns most of that time
+to paid work is a mother whose hours rise by about the amount estimated here.
 
 The timing is also informative. The event study rises gradually from an insignificant 2021 estimate
 to a significant one in 2023, consistent with WFH adoption and household time reallocation being a
@@ -1346,8 +1357,9 @@ clusters; estimates are unweighted (Sections~\ref{sec:res-extensive}, \ref{sec:l
 
 \item \textbf{Paragraph 5 --- policy reading and next steps.} WFH availability bears on how
 intensively mothers already employed in teleworkable jobs work, not on whether mothers are
-employed. Next: an earnings outcome; a higher-powered test of the employment margin; a jointly
-estimated model letting the mechanism differ by sex and population group.
+employed. Next: an earnings outcome, which needs income data linked to the survey since the
+extract carries none; a higher-powered test of the employment margin; a jointly estimated model
+letting the mechanism differ by sex and population group.
 \end{enumerate}
 
 \noindent\textbf{\color{red}[END SKELETON --- DELETE THIS BLOCK]}
