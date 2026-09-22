@@ -682,9 +682,9 @@ export_all_results(results_to_export)
 # a 5in-wide PDF looks small in the 8in PNG -- that is expected, and the PNG is not what compiles.
 #
 # Keys here are filenames: paper.tex hard-codes ../outputs/figures/<key>.pdf, so renaming one
-# breaks the LaTeX build. emp_res$plots$raw is intentionally omitted -- the plain raw bar chart is
-# subsumed by the pre/post panel and by Table 1, so it stays a repo artifact only. The mechanism
-# scatter is omitted for the scope reason recorded at §8e.
+# breaks the LaTeX build. Two of employment_by_child_age()'s three plots are intentionally omitted
+# -- the plain raw bar chart and the pre/post panel -- and both stay repo artifacts only. The
+# mechanism scatter is omitted for the scope reason recorded at §8e.
 message("Exporting paper figures (vector PDF) to outputs/figures/...")
 paper_figures <- list(
   # hours_descriptives$plots$period_2x2 is deliberately NOT here. The paper cut the 2x2 figure:
@@ -705,7 +705,12 @@ paper_figures <- list(
   # its text renders smaller than theirs on the page.
   hours_ddd_event_study = list(plot = hours_ddd_event_study_plot$plot,     width = 5.0, height = 3.4),
   hours_dose_response   = list(plot = hours_dose_response$plot,            width = 5.0, height = 3.4),
-  emp_childage_period   = list(plot = emp_res$plots$period,                width = 5.0, height = 3.6),
+  # emp_res$plots$period is deliberately NOT here. The paper cut the pre/post panel for the same
+  # reason as the 2x2 above: its interpretable content -- the child-age gradient in employment
+  # levels -- is a strict subset of the raw series already drawn in emp_childage_adjusted, and its
+  # only unique content is the pre/post separation, which is not an estimate of anything: mothers
+  # only, no comparison group, no controls. That separation now sits in a §4.5 footnote with the
+  # caveat attached. Nothing outside §4.5 ever cited the figure.
   emp_childage_adjusted = list(plot = emp_res$plots$adjusted,              width = 5.0, height = 3.6),
   mobility              = list(plot = comp_stats$plots$mobility,           width = 5.0, height = 3.4)
 )

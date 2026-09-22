@@ -105,21 +105,23 @@ which is the wrong number for this purpose.
 | Plot | Outcome |
 |---|---|
 | mobility | Kept, → §4.4. Fixed: the line interpolated straight across the excluded 2020 year. |
-| employment by child age, pre/post | Kept, → §4.5. Fixed: fragile `c(min*0.92, max*1.06)` limits replaced with `expansion()`; binomial CIs added. |
-| employment by child age, raw vs adjusted | Kept, → §4.5. Fixed: `geom_col` → dumbbell. Bars must be anchored at zero, which squeezed the whole ~5pp raw-vs-adjusted divergence into the top fifth of the panel; a point-and-segment chart carries no such obligation. Legend order pinned (was alphabetical, putting "Adjusted" first). |
-| employment by child age, raw bars | **Out of the paper**, kept in the repo. Subsumed by the pre/post panel and Table 1. |
+| employment by child age, pre/post | **Out of the paper** (2026-09-22), kept in the repo. Fixed first: fragile `c(min*0.92, max*1.06)` limits replaced with `expansion()`; clustered CIs added. Cut afterwards on editorial review — its interpretable content, the child-age gradient in levels, is a strict subset of the raw series in the raw-vs-adjusted dumbbell; its only unique content was the pre/post separation, which §4.5 had to defuse in a full paragraph. The separation now appears as a §4.5 footnote carrying the caveat with it. `\ref{fig:emp-childage-period}` had no citation anywhere outside §4.5. |
+| employment by child age, raw vs adjusted | Kept, → §4.5, and now the section's only figure. Fixed: `geom_col` → dumbbell. Bars must be anchored at zero, which squeezed the whole ~5pp raw-vs-adjusted divergence into the top fifth of the panel; a point-and-segment chart carries no such obligation. Legend order pinned (was alphabetical, putting "Adjusted" first). |
+| employment by child age, raw bars | **Out of the paper**, kept in the repo. Subsumed by the raw series of the raw-vs-adjusted dumbbell and by Table 1. |
 | hours DiD / DDD subgroup forest plots | Kept in the repo; these are *Results* figures, not descriptives, and `tab:subgroup` already reports the numbers. Fixed anyway: the Arab-women DDD CI (11.19) ran to the panel edge and read as truncated; the placebo row is now styled apart as a different population; a caption names the estimand, since the DiD and DDD panels were visually interchangeable on different scales. |
 
 ## Interpretive hazard recorded
 
 `paper/archive/old_paper.tex` reported child-age × `Post` *regression* coefficients (−0.0146,
 −0.0155, joint F(5,79069) = 2.02) — significant post-2021 **declines** for the 0–1 and 2–4 bins
-relative to childless women, with controls. The restored figures are **raw rates with no control
+relative to childless women, with controls. The restored plots are **raw rates with no control
 group and no reference category**, and they show post-2021 rates *higher* at nearly every bin.
 These are not contradictory, but narrated carelessly they read as such, and nothing in the current
 pipeline estimates the old interaction (`employment_by_child_age.R` fits
-`Employed ~ ChildAgeBin + controls`, no `Post` term). §4.5 therefore states explicitly that the
-figures describe levels and must not be read against the employment DiD of `tab:emp-did`.
+`Employed ~ ChildAgeBin + controls`, no `Post` term). §4.5 therefore states explicitly that what it
+shows are levels, which must not be read against the employment DiD of `tab:emp-did`. The
+2026-09-22 cut of the pre/post figure shrinks this hazard rather than removing it: the pre/post
+comparison survives as a §4.5 footnote, with the caveat in the same sentence as the numbers.
 
 ## Verification
 
