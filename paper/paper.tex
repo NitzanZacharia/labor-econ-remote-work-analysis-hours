@@ -587,7 +587,11 @@ confidence intervals clustered by individual. Quartiles are of the \emph{occupat
 calibrated} exposure measure ---
 the same regressor the hours DDD uses, not the demographic-cell index of
 Section~\ref{sec:res-emp-ddd}, whose scale is different and whose coefficients are not comparable.
-Breakpoints are computed on pre-period rows and applied to all years.
+Breakpoints are computed on pre-period rows and applied to all years, and each quartile's
+exposure range is printed beneath its tick. Those ranges carry a second point: the bottom three
+quartiles together span exposure $0.00$ to $0.30$ while the top spans $0.30$ to $0.75$, so the
+dispersion in the regressor is concentrated in one tail --- which is how the per-unit coefficient
+of Table~\ref{tab:hours} should be read.
 \end{minipage}
 \end{figure}
 
