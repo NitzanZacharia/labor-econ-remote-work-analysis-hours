@@ -67,14 +67,17 @@ an outcome.
 %======================================================================
 
 \paragraph{The external score.}
-The \citet{dingel2020} teleworkability score reaches the two-digit ISCO-08 level through an
-O*NET/SOC-to-ISCO crosswalk. Teaching (ISCO 23) is the clearest case of a US task-based score
+The \citet{dingel2020} teleworkability score reaches the two-digit ISCO-08 level through the
+\citet{bls2012crosswalk} crosswalk between ISCO-08 and the 2010 SOC. Each O*NET-SOC occupation
+in their published classification is matched to every ISCO-08 unit group the crosswalk lists
+for its six-digit SOC code, and the score of a sub-major group is the unweighted mean of their
+binary indicator over the matched pairs; armed-forces groups have no counterpart in their data
+and carry no score. The replication code re-derives the forty scores
+(Table~\ref{tab:exposure-scores}) from the two public source files and checks them against the
+file the pipeline reads. Teaching (ISCO 23) is the clearest case of a US task-based score
 misclassifying Israeli practice: it scores $0.966$ on the external index, yet Israeli schools,
 closed and reopened in stages through 2020 and early 2021 \citep{somekh2021, hale2021}, were fully
-in person throughout the 2022--23 survey years, and teachers did not work from home. The
-crosswalk that maps the US occupation codes onto ISCO-08 is not documented in the replication
-materials, so a reader can check the forty resulting scores (Table~\ref{tab:exposure-scores}) but
-not rebuild them from the source.
+in person throughout the 2022--23 survey years, and teachers did not work from home.
 
 \paragraph{The calibration rule.}
 The external score is replaced by the realized 2022--23 Israeli WFH share only where the gap

@@ -8,8 +8,9 @@
 % Out of scope per digest §6.3 (deliberately NOT included): Correll et al. (2007),
 %   Cohen & Manor (2024), Bloom / WFH Research.
 % [VERIFY] markers carried over from the digest were checked against Crossref and NBER on
-% 2026-09-19 and all fields confirmed. The only one still open is the Dingel & Neiman crosswalk
-% provenance below, which is a question about data derivation, not about a citation field.
+% 2026-09-19 and all fields confirmed. The last one, the Dingel & Neiman crosswalk provenance
+% (a question about data derivation, not a citation field), was closed on 2026-09-23 -- see the
+% comment above dingel2020 and the bls2012crosswalk entry it cites.
 
 @techreport{harrington2025,
   author      = {Harrington, Emma and Kahn, Matthew E.},
@@ -52,9 +53,13 @@
   doi     = {10.1257/pandp.20191078}
 }
 
-% VERIFY (digest §6.1 item 5): that data/israeli_cbs_wfh_2digit.csv is derived from Dingel &
-% Neiman's published occupational classification -- the SOC->ISCO crosswalk provenance is not
-% documented in the repo. Citation fields themselves are verified.
+% Provenance of data/israeli_cbs_wfh_2digit.csv, resolved 2026-09-23 (was the digest §6.1 item 5
+% VERIFY marker): Dingel & Neiman's published binary indicator (occupations_workathome.csv in
+% their replication repository), mapped to ISCO-08 through the bls2012crosswalk entry below and
+% averaged without weights over the matched pairs within each two-digit group. Rebuilding from
+% the two public files reproduces the committed file exactly; the executable proof and the input
+% hashes are in tests/testthat/test-wfh_crosswalk_integrity.R and
+% docs/open-question-wfh-crosswalk-provenance.md. Citation fields verified 2026-09-19.
 @article{dingel2020,
   author  = {Dingel, Jonathan I. and Neiman, Brent},
   title   = {How Many Jobs Can Be Done at Home?},
@@ -63,6 +68,17 @@
   volume  = {189},
   pages   = {104235},
   doi     = {10.1016/j.jpubeco.2020.104235}
+}
+
+% The SOC-to-ISCO crosswalk behind the external exposure score. Author's copy supplied by the
+% Israeli Central Bureau of Statistics; identical to the BLS's public workbook. Cited in the
+% appendix's exposure-construction paragraph.
+@misc{bls2012crosswalk,
+  author       = {{Bureau of Labor Statistics}},
+  title        = {Crosswalk between the {I}nternational {S}tandard {C}lassification of {O}ccupations ({ISCO}-08) and the 2010 {S}tandard {O}ccupational {C}lassification ({SOC})},
+  howpublished = {Prepared on behalf of the Standard Occupational Classification Policy Committee. \url{https://www.bls.gov/soc/ISCO_SOC_Crosswalk.xls}},
+  year         = {2012},
+  note         = {Updated June 2015}
 }
 
 % DOI, title, journal, volume, issue and pages all confirmed via Crossref, 2026-09-19.

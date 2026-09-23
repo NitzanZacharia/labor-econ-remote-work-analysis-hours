@@ -13,7 +13,7 @@ complete outstanding list; everything else in this register is either resolved o
 |---|---|---|---|
 | D1 | The Conclusion | Author writes it last | Replace the skeleton block at `paper/paper.tex` with your own prose, and delete the banner |
 | D2 | Furlough sentence | Author is checking for a CBS source | Either the citation, or the reworded sentence in the D2 entry below |
-| D5 | Crosswalk provenance | Author is tracing where the file came from | See `docs/open-question-wfh-crosswalk-provenance.md` |
+| ~~D5~~ | ~~Crosswalk provenance~~ | **CLOSED 2026-09-23** | Derivation reproduced exactly from Dingel & Neiman plus the BLS crosswalk. See below. |
 | ~~D15~~ | ~~Null-placebo caveat~~ | **CLOSED 2026-09-19** | Decided: leave it out, keep only the hours placebo. See below. |
 
 ### D15. The employment placebo's null is underpowered, not informative — CLOSED
@@ -146,7 +146,20 @@ which is fiddly but leaves the prose alone.
 **Impact.** Purely presentational. A grader reading sequentially meets 2019b before 2019a, which
 looks like an error even though it is not.
 
-### D5. Crosswalk provenance, the last VERIFY marker
+### D5. Crosswalk provenance, the last VERIFY marker — CLOSED
+
+**Decision, 2026-09-23: the derivation is established and proven.** `data/israeli_cbs_wfh_2digit.csv`
+is Dingel and Neiman's published binary teleworkability indicator, mapped to ISCO-08 through the
+BLS 2012 crosswalk between ISCO-08 and the 2010 SOC (the author's copy came from the Israeli CBS;
+it is the BLS's own workbook) and averaged without weights over the matched pairs within each
+two-digit group. Rebuilding from the two public files reproduces all 43 rows exactly. The
+executable proof is the last block of `tests/testthat/test-wfh_crosswalk_integrity.R`, which
+skips unless the source files are supplied; the full record, with input hashes, is in
+`docs/open-question-wfh-crosswalk-provenance.md`. The VERIFY comment in `paper/references.bib`
+is resolved, the BLS crosswalk is cited (`bls2012crosswalk`), and the two "undocumented"
+sentences in the paper are gone.
+
+The original entry follows, for the record.
 
 `paper/references.bib:50`. Is `data/israeli_cbs_wfh_2digit.csv` derived from Dingel and Neiman's
 published classification, and through which SOC-to-ISCO crosswalk? The paper cites them for it; the
