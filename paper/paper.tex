@@ -478,19 +478,14 @@ age-by-education-by-district cell (about 210 clusters).
 
 \subsection{Selection into employment: Lee bounds}\label{sec:lee}
 
-Hours are observed only for women who are working, and whether a woman is working is itself an
-outcome of the same treatment: if remote work pulls marginal mothers into work after 2021, the
-post-period sample of working mothers differs from the pre-period one for reasons unrelated to
-hours choices. We address this with trimming bounds in the spirit of \citet{lee2009}, adapted to
-the two-by-two design: the share of post-period mothers observed with hours in excess of the
-parallel-trends-in-selection counterfactual is trimmed from that cell's hours distribution, from
-the top for a lower bound and from the bottom for an upper bound. For the DDD the trimming is
-done within each quartile of the cell-based exposure index, which unlike the occupation-level
-index is observable for the non-employed, and equation~\eqref{eq:ddd} is refit on the recombined
-sample. Because the parameter is partially identified we also report the \citet{imbens2004}
-confidence interval for the identified set. The construction, its monotonicity assumption and
-the fact that it handles only \emph{excess} selection in the treated cell are set out in
-Appendix~\ref{sec:app-lee}.
+Hours are observed only for women who are working, and working is itself an outcome of the
+same treatment. We therefore report trimming bounds in the spirit of \citet{lee2009}: the share
+of post-period mothers observed with hours in excess of a parallel-trends counterfactual is
+trimmed from the top of that cell's hours distribution for a lower bound and from the bottom for
+an upper bound, the model is refit, and the \citet{imbens2004} interval for the identified set
+is reported. For the DDD the trimming is done within quartiles of the cell-based index, which is
+defined for the non-employed. Appendix~\ref{sec:app-lee} gives the construction and its
+assumptions.
 
 \subsection{Diagnostics, falsification, and the fathers' comparison}\label{sec:diagnostics}
 
@@ -540,10 +535,8 @@ intensive-margin penalty itself, and that penalty did not measurably change afte
 remote work, $\Mother \times \Post = 0.228$ (SE $0.181$, $N = 251{,}857$). The minimum detectable
 effect is about $0.51$ hours, so the estimate rules out average gains much above half an hour a
 week: a reasonably precise null. Survey-year effects in place of the single $\Post$ dummy leave it
-at $0.231$ (SE $0.181$), and selection into the estimation sample does not change the reading:
-the Lee bounds are $-0.517$ (SE $0.178$) and $0.802$ (SE $0.179$), with an Imbens--Manski 95\%
-interval of $[-0.810, 1.096]$ (Appendix~\ref{sec:app-lee}). Nothing that follows rests on the
-plain DiD.
+at $0.231$ (SE $0.181$), and the Lee bounds of Appendix~\ref{sec:app-lee}, $[-0.517, 0.802]$,
+do not change that reading. Nothing that follows rests on the plain DiD.
 
 \begin{figure}[htbp]
 \centering
@@ -641,11 +634,10 @@ has limited power: with forty clusters the pre-period standard errors ($2.24$ an
 the same order as the effect, so each pre-period interval contains values as large as the
 estimate itself. The test shows no sign of a violation; it does not rule one out.
 
-\paragraph{Lee bounds.}
-Trimming the modest excess selection among post-period mothers within each quartile of the
-cell-based index (Appendix Table~\ref{tab:lee-ddd}) gives bounds of $3.126$ (SE $1.144$) and
-$3.443$ (SE $1.022$), and the Imbens--Manski 95\% confidence interval for the identified set,
-$[1.021, 5.324]$, excludes zero.
+\paragraph{Selection.}
+Trimming the excess selection among post-period mothers within each quartile of the cell-based
+index (Appendix~\ref{sec:app-lee}) gives bounds of $3.126$ (SE $1.144$) and $3.443$
+(SE $1.022$); the Imbens--Manski 95\% interval, $[1.021, 5.324]$, excludes zero.
 
 \paragraph{Sorting across occupations.}
 Selection across occupations within the sample is the remaining channel, and the exposure score
@@ -846,9 +838,8 @@ effect, and the two nulls should not be read as one verdict.
 %======================================================================
 
 Among mothers who remain in work there is no post-2021 hours effect on average, and a large one
-in teleworkable occupations: a triple interaction of about $3.2$ hours per unit of exposure, an
-implied change at zero exposure that is if anything negative, and a selection correction the
-estimate survives. This is consistent with WFH access relaxing a binding time constraint for
+in teleworkable occupations: a triple interaction of about $3.2$ hours per unit of exposure and
+an implied change at zero exposure that is if anything negative. This is consistent with WFH access relaxing a binding time constraint for
 mothers in teleworkable jobs, the \citet{goldin2014} mechanism, and hard to reconcile with a
 general recovery common to all women, which would have raised hours across occupations rather
 than only where the work can be done from home. What makes the finding credible is the pattern of
@@ -923,11 +914,10 @@ Hours are usual hours among women who were working, not among all women holding 
 roughly $10\%$ of each year's employed sample is excluded on that basis. The exclusion is not
 innocuous for the triple interaction because absence is related to exposure: it is highest in
 the least teleworkable quartile, and among mothers it fell after 2021 in the top quartile while
-rising in the bottom one (Appendix~\ref{sec:app-data}). Movement across the absence margin is
-part of what selection into the observed-hours sample means here, which is why the bounds of
-Section~\ref{sec:lee} define selection on that sample. They handle only \emph{excess} selection
-in the post-period mother cell, assume monotone selection to justify trimming from a single tail,
-and found little to correct; that is not the same as the concern being absent.
+rising in the bottom one (Appendix~\ref{sec:app-data}). The bounds of Section~\ref{sec:lee}
+therefore define selection on the observed-hours sample; they handle only \emph{excess}
+selection under monotonicity and found little to correct, which is not the same as the concern
+being absent.
 
 \paragraph{Sample and period.}
 The 2023 coefficient is the largest in both event studies, and the 2023 survey year includes the
