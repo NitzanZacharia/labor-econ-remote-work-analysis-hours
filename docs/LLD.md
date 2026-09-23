@@ -1,16 +1,16 @@
 # Low-Level Design: Motherhood Penalty / WFH Analysis Pipeline
 
-Derived from [`docs/HLD.md`](HLD.md) and the actual current state of the repository. The original 81-column table below was pulled directly from a real cached `cleaned_df.rds` (372,741 rows × 81 columns) as it stood at the time — not reconstructed from reading code — see the Verification note at the end. `data_processing.R` has since grown 6 more derived columns (`WFH_RefWeek`, `WFH_Hours`, `WFH_Share`, `WFH_Arrangement`, `ISCO_masked`, `ISCO1`), documented in a follow-on subsection below the original table; those 6 were reconciled directly from the current code, **not** from a fresh live pull, so their exact final column position (as opposed to their existence, type, and derivation) is not independently re-verified the way rows 1-81 were. The dataset is currently **372,741 rows × 87 columns**.
+Derived from [`docs/HLD.md`](HLD.md) and the current state of the repository. The column table below is dumped from the cached `cleaned_df.rds` that `main.R` writes (372,741 rows x 87 columns, cache hash matching the current `scripts/data_processing.R`); the Class column is maintained by hand. Re-dump it whenever `data_processing.R` adds, drops or retypes a column.
 
 ## Data Schema
 
-`cleaned_df` (the output of `load_and_clean_data()`) is a flat tibble, currently 372,741 rows × 87 columns (81 as of the original live pull below, plus 6 documented in the follow-on subsection). Columns fall into three classes:
+`cleaned_df` (the output of `load_and_clean_data()`) is a flat tibble, currently 372,741 rows x 87 columns. Columns fall into three classes:
 
 - **Derived (new)** — created by `data_processing.R`, not present in the raw CBS extract.
 - **Type-transformed** — a raw CBS column, converted to `factor` or recoded/grouped in place (same column name, new representation).
 - **Raw passthrough** — an untouched raw CBS column (Hebrew-named, numeric or character), surviving the drop step unchanged.
 
-### Full column list (original 81-column live pull)
+### Full column list (87 columns, cache order)
 
 | # | Column | Type | Class |
 |---|---|---|---|
@@ -92,26 +92,17 @@ Derived from [`docs/HLD.md`](HLD.md) and the actual current state of the reposit
 | 76 | `Post` | integer | Derived |
 | 77 | `Employed` | integer | Derived |
 | 78 | `WFH` | numeric | Derived |
-| 79 | `WorkHoursCont` | numeric | Derived |
-| 80 | `BirthContinent` | factor | Derived |
-| 81 | `WorksOutsideLocality` | integer | Derived |
+| 79 | `WFH_RefWeek` | numeric | Derived |
+| 80 | `WFH_Hours` | numeric | Derived |
+| 81 | `WFH_Share` | numeric | Derived |
+| 82 | `WFH_Arrangement` | factor | Derived |
+| 83 | `ISCO_masked` | logical | Derived |
+| 84 | `ISCO1` | numeric | Derived |
+| 85 | `BirthContinent` | factor | Derived |
+| 86 | `WorksOutsideLocality` | integer | Derived |
+| 87 | `WorkHoursCont` | numeric | Derived |
 
 **Schema-quality gap**: the ~65 raw-passthrough columns above have no explicit final-format contract — no renaming, no type normalization (numeric vs. character is whatever `read_csv()` guessed), no documented meaning beyond the original CBS codebook. Only the columns actually consumed downstream (§ below) have a defined contract. This is a real gap if the dataset is ever handed to someone without codebook access.
-
-### Columns added since the original 81-column pull
-
-Reconciled directly from the current `data_processing.R` (not a fresh live pull — see the note at the top of this document). All 6 are genuinely new columns (not present in the original pull), so they sit after column 81 in creation order; their exact final index is not independently re-verified.
-
-| Column | Type | Class | Derivation |
-|---|---|---|---|
-| `WFH_RefWeek` | numeric | Derived | Reference-week WFH behaviour, from `AvadMeHaBayit` (same 1/2/9→1/0/NA mapping as `WFH`). Created immediately after `WFH` in `data_processing.R`'s WFH block. |
-| `WFH_Hours` | numeric | Derived | Hours worked from home in the reference week, from `KamaShaot` (only defined when `WFH_RefWeek == 1`). |
-| `WFH_Share` | numeric | Derived | `WFH_Hours / ShaotAvodaLeMaase`, capped at 1. |
-| `WFH_Arrangement` | factor (3 levels) | Derived | Binned from `WFH_Share`: On-site / Hybrid / Fully remote. |
-| `ISCO_masked` | logical | Derived | `TRUE` where the raw `MishlachYad_ISCO_08_2` held a CBS disclosure mask (`XX`, `7X`, …) rather than a numeric code. Created in the ISCO block, immediately after column 57's type transform. |
-| `ISCO1` | numeric | Derived | 1-digit ISCO-08 major group, recovered from the first character of the raw code (survives partial masking, e.g. `7X` → `7`). |
-
-See the "Analysis-critical derived columns" table below for each column's exact NA-rate contract and derivation logic.
 
 ### Analysis-critical derived columns (exact contract)
 
@@ -322,8 +313,7 @@ run_hours_ddd_lee_bounds(cleaned_df: tibble, exposure_index: tibble, exposure_ce
 # Generalized Lee (2009) bounds for run_hours_ddd_regression()'s Employed==1 selection risk:
 # selection-rate counterfactual (s11_counterfactual = s10 + (s01 - s00)) stratified by quartile of
 # the cell-based WFH_Exposure (build_exposure_cells(), defined for employed and non-employed
-# alike -- reuses robustness/age_balance_robustness.R's compute_pre_period_quartile_breaks()/
-# assign_wfh_quartile()), while the outcome regression itself uses the occupation-level
+# alike -- via compute_pre_period_quartile_breaks() and scripts/assign_wfh_quartile.R), while the outcome regression itself uses the occupation-level
 # WFH_Exposure. warning()s when a quartile's Mother==1,Post==1 cell has fewer than
 # MIN_CELL_WARN (30) rows (noisy trim_prop). See docs/decisions/hours-ddd-pivot.md.
 
@@ -612,7 +602,3 @@ already in use everywhere, matching Part 3 §3's own advisor feedback for catego
 
 For the current list of documented limitations and deliberate decisions (survey weights not
 applied, the Lee bounds' one-directional limitation, etc.), see `docs/HLD.md` §4.2.
-
-## Verification
-
-The original 81-column Data Schema and Validation sections were generated by loading the actual `cleaned_df.rds` cache (372,741 × 81, as it stood at the time) and dumping real column names, types, factor levels, and NA rates via `Rscript` — not reconstructed from reading source code. The Age/Age² data-availability claim was confirmed by grepping every raw CSV header for age- and birth-year-related column names before writing it down as absent — this remains true; it's the reason `docs/decisions/checkpoint8-age-age2-controls.md` exists. The 6 columns added since (see "Columns added since the original 81-column pull") and the "Core Function Signatures" section were reconciled directly against the current `.R` files in this repo, not from a fresh `Rscript` data pull — flagged wherever that distinction matters. `Validation & Thresholds`' hard/soft-fail checks and the schema-drift check are no longer a design spec; both are implemented in `validation.R` and can be read directly from source.

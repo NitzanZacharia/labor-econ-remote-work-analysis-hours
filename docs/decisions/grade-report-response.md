@@ -6,7 +6,7 @@ records what the full `Rscript main.R` re-run produced and what the paper now sa
 
 ## Motivation
 
-`seminar_grade_report.md` (84/100) reviewed `paper/paper.tex` and the pipeline and listed twelve
+the 2026-09-22 seminar grade report (84/100; not committed -- the file at `docs/grade-reports/` is the later 86/100 report) reviewed `paper/paper.tex` and the pipeline and listed twelve
 deductions (W1, W2, M1, M2, M3, R1, R2, R3, T1, T2, E1, C1). The substantive ones were
 specification choices a referee would query: a linear-in-exposure DDD with no saturated
 comparison (M1); a "gender placebo" that is not a placebo, because fathers are also treated by
@@ -177,7 +177,7 @@ existing chain. Numbers and their files are itemised in `paper/notes/results_dig
 
 - **Crosswalk provenance (grade item C1, first half).** The derivation of
   `data/israeli_cbs_wfh_2digit.csv` remains an open question
-  (`docs/open-question-wfh-crosswalk-provenance.md`). Deliberately left to a separate, later plan
+  (`docs/decisions/wfh-crosswalk-provenance.md`). Deliberately left to a separate, later plan
   at the authors' request; this change adds the appendix table of the forty scores and states the
   gap in the paper's Data section and Limitations.
 

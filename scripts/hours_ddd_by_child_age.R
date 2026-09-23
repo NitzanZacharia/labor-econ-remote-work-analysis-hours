@@ -1,6 +1,6 @@
 # hours_ddd_by_child_age.R
-# The hours DiD and DDD re-estimated by the age of the mother's youngest child, added in response
-# to the 2026-09-22 grade report (item R2; docs/decisions/grade-report-response.md).
+# The hours DiD and DDD re-estimated by the age of the mother's youngest child
+# (docs/decisions/grade-report-response.md, item R2).
 #
 # The paper's mechanism -- remote work relaxing a binding time constraint -- predicts that the
 # hours response is concentrated among mothers whose care obligations bind hardest, i.e. mothers

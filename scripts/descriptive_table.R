@@ -16,10 +16,9 @@ library(tidyverse)
 # DEFAULT_CONTROLS is the single source of truth for the control set (scripts/data_processing.R);
 # sourced here so this file also works when loaded on its own, not just via main.R.
 source(file.path("scripts", "data_processing.R"))
-# Cluster-robust standard errors for the difference column (added 2026-09-22, grade-report item
-# T2). Each difference is the Mother coefficient of `y ~ Mother` clustered by IDPUF, so the point
-# estimate is the same arithmetic as before and only the uncertainty is new -- the same integrity
-# rule clustered_se.R's header states for every descriptive in the paper.
+# Cluster-robust standard errors for the difference column (grade-report item T2). Each difference
+# is the Mother coefficient of `y ~ Mother` clustered by IDPUF, so the point estimate is the plain
+# cell difference -- the integrity rule clustered_se.R's header states for every descriptive.
 source(file.path("scripts", "clustered_se.R"))
 
 build_descriptive_table <- function(cleaned_df) {

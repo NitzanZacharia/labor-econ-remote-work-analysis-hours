@@ -2,7 +2,7 @@
 
 **Status: CLOSED 2026-09-23. The derivation is known and reproduces the file exactly.**
 Raised by the pre-submission audit, 2026-09-19, and tracked as D5 in
-`docs/pre-submission-audit-decisions.md`, where it is now struck. The `% VERIFY` comment in
+`docs/decisions/pre-submission-audit-decisions.md`, where it is now struck. The `% VERIFY` comment in
 `paper/references.bib` is resolved, the BLS crosswalk is cited in the appendix
 (`bls2012crosswalk`), and the two "undocumented" sentences in the paper are gone — see "Where the
 answer is recorded" below.
@@ -59,7 +59,7 @@ both are public at the addresses above.
   `bls2012crosswalk` entry added; `paper/appendix.tex` (exposure-construction paragraph) states
   the derivation and cites it; the Limitations sentence in `paper/paper.tex` no longer calls the
   crosswalk undocumented — done 2026-09-23.
-- `docs/pre-submission-audit-decisions.md` — D5 struck, with a closed entry — done 2026-09-23.
+- `docs/decisions/pre-submission-audit-decisions.md` — D5 struck, with a closed entry — done 2026-09-23.
 - `README.md` (`data/` description) and `paper/notes/results_digest.md` (its own `[VERIFY]`
   marker for this item) — not updated; neither is read by the paper.
 

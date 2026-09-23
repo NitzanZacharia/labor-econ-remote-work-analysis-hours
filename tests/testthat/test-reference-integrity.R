@@ -20,7 +20,14 @@ known_removed <- c(
   # outputs/figures/hours_event_study.pdf when run_hours_diagnostics() stopped drawing via iplot()
   # and main.R started building the figure with build_event_study_plot() -- see
   # docs/decisions/ddd-event-study.md's "Porting the DiD event study".
-  "outputs/event_study_pretrend_hours.pdf"
+  "outputs/event_study_pretrend_hours.pdf",
+  # Exported as paper PDFs until 2026-09-23 but never includegraphics-ed by paper.tex; dropped
+  # from main.R's paper_figures list. The PNG copies still come from export_all_results().
+  "outputs/figures/mobility.pdf",
+  "outputs/figures/hours_ddd_by_child_age.pdf",
+  # The pre-pivot manuscript draft, archived 2026-09-17 and deleted 2026-09-23 (git history keeps
+  # it); two memos cite it as the source of numbers that were corrected during the pivot.
+  "paper/archive/old_paper.tex"
 )
 
 test_that("every repo-relative path referenced in a .R or .md file resolves", {

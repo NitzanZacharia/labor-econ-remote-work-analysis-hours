@@ -6,7 +6,7 @@ records what the full `Rscript main.R` re-run produced and what the paper now sa
 
 ## Motivation
 
-`seminar_grade_report.md` (86/100, 2026-09-23) lists fourteen deductions. Two are identification
+`docs/grade-reports/2026-09-23-seminar-grade-report.md` (86/100) lists fourteen deductions. Two are identification
 concerns the previous response did not reach: the headline is not robust to the only fully
 pre-treatment exposure index and the calibrated index was chosen as primary after the results
 were known (Methods, 3 points); and occupation is measured contemporaneously, so post-2021

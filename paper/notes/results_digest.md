@@ -3,7 +3,7 @@
 **Purpose.** Fact-extraction pass for the seminar paper. No prose, no LaTeX. Every number is
 tagged with the exact file it was read from. Where the only source is a console message quoted in
 a decision memo (never exported to `outputs/`), that is stated explicitly. Anything not confirmable
-from a repo artifact is marked `[TODO: confirm]`; citation fields not verified are marked `[VERIFY]`.
+from a repo artifact was marked `[TODO: confirm]` and unverified citation fields `[VERIFY]`; as of 2026-09-24 no marker of either kind remains.
 
 **Authors (paper byline):** Inbal Moryles and Nitzan Zacharia. (The research doc's byline spells
 the first author "Inbal Muriel" — that spelling is wrong; do not copy it into the paper.)
@@ -240,7 +240,7 @@ every file there is produced by the current pipeline.
   Full precision: lower 3.125517 / 1.143991; point 3.231854 / 1.053815; upper 3.443446 / 1.021983.
   The "point" here (3.2319, SE 1.0538) differs slightly from §1.3's 3.224 (SE 1.022) because this
   function additionally requires a matched *cell*-based exposure — stated in the script header.
-  N for these three fits is not exported `[TODO: confirm]`.
+  N for the three fits (`outputs/hours_lee_bounds_table.csv`, `n_obs`): point 242,552; lower 241,166; upper 241,167 (1,386 and 1,385 rows trimmed).
 - **95% Imbens–Manski CI for the identified set: [1.021, 5.324]**, `c_α = 1.839787` — excludes
   zero. Recomputed 2026-09-21 by sourcing `scripts/imbens_manski_ci.R`; **not in any CSV**.
   - ⚠ **Historical note worth keeping.** Between the harmonization and the selection-rate fix, the
@@ -892,7 +892,7 @@ are not cited anywhere in the repo; their roles are fixed below.
    **Provenance resolved 2026-09-23:** the file is D&N's published binary indicator mapped to
    ISCO-08 through the BLS 2012 ISCO-08/SOC-2010 crosswalk (cited as `bls2012crosswalk`) and
    averaged without weights within each two-digit group; rebuilding from the two public files
-   reproduces it exactly — see `docs/open-question-wfh-crosswalk-provenance.md` and the last block
+   reproduces it exactly — see `docs/decisions/wfh-crosswalk-provenance.md` and the last block
    of `tests/testthat/test-wfh_crosswalk_integrity.R`.)
 
 ### 6.2 Methods citations (Empirical Strategy section only) — REQUIRED, but NOT literature review
@@ -970,9 +970,9 @@ to the paper.**
    investigation; handled as a one-sentence footnote near the subgroup results (text in §3.1).**
 9. Lee-bounds trim proportion for the plain DiD (**≈1.9%** post-harmonization, inferred) and N of the three hours-DDD
    Lee-bounds fits — not exported (§1.2, §1.4). **2026-09-15: the ≈1.5% is used in the paper as a
-   derived, footnoted figure; the DDD Lee-bounds N stays `[TODO: confirm]` — do not infer it.**
+   derived, footnoted figure; the DDD Lee-bounds N is exported since 2026-09-24 (`n_obs` column of `outputs/hours_lee_bounds_table.csv`: 242,552 / 241,166 / 241,167).**
 10. Citation gaps — **resolved 2026-09-15 (§6):** Goldin locked to 2014 AER; Harrington & Kahn
-    confirmed two-author, marked central/required; Olden & Møen kept with DOI `[VERIFY]`
+    confirmed two-author, marked central/required; Olden & Møen DOI 10.1093/ectj/utac010 verified against Crossref 2026-09-19 (see `paper/references.bib` header)
     (non-blocking); Correll, Cohen & Manor, and Bloom placed out of scope; Lee (2009) and
     Imbens & Manski (2004) reclassified as methods citations. Remaining: Olden & Møen DOI; Lee and
     Imbens–Manski page ranges not web-checked. D&N crosswalk provenance closed 2026-09-23 (§6.1

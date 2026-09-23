@@ -112,7 +112,7 @@ which is the wrong number for this purpose.
 
 ## Interpretive hazard recorded
 
-`paper/archive/old_paper.tex` reported child-age × `Post` *regression* coefficients (−0.0146,
+`paper/archive/old_paper.tex` (deleted 2026-09-23; in git history) reported child-age × `Post` *regression* coefficients (−0.0146,
 −0.0155, joint F(5,79069) = 2.02) — significant post-2021 **declines** for the 0–1 and 2–4 bins
 relative to childless women, with controls. The restored plots are **raw rates with no control
 group and no reference category**, and they show post-2021 rates *higher* at nearly every bin.

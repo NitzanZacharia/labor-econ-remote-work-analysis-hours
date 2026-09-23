@@ -1,6 +1,6 @@
 # hours_ddd_swap_control.R
-# A fixed-sample test of the exposure calibration, added in response to the 2026-09-23 grade
-# report (Methods deduction 1; docs/decisions/grade-report-2-response.md).
+# A fixed-sample test of the exposure calibration
+# (docs/decisions/grade-report-2-response.md, Methods 1).
 #
 # The problem it answers. calibrate_isco_exposure() swaps ten of forty occupation scores to their
 # realized 2022-23 Israeli WFH shares, which sit inside the post-period. The paper's existing

@@ -8,7 +8,7 @@ library(tidyverse)
 library(fixest)
 source(file.path("scripts", "data_processing.R"))
 
-# `year_fe` (added for the 2026-09-22 grade-report response, item M1) replaces the single Post
+# `year_fe` (docs/decisions/grade-report-response.md, item M1) replaces the single Post
 # main effect with survey-year effects, i(ShnatSeker, ref = ref_year), while keeping Mother:Post as
 # the coefficient of interest. The pooled 2x2 is the paper's column (1); the year-effects version
 # is a robustness row, since pooling six years into two periods lets year-specific movements in

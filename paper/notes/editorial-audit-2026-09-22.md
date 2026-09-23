@@ -17,7 +17,7 @@ Verified facts that shape the plan:
 - Body length ~12,900 words, 37 pages, 6 tables (incl. summary stats), 4 figures. Tables 6 and 7
   duplicate Figures 3 and 4 coefficient for coefficient.
 - The Conclusion is a red skeleton block that the course requires the student to write alone
-  (`docs/pre-submission-audit-decisions.md`, D1). This audit gives it a structure, not prose.
+  (`docs/decisions/pre-submission-audit-decisions.md`, D1). This audit gives it a structure, not prose.
 - Still-open register items that the audit interacts with: D2 (furlough sentence; now lives only
   in Discussion lines 1340–1348 and dies with the cut recommended there), D3 (course bibliography
   rule), D4 (Kleven a/b order), D5 (crosswalk provenance), D11 (`\today` on the title page).

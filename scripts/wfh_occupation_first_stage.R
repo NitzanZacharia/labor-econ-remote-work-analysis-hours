@@ -1,7 +1,7 @@
 # wfh_occupation_first_stage.R
 # First-stage relevance of the OCCUPATION-LEVEL exposure score, plus the per-occupation table the
-# paper's appendix prints. Added in response to the 2026-09-22 grade report (item R3, and the
-# appendix-table half of item C1; docs/decisions/grade-report-response.md).
+# paper's appendix prints (docs/decisions/grade-report-response.md, item R3 and the appendix-table
+# half of C1).
 #
 # wfh_first_stage_check.R answers the relevance question for the CELL-based index the employment
 # DDD uses. Nothing did so for the calibrated occupation-level score that the headline hours DDD

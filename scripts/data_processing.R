@@ -1,8 +1,7 @@
 library(tidyverse)
 
-# Single source of truth for the regression controls used across basic_regression.R,
-# basic_reg_compared_data.R, employment_by_child_age.R, and Diagnostics.R (Checkpoint 3 --
-# previously copy-pasted identically into each of those files).
+# Single source of truth for the regression controls (docs/ROADMAP.md Checkpoint 3);
+# test-controls-consistency.R fails on any local copy.
 DEFAULT_CONTROLS <- c("MatzavMishpachti", "Dat", "GilNK", "MachozMegurim", "TeudaGvoha")
 
 load_and_clean_data <- function(folder_path, sex_filter = c("women", "men")) {

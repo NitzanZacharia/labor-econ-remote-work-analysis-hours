@@ -1,8 +1,8 @@
 # build_leave_one_out_plot.R
 # Influence plot for run_hours_ddd_leave_one_out(): one point per refit (the triple interaction
 # with the named occupation removed), sorted by estimate, against the headline estimate and a
-# band of one headline standard error either side of it. Added for the 2026-09-23 grade-report
-# response (Robustness deduction 1). Pure post-processing over the leave-one-out table, in the
+# band of one headline standard error either side of it (docs/decisions/grade-report-2-response.md,
+# Robustness 1). Pure post-processing over the leave-one-out table, in the
 # style of build_hours_subgroup_comparison(): no data cleaning or regression logic of its own.
 library(tidyverse)
 source(file.path("scripts", "paper_theme.R"))

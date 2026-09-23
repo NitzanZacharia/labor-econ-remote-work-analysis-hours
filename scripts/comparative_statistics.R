@@ -32,7 +32,7 @@ run_comparative_stats <- function(cleaned_df) {
   print(cleaned_df %>% count(Employed, name = "n") %>% mutate(pct = n / sum(n) * 100))
 
   # Assigned rather than printed inline so it can be returned: this is the pooled hours summary
-  # the paper's descriptive section quotes, and it previously existed only in console scrollback.
+  # the paper's descriptive section quotes.
   message("=== WorkHoursCont summary, among Employed == 1 ===")
   hours_summary <- cleaned_df %>% filter(Employed == 1) %>% summarise(
     n      = sum(!is.na(WorkHoursCont)),

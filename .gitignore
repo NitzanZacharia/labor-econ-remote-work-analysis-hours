@@ -13,6 +13,8 @@ Rplots*.pdf
 # runs (run_tests.R:19). Debugging debris from a red run, not source -- it lingers after the
 # failure is fixed and would otherwise get committed alongside the fix.
 tests/testthat/_problems/
+# Same reporter, same debris: testthat also drops a testthat-problems.rds next to the tests.
+tests/testthat/testthat-problems.rds
 
 *.csv
 !tests/testthat/fixtures/**/*.csv
@@ -41,6 +43,5 @@ paper/*.fdb_latexmk
 
 # Personal Claude Code overrides. Holds the paper-recompile PostToolUse hook, whose command
 # hardcodes this machine's MiKTeX location (~/AppData/Local/Programs/MiKTeX/...), so it is not
-# portable to a co-author's machine and must not be committed. A shared, portable
-# .claude/settings.json is deliberately NOT ignored.
+# portable to a co-author's machine and must not be committed.
 .claude/settings.local.json

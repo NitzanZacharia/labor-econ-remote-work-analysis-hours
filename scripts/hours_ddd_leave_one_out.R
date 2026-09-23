@@ -1,6 +1,6 @@
 # hours_ddd_leave_one_out.R
-# Leave-one-occupation-out sensitivity of the hours DDD's triple interaction, added in response to
-# the 2026-09-23 grade report (Robustness deduction 1; docs/decisions/grade-report-2-response.md).
+# Leave-one-occupation-out sensitivity of the hours DDD's triple interaction
+# (docs/decisions/grade-report-2-response.md, Robustness 1).
 #
 # Why. The regressor varies across forty occupations, the top exposure quartile holds six of them,
 # and two of those (ICT professionals, science and engineering professionals) are among the

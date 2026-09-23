@@ -84,7 +84,7 @@ could fairly pick up.
 by the `SKELETON -- NOT SUBMITTABLE TEXT` comment and the two red
 `[SKELETON ONLY --- REPLACE WITH YOUR OWN TEXT BEFORE SUBMISSION]` /
 `[END SKELETON --- DELETE THIS BLOCK]` markers (grep `SKELETON` to find it; line numbers have moved
-twice). The course rule quoted at `paper/archive/old_paper.tex:209-213`
+twice). The course rule quoted at `paper/archive/old_paper.tex:209-213` (deleted 2026-09-23; in git history)
 requires this section to be written individually by the student, and the block in the file is
 explicitly labelled a model answer for self-comparison. **It still compiles into the PDF today, in
 red.** `\usepackage{xcolor}` is carried solely for these markers and can go with them.
@@ -155,7 +155,7 @@ it is the BLS's own workbook) and averaged without weights over the matched pair
 two-digit group. Rebuilding from the two public files reproduces all 43 rows exactly. The
 executable proof is the last block of `tests/testthat/test-wfh_crosswalk_integrity.R`, which
 skips unless the source files are supplied; the full record, with input hashes, is in
-`docs/open-question-wfh-crosswalk-provenance.md`. The VERIFY comment in `paper/references.bib`
+`docs/decisions/wfh-crosswalk-provenance.md`. The VERIFY comment in `paper/references.bib`
 is resolved, the BLS crosswalk is cited (`bls2012crosswalk`), and the two "undocumented"
 sentences in the paper are gone.
 

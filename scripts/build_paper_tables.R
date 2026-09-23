@@ -1,15 +1,11 @@
 # build_paper_tables.R
 # Assembles every regression and summary table paper/paper.tex prints, as booktabs tabular blocks
-# built directly from the fitted models and result frames of a pipeline run. Part of the
-# generated-table layer added for the 2026-09-22 grade-report response (item C1;
-# docs/decisions/grade-report-response.md).
+# built directly from the fitted models and result frames of a pipeline run
+# (docs/decisions/grade-report-response.md, item C1).
 #
-# Before this file existed every table in the paper was a hand-typed tabular block transcribed
-# from outputs/*.csv. The numbers matched -- the grade report verified every cell -- but nothing
-# enforced it, and one table note had drifted (Table 2 claimed a religion category was dropped
-# that was not). Now main.R calls this once, after all models are fit, and export_paper_tables()
-# writes one .tex file per block into paper/tables/; paper.tex \input{}s them inside its own,
-# still hand-written, table floats (caption, label, notes).
+# main.R calls this once, after all models are fit, and export_paper_tables() writes one .tex file
+# per block into paper/tables/; paper.tex \input{}s them inside its own hand-written table floats
+# (caption, label, notes). No number in a paper table is typed by hand, so none can drift.
 #
 # Conventions, all inherited from the paper as it stood:
 #   - coefficients via tex_coef_cell(): fixest's 4-significant-digit formatting, stars per the
@@ -38,7 +34,7 @@ build_paper_tables <- function(r) {
     "hours_gender_placebo", "hours_ddd_by_child_age", "baseline_results",
     "ddd_employment_additive", "mde_additive", "baseline_employment_rate",
     "wfh_occupation_first_stage",
-    # 2026-09-23 grade-report-2 response (docs/decisions/grade-report-2-response.md).
+    # Grade-report-2 inputs (docs/decisions/grade-report-2-response.md).
     "hours_ddd_calib_men", "hours_ddd_swap_control", "hours_ddd_cell_exposure",
     "exposure_sorting_check", "hours_ddd_leave_one_out", "balance_by_quartile"
   )
@@ -48,7 +44,7 @@ build_paper_tables <- function(r) {
   }
 
   # ── formatting helpers ────────────────────────────────────────────────────────────────────
-  # Fixed decimals throughout (2026-09-23): three for the hours tables, four for the employment
+  # Fixed decimals throughout: three for the hours tables, four for the employment
   # table, whose coefficients are on a probability scale. f3 is the standard-error / free-standing
   # coefficient formatter; dec() takes an explicit count.
   dec   <- function(x, d) if (is.na(x)) "" else paste0("$", formatC(x, digits = d, format = "f"), "$")

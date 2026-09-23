@@ -1,8 +1,7 @@
 # export_paper_tables.R
 # Writes the tabular blocks build_paper_tables() assembles to paper/tables/<name>.tex, one file
 # per table, plus paper/tables/auto_notes.tex holding one \newcommand per generated note
-# sentence. Part of the generated-table layer added for the 2026-09-22 grade-report response
-# (item C1; docs/decisions/grade-report-response.md).
+# sentence (docs/decisions/grade-report-response.md, item C1).
 #
 # Mirrors export_paper_figures.R in spirit: a flat named list whose names ARE the filenames
 # paper/paper.tex hard-codes in its \input{tables/<name>.tex} lines, so renaming a key here
