@@ -19,6 +19,7 @@
 library(tidyverse)
 library(fixest)
 source(file.path("scripts", "clustered_se.R"))
+source(file.path("scripts", "occupation_exposure_breaks.R"))
 source(file.path("robustness", "age_balance_robustness.R"))
 
 build_absence_by_exposure_quartile <- function(cleaned_df, exposure_index, breaks = NULL) {
@@ -37,12 +38,7 @@ build_absence_by_exposure_quartile <- function(cleaned_df, exposure_index, break
     mutate(absent = as.integer(AvadBeshavua != 1))
 
   if (is.null(breaks)) {
-    pre_exposure <- df %>% filter(ShnatSeker < 2020) %>% pull(WFH_Exposure)
-    breaks <- quantile(pre_exposure, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
-    if (any(duplicated(breaks))) {
-      stop("build_absence_by_exposure_quartile: duplicate quartile breakpoints -- cut() would ",
-           "silently produce fewer than 4 bins.")
-    }
+    breaks <- compute_occupation_exposure_breaks(df, caller = "build_absence_by_exposure_quartile")
   }
 
   df <- assign_wfh_quartile(df, breaks)

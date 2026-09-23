@@ -60,3 +60,26 @@ test_that("run_hours_ddd_regression's second-stage mechanism regression recovers
   expect_lt(unname(coef(res$models$mechanism)[["wfh_exposure"]]), 0)
   expect_equal(res$dropped_occupations$n_dropped, nrow(res$dropped_occupations$data))
 })
+
+# ── `outcome` / `run_mechanism` (2026-09-22 grade-report response, item M3) ──────────────────
+test_that("the outcome argument switches the dependent variable and run_mechanism = FALSE skips the second stage", {
+  set.seed(14)
+  fx <- make_hours_ddd_fixtures(delta = -3)
+  panel <- dplyr::mutate(fx$panel, FullTime = as.integer(WorkHoursCont >= 40))
+
+  out <- capture.output(res <- suppressWarnings(
+    run_hours_ddd_regression(panel, fx$exposure_index, outcome = "FullTime")
+  ))
+  expect_equal(res$outcome, "FullTime")
+  expect_equal(as.character(res$model$fml[[2]]), "FullTime")
+  expect_true("Mother:Post:WFH_Exposure" %in% names(coef(res$model)))
+  # A binary outcome has no per-occupation hours mechanism stage.
+  expect_null(res$models$mechanism)
+  expect_null(res$mechanism_data)
+
+  out <- capture.output(res_default <- suppressWarnings(run_hours_ddd_regression(fx$panel, fx$exposure_index)))
+  expect_equal(res_default$outcome, "WorkHoursCont")
+  expect_s3_class(res_default$models$mechanism, "lm")
+
+  expect_error(run_hours_ddd_regression(fx$panel, fx$exposure_index, outcome = "Nope"), "not in cleaned_df")
+})

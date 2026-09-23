@@ -225,3 +225,89 @@
   number      = {2023.17},
   year        = {2023}
 }
+
+% ── Added by the 2026-09-22 grade-report response (docs/decisions/grade-report-response.md) ──
+% Each entry below was verified the same day against the publisher or NBER page named in the
+% comment above it. Continuous-treatment DiD (Literature Review, item E1); inference and
+% permutation methods (Empirical Strategy, items R1/M2); the fertility and school-closure
+% sources for the Introduction and Data sections (item W2).
+
+% NBER page: https://www.nber.org/papers/w32117 (also arXiv:2107.02637).
+@techreport{callaway2024,
+  author      = {Callaway, Brantly and Goodman-Bacon, Andrew and Sant'Anna, Pedro H. C.},
+  title       = {Difference-in-Differences with a Continuous Treatment},
+  institution = {National Bureau of Economic Research},
+  type        = {NBER Working Paper},
+  number      = {32117},
+  year        = {2024}
+}
+
+% Stata Journal page: https://journals.sagepub.com/doi/10.1177/1536867X19830877
+@article{roodman2019,
+  author  = {Roodman, David and Nielsen, Morten {\O}rregaard and MacKinnon, James G. and Webb, Matthew D.},
+  title   = {Fast and Wild: Bootstrap Inference in {S}tata Using boottest},
+  journal = {The Stata Journal},
+  year    = {2019},
+  volume  = {19},
+  number  = {1},
+  pages   = {4--60},
+  doi     = {10.1177/1536867X19830877}
+}
+
+% citation("fwildclusterboot") on the installed version (0.14.3).
+@misc{fischer2021,
+  author = {Fischer, Alexander and Roodman, David},
+  title  = {fwildclusterboot: Fast Wild Cluster Bootstrap Inference for Linear Regression Models},
+  year   = {2021},
+  note   = {R package version 0.14.3},
+  url    = {https://cran.r-project.org/package=fwildclusterboot}
+}
+
+% Publisher page: https://www.degruyterbrill.com/document/doi/10.2202/1544-6115.1585/html
+@article{phipson2010,
+  author  = {Phipson, Belinda and Smyth, Gordon K.},
+  title   = {Permutation {P}-values Should Never Be Zero: Calculating Exact {P}-values When Permutations Are Randomly Drawn},
+  journal = {Statistical Applications in Genetics and Molecular Biology},
+  year    = {2010},
+  volume  = {9},
+  number  = {1},
+  pages   = {Article 39},
+  doi     = {10.2202/1544-6115.1585}
+}
+
+% OECD Family Database indicator SF2.1 (2024 data: Israel 2.87 children per woman, the highest
+% TFR in the OECD): https://webfs.oecd.org/els-com/Family_Database/SF_2_1_Fertility_rates.pdf
+@misc{oecd2025fertility,
+  author = {{OECD}},
+  title  = {{OECD} Family Database, Indicator {SF2.1}: Fertility Rates},
+  year   = {2025},
+  note   = {Accessed 22 September 2026},
+  url    = {https://webfs.oecd.org/els-com/Family_Database/SF_2_1_Fertility_rates.pdf}
+}
+
+% Publisher page: https://academic.oup.com/cid/article/73/12/2265/6103916 -- gives the 2020
+% school closure (14 March), partial (3 May) and full (17 May) reopening dates.
+@article{somekh2021,
+  author  = {Somekh, Ido and Shohat, Tamy and Keinan-Boker, Lital and Sim{\~o}es, Eric A. F. and Somekh, Eli},
+  title   = {Reopening Schools and the Dynamics of {SARS-CoV-2} Infections in {I}srael: A Nationwide Study},
+  journal = {Clinical Infectious Diseases},
+  year    = {2021},
+  volume  = {73},
+  number  = {12},
+  pages   = {2265--2275},
+  doi     = {10.1093/cid/ciab035}
+}
+
+% Nature Human Behaviour page: https://www.nature.com/articles/s41562-021-01079-8. The OxCGRT
+% "school closing" indicator (C1) gives the day-by-day Israeli school-closure record for
+% 2020-2021 that the Data section summarises.
+@article{hale2021,
+  author  = {Hale, Thomas and Angrist, Noam and Goldszmidt, Rafael and Kira, Beatriz and Petherick, Anna and Phillips, Toby and Webster, Samuel and Cameron-Blake, Emily and Hallas, Laura and Majumdar, Saptarshi and Tatlow, Helen},
+  title   = {A Global Panel Database of Pandemic Policies ({O}xford {COVID-19} {G}overnment {R}esponse {T}racker)},
+  journal = {Nature Human Behaviour},
+  year    = {2021},
+  volume  = {5},
+  number  = {4},
+  pages   = {529--538},
+  doi     = {10.1038/s41562-021-01079-8}
+}

@@ -8,10 +8,19 @@ library(tidyverse)
 library(fixest)
 source(file.path("scripts", "data_processing.R"))
 
-run_intensive_margin_reg <- function(cleaned_df, controls = DEFAULT_CONTROLS) {
+# `year_fe` (added for the 2026-09-22 grade-report response, item M1) replaces the single Post
+# main effect with survey-year effects, i(ShnatSeker, ref = ref_year), while keeping Mother:Post as
+# the coefficient of interest. The pooled 2x2 is the paper's column (1); the year-effects version
+# is a robustness row, since pooling six years into two periods lets year-specific movements in
+# hours (visible in Figure 1) load onto the Post intercept. Default FALSE reproduces every existing
+# call byte for byte.
+run_intensive_margin_reg <- function(cleaned_df, controls = DEFAULT_CONTROLS, year_fe = FALSE,
+                                     ref_year = 2019) {
+
+  period_term <- if (isTRUE(year_fe)) sprintf("i(ShnatSeker, ref = %d)", ref_year) else "Post"
 
   rhs <- paste(
-    "Mother + Post + Mother:Post",
+    paste("Mother +", period_term, "+ Mother:Post"),
     paste(controls, collapse = " + "),
     sep = " + "
   )
@@ -21,7 +30,7 @@ run_intensive_margin_reg <- function(cleaned_df, controls = DEFAULT_CONTROLS) {
   reg_hours <- feols(formula_hours, data = filter(cleaned_df, Employed == 1), cluster = ~IDPUF)
 
   table_hours <- etable(reg_hours,
-                         headers = c("WorkHoursCont"),
+                         headers = c(if (isTRUE(year_fe)) "WorkHoursCont (year effects)" else "WorkHoursCont"),
                          digits = 4)
   print(table_hours)
   return(invisible(list(

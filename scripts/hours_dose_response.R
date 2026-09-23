@@ -32,10 +32,16 @@ library(tidyverse)
 library(fixest)
 source(file.path("scripts", "paper_theme.R"))
 source(file.path("scripts", "clustered_se.R"))
+source(file.path("scripts", "occupation_exposure_breaks.R"))
 source(file.path("robustness", "age_balance_robustness.R"))
 
+# `breaks` (added 2026-09-22): quartile edges to reuse instead of recomputing. When NULL the edges
+# are computed here by compute_occupation_exposure_breaks(), the rule this function used to carry
+# inline; main.R takes the returned `breaks` and hands them to the binned DDD
+# (scripts/hours_ddd_binned.R) and the absence footnote so all three share one set of bins.
 build_hours_dose_response <- function(cleaned_df, exposure_index,
-                                      measure_label = "occupation-level calibrated WFH exposure") {
+                                      measure_label = "occupation-level calibrated WFH exposure",
+                                      breaks = NULL) {
   # Same join as run_hours_ddd_regression(), so this figure and the DDD are computed on the
   # same rows: inner_join drops the non-employed and disclosure-masked/unmapped ISCO codes.
   df <- cleaned_df %>%
@@ -50,12 +56,8 @@ build_hours_dose_response <- function(cleaned_df, exposure_index,
   # Breakpoints from the PRE-period distribution, then applied to all rows -- the philosophy stated
   # at age_balance_robustness.R:22-27. Computing them separately on pre- and full-period rows would
   # silently misalign the quartile labels between the two.
-  pre_exposure <- df %>% filter(ShnatSeker < 2020) %>% pull(WFH_Exposure)
-  breaks <- quantile(pre_exposure, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
-  if (any(duplicated(breaks))) {
-    stop("build_hours_dose_response: duplicate quartile breakpoints (a mass point sits exactly on ",
-         "a boundary) -- cut() would silently produce fewer than 4 bins. Inspect the pre-period ",
-         "WFH_Exposure distribution before proceeding.")
+  if (is.null(breaks)) {
+    breaks <- compute_occupation_exposure_breaks(df, caller = "build_hours_dose_response")
   }
 
   df <- assign_wfh_quartile(df, breaks)

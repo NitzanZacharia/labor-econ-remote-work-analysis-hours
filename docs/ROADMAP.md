@@ -249,3 +249,27 @@ Rscript main.R        # exit 0; 31 CSVs + 6 PNGs change, all in the hours chain
 Every control artifact must stay byte-identical — the four `wfh_exposure_*.csv`, both Lee-bounds selection-rate files, and the entire employment margin. Any of those moving means the change leaked outside `WorkHoursCont`.
 
 **Downstream (completed since):** `paper/paper.tex`, `paper/notes/results_digest.md` and `paper/paper.pdf` were subsequently brought in line with the post-fix `outputs/` (commits `cc759d4`, `605e56e`, `b53846f`, `bdad127`). The 2017 anomaly paragraph, the 2018-2019 restriction on the identifying assumption, and the old §4.3 were rewritten or removed rather than merely renumbered.
+
+---
+
+## Checkpoint 14 — Grade-Report Response (specification, inference, heterogeneity, generated tables)
+
+**Objective:** Close the twelve deductions in `seminar_grade_report.md` (84/100) that could be closed inside the pipeline and the paper, without touching the Conclusion (work in progress) and without rebuilding the exposure crosswalk (deferred to its own plan).
+
+**Status:** Implemented 2026-09-22. New files: `scripts/occupation_exposure_breaks.R`, `scripts/hours_ddd_saturated.R`, `scripts/hours_ddd_binned.R`, `scripts/hours_ddd_by_child_age.R`, `scripts/wfh_occupation_first_stage.R`, `scripts/build_permutation_plot.R`, `scripts/tex_coef_cell.R`, `scripts/format_tex_table_body.R`, `scripts/build_paper_tables.R`, `scripts/export_paper_tables.R`, `robustness/hours_ddd_inference.R`, `data/isco08_2digit_labels.csv`, `paper/tables/*.tex` (generated). Changed: `main.R` (§8a additions, new §8f inference block, §8g table assembly), `scripts/hours_ddd_regression.R` (`outcome`, `run_mechanism`), `scripts/intensive_margin_regression.R` (`year_fe`), `scripts/descriptive_table.R` (clustered SEs on every difference), `scripts/hours_dose_response.R` and `scripts/absence_by_exposure_quartile.R` (shared breaks helper), the test helper and eleven test files, `CLAUDE.md`, `README.md`, `paper/paper.tex`, `paper/references.bib`.
+
+Full design, rejected alternatives and the item-by-item closure table are in [`docs/decisions/grade-report-response.md`](decisions/grade-report-response.md) — not duplicated here. In brief: the hours DDD is now reported three ways (pooled, fully saturated with occupation×year, occupation×mother and mother×year fixed effects, and quartile-binned on Figure 2's bins); the forty-cluster problem is met with a wild cluster bootstrap (`fwildclusterboot`, the one dependency added beyond tidyverse + fixest) and a permutation test that reassigns the forty exposure scores across occupations, which is also the paper's falsification test; the hours DiD/DDD are split by the youngest child's age; the occupation-level score gets a first stage; and every paper table is generated from the fitted models into `paper/tables/` and `\input{}` by `paper.tex`.
+
+**The result that matters:** the headline triple interaction (3.224, SE 1.022) is 2.876 (SE 0.9495) under the saturated specification and 1.844 (SE 0.594) as a top-vs-bottom-quartile contrast; its analytic p is 0.003, the permutation p is 0.032 and the wild-bootstrap p is 0.056, and the paper now reports all three rather than one. The child-age gradient is monotone: 3.656 (0-4), 3.211 (5-9), 2.741 (10-14), 1.862 (15-17). The stale Table 2 note (a religion category "dropped for collinearity" that was not dropped) is gone because the notes are now generated from `$collin.var`.
+
+Two notes for anyone extending this:
+
+- **`paper/tables/*.tex` are build products.** Change `scripts/build_paper_tables.R`, never the fragments. `tex_coef_cell()` uses fixest's internal `format_number()` so the cells are character-identical to `etable(digits = 4)`; `test-tex_coef_cell.R` pins that and will fail on a fixest upgrade that changes it.
+- **Seeds.** `INFERENCE_SEED` in `main.R` §8f seeds both `dqrng::dqset.seed()` (which the bootstrap actually draws from) and `set.seed()` (the permutation test). `set.seed()` alone does not reproduce `boottest()`.
+
+**Verification Step:**
+```r
+Rscript run_tests.R   # 1,284 passing (was 951 before this checkpoint)
+Rscript main.R        # exit 0; ~25 min (999 permutation refits); writes outputs/ and paper/tables/
+```
+Every pre-existing CSV except `descriptive_table_{continuous,categorical}.csv` (which gained SE columns and an hours-N row) must stay byte-identical.

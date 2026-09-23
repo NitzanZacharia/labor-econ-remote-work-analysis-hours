@@ -230,3 +230,64 @@ test_that("the primary (hours) DDD pipeline (main.R's section 8a) runs end-to-en
     expect_true(is.null(mech) || inherits(mech$plot, "ggplot"))
   }
 })
+
+# ── main.R §8a additions and §8f (2026-09-22 grade-report response) ──────────────────────────
+# Same smoke discipline as the §8a test above: the fixtures are far too small for most of these
+# to identify anything, so a clean failure is tolerated and only the orchestration is checked.
+# The permutation and bootstrap steps use tiny draw counts; their mechanics are covered by
+# test-hours_ddd_inference.R on a purpose-built panel.
+test_that("the grade-report additions (saturated/binned DDD, child-age split, first stage, inference) compose against fixtures", {
+  cleaned <- load_and_clean_data(fixtures_dir)
+
+  tmp_csv <- tempfile(fileext = ".csv")
+  on.exit(unlink(tmp_csv), add = TRUE)
+  isco_codes <- unique(stats::na.omit(cleaned$MishlachYad_ISCO_08_2))
+  readr::write_csv(
+    tibble::tibble(isco_2digit = isco_codes,
+                   wfh_probability_2d = seq_len(length(isco_codes)) / (length(isco_codes) + 1)),
+    tmp_csv
+  )
+  exposure_external <- build_exposure_isco2(path = tmp_csv)
+  out <- capture.output(exposure_calibrated <- suppressWarnings(calibrate_isco_exposure(cleaned, exposure_external)))
+  exposure_realized <- build_wfh_exposure_index(cleaned, ref_year = 2021, min_n = 0)
+  exposure_index <- exposure_calibrated %>%
+    dplyr::select(occupation_code = ISCO2, wfh_exposure = wfh_exposure_calibrated)
+
+  try_step <- function(expr) tryCatch(suppressWarnings(suppressMessages(expr)), error = function(e) NULL)
+
+  out <- capture.output(sat <- try_step(run_hours_ddd_saturated(cleaned, exposure_index)))
+  expect_true(is.null(sat) || inherits(sat$model, "fixest"))
+
+  out <- capture.output(dose <- try_step(build_hours_dose_response(cleaned, exposure_index)))
+  if (!is.null(dose)) {
+    out <- capture.output(binned <- try_step(run_hours_ddd_binned(cleaned, exposure_index, breaks = dose$breaks)))
+    expect_true(is.null(binned) || inherits(binned$model, "fixest"))
+  }
+
+  out <- capture.output(yearfe <- try_step(run_intensive_margin_reg(cleaned, year_fe = TRUE)))
+  expect_true(is.null(yearfe) || inherits(yearfe$models$hours, "fixest"))
+
+  out <- capture.output(childage <- try_step(run_hours_ddd_by_child_age(cleaned, exposure_index)))
+  expect_true(is.null(childage) || is.data.frame(childage$table))
+
+  out <- capture.output(fs <- try_step(build_wfh_occupation_first_stage(
+    cleaned, NULL, exposure_calibrated, exposure_external, exposure_realized,
+    labels_path = file.path(project_root, "data", "isco08_2digit_labels.csv")
+  )))
+  expect_true(is.null(fs) || inherits(fs$plot, "ggplot"))
+
+  out <- capture.output(perm <- try_step(run_hours_ddd_permutation_test(
+    cleaned, exposure_index, n_perm = 3, seed = 1, report_every = 0
+  )))
+  expect_true(is.null(perm) || nrow(perm$draws) == 3)
+
+  if (requireNamespace("fwildclusterboot", quietly = TRUE)) {
+    out <- capture.output(hours_ddd <- try_step(run_hours_ddd_regression(cleaned, exposure_index)))
+    if (!is.null(hours_ddd)) {
+      out <- capture.output(wb <- try_step(run_hours_ddd_wild_bootstrap(
+        hours_ddd$model, "Mother:Post:WFH_Exposure", B = 19, seed = 1, label = "headline"
+      )))
+      expect_true(is.null(wb) || nrow(wb$table) == 1)
+    }
+  }
+})

@@ -1,0 +1,2 @@
+"coef_name","estimate","t_stat","p_perm","p_perm_coef","n_perm","n_perm_valid","seed","n_clusters","t_perm_q025","t_perm_q975","t_perm_max_abs","coef_perm_q025","coef_perm_q975","p_perm_mc_se"
+"Mother:Post:WFH_Exposure",3.22404165894545,3.15380311324679,0.032,0.026,999,999,20260922,40,-2.96066021898447,2.60210825743405,6.20986092250753,-2.71561155328823,2.84829722824205,0.00556839357508133
