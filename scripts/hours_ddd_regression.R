@@ -27,7 +27,19 @@ source(file.path("scripts", "data_processing.R"))
 source(file.path("scripts", "ddd_collinearity_diagnostics.R"))
 source(file.path("scripts", "intensive_margin_regression.R"))
 
-run_hours_ddd_regression <- function(cleaned_df, exposure_index, controls = DEFAULT_CONTROLS) {
+# `outcome` and `run_mechanism` were added for the 2026-09-22 grade-report response (item M3,
+# docs/decisions/grade-report-response.md). `outcome` lets the same specification be estimated on
+# an alternative coding of the hours variable (a full-time or long-hours indicator built in
+# main.R) without a second copy of this function; the default reproduces every existing call.
+# `run_mechanism` switches off the per-occupation second stage below, which is a repo diagnostic
+# on WorkHoursCont specifically and has no meaning for a binary outcome or a subgroup row.
+run_hours_ddd_regression <- function(cleaned_df, exposure_index, controls = DEFAULT_CONTROLS,
+                                     outcome = "WorkHoursCont",
+                                     run_mechanism = identical(outcome, "WorkHoursCont")) {
+
+  if (!outcome %in% names(cleaned_df)) {
+    stop("run_hours_ddd_regression: outcome column '", outcome, "' is not in cleaned_df.")
+  }
 
   n_employed <- sum(cleaned_df$Employed == 1, na.rm = TRUE)
 
@@ -43,10 +55,13 @@ run_hours_ddd_regression <- function(cleaned_df, exposure_index, controls = DEFA
       by = "MishlachYad_ISCO_08_2"
     )
 
-  n_matched <- nrow(df_ddd)
+  n_matched  <- nrow(df_ddd)
+  # Occupation is the cluster; the count is returned so the paper's robustness table can print it
+  # per row (the unswapped-occupations row has 30, every other row 40).
+  n_clusters <- n_distinct(df_ddd$MishlachYad_ISCO_08_2)
   message(sprintf(
-    "run_hours_ddd_regression: %d of %d employed rows (%.1f%%) retained an occupation-level WFH_Exposure match (dropped: disclosure-masked or unmapped ISCO codes).",
-    n_matched, n_employed, 100 * n_matched / n_employed
+    "run_hours_ddd_regression: %d of %d employed rows (%.1f%%) retained an occupation-level WFH_Exposure match (dropped: disclosure-masked or unmapped ISCO codes); %d occupation clusters.",
+    n_matched, n_employed, 100 * n_matched / n_employed, n_clusters
   ))
 
   rhs_ddd <- paste(
@@ -54,15 +69,30 @@ run_hours_ddd_regression <- function(cleaned_df, exposure_index, controls = DEFA
     paste(controls, collapse = " + "),
     sep = " + "
   )
-  formula_ddd <- as.formula(paste("WorkHoursCont ~", rhs_ddd))
+  formula_ddd <- as.formula(paste(outcome, "~", rhs_ddd))
   # WFH_Exposure is assigned at the occupation level (~40 ISCO-2 groups), not the individual --
   # cluster on the occupation code, the level the regressor of interest actually varies at, not
   # IDPUF (a Moulton problem otherwise).
   reg_ddd <- feols(formula_ddd, data = df_ddd, cluster = ~MishlachYad_ISCO_08_2)
   check_for_dropped_coefficients(reg_ddd, "run_hours_ddd_regression()'s triple interaction")
 
-  table_ddd <- etable(reg_ddd, headers = c("WorkHoursCont (hours DDD)"), digits = 4)
+  table_ddd <- etable(reg_ddd, headers = c(paste0(outcome, " (hours DDD)")), digits = 4)
   print(table_ddd)
+
+  if (!isTRUE(run_mechanism)) {
+    return(invisible(list(
+      table           = table_ddd,
+      model           = reg_ddd,
+      n_employed      = n_employed,
+      n_matched       = n_matched,
+      n_clusters      = n_clusters,
+      exposure_vector = df_ddd$WFH_Exposure,
+      models          = list(ddd = reg_ddd, mechanism = NULL),
+      mechanism_data  = NULL,
+      dropped_occupations = NULL,
+      outcome         = outcome
+    )))
+  }
 
   # ── Model 2: second-stage mechanism regression ──────────────────────────────
   # For each occupation, fits run_intensive_margin_reg() (WorkHoursCont, Employed==1) on that
@@ -114,6 +144,7 @@ run_hours_ddd_regression <- function(cleaned_df, exposure_index, controls = DEFA
     model      = reg_ddd,
     n_employed = n_employed,
     n_matched  = n_matched,
+    n_clusters = n_clusters,
     # The regressor's own values on the estimation sample, so compute_ddd_mde() can report the MDE
     # per SD/IQR of exposure rather than only per unit. A bare numeric vector, not a data frame,
     # so export_all_results() ignores it (it is row-level and has no business in outputs/).
@@ -125,6 +156,7 @@ run_hours_ddd_regression <- function(cleaned_df, exposure_index, controls = DEFA
       n_dropped              = n_dropped,
       mean_exposure_dropped  = if (n_dropped > 0) mean(dropped_df$wfh_exposure) else NA_real_,
       mean_exposure_retained = mean(mechanism_df$wfh_exposure)
-    )
+    ),
+    outcome = outcome
   ))
 }

@@ -194,7 +194,7 @@ run_hours_ddd_age_interacted <- function(cleaned_df, exposure_index, controls = 
 
   print(etable(model, headers = c("Hours DDD, age-interacted"), digits = 4))
 
-  invisible(list(model = model))
+  invisible(list(model = model, n_clusters = n_distinct(df_ddd$MishlachYad_ISCO_08_2)))
 }
 
 run_hours_ddd_reweighted <- function(cleaned_df, exposure_cells, exposure_index,
@@ -235,7 +235,8 @@ run_hours_ddd_reweighted <- function(cleaned_df, exposure_cells, exposure_index,
 
   print(etable(model, headers = c("Hours DDD, reweighted"), digits = 4))
 
-  invisible(list(rake = rake, model = model))
+  invisible(list(rake = rake, model = model,
+                 n_clusters = n_distinct(ddd_df$MishlachYad_ISCO_08_2[!is.na(ddd_df$rake_weight)])))
 }
 
 run_ddd_reweighted <- function(cleaned_df, exposure_cells, controls = DEFAULT_CONTROLS,

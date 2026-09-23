@@ -17,6 +17,8 @@ tests/testthat/_problems/
 *.csv
 !tests/testthat/fixtures/**/*.csv
 !data/israeli_cbs_wfh_2digit.csv
+# ISCO-08 two-digit titles for the appendix exposure table (scripts/wfh_occupation_first_stage.R).
+!data/isco08_2digit_labels.csv
 
 # Checkpoint 9: persisted output layer. Tracked in git (not blanket-ignored). The `*.csv` rule
 # above would otherwise still catch every CSV in here, hence the negation. See docs/ROADMAP.md

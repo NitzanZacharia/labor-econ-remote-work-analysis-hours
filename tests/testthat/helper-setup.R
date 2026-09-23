@@ -55,6 +55,8 @@ source(file.path("scripts", "ddd_mde_diagnostics.R"))
 source(file.path("scripts", "hours_subgroup_comparison.R"))
 source(file.path("scripts", "hours_descriptive_plots.R"))
 source(file.path("scripts", "hours_dose_response.R"))
+source(file.path("scripts", "wfh_share_by_year.R"))
+source(file.path("scripts", "absence_by_exposure_quartile.R"))
 source(file.path("scripts", "build_mechanism_scatter.R"))
 source(file.path("scripts", "build_event_study_plot.R"))
 source(file.path("scripts", "export_results.R"))
@@ -63,6 +65,24 @@ source(file.path("scripts", "Diagnostics.R"))
 source(file.path("scripts", "hours_diagnostics.R"))
 source(file.path("scripts", "employment_by_child_age.R"))
 source(file.path("scripts", "validation.R"))
+# 2026-09-22 grade-report response (docs/decisions/grade-report-response.md).
+source(file.path("scripts", "occupation_exposure_breaks.R"))
+source(file.path("scripts", "hours_ddd_saturated.R"))
+source(file.path("scripts", "hours_ddd_binned.R"))
+source(file.path("scripts", "hours_ddd_by_child_age.R"))
+source(file.path("scripts", "wfh_occupation_first_stage.R"))
+source(file.path("scripts", "build_permutation_plot.R"))
+source(file.path("scripts", "tex_coef_cell.R"))
+source(file.path("scripts", "format_tex_table_body.R"))
+source(file.path("scripts", "build_paper_tables.R"))
+source(file.path("scripts", "export_paper_tables.R"))
+# 2026-09-23 grade-report-2 response (docs/decisions/grade-report-2-response.md).
+source(file.path("scripts", "hours_ddd_swap_control.R"))
+source(file.path("scripts", "exposure_sorting_check.R"))
+source(file.path("scripts", "hours_ddd_cell_exposure.R"))
+source(file.path("scripts", "hours_ddd_leave_one_out.R"))
+source(file.path("scripts", "build_leave_one_out_plot.R"))
+source(file.path("scripts", "build_balance_by_exposure_quartile.R"))
 
 # The 3 robustness-chain scripts below live in robustness/, not scripts/ -- each defines several
 # related functions (a diagnostic + one or more regression specs sharing it), not the single
@@ -70,6 +90,7 @@ source(file.path("scripts", "validation.R"))
 source(file.path("robustness", "balance_test.R"))
 source(file.path("robustness", "age_balance_robustness.R"))
 source(file.path("robustness", "pretrend_wald_test.R"))
+source(file.path("robustness", "hours_ddd_inference.R"))
 
 setwd(old_wd)
 
@@ -112,10 +133,13 @@ extract_controls_vector <- function(file_path) {
 # the two columns cannot disagree the way an independently sampled year column would. Trailing, and
 # defaulting to FALSE, so the two original callers are untouched -- the same convention `min_sex`
 # follows above.
+# `with_child_age` (2026-09-22) adds GilYeledTzairMBNK -- 0 for non-mothers, a random 1-5 bin for
+# mothers -- for run_hours_ddd_by_child_age(). Trailing and default FALSE, like the others.
 make_hours_ddd_panel <- function(delta = -3, n = 400, n_occ = 10, min_sex = NULL,
                                  with_years = FALSE,
                                  pre_years = c(2017, 2018, 2019),
-                                 post_years = c(2021, 2022, 2023)) {
+                                 post_years = c(2021, 2022, 2023),
+                                 with_child_age = FALSE) {
   occ_codes <- 300 + seq_len(n_occ)
   exposure_index <- tibble::tibble(
     occupation_code = occ_codes,
@@ -151,6 +175,13 @@ make_hours_ddd_panel <- function(delta = -3, n = 400, n_occ = 10, min_sex = NULL
         sample(post_years, dplyr::n(), replace = TRUE),
         sample(pre_years,  dplyr::n(), replace = TRUE)
       )
+    )
+  }
+
+  if (isTRUE(with_child_age)) {
+    panel <- dplyr::mutate(
+      panel,
+      GilYeledTzairMBNK = ifelse(Mother == 1, sample(1:5, dplyr::n(), replace = TRUE), 0)
     )
   }
 

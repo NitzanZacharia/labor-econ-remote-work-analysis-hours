@@ -1,0 +1,2 @@
+"term","estimate","std_error","p_value","n","n_clusters","regressor_sd","estimate_per_sd","se_per_sd"
+"Mother:Post:WFH_Exposure",2.07569929648344,2.37096425865844,0.38232525207666,247931,245,0.0670274818657768,0.139128896953849,0.158919763851634

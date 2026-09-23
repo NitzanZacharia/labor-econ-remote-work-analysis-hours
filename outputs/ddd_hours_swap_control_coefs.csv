@@ -1,0 +1,3 @@
+"term","estimate","std_error","p_value","n","n_clusters","n_swapped_occupations"
+"Mother:Post:WFH_Exposure",2.3394487079554,1.35216557960988,0.0915110025468912,246326,40,10
+"Mother:Post:Swapped",-1.34672920113076,0.925670452538275,0.153707633663107,246326,40,10

@@ -50,3 +50,19 @@ test_that("run_intensive_margin_reg recovers an exact hand-computable DiD effect
   did_coef <- coef(res$models$hours)[["Mother:Post"]]
   expect_equal(did_coef, 2, tolerance = 1e-8)
 })
+
+# ── `year_fe` (2026-09-22 grade-report response, item M1) ────────────────────────────────────
+test_that("year_fe = TRUE replaces Post with survey-year effects and keeps Mother:Post", {
+  set.seed(15)
+  fx <- make_hours_ddd_panel(delta = -3, n = 1200, n_occ = 10, with_years = TRUE)
+  out <- capture.output(res <- suppressWarnings(run_intensive_margin_reg(fx$panel, year_fe = TRUE)))
+
+  coefs <- names(coef(res$models$hours))
+  expect_true("Mother:Post" %in% coefs)
+  expect_false("Post" %in% coefs)
+  expect_true(any(grepl("^ShnatSeker::20(17|18|21|22|23)$", coefs)))
+  expect_false("ShnatSeker::2019" %in% coefs)
+
+  out <- capture.output(res_default <- suppressWarnings(run_intensive_margin_reg(fx$panel)))
+  expect_true("Post" %in% names(coef(res_default$models$hours)))
+})

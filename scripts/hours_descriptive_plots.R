@@ -189,6 +189,15 @@ build_hours_descriptive_plots <- function(cleaned_df, hours_by_period = NULL) {
     geom_line(linewidth = 0.9) +
     geom_point(size = 2.2) +
     geom_errorbar(aes(ymin = ci_low, ymax = ci_high), width = 0.12, linewidth = 0.4) +
+    # The levels panel used to span only the data (about 38 to 41 hours), which made movements
+    # of under half an hour fill the panel. A blank layer pins its range to at least 36-42 hours
+    # so the gap panel beneath, not the axis, carries the visual claim (2026-09-23 grade-report-2
+    # item on Figure 1). The gap panel is unaffected: its own data define its range.
+    geom_blank(
+      data = tibble(panel = factor(panel_levels[1], levels = panel_levels),
+                    ShnatSeker = year_levels[1], value = c(36, 42), series = names(year_palette)[1]),
+      aes(x = ShnatSeker, y = value), inherit.aes = FALSE
+    ) +
     scale_colour_manual(values = year_palette) +
     scale_x_continuous(breaks = year_levels) +
     facet_wrap(~ panel, ncol = 1, scales = "free_y") +

@@ -16,6 +16,11 @@ library(tidyverse)
 # DEFAULT_CONTROLS is the single source of truth for the control set (scripts/data_processing.R);
 # sourced here so this file also works when loaded on its own, not just via main.R.
 source(file.path("scripts", "data_processing.R"))
+# Cluster-robust standard errors for the difference column (added 2026-09-22, grade-report item
+# T2). Each difference is the Mother coefficient of `y ~ Mother` clustered by IDPUF, so the point
+# estimate is the same arithmetic as before and only the uncertainty is new -- the same integrity
+# rule clustered_se.R's header states for every descriptive in the paper.
+source(file.path("scripts", "clustered_se.R"))
 
 build_descriptive_table <- function(cleaned_df) {
 
@@ -38,10 +43,26 @@ build_descriptive_table <- function(cleaned_df) {
       emp_rate   = mean(Employed, na.rm = TRUE),
       hours_mean = mean(WorkHoursCont[Employed == 1], na.rm = TRUE),
       hours_sd   = sd(WorkHoursCont[Employed == 1], na.rm = TRUE),
+      hours_n    = sum(Employed == 1 & !is.na(WorkHoursCont)),
       mean_gilnk = mean(gilnk_num(GilNK), na.rm = TRUE),
       arab_share = mean(Leom == 2, na.rm = TRUE),
       .groups    = "drop"
     )
+
+  # Standard error of each mothers-minus-childless difference, clustered by individual. The
+  # frame carries the numeric versions of the two factor-coded measures so feols sees a number.
+  se_frame <- cleaned_df %>%
+    mutate(gilnk_num_col = gilnk_num(GilNK), arab_col = as.integer(Leom == 2))
+  se_of <- function(data, formula) clustered_se(data, formula, "Mother")$se
+  diff_se <- c(
+    n_obs      = NA_real_,
+    emp_rate   = se_of(se_frame, Employed ~ Mother),
+    hours_mean = se_of(filter(se_frame, Employed == 1), WorkHoursCont ~ Mother),
+    hours_sd   = NA_real_,
+    hours_n    = NA_real_,
+    mean_gilnk = se_of(se_frame, gilnk_num_col ~ Mother),
+    arab_share = se_of(se_frame, arab_col ~ Mother)
+  )
 
   # Pull one cell, tolerating an absent Mother level (a fixture or subsample may hold only one).
   pick <- function(col, m) {
@@ -54,6 +75,7 @@ build_descriptive_table <- function(cleaned_df) {
     emp_rate   = "Employment rate",
     hours_mean = "Usual weekly hours (employed), mean",
     hours_sd   = "Usual weekly hours (employed), SD",
+    hours_n    = "Usual weekly hours (employed), N",
     mean_gilnk = "Age-group code (CBS 3-7), mean",
     arab_share = "Arab (share)"
   )
@@ -64,8 +86,11 @@ build_descriptive_table <- function(cleaned_df) {
     mothers   = map_dbl(names(measures), ~ pick(.x, 1))
   ) %>%
     mutate(
-      # A difference in row counts is not a comparison, so it is left blank rather than computed.
-      difference = if_else(measure == "Observations", NA_real_, mothers - childless)
+      # A difference in row counts is not a comparison, so it is left blank rather than computed;
+      # the same holds for the hours N row.
+      difference = if_else(measure %in% c("Observations", "Usual weekly hours (employed), N"),
+                           NA_real_, mothers - childless),
+      se_difference = unname(diff_se[names(measures)])
     )
 
   message("=== Descriptive statistics: continuous measures, by mother status ===")
@@ -97,6 +122,17 @@ build_descriptive_table <- function(cleaned_df) {
   if (all(c("pct_mother1", "pct_mother0") %in% names(categorical))) {
     categorical <- categorical %>%
       mutate(pct_difference = pct_mother1 - pct_mother0)
+
+    # Clustered SE of each level's share difference, in percentage points: the Mother coefficient
+    # of an indicator regression, times 100. One small feols per level.
+    categorical <- categorical %>%
+      mutate(se_pct_difference = map2_dbl(variable, level, function(v, l) {
+        ind_df <- cleaned_df %>%
+          select(Mother, IDPUF, level_raw = all_of(v)) %>%
+          filter(!is.na(level_raw)) %>%
+          mutate(ind_col = as.integer(as.character(level_raw) == l))
+        100 * clustered_se(ind_df, ind_col ~ Mother, "Mother")$se
+      }))
   }
 
   # Level labels for the three controls the extract carries only as numeric CBS codes. Source:

@@ -1,12 +1,16 @@
 % references.bib -- built from paper/notes/results_digest.md §6 (2026-09-15).
 % Substantive citations (§6.1): harrington2025, goldin2014, kleven2019denmark,
 %   kleven2019countries, dingel2020.
+% Intensive-margin citations added by the 2026-09-22 editorial audit (item C3), each verified
+%   field by field against Crossref that day: maspallais2017, cortespan2019 (Literature Review,
+%   Goldin paragraph), bloom2015 (Literature Review, evidence paragraph), aksoy2023 (Discussion).
 % Methods citations (§6.2, Empirical Strategy only): olden2022, lee2009, imbens2004.
 % Out of scope per digest §6.3 (deliberately NOT included): Correll et al. (2007),
 %   Cohen & Manor (2024), Bloom / WFH Research.
 % [VERIFY] markers carried over from the digest were checked against Crossref and NBER on
-% 2026-09-19 and all fields confirmed. The only one still open is the Dingel & Neiman crosswalk
-% provenance below, which is a question about data derivation, not about a citation field.
+% 2026-09-19 and all fields confirmed. The last one, the Dingel & Neiman crosswalk provenance
+% (a question about data derivation, not a citation field), was closed on 2026-09-23 -- see the
+% comment above dingel2020 and the bls2012crosswalk entry it cites.
 
 @techreport{harrington2025,
   author      = {Harrington, Emma and Kahn, Matthew E.},
@@ -49,9 +53,13 @@
   doi     = {10.1257/pandp.20191078}
 }
 
-% VERIFY (digest §6.1 item 5): that data/israeli_cbs_wfh_2digit.csv is derived from Dingel &
-% Neiman's published occupational classification -- the SOC->ISCO crosswalk provenance is not
-% documented in the repo. Citation fields themselves are verified.
+% Provenance of data/israeli_cbs_wfh_2digit.csv, resolved 2026-09-23 (was the digest §6.1 item 5
+% VERIFY marker): Dingel & Neiman's published binary indicator (occupations_workathome.csv in
+% their replication repository), mapped to ISCO-08 through the bls2012crosswalk entry below and
+% averaged without weights over the matched pairs within each two-digit group. Rebuilding from
+% the two public files reproduces the committed file exactly; the executable proof and the input
+% hashes are in tests/testthat/test-wfh_crosswalk_integrity.R and
+% docs/open-question-wfh-crosswalk-provenance.md. Citation fields verified 2026-09-19.
 @article{dingel2020,
   author  = {Dingel, Jonathan I. and Neiman, Brent},
   title   = {How Many Jobs Can Be Done at Home?},
@@ -60,6 +68,17 @@
   volume  = {189},
   pages   = {104235},
   doi     = {10.1016/j.jpubeco.2020.104235}
+}
+
+% The SOC-to-ISCO crosswalk behind the external exposure score. Author's copy supplied by the
+% Israeli Central Bureau of Statistics; identical to the BLS's public workbook. Cited in the
+% appendix's exposure-construction paragraph.
+@misc{bls2012crosswalk,
+  author       = {{Bureau of Labor Statistics}},
+  title        = {Crosswalk between the {I}nternational {S}tandard {C}lassification of {O}ccupations ({ISCO}-08) and the 2010 {S}tandard {O}ccupational {C}lassification ({SOC})},
+  howpublished = {Prepared on behalf of the Standard Occupational Classification Policy Committee. \url{https://www.bls.gov/soc/ISCO_SOC_Crosswalk.xls}},
+  year         = {2012},
+  note         = {Updated June 2015}
 }
 
 % DOI, title, journal, volume, issue and pages all confirmed via Crossref, 2026-09-19.
@@ -114,6 +133,50 @@
   number      = {28731},
   year        = {2021},
   doi         = {10.3386/w28731}
+}
+
+@article{maspallais2017,
+  author  = {Mas, Alexandre and Pallais, Amanda},
+  title   = {Valuing Alternative Work Arrangements},
+  journal = {American Economic Review},
+  year    = {2017},
+  volume  = {107},
+  number  = {12},
+  pages   = {3722--3759},
+  doi     = {10.1257/aer.20161500}
+}
+
+@article{cortespan2019,
+  author  = {Cort{\'e}s, Patricia and Pan, Jessica},
+  title   = {When Time Binds: Substitutes for Household Production, Returns to Working Long Hours, and the Skilled Gender Wage Gap},
+  journal = {Journal of Labor Economics},
+  year    = {2019},
+  volume  = {37},
+  number  = {2},
+  pages   = {351--398},
+  doi     = {10.1086/700185}
+}
+
+@article{aksoy2023,
+  author  = {Aksoy, Cevat Giray and Barrero, Jose Maria and Bloom, Nicholas and Davis, Steven J. and Dolls, Mathias and Zarate, Pablo},
+  title   = {Time Savings When Working from Home},
+  journal = {AEA Papers and Proceedings},
+  year    = {2023},
+  volume  = {113},
+  pages   = {597--603},
+  doi     = {10.1257/pandp.20231013}
+}
+
+% Crossref's issued date is the 2014 online-first date; the print volume (130, issue 1) is 2015.
+@article{bloom2015,
+  author  = {Bloom, Nicholas and Liang, James and Roberts, John and Ying, Zhichun Jenny},
+  title   = {Does Working from Home Work? {E}vidence from a {C}hinese Experiment},
+  journal = {The Quarterly Journal of Economics},
+  year    = {2015},
+  volume  = {130},
+  number  = {1},
+  pages   = {165--218},
+  doi     = {10.1093/qje/qju032}
 }
 
 @article{angelici2024,
@@ -177,4 +240,148 @@
   type        = {Discussion Paper},
   number      = {2023.17},
   year        = {2023}
+}
+
+% ── Added by the 2026-09-22 grade-report response (docs/decisions/grade-report-response.md) ──
+% Each entry below was verified the same day against the publisher or NBER page named in the
+% comment above it. Continuous-treatment DiD (Literature Review, item E1); inference and
+% permutation methods (Empirical Strategy, items R1/M2); the fertility and school-closure
+% sources for the Introduction and Data sections (item W2).
+
+% NBER page: https://www.nber.org/papers/w32117 (also arXiv:2107.02637).
+@techreport{callaway2024,
+  author      = {Callaway, Brantly and Goodman-Bacon, Andrew and Sant'Anna, Pedro H. C.},
+  title       = {Difference-in-Differences with a Continuous Treatment},
+  institution = {National Bureau of Economic Research},
+  type        = {NBER Working Paper},
+  number      = {32117},
+  year        = {2024}
+}
+
+% Stata Journal page: https://journals.sagepub.com/doi/10.1177/1536867X19830877
+@article{roodman2019,
+  author  = {Roodman, David and Nielsen, Morten {\O}rregaard and MacKinnon, James G. and Webb, Matthew D.},
+  title   = {Fast and Wild: Bootstrap Inference in {S}tata Using boottest},
+  journal = {The Stata Journal},
+  year    = {2019},
+  volume  = {19},
+  number  = {1},
+  pages   = {4--60},
+  doi     = {10.1177/1536867X19830877}
+}
+
+% citation("fwildclusterboot") on the installed version (0.14.3).
+@misc{fischer2021,
+  author = {Fischer, Alexander and Roodman, David},
+  title  = {fwildclusterboot: Fast Wild Cluster Bootstrap Inference for Linear Regression Models},
+  year   = {2021},
+  note   = {R package version 0.14.3},
+  url    = {https://cran.r-project.org/package=fwildclusterboot}
+}
+
+% Publisher page: https://www.degruyterbrill.com/document/doi/10.2202/1544-6115.1585/html
+@article{phipson2010,
+  author  = {Phipson, Belinda and Smyth, Gordon K.},
+  title   = {Permutation {P}-values Should Never Be Zero: Calculating Exact {P}-values When Permutations Are Randomly Drawn},
+  journal = {Statistical Applications in Genetics and Molecular Biology},
+  year    = {2010},
+  volume  = {9},
+  number  = {1},
+  pages   = {Article 39},
+  doi     = {10.2202/1544-6115.1585}
+}
+
+% OECD Family Database indicator SF2.1 (2024 data: Israel 2.87 children per woman, the highest
+% TFR in the OECD): https://webfs.oecd.org/els-com/Family_Database/SF_2_1_Fertility_rates.pdf
+@misc{oecd2025fertility,
+  author = {{OECD}},
+  title  = {{OECD} Family Database, Indicator {SF2.1}: Fertility Rates},
+  year   = {2025},
+  note   = {Accessed 22 September 2026},
+  url    = {https://webfs.oecd.org/els-com/Family_Database/SF_2_1_Fertility_rates.pdf}
+}
+
+% Publisher page: https://academic.oup.com/cid/article/73/12/2265/6103916 -- gives the 2020
+% school closure (14 March), partial (3 May) and full (17 May) reopening dates.
+@article{somekh2021,
+  author  = {Somekh, Ido and Shohat, Tamy and Keinan-Boker, Lital and Sim{\~o}es, Eric A. F. and Somekh, Eli},
+  title   = {Reopening Schools and the Dynamics of {SARS-CoV-2} Infections in {I}srael: A Nationwide Study},
+  journal = {Clinical Infectious Diseases},
+  year    = {2021},
+  volume  = {73},
+  number  = {12},
+  pages   = {2265--2275},
+  doi     = {10.1093/cid/ciab035}
+}
+
+% Nature Human Behaviour page: https://www.nature.com/articles/s41562-021-01079-8. The OxCGRT
+% "school closing" indicator (C1) gives the day-by-day Israeli school-closure record for
+% 2020-2021 that the Data section summarises.
+@article{hale2021,
+  author  = {Hale, Thomas and Angrist, Noam and Goldszmidt, Rafael and Kira, Beatriz and Petherick, Anna and Phillips, Toby and Webster, Samuel and Cameron-Blake, Emily and Hallas, Laura and Majumdar, Saptarshi and Tatlow, Helen},
+  title   = {A Global Panel Database of Pandemic Policies ({O}xford {COVID-19} {G}overnment {R}esponse {T}racker)},
+  journal = {Nature Human Behaviour},
+  year    = {2021},
+  volume  = {5},
+  number  = {4},
+  pages   = {529--538},
+  doi     = {10.1038/s41562-021-01079-8}
+}
+
+% Added 2026-09-23 (grade-report-2 response, Literature Review paragraph "Remote work and hours"
+% and the Israeli benchmark sentence). Each entry verified field by field against the Crossref
+% API that day: DOI, title, authors, journal, volume, issue, pages, year.
+@article{barrero2023,
+  author  = {Barrero, Jos{\'e} Mar{\'i}a and Bloom, Nicholas and Davis, Steven J.},
+  title   = {The Evolution of Work from Home},
+  journal = {Journal of Economic Perspectives},
+  year    = {2023},
+  volume  = {37},
+  number  = {4},
+  pages   = {23--49},
+  doi     = {10.1257/jep.37.4.23}
+}
+
+@article{emanuelharrington2024,
+  author  = {Emanuel, Natalia and Harrington, Emma},
+  title   = {Working Remotely? {S}election, Treatment, and the Market for Remote Work},
+  journal = {American Economic Journal: Applied Economics},
+  year    = {2024},
+  volume  = {16},
+  number  = {4},
+  pages   = {528--559},
+  doi     = {10.1257/app.20230376}
+}
+
+@article{gibbs2023,
+  author  = {Gibbs, Michael and Mengel, Friederike and Siemroth, Christoph},
+  title   = {Work from Home and Productivity: Evidence from Personnel and Analytics Data on Information Technology Professionals},
+  journal = {Journal of Political Economy Microeconomics},
+  year    = {2023},
+  volume  = {1},
+  number  = {1},
+  pages   = {7--41},
+  doi     = {10.1086/721803}
+}
+
+@article{pabilonia2022,
+  author  = {Pabilonia, Sabrina Wulff and Vernon, Victoria},
+  title   = {Telework, Wages, and Time Use in the {U}nited {S}tates},
+  journal = {Review of Economics of the Household},
+  year    = {2022},
+  volume  = {20},
+  number  = {3},
+  pages   = {687--734},
+  doi     = {10.1007/s11150-022-09601-1}
+}
+
+@article{budig2023,
+  author  = {Budig, Michelle J. and Kraus, Vered and Levanon, Asaf},
+  title   = {Israeli Ethno-Religious Differences in Motherhood Penalties on Employment and Earnings},
+  journal = {Gender \& Society},
+  year    = {2023},
+  volume  = {37},
+  number  = {2},
+  pages   = {208--239},
+  doi     = {10.1177/08912432231155913}
 }

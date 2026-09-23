@@ -74,6 +74,17 @@ test_that("a planted dose-response is recovered in the right direction", {
   expect_gt(d$did[4], d$did[1])
 })
 
+test_that("each quartile carries its mean exposure, rising across quartiles and inside its edges", {
+  fx <- make_dose_panel()
+  capture.output(res <- build_hours_dose_response(fx$cleaned_df, fx$exposure_index))
+
+  d <- dplyr::arrange(res$data, WFH_Exposure_Q)
+  expect_true("mean_exposure" %in% names(d))
+  expect_true(all(is.finite(d$mean_exposure)))
+  expect_true(all(diff(d$mean_exposure) > 0))
+  expect_true(all(d$mean_exposure >= d$q_low & d$mean_exposure <= d$q_high))
+})
+
 test_that("confidence intervals bracket the point estimate and all values are finite", {
   fx <- make_dose_panel()
   capture.output(res <- build_hours_dose_response(fx$cleaned_df, fx$exposure_index))

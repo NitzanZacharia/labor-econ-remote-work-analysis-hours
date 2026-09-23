@@ -292,6 +292,31 @@ Framing: "directionally robust, not point-estimate robust." The external index s
 insignificant, which is the form the paper's "measurement is part of the result" argument needs —
 the mechanism is visible only once exposure is measured as Israeli jobs were actually done.
 
+**Added 2026-09-22 (editorial audit, `paper/notes/editorial-audit-2026-09-22.md` step 2).** Three
+more rows in the paper's robustness table, all from `run_hours_ddd_regression()` call sites in
+`main.R` §8a with no new econometric machinery:
+
+| Specification | `Mother x Post x WFH_Exposure` | SE | Sig. | N | Source |
+|---|---|---|---|---|---|
+| Unswapped occupations only (30 of 40; calibrated == external on these rows) | 4.309 | 1.192 | ** | 132,046 | `outputs/ddd_hours_unswapped.csv` |
+| Excluding survey year 2023 | 2.979 | 1.170 | * | 208,833 | `outputs/ddd_hours_ex2023.csv` |
+| Two-way clustering (IDPUF + occupation), same fit | 3.224 | 1.022 | ** | 246,326 | `outputs/ddd_hours_twoway_cluster.csv` |
+
+The plain hours DiD without 2023 is 0.0710 (SE 0.1975), N = 213,385
+(`outputs/intensive_margin_ex2023.csv`). The unswapped row is the direct answer to "the result
+appears only once post-period data enter the regressor": on the thirty occupations where no
+post-period information enters, the estimate is larger, not smaller. All ten swaps are downward
+(`outputs/wfh_exposure_calibrated.csv`, `swap == TRUE`).
+
+Two descriptives were added at the same time. `outputs/wfh_share_by_year.csv`: realized WFH among
+employed women 25–59, usual location 15.7% / 13.0% / 12.7% (2021/2022/2023) and reference-week
+21.3% / 21.9% / 22.2% (denominator: those at work that week); NA before 2021 by construction.
+`outputs/absence_by_exposure_quartile_by_quartile.csv`: reference-week absence 14.4% / 8.5% /
+9.5% / 9.6% from Q1 to Q4 of the occupation-level index (the `by_cell` file splits by Mother ×
+Post; mothers' Q4 share falls 12.1% → 10.4% while Q1 rises 15.5% → 16.9%). The dose-response frame
+`outputs/hours_dose_response_data.csv` gained `mean_exposure` (Q1 0.060, Q4 0.592), which gives
+the paper's implied Q4−Q1 effect of 3.224 × 0.531 = 1.71 hours against the raw 1.87.
+
 ### 1.7 [PRIMARY] Age-balance robustness (hours DDD)
 
 Source: `outputs/age_balance_robustness_hours_ddd_age_interacted.csv`,
@@ -727,7 +752,7 @@ Source: `docs/decisions/checkpoint6-wfh-anchor-year.md` (Status: DECIDED — Pat
 
 ## 5. Limitations (verbatim)
 
-### 5.1 `README.md` — "Known limitations" (snapshot as of 2026-09-19; `README.md` has since been rewritten — check it for the current wording, which now enumerates three legitimate `weights =` uses rather than one)
+### 5.1 `README.md` — "Known limitations" (snapshot as of 2026-09-19; `README.md` has since been rewritten — check it for the current wording, which now enumerates four legitimate `weights =` uses rather than one — the fourth, added 2026-09-22, is the occupation-cell-size weight in `build_wfh_occupation_first_stage()`)
 
 > - **Survey weights are intentionally not applied in any regression.** CBS weight columns
 >   (`MishkalSofi`, `MishkalShnati`, etc.) exist in the raw data and are deliberately excluded from
@@ -863,9 +888,12 @@ are not cited anywhere in the repo; their roles are fixed below.
 
 5. **Dingel, Jonathan I., and Brent Neiman (2020).** "How Many Jobs Can Be Done at Home?" *Journal
    of Public Economics*, 189: 104235. DOI 10.1016/j.jpubeco.2020.104235. (Source of the external
-   teleworkability score in `data/israeli_cbs_wfh_2digit.csv` / `build_exposure_isco2()`
-   `[VERIFY: that the crosswalk file is derived from D&N's published occupational classification —
-   the repo says so but the provenance of the SOC→ISCO mapping is not documented]`.)
+   teleworkability score in `data/israeli_cbs_wfh_2digit.csv` / `build_exposure_isco2()`.
+   **Provenance resolved 2026-09-23:** the file is D&N's published binary indicator mapped to
+   ISCO-08 through the BLS 2012 ISCO-08/SOC-2010 crosswalk (cited as `bls2012crosswalk`) and
+   averaged without weights within each two-digit group; rebuilding from the two public files
+   reproduces it exactly — see `docs/open-question-wfh-crosswalk-provenance.md` and the last block
+   of `tests/testthat/test-wfh_crosswalk_integrity.R`.)
 
 ### 6.2 Methods citations (Empirical Strategy section only) — REQUIRED, but NOT literature review
 
@@ -913,7 +941,7 @@ to the paper.**
    (employment-probability units). The §1.5 scope decision is unaffected — the data is now
    verifiable, but the regression is still not drafted into the paper. The Jewish/Arab analogs
    remain console-only.
-2. Imbens–Manski CIs for both Lee-bounds tables — console only; **recomputed 2026-09-21** by sourcing `scripts/imbens_manski_ci.R` against the regenerated bounds: DiD [−0.810, 1.096] (c_α 1.644854), DDD [1.021, 5.324] (c_α 1.839787). Still not written to any CSV. Arithmetically consistent with the
+2. ~~Imbens–Manski CIs for both Lee-bounds tables — console only.~~ **Resolved 2026-09-22:** exported by `main.R` as `outputs/hours_lee_bounds_imbens_manski.csv` ([1.0208, 5.3237], c_α 1.8398) and `outputs/intensive_margin_lee_bounds_imbens_manski.csv` ([−0.8095, 1.0959], c_α 1.6449). Earlier note: **recomputed 2026-09-21** by sourcing `scripts/imbens_manski_ci.R` against the regenerated bounds: DiD [−0.810, 1.096] (c_α 1.644854), DDD [1.021, 5.324] (c_α 1.839787). Still not written to any CSV. Arithmetically consistent with the
    exported per-bound SEs (§1.2, §1.4).
 3. ~~Hours-DDD MDE (2.6059) — console only; arithmetically verified from the exported SE (§1.3).~~
    **Resolved 2026-09-19:** `compute_ddd_mde()` now returns a one-row data frame, so all three
@@ -947,4 +975,79 @@ to the paper.**
     confirmed two-author, marked central/required; Olden & Møen kept with DOI `[VERIFY]`
     (non-blocking); Correll, Cohen & Manor, and Bloom placed out of scope; Lee (2009) and
     Imbens & Manski (2004) reclassified as methods citations. Remaining: Olden & Møen DOI; Lee and
-    Imbens–Manski page ranges not web-checked; D&N crosswalk provenance.
+    Imbens–Manski page ranges not web-checked. D&N crosswalk provenance closed 2026-09-23 (§6.1
+    item 5).
+
+---
+
+## 8. 2026-09-22 grade-report response — new artifacts and numbers
+
+Added by `docs/decisions/grade-report-response.md` (Checkpoint 14). Every number below is read
+from the named `outputs/` file written by the same default `Rscript main.R` run; the paper's
+tables are now generated from that run (`paper/tables/*.tex`, via `build_paper_tables()`), so
+Tables 1–7 and A1 are not transcribed at all. Significance codes as in the header.
+
+### 8.1 [PRIMARY] Hours DDD, saturated fixed effects — `outputs/ddd_hours_saturated.csv`
+`WorkHoursCont ~ Mother:Post:WFH_Exposure + controls | occ^ShnatSeker + occ^Mother + Mother^ShnatSeker`,
+clustered by occupation. **Mother × Post × WFH_Exposure = 2.876\*\* (0.9495)**, N = 246,324,
+R² 0.13512 (within 0.02453). Paper: Table 2 column (3), §5.2.
+
+### 8.2 [PRIMARY] Hours DDD, exposure quartiles — `outputs/ddd_hours_binned_coefs.csv`, `_quartile_sizes.csv`, `_table.csv`
+Bins are Figure 2's pre-period quartile edges (`hours_dose_response$breaks`). Relative to Q1:
+Q2 0.7529 (0.4827), Q3 0.5998 (0.4847), **Q4 1.844\*\* (0.5946)**, p = 0.0036; Mother × Post
+(Q1) −0.4720 (0.3459); N = 246,326. Occupations per bin 16 / 7 / 11 / 6; rows 61,571 / 66,612 /
+74,911 / 48,874. Paper: Table 2 column (4), §5.2.
+
+### 8.3 [PRIMARY] Hours DiD with survey-year effects — `outputs/intensive_margin_yearfe.csv`
+Mother × Post = 0.2310 (0.1808), N = 251,857. Paper: §5.1, one sentence.
+
+### 8.4 [PRIMARY] Outcome-coding sensitivity — `outputs/ddd_hours_noimputed.csv`, `ddd_hours_fulltime.csv`, `ddd_hours_longhours.csv`, `hours_outcome_shares.csv`
+Triple interaction: irregular-hours codes 11/12 dropped **3.056\*\* (1.059)**, N = 232,785;
+full-time (≥35 h) LPM **0.0964\*\* (0.0291)**; long-hours (≥40 h) LPM **0.1073\*\* (0.0380)**,
+both N = 246,326. Per SD of exposure (0.1986): 1.9 and 2.1 pp. Baseline shares by Mother × Post
+in `hours_outcome_shares.csv`. Paper: Table 4 "Outcome coding", §5.4.
+
+### 8.5 [PRIMARY] Wild cluster bootstrap — `outputs/hours_wild_bootstrap.csv`
+`fwildclusterboot::boottest()`, Rademacher, null imposed, B = 9,999, 40 clusters, seed 20260922
+(`dqrng::dqset.seed` + `set.seed`). Headline Mother × Post × WFH_Exposure: t = 3.154,
+**p_boot = 0.0558**, bootstrap 95% CI [−0.2644, 5.8433]. DDD event-study pre-period terms:
+2017 p = 0.8381, 2018 p = 0.8837, sum p = 0.8523. Paper: Table 4 "Inference", §5.3 notes,
+§4.4, §5.4, Abstract.
+
+### 8.6 [PRIMARY] Permutation test — `outputs/hours_permutation_table.csv`, `hours_permutation_draws.csv`
+999 reassignments of the 40 calibrated scores across occupation codes, seed 20260922, refit with
+occupation clustering. Observed t = 3.1538; **p_perm = 0.032** on |t| (31 of 999 draws ≥ |t_obs|;
+Phipson–Smyth count), 0.026 on |coef|; t_perm 2.5/97.5% quantiles −2.9607 / 2.6021, max |t| 6.2099;
+Monte-Carlo SE of p 0.0056. Figure: `outputs/figures/hours_permutation.pdf` (Figure 5). Paper:
+§4.6, §5.4, §5.5, Abstract.
+
+### 8.7 [PRIMARY] Hours DiD/DDD by youngest child's age — `outputs/hours_ddd_by_child_age_table.csv`, `_comparison_data.csv`
+Each bin's mothers + all 133,646 childless women. DiD (SE, N): 0–4 0.1267 (0.2111, 158,424);
+5–9 0.1621 (0.2533, 130,782); 10–14 0.1593 (0.2780, 123,280); 15–17 0.5613 (0.3483, 107,061) —
+all ns. DDD: **0–4 3.656\*\* (1.079, 154,499)**; 5–9 3.211\* (1.311, 127,419); 10–14 2.741·
+(1.525, 120,084; p 0.0803); 15–17 1.862· (0.9354, 104,079; p 0.0537). Mothers per bin 109,220 /
+56,897 / 47,378 / 25,600. Figure: `outputs/figures/hours_ddd_by_child_age.pdf` (Figure 6). Paper:
+Table 6, §5.6, Discussion.
+
+### 8.8 Occupation-level first stage — `outputs/wfh_occupation_first_stage_stats.csv`, `_table.csv`
+Per-occupation realized WFH shares over 2021–23, men and women pooled, both the reference-week
+item and the usual-place item; correlations and n-weighted (occupation cell size, not a survey
+weight) slopes on the calibrated and external scores. Reference-week: corr(calibrated) 0.529,
+slope 0.400 (0.087), R² 0.249; corr(external) 0.739, slope 0.374 (0.097), R² 0.585. Usual-place (2021–23): corr(calibrated) 0.481, slope 0.255 (0.054), R² 0.285; corr(external) 0.588, slope 0.205 (0.062), R² 0.502 — the external index fits better on both measures because the threshold swap mixes two scales (paper §3.2, Limitations). Usual-place
+figures: see the CSV (`realized_usual` rows). The 40-row table is Appendix Table A1; the scatter
+`outputs/figures/wfh_first_stage_occupation.pdf` is Figure A1. Paper: §3.2, Appendix.
+
+### 8.9 Subgroup z-tests — `outputs/hours_subgroup_ztests.csv`
+Previously console-only (§3.3). Jewish vs Arab: DiD z = 0.720 (p 0.471), DDD z = −0.942 (p 0.346).
+Women vs men: DiD z = 2.406 (p 0.016), DDD z = 3.461 (p 0.0005). Paper: Table 5.
+
+### 8.10 Table 1 inference — `outputs/descriptive_table_continuous.csv` (`se_difference`), `_categorical.csv` (`se_pct_difference`)
+IDPUF-clustered SE of every mothers-minus-childless difference, plus an hours-N row
+(93,982 childless / 164,193 mothers with observed usual hours). Paper: Table 1.
+
+### 8.11 Generated tables — `paper/tables/*.tex`, `paper/tables/auto_notes.tex`
+`tab_descriptives`, `tab_hours` (4 columns), `tab_lee_selection`, `tab_lee_bounds`, `tab_robust`
+(now with a p column and the outcome-coding and inference blocks), `tab_subgroup`, `tab_childage`,
+`tab_extensive`, `tab_exposure_scores`. The note macros record, per table, which columns dropped a
+coefficient for collinearity (only the Arab-women rows drop religion `other`). This is what
+retires the stale Table 2 note the grade report flagged (T1).
