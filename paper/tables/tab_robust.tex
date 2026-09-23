@@ -1,24 +1,32 @@
-\begin{tabular}{lcccc}
+\begin{tabular}{lccccc}
 \toprule
-Specification & Coefficient & SE & $p$ & $N$ \\
+Specification & Coefficient & SE & $p$ & $N$ & Clusters \\
 \midrule
-\multicolumn{5}{l}{\emph{Exposure measure}} \\
-\quad Calibrated (primary) & $3.224$\sym{**} & $1.022$ & $0.0031$ & 246{,}326 \\
-\quad External (Dingel--Neiman) & $0.6720$ & $0.8838$ & $0.4517$ & 246{,}326 \\
-\quad Realized (2021 anchor) & $5.195$\sym{*} & $2.363$ & $0.0346$ & 246{,}037 \\
-\multicolumn{5}{l}{\emph{Age balance}} \\
-\quad Age-interacted ($+\,\Mother \times$ age group) & $3.205$\sym{**} & $1.055$ & $0.0042$ & 246{,}326 \\
-\quad Reweighted (pre-period age-group raking) & $2.597$\sym{*} & $1.050$ & $0.0178$ & 242{,}552 \\
-\multicolumn{5}{l}{\emph{Sample}} \\
-\quad Unswapped occupations only (30 of 40) & $4.309$\sym{**} & $1.192$ & $0.0011$ & 132{,}046 \\
-\quad Excluding survey year 2023 & $2.979$\sym{*} & $1.170$ & $0.0151$ & 208{,}833 \\
-\multicolumn{5}{l}{\emph{Outcome coding}} \\
-\quad Irregular-hours codes dropped, not imputed & $3.056$\sym{**} & $1.059$ & $0.0064$ & 232{,}785 \\
-\quad Full-time indicator ($\geq 35$ hours) & $0.0964$\sym{**} & $0.0291$ & $0.0020$ & 246{,}326 \\
-\quad Long-hours indicator ($\geq 40$ hours) & $0.1073$\sym{**} & $0.0380$ & $0.0075$ & 246{,}326 \\
-\multicolumn{5}{l}{\emph{Inference on the primary estimate}} \\
-\quad Two-way clustering (individual, occupation) & $3.224$\sym{**} & $1.022$ & $0.0031$ & 246{,}326 \\
-\quad Wild cluster bootstrap ($B = 9{,}999$) & $3.224$ & $1.022$ & $0.0558$ & 246{,}326 \\
-\quad Permutation test (999 reassignments) & $3.224$ &  & $0.0320$ & 246{,}326 \\
+\multicolumn{6}{l}{\emph{Exposure measure}} \\
+\quad Calibrated (primary) & $3.224$\sym{**} & $1.022$ & $0.0031$ & 246{,}326 & 40 \\
+\quad External (Dingel--Neiman) & $0.672$ & $0.884$ & $0.4517$ & 246{,}326 & 40 \\
+\quad Realized (2021 anchor) & $5.195$\sym{*} & $2.363$ & $0.0346$ & 246{,}037 & 36 \\
+\quad Calibrated on men only (12 of 40 swapped) & $3.869$\sym{***} & $0.979$ & $0.0003$ & 246{,}326 & 40 \\
+\quad External index with swapped-occupation terms (40 occ.) & $2.339$\sym{\cdot} & $1.352$ & $0.0915$ & 246{,}326 & 40 \\
+\quad\quad $\Mother \times \Post \times \mathrm{Swapped}$ (same model) & $-1.347$ & $0.926$ & $0.1537$ & 246{,}326 & 40 \\
+\multicolumn{6}{l}{\emph{Age balance}} \\
+\quad Age-interacted ($+\,\Mother \times$ age group) & $3.205$\sym{**} & $1.055$ & $0.0042$ & 246{,}326 & 40 \\
+\quad Reweighted (pre-period age-group raking) & $2.597$\sym{*} & $1.050$ & $0.0178$ & 242{,}552 & 40 \\
+\multicolumn{6}{l}{\emph{Sample}} \\
+\quad Unswapped occupations only & $4.309$\sym{**} & $1.192$ & $0.0011$ & 132{,}046 & 30 \\
+\quad Excluding survey year 2023 & $2.979$\sym{*} & $1.170$ & $0.0151$ & 208{,}833 & 39 \\
+\quad Leave-one-occupation-out (40 refits): range & $[2.415,\ 3.580]$ &  & $[0.0007,\ 0.0167]$ &  & 39 \\
+\multicolumn{6}{l}{\emph{Occupational sorting}} \\
+\quad Pre-period cell exposure as regressor, per SD & $0.139$ & $0.159$ & $0.3823$ & 247{,}931 & 245 \\
+\quad Exposure score as outcome: $\Mother \times \Post$ & $0.001$ & $0.003$ & $0.6996$ & 246{,}326 & individual \\
+\quad Top-quartile indicator as outcome: $\Mother \times \Post$ & $0.004$ & $0.007$ & $0.5433$ & 246{,}326 & individual \\
+\multicolumn{6}{l}{\emph{Outcome coding}} \\
+\quad Irregular-hours codes dropped, not imputed & $3.056$\sym{**} & $1.059$ & $0.0064$ & 232{,}785 & 40 \\
+\quad Full-time indicator ($\geq 35$ hours) & $0.096$\sym{**} & $0.029$ & $0.0020$ & 246{,}326 & 40 \\
+\quad Long-hours indicator ($\geq 40$ hours) & $0.107$\sym{**} & $0.038$ & $0.0075$ & 246{,}326 & 40 \\
+\multicolumn{6}{l}{\emph{Inference on the primary estimate}} \\
+\quad Two-way clustering (individual, occupation) & $3.224$\sym{**} & $1.022$ & $0.0031$ & 246{,}326 & 40 $\times$ ind. \\
+\quad Wild cluster bootstrap ($B = 9{,}999$) & $3.224$ & $1.022$ & $0.0558$ & 246{,}326 & 40 \\
+\quad Permutation test (999 reassignments) & $3.224$ &  & $0.0320$ & 246{,}326 & 40 \\
 \bottomrule
 \end{tabular}

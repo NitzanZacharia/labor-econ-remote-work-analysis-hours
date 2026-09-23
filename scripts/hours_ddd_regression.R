@@ -55,10 +55,13 @@ run_hours_ddd_regression <- function(cleaned_df, exposure_index, controls = DEFA
       by = "MishlachYad_ISCO_08_2"
     )
 
-  n_matched <- nrow(df_ddd)
+  n_matched  <- nrow(df_ddd)
+  # Occupation is the cluster; the count is returned so the paper's robustness table can print it
+  # per row (the unswapped-occupations row has 30, every other row 40).
+  n_clusters <- n_distinct(df_ddd$MishlachYad_ISCO_08_2)
   message(sprintf(
-    "run_hours_ddd_regression: %d of %d employed rows (%.1f%%) retained an occupation-level WFH_Exposure match (dropped: disclosure-masked or unmapped ISCO codes).",
-    n_matched, n_employed, 100 * n_matched / n_employed
+    "run_hours_ddd_regression: %d of %d employed rows (%.1f%%) retained an occupation-level WFH_Exposure match (dropped: disclosure-masked or unmapped ISCO codes); %d occupation clusters.",
+    n_matched, n_employed, 100 * n_matched / n_employed, n_clusters
   ))
 
   rhs_ddd <- paste(
@@ -82,6 +85,7 @@ run_hours_ddd_regression <- function(cleaned_df, exposure_index, controls = DEFA
       model           = reg_ddd,
       n_employed      = n_employed,
       n_matched       = n_matched,
+      n_clusters      = n_clusters,
       exposure_vector = df_ddd$WFH_Exposure,
       models          = list(ddd = reg_ddd, mechanism = NULL),
       mechanism_data  = NULL,
@@ -140,6 +144,7 @@ run_hours_ddd_regression <- function(cleaned_df, exposure_index, controls = DEFA
     model      = reg_ddd,
     n_employed = n_employed,
     n_matched  = n_matched,
+    n_clusters = n_clusters,
     # The regressor's own values on the estimation sample, so compute_ddd_mde() can report the MDE
     # per SD/IQR of exposure rather than only per unit. A bare numeric vector, not a data frame,
     # so export_all_results() ignores it (it is row-level and has no business in outputs/).

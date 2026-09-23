@@ -66,6 +66,13 @@ source(file.path("scripts", "format_tex_table_body.R"))
 source(file.path("scripts", "build_paper_tables.R"))
 source(file.path("scripts", "export_paper_tables.R"))
 source(file.path("robustness", "hours_ddd_inference.R"))
+# 2026-09-23 grade-report-2 response (docs/decisions/grade-report-2-response.md).
+source(file.path("scripts", "hours_ddd_swap_control.R"))
+source(file.path("scripts", "exposure_sorting_check.R"))
+source(file.path("scripts", "hours_ddd_cell_exposure.R"))
+source(file.path("scripts", "hours_ddd_leave_one_out.R"))
+source(file.path("scripts", "build_leave_one_out_plot.R"))
+source(file.path("scripts", "build_balance_by_exposure_quartile.R"))
 
 # ── 2. Configure paths ────────────────────────────────────────────────────────
 message("Edit folder paths if needed!")
@@ -290,8 +297,13 @@ hours_ddd <- run_hours_ddd_regression(cleaned_df, hours_exposure_index)
 
 message("Computing minimum detectable effect for the hours DDD's triple interaction...")
 baseline_hours <- mean(cleaned_df$WorkHoursCont[cleaned_df$Employed == 1], na.rm = TRUE)
+# `df` is the t degrees of freedom the model's own p-values use (G - 1 = 39 occupation clusters),
+# so the MDE's multiplier matches the inference rather than assuming a normal reference
+# (2026-09-23 grade-report-2 note). The employment MDEs in §8d keep the normal multiplier: their
+# ~210 cell clusters make the two indistinguishable.
 mde_hours <- compute_ddd_mde(hours_ddd$model, baseline_rate = baseline_hours,
-                             regressor = hours_ddd$exposure_vector)
+                             regressor = hours_ddd$exposure_vector,
+                             df = degrees_freedom(hours_ddd$model, type = "t"))
 
 # Parallel-trends check for the PRIMARY estimand. §7's two Wald tests are both DiD-level
 # (Mother x year): they ask whether mothers and non-mothers trended together, averaging over WFH
@@ -424,6 +436,66 @@ hours_outcome_shares <- hours_outcome_df %>%
   summarise(share_fulltime = mean(FullTime), share_longhours = mean(LongHours),
             mean_hours = mean(WorkHoursCont), n = n(), .groups = "drop")
 print(as.data.frame(hours_outcome_shares), digits = 4)
+
+# ── Grade-report-2 checks (2026-09-23; docs/decisions/grade-report-2-response.md) ─────────────
+# Six additions, each one function, all on the primary hours DDD's sample and clustering:
+#
+#   (a) Men-only calibration. The pooled calibration computes realized 2022-23 WFH shares on men
+#       and women together; computing them on MEN ONLY removes every woman in the regression from
+#       the construction of her own regressor. Same swap rule, same external index.
+#   (b) Fixed-sample calibration test. All forty occupations, external score as regressor, with
+#       the ten swapped occupations given their own Mother x Post change -- the calibration's
+#       content without the sample change the unswapped-30 row makes.
+#   (c) Occupational sorting, diagnosed: a DiD with the exposure score itself as the outcome.
+#   (d) Occupational sorting, bounded: the hours DDD on the PRE-PERIOD demographic-cell exposure,
+#       which a woman's post-2021 occupation cannot move.
+#   (e) Leave-one-occupation-out: forty refits, one occupation dropped each time.
+#   (f) Pre-period covariate balance by quartile of the occupation-level score (Appendix Table A2).
+message("Calibrating the exposure index on men only (grade-report-2, exposure measure)...")
+exposure_calibrated_men <- calibrate_isco_exposure(cleaned_men_for_exposure, exposure_external)
+message(sprintf(
+  "  men-only calibration swapped %d of %d occupations (pooled calibration swapped %d): %s",
+  sum(exposure_calibrated_men$swap), nrow(exposure_calibrated_men), sum(exposure_calibrated$swap),
+  paste(sort(exposure_calibrated_men$ISCO2[exposure_calibrated_men$swap]), collapse = ", ")
+))
+hours_ddd_calib_men <- list(
+  result = run_hours_ddd_regression(
+    cleaned_df,
+    exposure_calibrated_men %>% select(occupation_code = ISCO2, wfh_exposure = wfh_exposure_calibrated),
+    run_mechanism = FALSE
+  ),
+  n_swapped     = sum(exposure_calibrated_men$swap),
+  n_occupations = nrow(exposure_calibrated_men),
+  swapped_codes = sort(exposure_calibrated_men$ISCO2[exposure_calibrated_men$swap]),
+  index         = exposure_calibrated_men
+)
+
+message("Running the fixed-sample calibration test (external index + swapped-occupation terms, all occupations)...")
+hours_ddd_swap_control <- run_hours_ddd_swap_control(
+  cleaned_df,
+  external_index = exposure_external %>% select(occupation_code = ISCO2, wfh_exposure = tele_ext),
+  swapped_codes  = exposure_calibrated$ISCO2[exposure_calibrated$swap]
+)
+
+message("Checking occupational sorting: DiD on the exposure score itself (grade-report-2)...")
+exposure_sorting_check <- run_exposure_sorting_check(cleaned_df, hours_exposure_index,
+                                                     breaks = hours_exposure_breaks)
+
+message("Running the hours DDD on the pre-period demographic-cell exposure (sorting bound)...")
+hours_ddd_cell_exposure <- run_hours_ddd_cell_exposure(cleaned_df, exposure_cells)
+
+message("Running leave-one-occupation-out refits of the hours DDD (forty fits; about a minute)...")
+hours_ddd_leave_one_out <- run_hours_ddd_leave_one_out(cleaned_df, hours_exposure_index)
+hours_ddd_leave_one_out_plot <- build_leave_one_out_plot(
+  hours_ddd_leave_one_out$table,
+  headline_estimate = hours_ddd_leave_one_out$headline$estimate,
+  headline_se       = hours_ddd_leave_one_out$headline$se,
+  subtitle = "Each point: the triple interaction with the named occupation removed; band = headline +/- 1 SE"
+)
+
+message("Building the pre-period balance table by quartile of occupation-level exposure...")
+balance_by_quartile <- build_balance_by_exposure_quartile(cleaned_df, hours_exposure_index,
+                                                          breaks = hours_exposure_breaks)
 
 # (R3) First stage for the occupation-level score the headline is estimated on, plus the 40-row
 # appendix table. Men and women pooled, as in the calibration itself.
@@ -781,7 +853,14 @@ paper_tables <- build_paper_tables(list(
   ddd_employment_additive  = ddd_employment_additive,
   mde_additive             = mde_additive,
   baseline_employment_rate = baseline_employment_rate,
-  wfh_occupation_first_stage = wfh_occupation_first_stage
+  wfh_occupation_first_stage = wfh_occupation_first_stage,
+  # 2026-09-23 grade-report-2 response.
+  hours_ddd_calib_men      = hours_ddd_calib_men,
+  hours_ddd_swap_control   = hours_ddd_swap_control,
+  hours_ddd_cell_exposure  = hours_ddd_cell_exposure,
+  exposure_sorting_check   = exposure_sorting_check,
+  hours_ddd_leave_one_out  = hours_ddd_leave_one_out,
+  balance_by_quartile      = balance_by_quartile
 ))
 
 # ── 9. Export results ─────────────────────────────────────────────────────────
@@ -886,6 +965,20 @@ results_to_export <- list(
                                     stats = wfh_occupation_first_stage$stats,
                                     plot  = wfh_occupation_first_stage$plot),
   hours_subgroup_ztests    = paper_tables$subgroup_ztests,
+  # 2026-09-23 grade-report-2 response (docs/decisions/grade-report-2-response.md). All
+  # aggregate: etable views, one-row coefficient frames, a 40-row occupation table, and the
+  # per-quartile balance frame. hours_ddd_calib_men$index is the 40-row calibrated index.
+  wfh_exposure_calibrated_men = hours_ddd_calib_men$index,
+  ddd_hours_calibrated_men    = hours_ddd_calib_men$result$table,
+  ddd_hours_swap_control      = list(table = hours_ddd_swap_control$table, coefs = hours_ddd_swap_control$coefs),
+  exposure_sorting_check      = list(table = exposure_sorting_check$table,
+                                     pre_levels = exposure_sorting_check$pre_levels,
+                                     event_study = exposure_sorting_check$event_study),
+  ddd_hours_cell_exposure     = list(table = hours_ddd_cell_exposure$table, coefs = hours_ddd_cell_exposure$coefs),
+  hours_ddd_leave_one_out     = list(table = hours_ddd_leave_one_out$table,
+                                     summary = hours_ddd_leave_one_out$summary,
+                                     plot = if (is.null(hours_ddd_leave_one_out_plot)) NULL else hours_ddd_leave_one_out_plot$plot),
+  balance_by_exposure_quartile = balance_by_quartile$table,
   # The Imbens-Manski intervals were console-only until now (results_digest.md §7 item 2).
   hours_lee_bounds_imbens_manski      = as.data.frame(hours_lee_bounds$imbens_manski_ci),
   intensive_margin_lee_bounds_imbens_manski = as.data.frame(intensive_lee_bounds$imbens_manski_ci)
@@ -987,6 +1080,11 @@ paper_figures <- list(
   hours_ddd_by_child_age       = list(plot = hours_ddd_childage_comparison$plot, width = 5.0, height = 3.0),
   wfh_first_stage_occupation   = list(plot = wfh_occupation_first_stage$plot,   width = 5.0, height = 3.8)
 )
+# 2026-09-23: the leave-one-occupation-out influence plot (Appendix Figure A1). Forty labelled
+# rows need the height; the width matches the rest so the text renders at the same size.
+if (!is.null(hours_ddd_leave_one_out_plot)) {
+  paper_figures$hours_ddd_leave_one_out <- list(plot = hours_ddd_leave_one_out_plot$plot, width = 5.0, height = 6.2)
+}
 if (RUN_PERMUTATION_TEST && !is.null(hours_permutation_plot)) {
   paper_figures$hours_permutation <- list(plot = hours_permutation_plot$plot, width = 5.0, height = 3.2)
 }

@@ -115,6 +115,7 @@ run_hours_ddd_binned <- function(cleaned_df, exposure_index, breaks, controls = 
     quartile_sizes = quartile_sizes,
     breaks         = breaks,
     n_employed     = n_employed,
-    n_matched      = n_matched
+    n_matched      = n_matched,
+    n_clusters     = n_distinct(df_ddd$MishlachYad_ISCO_08_2)
   ))
 }

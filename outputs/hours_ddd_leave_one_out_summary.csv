@@ -1,0 +1,2 @@
+"term","headline_estimate","headline_se","n_refits","n_refits_valid","min_estimate","max_estimate","min_estimate_code","max_estimate_code","max_abs_delta_in_se","n_moves_over_1se","all_same_sign","min_p_value","max_p_value","seconds"
+"Mother:Post:WFH_Exposure",3.22404165894545,1.02227106232588,40,40,2.41549506569345,3.58002823312995,21,33,0.790931703977215,0,TRUE,0.000715830724338919,0.016728510174626,81.9120318889618

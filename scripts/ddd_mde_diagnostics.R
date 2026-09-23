@@ -25,9 +25,15 @@ library(fixest)
 # look ~8-10x underpowered against the literature when the honest per-SD comparison is ~2-3x. The
 # scale-free ratio MDE/|point estimate| is unaffected by any of this and remains the strongest
 # statement of the power problem.
+# `df` (added 2026-09-23, grade-report-2 note on the MDE): the degrees of freedom of the t
+# reference distribution the model's inference actually uses. With forty occupation clusters the
+# hours DDD's p-values come from t(39), and the normal multiplier (2.80) understates the
+# detectable effect relative to the t one (2.87). When supplied, BOTH terms use qt(); NULL keeps
+# the normal closed form, which is exact for the individual-clustered employment specifications
+# (tens of thousands of clusters) and is what every existing caller gets.
 compute_ddd_mde <- function(model, coef_name = "Mother:Post:WFH_Exposure",
                              sig_level = 0.05, power = 0.8, baseline_rate = NULL,
-                             regressor = NULL) {
+                             regressor = NULL, df = NULL) {
   se_vec <- fixest::se(model)
   if (!coef_name %in% names(se_vec) || is.na(se_vec[[coef_name]])) {
     stop(sprintf(
@@ -35,9 +41,17 @@ compute_ddd_mde <- function(model, coef_name = "Mother:Post:WFH_Exposure",
       coef_name
     ))
   }
+  if (!is.null(df) && (!is.numeric(df) || length(df) != 1 || !is.finite(df) || df <= 0)) {
+    stop("compute_ddd_mde: `df` must be a single positive number (or NULL for the normal multiplier).")
+  }
   se             <- unname(se_vec[[coef_name]])
   point_estimate <- unname(coef(model)[[coef_name]])
-  mde            <- se * (qnorm(1 - sig_level / 2) + qnorm(power))
+  multiplier     <- if (is.null(df)) {
+    qnorm(1 - sig_level / 2) + qnorm(power)
+  } else {
+    qt(1 - sig_level / 2, df = df) + qt(power, df = df)
+  }
+  mde            <- se * multiplier
 
   # Scale the MDE by how much the regressor actually moves, when the caller supplies it.
   reg_sd <- reg_iqr <- mde_per_sd <- mde_per_iqr <- NA_real_
@@ -54,10 +68,12 @@ compute_ddd_mde <- function(model, coef_name = "Mother:Post:WFH_Exposure",
 
   message(sprintf(
     paste0(
-      "compute_ddd_mde: %s point estimate = %.4f, SE = %.4f -> MDE (alpha=%.2f, power=%.0f%%) = %.4f",
+      "compute_ddd_mde: %s point estimate = %.4f, SE = %.4f -> MDE (alpha=%.2f, power=%.0f%%, ",
+      "multiplier %.4f%s) = %.4f",
       "%s"
     ),
-    coef_name, point_estimate, se, sig_level, power * 100, mde,
+    coef_name, point_estimate, se, sig_level, power * 100, multiplier,
+    if (is.null(df)) ", normal" else sprintf(", t(%g)", df), mde,
     if (!is.null(baseline_rate)) {
       # "baseline" deliberately left unnamed: main.R passes the baseline employment rate for the
       # employment DDD but mean weekly hours for the hours DDD, and hardcoding "employment rate"
@@ -93,6 +109,8 @@ compute_ddd_mde <- function(model, coef_name = "Mother:Post:WFH_Exposure",
     se             = unname(se),
     sig_level      = sig_level,
     power          = power,
+    df             = if (is.null(df)) NA_real_ else df,
+    multiplier     = unname(multiplier),
     mde            = unname(mde),
     baseline       = if (is.null(baseline_rate)) NA_real_ else unname(baseline_rate),
     mde_pct_of_baseline = if (is.null(baseline_rate)) NA_real_ else 100 * mde / baseline_rate,
@@ -115,6 +133,8 @@ compute_ddd_mde <- function(model, coef_name = "Mother:Post:WFH_Exposure",
     se             = se,
     sig_level      = sig_level,
     power          = power,
+    df             = df,
+    multiplier     = multiplier,
     mde            = mde,
     mde_per_sd     = mde_per_sd,
     mde_per_iqr    = mde_per_iqr,

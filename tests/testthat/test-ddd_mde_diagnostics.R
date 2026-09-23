@@ -52,6 +52,29 @@ test_that("omitting the regressor leaves the original behaviour untouched", {
   expect_equal(res$mde, unname(fixest::se(m)["x"]) * (qnorm(0.975) + qnorm(0.8)), tolerance = 1e-10)
 })
 
+test_that("supplying df switches both multiplier terms to the t distribution", {
+  # With forty clusters the hours DDD's p-values use t(39); the MDE should use the same reference.
+  set.seed(13)
+  df <- data.frame(y = rnorm(400), x = rnorm(400), g = sample(1:40, 400, replace = TRUE))
+  m  <- fixest::feols(y ~ x, data = df, cluster = ~g)
+  se_x <- unname(fixest::se(m)["x"])
+
+  res_t <- compute_ddd_mde(m, coef_name = "x", df = 39)
+  res_n <- compute_ddd_mde(m, coef_name = "x")
+
+  expect_equal(res_t$mde, se_x * (qt(0.975, 39) + qt(0.8, 39)), tolerance = 1e-10)
+  expect_equal(res_t$multiplier, qt(0.975, 39) + qt(0.8, 39), tolerance = 1e-10)
+  expect_gt(res_t$mde, res_n$mde)
+  expect_equal(res_t$table$df, 39)
+  expect_true(is.na(res_n$table$df))
+  expect_equal(res_n$table$multiplier, qnorm(0.975) + qnorm(0.8), tolerance = 1e-10)
+  # fixest's own t degrees of freedom for this model are G - 1 = 39, so the two ways agree.
+  res_fx <- compute_ddd_mde(m, coef_name = "x", df = fixest::degrees_freedom(m, type = "t"))
+  expect_equal(res_fx$mde, res_t$mde, tolerance = 1e-10)
+  expect_error(compute_ddd_mde(m, coef_name = "x", df = -1), "df")
+  expect_error(compute_ddd_mde(m, coef_name = "x", df = c(1, 2)), "df")
+})
+
 test_that("compute_ddd_mde respects custom sig_level/power", {
   set.seed(2)
   df <- data.frame(y = rnorm(200), x = rnorm(200))

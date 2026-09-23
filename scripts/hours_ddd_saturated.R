@@ -74,6 +74,7 @@ run_hours_ddd_saturated <- function(cleaned_df, exposure_index, controls = DEFAU
     model         = reg_sat,
     n_employed    = n_employed,
     n_matched     = n_matched,
+    n_clusters    = n_distinct(df_ddd$MishlachYad_ISCO_08_2),
     fixed_effects = fixed_effects
   ))
 }

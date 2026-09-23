@@ -76,6 +76,13 @@ source(file.path("scripts", "tex_coef_cell.R"))
 source(file.path("scripts", "format_tex_table_body.R"))
 source(file.path("scripts", "build_paper_tables.R"))
 source(file.path("scripts", "export_paper_tables.R"))
+# 2026-09-23 grade-report-2 response (docs/decisions/grade-report-2-response.md).
+source(file.path("scripts", "hours_ddd_swap_control.R"))
+source(file.path("scripts", "exposure_sorting_check.R"))
+source(file.path("scripts", "hours_ddd_cell_exposure.R"))
+source(file.path("scripts", "hours_ddd_leave_one_out.R"))
+source(file.path("scripts", "build_leave_one_out_plot.R"))
+source(file.path("scripts", "build_balance_by_exposure_quartile.R"))
 
 # The 3 robustness-chain scripts below live in robustness/, not scripts/ -- each defines several
 # related functions (a diagnostic + one or more regression specs sharing it), not the single

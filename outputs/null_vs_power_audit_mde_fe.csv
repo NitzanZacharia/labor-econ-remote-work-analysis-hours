@@ -1,2 +1,2 @@
-"coef_name","point_estimate","se","sig_level","power","mde","baseline","mde_pct_of_baseline","regressor_sd","regressor_iqr","mde_per_sd","mde_per_iqr","mde_per_sd_pct_of_baseline","mde_per_iqr_pct_of_baseline","within_mde"
-"Mother:Post:WFH_Exposure",-0.0193633310113033,0.0721885119056163,0.05,0.8,0.202242267872347,0.773727601739546,26.1386911126929,0.0705935439419637,0.0766057464330904,0.0142769984239689,0.0154929198906821,1.8452228396493,2.00237394347183,TRUE
+"coef_name","point_estimate","se","sig_level","power","df","multiplier","mde","baseline","mde_pct_of_baseline","regressor_sd","regressor_iqr","mde_per_sd","mde_per_iqr","mde_per_sd_pct_of_baseline","mde_per_iqr_pct_of_baseline","within_mde"
+"Mother:Post:WFH_Exposure",-0.0193633310113033,0.0721885119056163,0.05,0.8,NA,2.80158521811297,0.202242267872347,0.773727601739546,26.1386911126929,0.0705935439419637,0.0766057464330904,0.0142769984239689,0.0154929198906821,1.8452228396493,2.00237394347183,TRUE

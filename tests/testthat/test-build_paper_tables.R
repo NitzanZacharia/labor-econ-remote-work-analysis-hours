@@ -60,7 +60,24 @@ make_paper_table_inputs <- function(seed = 91) {
     realized_refweek = 0.7 * idx$wfh_exposure, n_refweek = 250L
   )
 
+  # 2026-09-23 grade-report-2 inputs, from the new functions on the same panel.
+  panel_bal <- panel %>% dplyr::mutate(
+    TeudaGvoha = factor(sample(c("Below High School", "Matriculation (Bagrut)",
+                                 "Academic Degree (BA/MA/PhD)"), dplyr::n(), replace = TRUE)))
+  cells <- panel %>% dplyr::distinct(GilNK, TeudaGvoha, MachozMegurim) %>%
+    dplyr::mutate(WFH_Exposure = stats::runif(dplyr::n(), 0.05, 0.4), n_cell = 25)
+  hours_ddd_calib_men <- list(result = quiet(run_hours_ddd_regression(panel, idx, run_mechanism = FALSE)),
+                              n_swapped = 3L, n_occupations = nrow(idx))
+  hours_ddd_swap_control <- quiet(run_hours_ddd_swap_control(panel, idx, swapped_codes = idx$occupation_code[1:3]))
+  hours_ddd_cell_exposure <- quiet(run_hours_ddd_cell_exposure(panel, cells))
+  exposure_sorting_check  <- quiet(run_exposure_sorting_check(panel, idx, breaks = breaks))
+  hours_ddd_leave_one_out <- quiet(run_hours_ddd_leave_one_out(panel, idx, labels_path = NULL))
+  balance_by_quartile     <- quiet(build_balance_by_exposure_quartile(panel_bal, idx, breaks = breaks))
+
   list(
+    hours_ddd_calib_men = hours_ddd_calib_men, hours_ddd_swap_control = hours_ddd_swap_control,
+    hours_ddd_cell_exposure = hours_ddd_cell_exposure, exposure_sorting_check = exposure_sorting_check,
+    hours_ddd_leave_one_out = hours_ddd_leave_one_out, balance_by_quartile = balance_by_quartile,
     desc_table = desc_table, intensive_results = intensive_results, hours_ddd = hours_ddd,
     hours_ddd_saturated = hours_ddd_saturated, hours_ddd_binned = hours_ddd_binned,
     mde_hours = mde_hours, hours_lee_bounds = hours_lee_bounds,
@@ -90,7 +107,7 @@ make_paper_table_inputs <- function(seed = 91) {
 
 expected_tables <- c("tab_descriptives", "tab_hours", "tab_lee_selection", "tab_lee_bounds",
                      "tab_robust", "tab_subgroup", "tab_childage", "tab_extensive",
-                     "tab_exposure_scores")
+                     "tab_exposure_scores", "tab_balance_quartile")
 
 count_cols <- function(line) {
   # Columns a body line occupies: 1 + number of & separators + extra columns claimed by
@@ -141,6 +158,36 @@ test_that("a bootstrap p of zero prints as <0.0001 and the permutation row is om
   inputs$hours_permutation <- NULL
   res2 <- build_paper_tables(inputs)
   expect_false(any(grepl("Permutation", res2$tables$tab_robust)))
+})
+
+test_that("Table 4 carries a Clusters column and the grade-report-2 rows; hours cells have three decimals", {
+  inputs <- make_paper_table_inputs()
+  res <- build_paper_tables(inputs)
+  rob <- res$tables$tab_robust
+  expect_match(rob[1], "\\{lccccc\\}")
+  expect_true(any(grepl("Clusters", rob)))
+  for (needle in c("Calibrated on men only", "swapped-occupation terms", "Swapped\\}\\$ \\(same model\\)",
+                   "Leave-one-occupation-out", "Occupational sorting", "Pre-period cell exposure",
+                   "Exposure score as outcome", "Top-quartile indicator")) {
+    expect_true(any(grepl(needle, rob)), info = needle)
+  }
+  # The unswapped row's cluster count is the model's own, the primary row's is the full count.
+  primary <- rob[grepl("Calibrated \\(primary\\)", rob)]
+  expect_true(grepl(paste0("& ", inputs$hours_ddd$n_clusters, " \\\\\\\\$"), primary))
+  # Three fixed decimals on the hours coefficients: no four-decimal coefficient cell survives in
+  # Table 2 (p-values and R2 are formatted separately and are not coefficient cells).
+  coef_lines <- res$tables$tab_hours[grepl("^(Mother|Post|WFH|Constant)", res$tables$tab_hours)]
+  expect_false(any(grepl("\\$-?[0-9]+\\.[0-9]{4}\\$", coef_lines)))
+  expect_true(all(grepl("\\$-?[0-9]+\\.[0-9]{3}\\$", coef_lines)))
+  # The employment table keeps four.
+  ext_lines <- res$tables$tab_extensive[grepl("^Mother \\$\\\\times\\$ Post &", res$tables$tab_extensive)]
+  expect_true(any(grepl("\\$-?[0-9]+\\.[0-9]{4}\\$", ext_lines)))
+  # Balance table: one column per quartile plus the label, the count rows at the bottom.
+  bal <- res$tables$tab_balance_quartile
+  expect_match(bal[1], "\\{lcccc\\}")
+  expect_true(any(grepl("^Mothers &", bal)))
+  expect_true(any(grepl("Exposure range", bal)))
+  expect_true(any(grepl("Academic degree", bal)))
 })
 
 test_that("a missing input is named in the error", {
