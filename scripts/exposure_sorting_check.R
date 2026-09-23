@@ -1,7 +1,6 @@
 # exposure_sorting_check.R
 # Does the post-2021 change in mothers' OCCUPATIONS, rather than in their hours, drive the hours
-# DDD? Added in response to the 2026-09-23 grade report (Methods deduction 2;
-# docs/decisions/grade-report-2-response.md).
+# DDD? (docs/decisions/grade-report-2-response.md, Methods 2.)
 #
 # The hours DDD assigns each woman the exposure score of her current occupation. Occupation is
 # observed at the same time as the outcome, so it is itself a potential outcome of the treatment:
@@ -29,7 +28,7 @@ library(tidyverse)
 library(fixest)
 source(file.path("scripts", "data_processing.R"))
 source(file.path("scripts", "tidy_event_study_coefs.R"))
-source(file.path("robustness", "age_balance_robustness.R"))  # assign_wfh_quartile()
+source(file.path("scripts", "assign_wfh_quartile.R"))
 
 run_exposure_sorting_check <- function(cleaned_df, exposure_index, breaks,
                                        controls = DEFAULT_CONTROLS, ref_year = 2019,

@@ -1,20 +1,11 @@
 # intensive_margin_lee_bounds.R
-# DiD-adapted Lee (2009) trimming bounds for the intensive-margin (WorkHoursCont) regression --
-# the project's PRIMARY dependent-variable regression as of the hours pivot
-# (docs/decisions/hours-ddd-pivot.md). See docs/decisions/intensive-margin-lee-bounds.md for the
-# full decision memo (problem statement, alternatives considered, and this adaptation's stated
-# limitations); this same machinery is later generalized to the triple-interaction DDD by
-# hours_ddd_lee_bounds.R.
-#
-# run_intensive_margin_reg() (intensive_margin_regression.R) estimates WorkHoursCont ~ Mother*Post
-# + controls on the Employed == 1 subsample. Employed is itself the outcome of the project's
-# secondary, extensive-margin DiD (basic_regression.R) -- if WFH availability differentially pulls
-# marginal mothers into employment post-2021 (exactly the mechanism this project is testing for),
-# the post-period employed-mother sample is compositionally different from the pre-period one for
-# reasons unrelated to hours, biasing the intensive-margin Mother:Post coefficient in an unknown
-# direction. This is a textbook selection-on-a-mediator problem -- see Lee (2009), "Training,
-# Wages, and Sample Selection: Estimating Sharp Bounds on Treatment Effects", Review of Economic
-# Studies 76(3).
+# DiD-adapted Lee (2009) trimming bounds for the intensive-margin (WorkHoursCont) regression.
+# run_intensive_margin_reg() fits WorkHoursCont ~ Mother*Post + controls on the Employed == 1
+# subsample, and Employed is itself an outcome of the treatment: if WFH pulls marginal mothers into
+# employment post-2021, the post-period employed-mother sample differs in composition from the
+# pre-period one for reasons unrelated to hours (selection on a mediator; Lee 2009, REStud 76(3)).
+# Problem statement, alternatives and limitations: docs/decisions/intensive-margin-lee-bounds.md.
+# hours_ddd_lee_bounds.R generalizes this construction to the triple-interaction DDD.
 #
 # ── The bound construction ───────────────────────────────────────────────────
 # Classic Lee bounds compare one treated group to one control group with a fixed selection rate,
@@ -64,6 +55,8 @@ library(tidyverse)
 library(fixest)
 source(file.path("scripts", "data_processing.R"))
 source(file.path("scripts", "imbens_manski_ci.R"))
+source(file.path("scripts", "lee_trim_proportion.R"))
+source(file.path("scripts", "lee_trim_cell.R"))
 
 run_intensive_margin_lee_bounds <- function(cleaned_df, controls = DEFAULT_CONTROLS) {
 
@@ -89,10 +82,10 @@ run_intensive_margin_lee_bounds <- function(cleaned_df, controls = DEFAULT_CONTR
     rate
   }
   s00 <- get_rate(0, 0); s01 <- get_rate(0, 1); s10 <- get_rate(1, 0); s11 <- get_rate(1, 1)
-  s11_counterfactual <- s10 + (s01 - s00)
-
-  excess    <- s11 > s11_counterfactual
-  trim_prop <- if (excess) 1 - s11_counterfactual / s11 else 0
+  tp <- lee_trim_proportion(s00, s01, s10, s11)
+  s11_counterfactual <- tp$s11_counterfactual
+  excess             <- tp$excess_selection
+  trim_prop          <- tp$trim_prop
 
   message(sprintf(
     paste0(
@@ -132,25 +125,12 @@ run_intensive_margin_lee_bounds <- function(cleaned_df, controls = DEFAULT_CONTR
   } else {
     treated_cell <- filter(employed_df, Mother == 1, Post == 1)
     other_cells  <- filter(employed_df, !(Mother == 1 & Post == 1))
-    n_cell        <- nrow(treated_cell)
-    n_trim        <- floor(trim_prop * n_cell)
+    # Lower bound drops the highest-hours rows, upper bound the lowest (lee_trim_cell.R).
+    trimmed <- lee_trim_cell(treated_cell, trim_prop)
 
-    ranked <- arrange(treated_cell, WorkHoursCont)
-    # Lower bound: drop the highest-hours n_trim rows (marginal entrants assumed to work the most).
-    # seq_len(), not "1:(n_cell - n_trim)" -- the latter produces a reversed 2-element sequence
-    # (e.g. 1:0 == c(1, 0)) rather than zero rows when n_trim == n_cell (100% trim); seq_len(0)
-    # correctly yields an empty selection. See hours_ddd_lee_bounds.R's identical fix.
-    trimmed_for_lower <- if (n_trim > 0) slice(ranked, seq_len(max(n_cell - n_trim, 0))) else ranked
-    # Upper bound: drop the lowest-hours n_trim rows (marginal entrants assumed to work the least).
-    trimmed_for_upper <- if (n_trim > 0) {
-      slice(ranked, if (n_trim < n_cell) (n_trim + 1):n_cell else integer(0))
-    } else {
-      ranked
-    }
-
-    lower_reg <- fit_on(bind_rows(other_cells, trimmed_for_lower))
-    upper_reg <- fit_on(bind_rows(other_cells, trimmed_for_upper))
-    n_trimmed <- n_trim
+    lower_reg <- fit_on(bind_rows(other_cells, trimmed$lower))
+    upper_reg <- fit_on(bind_rows(other_cells, trimmed$upper))
+    n_trimmed <- trimmed$n_trim
   }
 
   # At trim_prop == 1 (100% of the Mother=1,Post=1 cell trimmed away), neither trimmed sample has
