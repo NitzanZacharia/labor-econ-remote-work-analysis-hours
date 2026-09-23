@@ -888,9 +888,12 @@ are not cited anywhere in the repo; their roles are fixed below.
 
 5. **Dingel, Jonathan I., and Brent Neiman (2020).** "How Many Jobs Can Be Done at Home?" *Journal
    of Public Economics*, 189: 104235. DOI 10.1016/j.jpubeco.2020.104235. (Source of the external
-   teleworkability score in `data/israeli_cbs_wfh_2digit.csv` / `build_exposure_isco2()`
-   `[VERIFY: that the crosswalk file is derived from D&N's published occupational classification —
-   the repo says so but the provenance of the SOC→ISCO mapping is not documented]`.)
+   teleworkability score in `data/israeli_cbs_wfh_2digit.csv` / `build_exposure_isco2()`.
+   **Provenance resolved 2026-09-23:** the file is D&N's published binary indicator mapped to
+   ISCO-08 through the BLS 2012 ISCO-08/SOC-2010 crosswalk (cited as `bls2012crosswalk`) and
+   averaged without weights within each two-digit group; rebuilding from the two public files
+   reproduces it exactly — see `docs/open-question-wfh-crosswalk-provenance.md` and the last block
+   of `tests/testthat/test-wfh_crosswalk_integrity.R`.)
 
 ### 6.2 Methods citations (Empirical Strategy section only) — REQUIRED, but NOT literature review
 
@@ -972,7 +975,8 @@ to the paper.**
     confirmed two-author, marked central/required; Olden & Møen kept with DOI `[VERIFY]`
     (non-blocking); Correll, Cohen & Manor, and Bloom placed out of scope; Lee (2009) and
     Imbens & Manski (2004) reclassified as methods citations. Remaining: Olden & Møen DOI; Lee and
-    Imbens–Manski page ranges not web-checked; D&N crosswalk provenance.
+    Imbens–Manski page ranges not web-checked. D&N crosswalk provenance closed 2026-09-23 (§6.1
+    item 5).
 
 ---
 
