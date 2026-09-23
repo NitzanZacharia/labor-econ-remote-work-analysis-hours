@@ -282,6 +282,8 @@ Every pre-existing CSV except `descriptive_table_{continuous,categorical}.csv` (
 
 Design, the per-deduction closure table and the real-data numbers are in [`docs/decisions/grade-report-2-response.md`](decisions/grade-report-2-response.md). In brief: the calibration is tested with the sample held fixed (men-only shares: 3.869; external score with swapped-occupation terms: 2.339 beside a negative swapped-group change); occupational sorting is diagnosed (a DiD on the exposure score itself is a zero) and bounded (pre-period cell exposure: 0.139 per SD, imprecise); forty leave-one-out refits span 2.415–3.580 with none outside one headline SE; a balance table by exposure quartile replaces the prose numbers; every hours table prints three fixed decimals and Table 4 a cluster count; the MDE uses t(39).
 
+A follow-up concision pass on `paper/paper.tex` (2026-09-23) cut the manuscript excluding the Conclusion from 10,359 to 9,565 words (prose 8,606 to 7,804) by removing repeated caveats and doubled numbers; no label, citation, float, footnote or number was removed, and the Conclusion skeleton is untouched. A structural second pass the same day split the appendix into `paper/appendix.tex` (data details, exposure construction, the selection correction, additional results), moved four floats there, merged the two event studies into one float, dropped the redundant child-age forest plot and rewrote the Literature Review, Data and Strategy sections; see `docs/decisions/paper-structural-cut.md`.
+
 Two notes for anyone extending this:
 
 - **`tex_coef_cell()` no longer mirrors `etable()`.** Cells are `formatC(x, digits, format = "f")`; `test-tex_coef_cell.R` pins that. Checkpoint 14's note about character-identity with `etable(digits = 4)` is superseded.

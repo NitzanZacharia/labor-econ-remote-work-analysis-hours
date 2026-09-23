@@ -171,3 +171,12 @@ a good argument for re-reading descriptive figures after any change to the estim
 §4.2 survives as prose and now states the precision difference explicitly, rather than — as it did
 briefly — emphasising that "the controls move it by less than four hundredths of an hour", which is
 true of the coefficient and silent about the standard error that determines the conclusion.
+
+
+## Addendum, 2026-09-23: structural cut of the manuscript
+
+Two further changes to the figure set in the paper, neither touching `main.R`'s `paper_figures` list, so every PDF is still produced:
+
+- `fig:childage` (`outputs/figures/hours_ddd_by_child_age.pdf`) is no longer included in the paper. It plotted exactly the DDD column of Table 5 with its confidence intervals and added no information to the table; it remains a browsing artifact under `outputs/figures/`.
+- The DiD and DDD event studies (`hours_event_study.pdf`, `hours_ddd_event_study.pdf`) share one two-panel float, `fig:pretrend`, at 0.48 text-width each; `fig:pretrend-ddd` labels the same float so existing cross-references resolve.
+- `fig:hours-by-year`, `fig:permutation`, Table 3 (Lee bounds) and Table 7 (extensive margin) moved to `paper/appendix.tex` (Appendix A, D, C and D). See `docs/decisions/paper-structural-cut.md`.

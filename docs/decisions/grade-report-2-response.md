@@ -144,4 +144,6 @@ moved from 2.864 (normal) to **2.938** (t(39)). New CSVs: `wfh_exposure_calibrat
   penalty (about -2.2 hours at top-quartile exposure), giving three fifths rather than four
   fifths, and a new paragraph lists the demand-side alternatives. Five Crossref-verified
   references added (`barrero2023`, `emanuelharrington2024`, `gibbs2023`, `pabilonia2022`,
-  `budig2023`).
+  `budig2023`). A concision pass later the same day (2026-09-23) removed repetition only,
+  taking the count to 9,565 words (7,804 prose, 1,761 in floats; abstract 190; 38 pages) with
+  every label, citation, table, figure, footnote and number kept and the Conclusion untouched.
