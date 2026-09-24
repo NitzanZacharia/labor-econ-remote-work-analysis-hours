@@ -23,10 +23,8 @@ PAPER_PALETTE <- list(
   # Treatment/control contrast. Two distinct hues, because mother status is unordered.
   mother_status = c("Mothers" = "#D85A30", "Non-mothers" = "#378ADD"),
 
-  # Pre/Post is an ORDERED pair, so it gets a sequential grey -> green ramp rather than the
-  # categorical hue pair it used to share with mother_status. This is what resolves the collision
-  # described in the header; mother_status keeps the original hues because it appears in more
-  # figures and re-hueing it would churn more artifacts.
+  # Pre/Post is an ORDERED pair, so it gets a sequential grey -> green ramp rather than a
+  # categorical hue pair, so it cannot collide with mother_status (see the header).
   period = c("Pre-2021" = "#B9B7B0", "Post-2021" = "#1D6F55"),
 
   # Raw vs covariate-adjusted rates (employment_by_child_age.R's dumbbell).

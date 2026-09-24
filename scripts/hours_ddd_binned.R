@@ -1,6 +1,6 @@
 # hours_ddd_binned.R
-# Quartile-binned version of the primary hours DDD (scripts/hours_ddd_regression.R), added in
-# response to the 2026-09-22 grade report (item M1; docs/decisions/grade-report-response.md).
+# Quartile-binned version of the primary hours DDD (scripts/hours_ddd_regression.R);
+# docs/decisions/grade-report-response.md, item M1.
 #
 # The pooled DDD reports one slope per unit of exposure. Figure 2 (build_hours_dose_response())
 # shows that the raw dose-response is not linear: three quartiles near zero and one well above.
@@ -26,7 +26,7 @@ library(tidyverse)
 library(fixest)
 source(file.path("scripts", "data_processing.R"))
 source(file.path("scripts", "ddd_collinearity_diagnostics.R"))
-source(file.path("robustness", "age_balance_robustness.R"))
+source(file.path("scripts", "assign_wfh_quartile.R"))
 
 run_hours_ddd_binned <- function(cleaned_df, exposure_index, breaks, controls = DEFAULT_CONTROLS,
                                  ref_quartile = 1, outcome = "WorkHoursCont") {

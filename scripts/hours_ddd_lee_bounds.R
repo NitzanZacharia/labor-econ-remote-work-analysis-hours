@@ -4,26 +4,13 @@
 # DDD (Mother x Post x WFH_Exposure). See docs/decisions/hours-ddd-pivot.md for the full rationale.
 #
 # ── Why this function uses TWO different WFH_Exposure measures ─────────────────────────────────
-# hours_ddd_regression.R's point estimate uses the PURE occupation-level exposure
-# (exposure_calibrated's wfh_exposure_calibrated, joined by MishlachYad_ISCO_08_2) as the
-# continuous regressor -- it's the more precise measure of a specific job's teleworkability, but it
-# is UNDEFINED for anyone without an observed occupation, i.e. the non-employed. The whole point of
-# a Lee-bounds correction here is to bound the bias from those very rows being dropped -- which
-# means the selection-into-employment counterfactual (s_ab below) must be computable for people who
-# are NOT employed, so it cannot be stratified by an exposure measure that only exists for the
-# employed. It is instead stratified by quartiles of the demographic-cell-based WFH_Exposure
-# (build_exposure_cells()'s shift-share measure, defined for the full sample regardless of
-# employment status -- the same measure the EXTENSIVE-margin primary DDD in main.R uses), reusing
-# robustness/age_balance_robustness.R's existing compute_pre_period_quartile_breaks()/
-# assign_wfh_quartile() helpers unchanged.
-#
-# So: cell-based WFH_Exposure quartiles stratify WHO gets bounded together (a property observable
-# pre-employment); occupation-level WFH_Exposure is what the bounded regression actually estimates
-# against (a property only observable once employed). Using one measure for both roles is not
-# possible -- the occupation-level measure can't stratify the non-employed, and the cell-based
-# measure is a coarser, noisier stand-in for what the DDD's own regressor is trying to capture (see
-# docs/decisions/exposure-cell-granularity-fix.md's rejection of using a demographic-cell measure to
-# approximate individual-level occupation exposure, and vice versa).
+# The regression's regressor is the occupation-level exposure, which is undefined for the
+# non-employed -- the very rows whose absence the bounds correct for. The selection counterfactual
+# s_ab therefore has to be stratified by something observable before employment: quartiles of the
+# demographic-cell WFH_Exposure (build_exposure_cells(), defined for the full sample), via
+# compute_pre_period_quartile_breaks()/assign_wfh_quartile(). Cell quartiles decide WHO is bounded
+# together; the occupation-level score is what the bounded regression estimates against. Neither
+# measure can play the other's role (docs/decisions/exposure-cell-granularity-fix.md).
 #
 # ── The bound construction, generalized from intensive_margin_lee_bounds.R ─────────────────────
 # For each quartile q of the cell-based WFH_Exposure (computed on the FULL cell-matched sample,
@@ -58,7 +45,9 @@ library(tidyverse)
 library(fixest)
 source(file.path("scripts", "data_processing.R"))
 source(file.path("scripts", "imbens_manski_ci.R"))
-source(file.path("robustness", "age_balance_robustness.R"))
+source(file.path("scripts", "lee_trim_proportion.R"))
+source(file.path("scripts", "lee_trim_cell.R"))
+source(file.path("robustness", "age_balance_robustness.R"))  # compute_pre_period_quartile_breaks()
 
 MIN_CELL_WARN <- 30
 
@@ -96,12 +85,10 @@ run_hours_ddd_lee_bounds <- function(cleaned_df, exposure_index, exposure_cells,
   quartile_diag <- map_dfr(quartiles, function(q) {
     s00 <- get_rate(0, 0, q); s01 <- get_rate(0, 1, q); s10 <- get_rate(1, 0, q); s11 <- get_rate(1, 1, q)
     n11 <- sum(full_df$Mother == 1 & full_df$Post == 1 & full_df$WFH_Exposure_Q == q)
-    s11_counterfactual <- s10 + (s01 - s00)
-    excess    <- s11 > s11_counterfactual
-    trim_prop <- if (excess) 1 - s11_counterfactual / s11 else 0
+    tp  <- lee_trim_proportion(s00, s01, s10, s11)
     tibble(WFH_Exposure_Q = q, s00 = s00, s01 = s01, s10 = s10, s11 = s11,
-           s11_counterfactual = s11_counterfactual, n_mother1_post1 = n11,
-           excess_selection = excess, trim_prop = trim_prop)
+           s11_counterfactual = tp$s11_counterfactual, n_mother1_post1 = n11,
+           excess_selection = tp$excess_selection, trim_prop = tp$trim_prop)
   })
 
   message("run_hours_ddd_lee_bounds: selection (observed-hours) rates and trim proportions by WFH_Exposure quartile:")
@@ -131,23 +118,10 @@ run_hours_ddd_lee_bounds <- function(cleaned_df, exposure_index, exposure_cells,
 
   other_cells <- filter(employed_df, !(Mother == 1 & Post == 1))
 
+  # Each quartile is trimmed independently on its own trim_prop (lee_trim_cell.R).
   trim_by_quartile <- map(quartiles, function(q) {
-    trim_prop_q <- quartile_diag$trim_prop[quartile_diag$WFH_Exposure_Q == q]
-    cell_q <- filter(employed_df, Mother == 1, Post == 1, WFH_Exposure_Q == q)
-    n_cell_q <- nrow(cell_q)
-
-    if (n_cell_q == 0 || trim_prop_q <= 0) {
-      return(list(lower = cell_q, upper = cell_q, n_trim = 0L, n_cell = n_cell_q))
-    }
-
-    n_trim <- floor(trim_prop_q * n_cell_q)
-    ranked <- arrange(cell_q, WorkHoursCont)
-    # seq_len(), not "1:(n_cell_q - n_trim)" -- the latter (as used in
-    # intensive_margin_lee_bounds.R) produces a reversed 2-element sequence rather than zero rows
-    # when n_trim == n_cell_q (100% trim); seq_len(0) correctly yields an empty selection.
-    lower_kept <- slice(ranked, seq_len(max(n_cell_q - n_trim, 0)))
-    upper_kept <- slice(ranked, if (n_trim < n_cell_q) (n_trim + 1):n_cell_q else integer(0))
-    list(lower = lower_kept, upper = upper_kept, n_trim = n_trim, n_cell = n_cell_q)
+    lee_trim_cell(filter(employed_df, Mother == 1, Post == 1, WFH_Exposure_Q == q),
+                  trim_prop = quartile_diag$trim_prop[quartile_diag$WFH_Exposure_Q == q])
   })
 
   n_trimmed_by_quartile <- tibble(
@@ -179,7 +153,10 @@ run_hours_ddd_lee_bounds <- function(cleaned_df, exposure_index, exposure_cells,
     coef    = c(co(lower_reg), co(point_reg), co(upper_reg)),
     se      = c(se_lower, se_point, se_upper),
     ci_low  = c(co(lower_reg) - z * se_lower, co(point_reg) - z * se_point, co(upper_reg) - z * se_upper),
-    ci_high = c(co(lower_reg) + z * se_lower, co(point_reg) + z * se_point, co(upper_reg) + z * se_upper)
+    ci_high = c(co(lower_reg) + z * se_lower, co(point_reg) + z * se_point, co(upper_reg) + z * se_upper),
+    # Rows the three fits used: the trimmed samples are smaller than the point sample by
+    # n_trimmed_total; exported so the N of each bound is on disk, not console-only.
+    n_obs   = c(nobs(lower_reg), nobs(point_reg), nobs(upper_reg))
   )
   print(as.data.frame(bounds_table), digits = 4)
 

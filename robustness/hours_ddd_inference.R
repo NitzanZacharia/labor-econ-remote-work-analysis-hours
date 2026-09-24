@@ -1,6 +1,6 @@
 # hours_ddd_inference.R
-# Small-cluster inference for the primary hours DDD (scripts/hours_ddd_regression.R), added in
-# response to the 2026-09-22 grade report (items R1 and M2; docs/decisions/grade-report-response.md).
+# Small-cluster inference for the primary hours DDD (scripts/hours_ddd_regression.R);
+# docs/decisions/grade-report-response.md, items R1 and M2.
 # Two functions, both about the same forty-cluster problem, so this lives in robustness/ with the
 # other multi-function robustness chains rather than in scripts/.
 #

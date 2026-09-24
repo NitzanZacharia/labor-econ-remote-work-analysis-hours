@@ -1,5 +1,5 @@
 # pretrend_wald_test.R
-# Phase 1c: joint significance test on the pre-2020 Mother:year interaction coefficients already
+# Joint significance test on the pre-2020 Mother:year interaction coefficients already
 # estimated by Diagnostics.R's event-study regression (run_diagnostics()'s pretrend_model,
 # i(ShnatSeker, Mother, ref=2019)). Diagnostics.R itself only reports each coefficient
 # individually (etable()); parallel trends requires them to be jointly, not just individually,
@@ -11,19 +11,16 @@
 # i(ShnatSeker, Mother, ref=2019) names them "ShnatSeker::2017:Mother" and
 # "ShnatSeker::2018:Mother" (not "Mother:ShnatSeker::...").
 #
-# `keep` and `label` are parameters (with the historical values as defaults, so both original call
-# sites are unchanged) because scripts/hours_ddd_event_study.R added a third pretrend model whose
-# coefficients of interest are the TRIPLE interaction's, named "ShnatSeker::<year>:MotherWFH". Two
-# notes on why that needed more than a new call site:
+# `keep` selects the coefficients under test and `label` names the test in the exported row. The
+# third caller, scripts/hours_ddd_event_study.R, tests the TRIPLE interaction's terms, named
+# "ShnatSeker::<year>:MotherWFH", which is why:
 #
-#   1. The default pattern is now anchored with `$`. Unanchored, "ShnatSeker::(2017|2018):Mother"
-#      also matches "ShnatSeker::2017:MotherWFH" (verified empirically, not assumed) -- so handing
-#      the DDD event-study model to the old function would have silently tested 4 restrictions
-#      spanning two different estimands while still looking like a well-formed pre-trend test. The
-#      anchor is behaviour-identical for the two DiD models, which have no MotherWFH term at all.
-#   2. The label is parameterized alongside it because it is written into the exported one-row
-#      table below; a DDD pre-trend F-statistic filed under "Mother:year coefficients = 0" would
-#      misreport which assumption was tested.
+#   1. The default `keep` is anchored with `$`. Unanchored, "ShnatSeker::(2017|2018):Mother" also
+#      matches "ShnatSeker::2017:MotherWFH", so the DDD event-study model would silently be tested
+#      on 4 restrictions spanning two estimands while still looking like a well-formed pre-trend
+#      test. The anchor changes nothing for the two DiD models, which have no MotherWFH term.
+#   2. `label` is written into the exported one-row table below; a DDD pre-trend F-statistic filed
+#      under "Mother:year coefficients = 0" would misreport which assumption was tested.
 library(fixest)
 
 run_pretrend_joint_test <- function(pretrend_model,

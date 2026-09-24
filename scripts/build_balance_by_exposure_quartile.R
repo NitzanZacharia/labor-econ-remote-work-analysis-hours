@@ -1,14 +1,12 @@
 # build_balance_by_exposure_quartile.R
 # Pre-period covariate balance between mothers and childless women, by quartile of the
 # OCCUPATION-LEVEL exposure score the hours DDD uses (Figure 2's bins), on the DDD's own
-# estimation sample. Added in response to the 2026-09-23 grade report (Robustness deduction 2;
-# docs/decisions/grade-report-2-response.md).
+# estimation sample (docs/decisions/grade-report-2-response.md, Robustness 2).
 #
 # What it is for. The triple difference compares the change in the motherhood gap ACROSS exposure
 # levels, so what matters is whether mothers and childless women differ from each other in
-# different ways at different exposure levels. The paper reported only the age-group gap by
-# quartile, in prose; this puts every control the regressions use -- and the population-group
-# split -- into one table, each cell the mother-minus-childless difference with an IDPUF-clustered
+# different ways at different exposure levels. This puts every control the regressions use -- and
+# the population-group split -- into one table, each cell the mother-minus-childless difference with an IDPUF-clustered
 # standard error from clustered_se() (the same helper Table 1's difference column uses).
 #
 # It is deliberately NOT robustness/balance_test.R: that function works on the demographic-cell
@@ -18,7 +16,7 @@
 library(tidyverse)
 source(file.path("scripts", "data_processing.R"))
 source(file.path("scripts", "clustered_se.R"))
-source(file.path("robustness", "age_balance_robustness.R"))  # assign_wfh_quartile()
+source(file.path("scripts", "assign_wfh_quartile.R"))
 
 build_balance_by_exposure_quartile <- function(cleaned_df, exposure_index, breaks,
                                                pre_period_before = 2020,

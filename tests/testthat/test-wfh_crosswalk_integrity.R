@@ -7,7 +7,7 @@
 # (build_exposure_cells() drops unmatched ISCO2 codes with a bare filter(!is.na(tele_ext))).
 #
 # What the file is (established and reproduced exactly on 2026-09-23; the record is in
-# docs/open-question-wfh-crosswalk-provenance.md): the Dingel & Neiman (2020) binary
+# docs/decisions/wfh-crosswalk-provenance.md): the Dingel & Neiman (2020) binary
 # `teleworkable` flag from their published O*NET-SOC occupations file (968 rows), mapped to
 # ISCO-08 through the BLS 2012 "ISCO-08 to 2010 SOC" crosswalk workbook (the author's copy came
 # via the Israeli CBS; it is the same workbook D&N's own country-level code reads), and averaged

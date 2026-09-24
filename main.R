@@ -6,7 +6,7 @@ source(file.path("scripts", "data_processing.R"))
 source(file.path("scripts", "comparative_statistics.R"))
 source(file.path("scripts", "descriptive_table.R"))
 source(file.path("scripts", "basic_regression.R"))
-source(file.path("scripts", "basic_reg_compared_data.R"))
+source(file.path("scripts", "basic_reg_compared_data.R"))  # manual robustness call only (README "Setup & running"); not run by the pipeline
 source(file.path("scripts", "Diagnostics.R"))
 source(file.path("scripts", "hours_diagnostics.R"))
 source(file.path("scripts", "employment_by_child_age.R"))
@@ -37,8 +37,8 @@ source(file.path("scripts", "hours_subgroup_comparison.R"))
 source(file.path("scripts", "paper_theme.R"))
 source(file.path("scripts", "hours_descriptive_plots.R"))
 source(file.path("scripts", "hours_dose_response.R"))
-# Two descriptives added by the 2026-09-22 editorial audit (paper/notes/editorial-audit-2026-09-22.md,
-# items B2 and I1): the Israeli realized-WFH share by year, and the reference-week absence share by
+# Two descriptives the editorial audit asked for (paper/notes/editorial-audit-2026-09-22.md, items
+# B2 and I1): the Israeli realized-WFH share by year, and the reference-week absence share by
 # exposure quartile.
 source(file.path("scripts", "wfh_share_by_year.R"))
 source(file.path("scripts", "absence_by_exposure_quartile.R"))
@@ -51,7 +51,7 @@ source(file.path("scripts", "build_event_study_plot.R"))
 # §8a for the DDD event study, which cannot run any earlier because it needs §8's exposure measure.
 source(file.path("robustness", "pretrend_wald_test.R"))
 
-# 2026-09-22 grade-report response (docs/decisions/grade-report-response.md): saturated and
+# Grade-report response (docs/decisions/grade-report-response.md): saturated and
 # quartile-binned DDD columns, the child-age heterogeneity split, the occupation-level first
 # stage, small-cluster inference (wild bootstrap + permutation test), and the generated-table
 # layer that writes paper/tables/*.tex.
@@ -66,7 +66,8 @@ source(file.path("scripts", "format_tex_table_body.R"))
 source(file.path("scripts", "build_paper_tables.R"))
 source(file.path("scripts", "export_paper_tables.R"))
 source(file.path("robustness", "hours_ddd_inference.R"))
-# 2026-09-23 grade-report-2 response (docs/decisions/grade-report-2-response.md).
+# Grade-report-2 response (docs/decisions/grade-report-2-response.md): calibration tests,
+# occupational sorting, leave-one-out influence and pre-period balance.
 source(file.path("scripts", "hours_ddd_swap_control.R"))
 source(file.path("scripts", "exposure_sorting_check.R"))
 source(file.path("scripts", "hours_ddd_cell_exposure.R"))
@@ -153,10 +154,9 @@ pdf(file.path("outputs", "event_study_pretrend.pdf"))
 diagnostics_results <- run_diagnostics(cleaned_df)
 dev.off()
 
-# Primary (hours) pretrend/event-study check -- hours_diagnostics.R (docs/decisions/hours-ddd-pivot.md).
-# No pdf()/dev.off() wrapper, unlike the employment check above: run_hours_diagnostics() no longer
-# draws anything, it returns tidy coefficients that build_event_study_plot() turns into a ggplot
-# below (docs/decisions/ddd-event-study.md's "Porting the DiD event study").
+# Primary (hours) pretrend/event-study check (docs/decisions/hours-ddd-pivot.md). No device wrapper:
+# run_hours_diagnostics() draws nothing, it returns tidy coefficients that build_event_study_plot()
+# turns into a ggplot below (docs/decisions/ddd-event-study.md).
 hours_diagnostics_results <- run_hours_diagnostics(cleaned_df)
 
 hours_event_study_plot <- build_event_study_plot(
@@ -191,18 +191,12 @@ pretrend_wald_hours <- run_pretrend_joint_test(hours_diagnostics_results$pretren
 # docs/decisions/calibrated-exposure-and-cell-ddd.md for the full argument.
 message("Building the WFH-exposure measures...")
 
-# calibrate_isco_exposure()/build_wfh_exposure_index()/build_exposure_cells() below must NOT be
-# built from cleaned_df alone: cleaned_df is the exact women-25-59 analysis sample that later
-# populates the employment DDD (secondary spec) as Mother/Post/Employed, and
-# wfh_exposure_index.R's own header comment already warns against exactly this ("passing the
-# analysis sample builds the third difference out
-# of the same people who enter the regression -- prefer a frame that excludes them, or at minimum
-# covers all workers"). build_exposure_cells() already stratifies by Min (sex) as a cell variable
-# (its first parameter is even named raw_all), so adding men doesn't change its women-cell output
-# at all -- but calibrate_isco_exposure()/build_wfh_exposure_index() aggregate by occupation only,
-# with no sex conditioning, so adding men's realized WFH behavior to the pool genuinely breaks the
-# mechanical link between "this occupation's exposure score" and "the exact population the DDD
-# studies."
+# calibrate_isco_exposure()/build_wfh_exposure_index()/build_exposure_cells() must NOT be built from
+# cleaned_df alone: it is the exact women-25-59 sample the employment DDD later fits, so an
+# occupation score built from it is built from the very people in the regression (see
+# wfh_exposure_index.R's header). build_exposure_cells() stratifies by Min, so adding men leaves
+# its women cells unchanged; calibrate_isco_exposure()/build_wfh_exposure_index() aggregate by
+# occupation only, so adding men's realized WFH is what breaks that mechanical link.
 message("Loading men's data (sex_filter = 'men') so exposure construction isn't built from the ",
         "exact women-25-59 analysis sample (see wfh_exposure_index.R's header comment)...")
 rds_file_path_men   <- paste0(folder_path, "/cleaned_df_men.rds")
@@ -299,7 +293,7 @@ message("Computing minimum detectable effect for the hours DDD's triple interact
 baseline_hours <- mean(cleaned_df$WorkHoursCont[cleaned_df$Employed == 1], na.rm = TRUE)
 # `df` is the t degrees of freedom the model's own p-values use (G - 1 = 39 occupation clusters),
 # so the MDE's multiplier matches the inference rather than assuming a normal reference
-# (2026-09-23 grade-report-2 note). The employment MDEs in §8d keep the normal multiplier: their
+# (docs/decisions/grade-report-2-response.md). The employment MDEs in §8d keep the normal multiplier: their
 # ~210 cell clusters make the two indistinguishable.
 mde_hours <- compute_ddd_mde(hours_ddd$model, baseline_rate = baseline_hours,
                              regressor = hours_ddd$exposure_vector,
@@ -353,9 +347,8 @@ hours_ddd_external <- run_hours_ddd_regression(
 message("Running primary DDD robustness variant (hours, realized Israeli index, 2021 anchor)...")
 hours_ddd_realized <- run_hours_ddd_regression(cleaned_df, exposure_realized)
 
-# Three further sensitivity rows for the paper's robustness table, added by the 2026-09-22
-# editorial audit (paper/notes/editorial-audit-2026-09-22.md, items G6, I5 and F3). None needs a
-# new function: run_hours_ddd_regression() is generic over its data frame and its exposure index.
+# Three further sensitivity rows for the paper's robustness table
+# (paper/notes/editorial-audit-2026-09-22.md, items G6, I5 and F3). None needs a new function: run_hours_ddd_regression() is generic over its data frame and its exposure index.
 #
 # (G6) Unswapped occupations only. calibrate_isco_exposure() swaps 10 of 40 occupations to their
 # realized 2022-23 share, which sits inside the post-period; on the 30 it leaves alone the
@@ -389,7 +382,7 @@ hours_ddd_twoway_table <- etable(
 )
 print(hours_ddd_twoway_table)
 
-# ── Specification and outcome-coding checks (2026-09-22 grade-report response, items M1/M3) ──
+# ── Specification and outcome-coding checks (grade-report response, items M1/M3) ─────────────
 # The dose-response figure is built HERE rather than in §8e, because its quartile edges are the
 # bins the binned DDD below uses: one `breaks` object feeds Figure 2, Table 2's column (4) and the
 # absence footnote, so the paper never compares bins that are not the same bins.
@@ -437,7 +430,7 @@ hours_outcome_shares <- hours_outcome_df %>%
             mean_hours = mean(WorkHoursCont), n = n(), .groups = "drop")
 print(as.data.frame(hours_outcome_shares), digits = 4)
 
-# ── Grade-report-2 checks (2026-09-23; docs/decisions/grade-report-2-response.md) ─────────────
+# ── Grade-report-2 checks (docs/decisions/grade-report-2-response.md) ─────────────────────────
 # Six additions, each one function, all on the primary hours DDD's sample and clustering:
 #
 #   (a) Men-only calibration. The pooled calibration computes realized 2022-23 WFH shares on men
@@ -509,25 +502,17 @@ wfh_occupation_first_stage <- build_wfh_occupation_first_stage(
 )
 
 # ── Hours subgroup comparisons (demographic heterogeneity) ────────────────────────────────────
-# Two independent checks for the now-primary hours DiD/DDD, mirroring coverage that already
-# existed for the (now-secondary) employment outcome (basic_reg_jewish/basic_reg_arab, section 5
-# above) but had never been ported to hours:
+# Two checks on the primary hours DiD/DDD, mirroring the employment outcome's coverage in section 5:
 #
-# (i) Arab vs. Jewish women (Leom == 2 / Leom == 1). run_intensive_margin_reg()/
-# run_hours_ddd_regression() are exactly as generic over their input data frame as basic_reg() is,
-# so the same Leom filter applies unchanged -- no new econometric machinery, just the existing
-# hours functions called on the two subsamples. Point estimates only (DiD + DDD), matching the
-# existing basic_reg_jewish/arab precedent: no separate per-subgroup Lee-bounds/MDE run, since the
-# analogous employment breakdown doesn't do that either and this is a heterogeneity check on the
-# primary spec, not a new primary specification in its own right.
+# (i) Arab vs. Jewish women (Leom == 2 / Leom == 1): the same hours functions on the two subsamples,
+# exactly as basic_reg() is run for basic_reg_jewish/basic_reg_arab. Point estimates only (DiD +
+# DDD) -- a heterogeneity check on the primary spec, not a new primary specification, so no
+# per-subgroup Lee-bounds/MDE run.
 #
-# (ii) Male vs. female (gender placebo). hours_gender_placebo.R's run_hours_gender_placebo()/
-# run_hours_gender_ddd_placebo() already implement this -- replicate the hours DiD/DDD on men,
-# reading "Mother" as "Father", to test whether the effect is motherhood-specific rather than a
-# general parenthood/macro pattern (see that file's header comment) -- and are unit-tested, but
-# were sourced without ever being called from main.R or exported. Reuses cleaned_men_for_exposure
-# (already loaded above for the WFH-exposure construction) and hours_exposure_index (defined above)
-# rather than reloading/rebuilding either.
+# (ii) Male vs. female (gender placebo): the hours DiD/DDD on men, reading "Mother" as "Father",
+# to test whether the effect is motherhood-specific rather than a general parenthood/macro pattern
+# (hours_gender_placebo.R's header). Reuses cleaned_men_for_exposure and hours_exposure_index from
+# above rather than reloading or rebuilding either.
 message("Running hours DiD/DDD by ethnicity (Jewish vs. Arab women)...")
 intensive_jewish <- run_intensive_margin_reg(filter(cleaned_df, Leom == 1))
 check_for_dropped_coefficients(intensive_jewish$models$hours, "hours DiD, Jewish women")
@@ -704,8 +689,6 @@ if (RUN_AGE_BALANCE_ROBUSTNESS) {
   message("Running GilNK-reweighted comparison spec for the hours DDD (pre-period raking weights)...")
   hours_ddd_reweighted <- run_hours_ddd_reweighted(cleaned_df, exposure_cells, hours_exposure_index)
 
-  # (The two joint Wald tests that used to live here now run unconditionally in §7, beside the
-  # event studies they test -- see the comment there.)
 }
 
 # ── 8d. Null-vs-power audit (docs/decisions/null-vs-power-audit.md) ───────────────────────────
@@ -774,9 +757,8 @@ if (RUN_PERMUTATION_TEST) {
 }
 
 # ── 8e. Descriptive figure set for the paper ──────────────────────────────────
-# Unconditional, like §8a and unlike the two audit blocks above -- paper/paper.tex compiles against
-# these figures, and a flag that defaults off would be the same defect both flags above were flipped
-# to TRUE on 2026-09-19 to fix.
+# Unconditional, like §8a: paper/paper.tex compiles against these figures, so they cannot sit behind
+# a flag.
 #
 # This is the first point in the pipeline where all the inputs exist: hours_diagnostics_results
 # (§7), emp_res (§6), hours_exposure_index and hours_ddd (§8a).
@@ -807,11 +789,9 @@ absence_by_exposure_quartile <- build_absence_by_exposure_quartile(
 )
 print(as.data.frame(absence_by_exposure_quartile$by_quartile))
 
-# Repo-level diagnostic only. results_digest.md §1.5 records a 2026-09-15 decision that the
-# second-stage mechanism regression is out of scope for the paper's results, and that stands --
-# this figure is deliberately absent from the paper_figures list below. What it does close is the
-# separate open item at §7 item 1: exporting hours_ddd$mechanism_data puts the 37-occupation frame
-# behind the slope on disk, so the mechanism regression is reproducible rather than console-only.
+# Repo-level diagnostic only: results_digest.md §1.5 rules the second-stage mechanism regression out
+# of the paper, so this figure is not in paper_figures below. Exporting hours_ddd$mechanism_data
+# keeps the 37-occupation frame behind the slope on disk (results_digest.md §7 item 1).
 hours_mechanism <- build_mechanism_scatter(
   hours_ddd$mechanism_data,
   fit = hours_ddd$models$mechanism
@@ -854,7 +834,7 @@ paper_tables <- build_paper_tables(list(
   mde_additive             = mde_additive,
   baseline_employment_rate = baseline_employment_rate,
   wfh_occupation_first_stage = wfh_occupation_first_stage,
-  # 2026-09-23 grade-report-2 response.
+  # Grade-report-2 inputs (docs/decisions/grade-report-2-response.md).
   hours_ddd_calib_men      = hours_ddd_calib_men,
   hours_ddd_swap_control   = hours_ddd_swap_control,
   hours_ddd_cell_exposure  = hours_ddd_cell_exposure,
@@ -922,7 +902,7 @@ results_to_export <- list(
   hours_lee_bounds_n_trimmed = hours_lee_bounds$diagnostics$n_trimmed_by_quartile,
   ddd_hours_external = hours_ddd_external$table,
   ddd_hours_realized = hours_ddd_realized$table,
-  # 2026-09-22 editorial-audit additions (all aggregate: etable views or a handful of cells).
+  # Editorial-audit rows (all aggregate: etable views or a handful of cells).
   ddd_hours_unswapped      = hours_ddd_unswapped$table,
   ddd_hours_ex2023         = hours_ddd_ex2023$table,
   intensive_margin_ex2023  = intensive_ex2023$table,
@@ -948,7 +928,7 @@ results_to_export <- list(
   hours_did_subgroup_comparison   = hours_did_subgroup_comparison,
   hours_ddd_subgroup_comparison   = hours_ddd_subgroup_comparison,
   ddd_employment = employment_ddd_table,
-  # 2026-09-22 grade-report response (docs/decisions/grade-report-response.md). All aggregate.
+  # Grade-report response rows (docs/decisions/grade-report-response.md). All aggregate.
   ddd_hours_saturated      = hours_ddd_saturated$table,
   ddd_hours_binned         = list(table = hours_ddd_binned$table, coefs = hours_ddd_binned$coefs,
                                   quartile_sizes = hours_ddd_binned$quartile_sizes),
@@ -965,8 +945,7 @@ results_to_export <- list(
                                     stats = wfh_occupation_first_stage$stats,
                                     plot  = wfh_occupation_first_stage$plot),
   hours_subgroup_ztests    = paper_tables$subgroup_ztests,
-  # 2026-09-23 grade-report-2 response (docs/decisions/grade-report-2-response.md). All
-  # aggregate: etable views, one-row coefficient frames, a 40-row occupation table, and the
+  # Grade-report-2 rows (docs/decisions/grade-report-2-response.md). All aggregate: etable views, one-row coefficient frames, a 40-row occupation table, and the
   # per-quartile balance frame. hours_ddd_calib_men$index is the 40-row calibrated index.
   wfh_exposure_calibrated_men = hours_ddd_calib_men$index,
   ddd_hours_calibrated_men    = hours_ddd_calib_men$result$table,
@@ -979,7 +958,7 @@ results_to_export <- list(
                                      summary = hours_ddd_leave_one_out$summary,
                                      plot = if (is.null(hours_ddd_leave_one_out_plot)) NULL else hours_ddd_leave_one_out_plot$plot),
   balance_by_exposure_quartile = balance_by_quartile$table,
-  # The Imbens-Manski intervals were console-only until now (results_digest.md §7 item 2).
+  # The Imbens-Manski intervals (results_digest.md §7 item 2).
   hours_lee_bounds_imbens_manski      = as.data.frame(hours_lee_bounds$imbens_manski_ci),
   intensive_margin_lee_bounds_imbens_manski = as.data.frame(intensive_lee_bounds$imbens_manski_ci)
 )
@@ -1035,53 +1014,28 @@ message("Exporting results to outputs/...")
 export_all_results(results_to_export)
 
 # Paper figures, again and deliberately. export_all_results() has already written every plot above
-# as an 8x5in 150dpi PNG for browsing; this second pass rewrites the handful paper/paper.tex
-# actually includes as vector PDFs at the size they are printed at (~0.8\textwidth). Text sized for
-# a 5in-wide PDF looks small in the 8in PNG -- that is expected, and the PNG is not what compiles.
+# as an 8x5in 150dpi PNG for browsing; this second pass rewrites only the figures paper/paper.tex
+# and paper/appendix.tex \includegraphics, as vector PDFs at the size they are printed at
+# (~0.8\textwidth). Text sized for a 5in-wide PDF looks small in the 8in PNG -- expected; the PNG
+# is not what compiles.
 #
-# Keys here are filenames: paper.tex hard-codes ../outputs/figures/<key>.pdf, so renaming one
-# breaks the LaTeX build. Two of employment_by_child_age()'s three plots are intentionally omitted
-# -- the plain raw bar chart and the pre/post panel -- and both stay repo artifacts only. The
-# mechanism scatter is omitted for the scope reason recorded at §8e.
+# Keys here are filenames: the .tex hard-codes ../outputs/figures/<key>.pdf, so renaming one
+# breaks the LaTeX build, and adding one that the paper does not include leaves an orphan PDF in
+# the repo. Every plot the paper has cut (the hours 2x2 panel, the two employment-by-child-age
+# panels, the mobility series, the child-age forest plot, the mechanism scatter) is still on disk
+# as a PNG; the reasons for each cut are in docs/decisions/paper-figure-layer.md and
+# docs/decisions/paper-structural-cut.md.
 message("Exporting paper figures (vector PDF) to outputs/figures/...")
 paper_figures <- list(
-  # hours_descriptives$plots$period_2x2 is deliberately NOT here. The paper cut the 2x2 figure:
-  # its content is a strict subset of the by-year panel below (whose lower panel recovers the same
-  # DiD to within 0.011 hours), and its caption reported the UNCLUSTERED raw SE of 0.098, which
-  # reads as significant against the clustered 0.1809 the paper actually reports as a null. The
-  # plot still reaches outputs/ as a PNG via export_all_results() for browsing; it just has no
-  # business being the figure a reader sees next to a null result.
   hours_by_year         = list(plot = hours_descriptives$plots$by_year,    width = 5.0, height = 5.0),
-  # paper.tex \includegraphics this as Figure fig:pretrend (Results §5.3), replacing the
-  # whole-device outputs/event_study_pretrend_hours.pdf the iplot() version used to write. Same
-  # dimensions as the DDD event study below: the two sit a page apart in the paper and are meant to
-  # be read against each other, so they must not differ in scale.
+  # The two event studies sit a page apart and are read against each other, so they share a size;
+  # both match hours_dose_response so no paper figure is scaled down further than its neighbours.
   hours_event_study     = list(plot = hours_event_study_plot$plot,         width = 5.0, height = 3.4),
-  # paper.tex \includegraphics this as Figure fig:pretrend-ddd (Results §5.3). Sized to match
-  # hours_dose_response below rather than to the plot's own natural aspect: every paper figure is
-  # printed at 0.8\textwidth, so a PDF authored wider than its neighbours is scaled down further and
-  # its text renders smaller than theirs on the page.
   hours_ddd_event_study = list(plot = hours_ddd_event_study_plot$plot,     width = 5.0, height = 3.4),
   hours_dose_response   = list(plot = hours_dose_response$plot,            width = 5.0, height = 3.4),
-  # No emp_res plot is here. The paper cut the pre/post panel first, for the same reason as the 2x2
-  # above -- its only unique content, the pre/post separation, is not an estimate of anything:
-  # mothers only, no comparison group, no controls -- and then cut the raw-vs-adjusted panel on the
-  # same standard. That one is mothers only with no comparison group too; it was cited exactly once,
-  # in the sentence that introduced it, and nothing downstream ever came back to it; and its five
-  # bins carried ten numbers and no uncertainty, which §4.5 now states in two paragraphs instead.
-  # The child-age bin (GilYeledTzairMBNK) now enters the HOURS analysis through
-  # run_hours_ddd_by_child_age() (§8a, grade-report item R2), whose forest plot is exported below;
-  # the employment-margin profile these two plots drew remains a repo artifact only. Both still
-  # reach outputs/ as PNGs via export_all_results(), and the plotted rates are on disk in
-  # outputs/employment_by_child_age_adjusted_rates.csv, which §4.5 quotes.
-  mobility              = list(plot = comp_stats$plots$mobility,           width = 5.0, height = 3.4),
-  # 2026-09-22 additions: the child-age forest plot (Results §5.6), the occupation-level first
-  # stage (Appendix Figure A1) and, when the permutation test ran, its histogram (Results §5.5).
-  hours_ddd_by_child_age       = list(plot = hours_ddd_childage_comparison$plot, width = 5.0, height = 3.0),
   wfh_first_stage_occupation   = list(plot = wfh_occupation_first_stage$plot,   width = 5.0, height = 3.8)
 )
-# 2026-09-23: the leave-one-occupation-out influence plot (Appendix Figure A1). Forty labelled
-# rows need the height; the width matches the rest so the text renders at the same size.
+# Forty labelled rows need the height; the width matches the rest so the text renders at the same size.
 if (!is.null(hours_ddd_leave_one_out_plot)) {
   paper_figures$hours_ddd_leave_one_out <- list(plot = hours_ddd_leave_one_out_plot$plot, width = 5.0, height = 6.2)
 }

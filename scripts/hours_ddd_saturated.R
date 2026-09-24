@@ -1,6 +1,6 @@
 # hours_ddd_saturated.R
-# The fully saturated version of the primary hours DDD (scripts/hours_ddd_regression.R), added in
-# response to the 2026-09-22 grade report (item M1; docs/decisions/grade-report-response.md).
+# The fully saturated version of the primary hours DDD (scripts/hours_ddd_regression.R);
+# docs/decisions/grade-report-response.md, item M1.
 #
 # The pooled DDD enters the occupation-level exposure score as one continuous regressor with its
 # two-way interactions, which forces three occupation-level differences -- in hours levels (the

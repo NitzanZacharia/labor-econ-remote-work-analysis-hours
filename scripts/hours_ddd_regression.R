@@ -27,8 +27,7 @@ source(file.path("scripts", "data_processing.R"))
 source(file.path("scripts", "ddd_collinearity_diagnostics.R"))
 source(file.path("scripts", "intensive_margin_regression.R"))
 
-# `outcome` and `run_mechanism` were added for the 2026-09-22 grade-report response (item M3,
-# docs/decisions/grade-report-response.md). `outcome` lets the same specification be estimated on
+# `outcome` and `run_mechanism` (docs/decisions/grade-report-response.md, item M3). `outcome` lets the same specification be estimated on
 # an alternative coding of the hours variable (a full-time or long-hours indicator built in
 # main.R) without a second copy of this function; the default reproduces every existing call.
 # `run_mechanism` switches off the per-occupation second stage below, which is a repo diagnostic

@@ -53,8 +53,8 @@ build_hours_subgroup_comparison <- function(models, term, title, subtitle = NULL
       guide  = "none"
     ) +
     scale_shape_manual(values = c("FALSE" = 16, "TRUE" = 21), guide = "none") +
-    # A wide interval (the Arab-women DDD reaches 11.19) previously ran to the panel edge and read
-    # as though it had been truncated. clip = "off" keeps the cap drawn even when it lands on the
+    # A wide interval (the Arab-women DDD reaches 11.19) would run to the panel edge and read as
+    # though it had been truncated. clip = "off" keeps the cap drawn even when it lands on the
     # boundary; the added expansion keeps it off the boundary in the first place.
     scale_x_continuous(expand = expansion(mult = 0.12)) +
     coord_cartesian(clip = "off") +

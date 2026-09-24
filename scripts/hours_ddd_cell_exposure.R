@@ -1,7 +1,6 @@
 # hours_ddd_cell_exposure.R
-# The hours DDD with a PRE-PERIOD exposure regressor that cannot respond to the treatment, added
-# in response to the 2026-09-23 grade report (Methods deduction 2, occupational sorting;
-# docs/decisions/grade-report-2-response.md). The companion diagnostic is
+# The hours DDD with a PRE-PERIOD exposure regressor that cannot respond to the treatment
+# (docs/decisions/grade-report-2-response.md, Methods 2, occupational sorting). The companion diagnostic is
 # exposure_sorting_check.R; this file is the bound.
 #
 # The headline regressor is the calibrated score of the occupation a woman holds WHEN SURVEYED, so

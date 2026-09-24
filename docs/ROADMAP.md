@@ -6,7 +6,7 @@ Checkpoints 1-10 predate a later pivot: weekly work hours (the intensive margin)
 
 Not covered here: general test-suite construction (unit/integration tests for the *existing* functions) — the live `tests/testthat/` suite (run via `Rscript run_tests.R`) is the source of truth for that.
 
-> **This document is a historical record, not a work queue.** All 13 checkpoints are implemented; there is no pending roadmap item (`docs/LLD.md` says the same). Each checkpoint below carries a `**Status:**` line, and the write-ups are preserved as accurate records of what was built and why, including options that were considered and rejected. Numbers quoted inside a checkpoint are as-of that checkpoint — where a later change superseded one, the superseding value is noted inline. New work should get its own checkpoint entry or a decision memo in [`docs/decisions/`](decisions/) rather than editing history here.
+> **This document is a historical record, not a work queue.** All 15 checkpoints are implemented; there is no pending roadmap item (`docs/LLD.md` says the same). Each checkpoint below carries a `**Status:**` line, and the write-ups are preserved as accurate records of what was built and why, including options that were considered and rejected. Numbers quoted inside a checkpoint are as-of that checkpoint — where a later change superseded one, the superseding value is noted inline. New work should get its own checkpoint entry or a decision memo in [`docs/decisions/`](decisions/) rather than editing history here.
 
 ---
 
@@ -254,7 +254,7 @@ Every control artifact must stay byte-identical — the four `wfh_exposure_*.csv
 
 ## Checkpoint 14 — Grade-Report Response (specification, inference, heterogeneity, generated tables)
 
-**Objective:** Close the twelve deductions in `seminar_grade_report.md` (84/100) that could be closed inside the pipeline and the paper, without touching the Conclusion (work in progress) and without rebuilding the exposure crosswalk (deferred to its own plan).
+**Objective:** Close the twelve deductions in the 2026-09-22 seminar grade report (84/100; not kept in the repo -- the later 86/100 report of 2026-09-23 is answered by Checkpoint 15) that could be closed inside the pipeline and the paper, without touching the Conclusion (work in progress) and without rebuilding the exposure crosswalk (deferred to its own plan).
 
 **Status:** Implemented 2026-09-22. New files: `scripts/occupation_exposure_breaks.R`, `scripts/hours_ddd_saturated.R`, `scripts/hours_ddd_binned.R`, `scripts/hours_ddd_by_child_age.R`, `scripts/wfh_occupation_first_stage.R`, `scripts/build_permutation_plot.R`, `scripts/tex_coef_cell.R`, `scripts/format_tex_table_body.R`, `scripts/build_paper_tables.R`, `scripts/export_paper_tables.R`, `robustness/hours_ddd_inference.R`, `data/isco08_2digit_labels.csv`, `paper/tables/*.tex` (generated). Changed: `main.R` (§8a additions, new §8f inference block, §8g table assembly), `scripts/hours_ddd_regression.R` (`outcome`, `run_mechanism`), `scripts/intensive_margin_regression.R` (`year_fe`), `scripts/descriptive_table.R` (clustered SEs on every difference), `scripts/hours_dose_response.R` and `scripts/absence_by_exposure_quartile.R` (shared breaks helper), the test helper and eleven test files, `CLAUDE.md`, `README.md`, `paper/paper.tex`, `paper/references.bib`.
 
@@ -276,7 +276,7 @@ Every pre-existing CSV except `descriptive_table_{continuous,categorical}.csv` (
 
 ## Checkpoint 15 — Grade-Report-2 Response (exposure calibration tests, sorting, leave-one-out, balance, fixed-decimal tables)
 
-**Objective:** Close the fourteen deductions in the 2026-09-23 `seminar_grade_report.md` (86/100) inside the pipeline and the paper, without touching the Conclusion.
+**Objective:** Close the fourteen deductions in the 2026-09-23 seminar grade report (86/100; removed from the repo 2026-09-24, git history keeps it) inside the pipeline and the paper, without touching the Conclusion.
 
 **Status:** Implemented 2026-09-23. New files: `scripts/hours_ddd_swap_control.R`, `scripts/exposure_sorting_check.R`, `scripts/hours_ddd_cell_exposure.R`, `scripts/hours_ddd_leave_one_out.R`, `scripts/build_leave_one_out_plot.R`, `scripts/build_balance_by_exposure_quartile.R`, six matching test files, `paper/tables/tab_balance_quartile.tex` (generated), `outputs/figures/hours_ddd_leave_one_out.pdf`. Changed: `main.R` (grade-report-2 block after the outcome-coding checks; men-only calibration; t-based MDE; table, export and figure lists), `scripts/tex_coef_cell.R` (fixed decimals), `scripts/build_paper_tables.R` (three decimals, R² to three, Clusters column, new Table 4 rows and blocks, Table A2), `scripts/ddd_mde_diagnostics.R` (`df`), `scripts/hours_ddd_regression.R` / `hours_ddd_saturated.R` / `hours_ddd_binned.R` / `robustness/age_balance_robustness.R` (return `n_clusters`), `scripts/hours_descriptive_plots.R` (Figure 1 axis floor), the test helper and three test files, `README.md`, `paper/paper.tex`, `paper/references.bib`.
 

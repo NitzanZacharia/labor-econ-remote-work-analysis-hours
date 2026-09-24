@@ -209,12 +209,9 @@ employment_by_child_age <- function(cleaned_df) {
     )
 
   # ── 7. Print plots ───────────────────────────────────────────────────────
-  # Interactive convenience only. Under a headless `Rscript main.R` these print() calls used to
-  # open R's default device and leak an Rplots.pdf into the repo root on every run (the
-  # .gitignore rule hid the symptom; the file was still created, and had been committed twice
-  # historically). The three plots reach disk as PNGs via export_all_results() regardless, so
-  # skipping the prints in a non-interactive session loses nothing. The bare dev.off() that used
-  # to sit here was removed with them: it had no device to close and was itself part of the leak.
+  # Interactive convenience only. Under a headless `Rscript main.R` a print() here would open R's
+  # default device and leak an Rplots.pdf into the repo root (see .gitignore). The three plots reach
+  # disk as PNGs via export_all_results() regardless, so skipping them loses nothing.
   if (interactive()) {
     print(p_raw)
     print(p_period)

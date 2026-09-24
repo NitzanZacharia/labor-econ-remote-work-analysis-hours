@@ -6,9 +6,8 @@
 # (docs/decisions/hours-population-harmonization.md), which drops the ~10% of the employed who were
 # absent that week. If absence is itself related to WFH exposure -- teleworkable jobs making it
 # easier to work while unwell or while caring for a child, say -- that restriction is not innocuous
-# for the triple interaction. The paper's Limitations section used to assert the relation was
-# "mild" with no number attached; the 2026-09-22 editorial audit (item I1) removed the claim and
-# asked for the four quartile shares so it can be restored with evidence or left out.
+# for the triple interaction. The Limitations section's statement about that relation rests on the
+# four quartile shares computed here (paper/notes/editorial-audit-2026-09-22.md, item I1).
 #
 # Quartiles are those of build_hours_dose_response(): breakpoints from the pre-period distribution
 # of the occupation-level measure, applied to all years. main.R passes that function's `breaks` in
@@ -20,7 +19,7 @@ library(tidyverse)
 library(fixest)
 source(file.path("scripts", "clustered_se.R"))
 source(file.path("scripts", "occupation_exposure_breaks.R"))
-source(file.path("robustness", "age_balance_robustness.R"))
+source(file.path("scripts", "assign_wfh_quartile.R"))
 
 build_absence_by_exposure_quartile <- function(cleaned_df, exposure_index, breaks = NULL) {
   if (!"AvadBeshavua" %in% names(cleaned_df)) {

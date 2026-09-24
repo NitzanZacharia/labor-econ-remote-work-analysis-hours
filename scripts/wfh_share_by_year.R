@@ -1,8 +1,8 @@
 # wfh_share_by_year.R
 # The realized share of employed women working from home, by survey year -- the Israeli counterpart
 # of the US "share of workdays" figures the paper's Introduction cites from Barrero, Bloom and Davis.
-# Added for the 2026-09-22 editorial audit (paper/notes/editorial-audit-2026-09-22.md, item B2):
-# the paper carried only the US numbers, and an Israeli reader will ask what the Israeli share was.
+# An Israeli reader will ask what the Israeli share was (paper/notes/editorial-audit-2026-09-22.md,
+# item B2).
 #
 # Two measures, both defined in data_processing.R and both NA before 2021 because the CBS asked
 # the items from 2021 only: WFH (usual work location) and WFH_RefWeek (worked from home in the

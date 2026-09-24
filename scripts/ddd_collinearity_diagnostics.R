@@ -1,8 +1,7 @@
 # ddd_collinearity_diagnostics.R
-# Runtime collinearity diagnostic for main.R's primary DDD Spec 1 (additive controls), refreshing
-# the two headline stats previously asserted only as a static, hardcoded comment in main.R (74.5%
-# of WFH_Exposure's variance explained by GilNK+TeudaGvoha+MachozMegurim alone; design-matrix
-# condition number 267.8) directly from the fitted data on every run, so they can't silently go
+# Runtime collinearity diagnostic for main.R's employment DDD Spec 1 (additive controls): the share
+# of WFH_Exposure's variance explained by GilNK+TeudaGvoha+MachozMegurim and the design-matrix
+# condition number, computed from the fitted data on every run so they can't silently go
 # stale as the underlying microdata composition changes (new survey years, sample restrictions,
 # etc.). Spec 2 (main.R's interacted-cell-FE spec) is the actual fix for this collinearity -- this
 # function only measures and reports how bad Spec 1's collinearity is, it doesn't correct anything.
@@ -48,8 +47,7 @@ check_spec1_collinearity <- function(ddd_df, cell_fe_vars, controls) {
 
 # Generic safety net for every OTHER feols()/lm() fit in the pipeline: check_spec1_collinearity()
 # above only ever covered the primary DDD's Spec 1, by design (it's specifically diagnosing that
-# spec's own known WFH_Exposure/cell-control overlap). Nothing previously inspected any other
-# fitted model for a silently-dropped-by-collinearity variable.
+# spec's own known WFH_Exposure/cell-control overlap).
 #
 # IMPORTANT, verified empirically against the fixest version this project uses: a collinear
 # variable is NOT left in coef() as an NA-valued entry -- fixest removes it from coef() entirely

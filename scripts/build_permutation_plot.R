@@ -1,7 +1,7 @@
 # build_permutation_plot.R
 # Histogram of the permutation distribution produced by run_hours_ddd_permutation_test()
-# (robustness/hours_ddd_inference.R), with the observed cluster-robust t marked. Added for the
-# paper's falsification-test subsection (2026-09-22 grade-report response, item M2).
+# (robustness/hours_ddd_inference.R), with the observed cluster-robust t marked. Drawn for the
+# paper's falsification-test subsection (docs/decisions/grade-report-response.md, item M2).
 #
 # Separate from the estimator for the same reason build_event_study_plot() is separate from the
 # event studies: a builder that takes an already-computed frame is testable without running 999

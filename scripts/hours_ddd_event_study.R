@@ -5,15 +5,12 @@
 # Post with a full set of survey-year interactions, so the triple difference is recovered separately
 # for every year against the 2019 reference.
 #
-# Why this exists: parallel trends is the identifying assumption of the DDD, but until this file the
-# repo tested it only at the DiD level -- run_diagnostics() (Employed x Mother x year) and
-# run_hours_diagnostics() (WorkHoursCont x Mother x year), each passed to
-# run_pretrend_joint_test(). Both ask whether mothers and non-mothers trended together. Neither asks
-# the question the DDD's identification actually rests on: whether the mother/non-mother gap trended
-# together ACROSS WFH exposure levels in the pre-period. A DiD pre-trend can pass while the DDD's
-# own pre-trend fails (the two-way test averages over exposure, so an exposure-correlated divergence
-# that nets to zero across occupations is invisible to it), which is why the triple-interaction
-# pre-period coefficients need a test of their own rather than inheriting the DiD's verdict.
+# Why this exists: the two DiD-level pre-trend models (run_diagnostics(), run_hours_diagnostics())
+# ask whether mothers and non-mothers trended together, averaging over exposure. The DDD's
+# identification rests on the stricter condition that the mother/non-mother gap trended together
+# ACROSS exposure levels, and an exposure-correlated divergence that nets to zero across occupations
+# is invisible to a DiD test. So the triple-interaction pre-period coefficients get a test of their
+# own (docs/decisions/ddd-event-study.md).
 #
 # Specification -- the saturated triple-difference event study. All three lower-order year
 # interactions are included alongside the triple one:

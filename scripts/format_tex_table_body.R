@@ -1,7 +1,6 @@
 # format_tex_table_body.R
 # Turns a character matrix of already-formatted cells into a booktabs `tabular` block. Part of the
-# generated-table layer added for the 2026-09-22 grade-report response (item C1;
-# docs/decisions/grade-report-response.md).
+# generated-table layer (docs/decisions/grade-report-response.md, item C1).
 #
 # Deliberately dumb: it knows nothing about regressions, only about rows, columns and rules. The
 # content decisions (which coefficient goes where, how numbers are rounded) live in

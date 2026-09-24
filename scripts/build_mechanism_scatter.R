@@ -3,11 +3,8 @@
 # the identifying variation behind the hours DDD, drawn directly.
 #
 # SCOPE NOTE, read before wiring this into the paper. paper/notes/results_digest.md section 1.5
-# records a decision dated 2026-09-15 that the second-stage mechanism regression is
-# "[PRIMARY -- OUT OF SCOPE, DO NOT DRAFT]" into the paper's results. That decision stands. This
-# file exists to (a) draw the figure as a repo-level diagnostic and (b) put mechanism_data on disk,
-# which closes the separate open item recorded at results_digest.md section 7 item 1 -- the
-# underlying data having never been exported was one of the two reasons 1.5 was ruled out of scope.
+# rules the second-stage mechanism regression out of the paper's results. This file draws the figure
+# as a repo-level diagnostic and puts mechanism_data on disk (results_digest.md section 7 item 1).
 # The figure is deliberately NOT included in paper/paper.tex.
 library(tidyverse)
 source(file.path("scripts", "paper_theme.R"))

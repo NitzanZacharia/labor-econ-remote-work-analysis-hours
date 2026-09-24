@@ -18,14 +18,14 @@ library(fixest)
 # estimation sample. Supply it and the MDE is ALSO reported per standard deviation and per
 # interquartile range of that regressor, not only per unit.
 #
-# Why this matters (added 2026-09-19). The MDE is a coefficient: an effect per ONE UNIT of the
+# Why this matters. The MDE is a coefficient: an effect per ONE UNIT of the
 # regressor. Comparing it to a baseline rate silently assumes the regressor moves a full unit.
 # WFH_Exposure never does: on the analysis sample its weighted SD is 0.081, its IQR 0.105, and its
 # entire observed range is 0 to 0.75. Reporting only the per-unit figure made the employment DDD
 # look ~8-10x underpowered against the literature when the honest per-SD comparison is ~2-3x. The
 # scale-free ratio MDE/|point estimate| is unaffected by any of this and remains the strongest
 # statement of the power problem.
-# `df` (added 2026-09-23, grade-report-2 note on the MDE): the degrees of freedom of the t
+# `df` (docs/decisions/grade-report-2-response.md, MDE note): the degrees of freedom of the t
 # reference distribution the model's inference actually uses. With forty occupation clusters the
 # hours DDD's p-values come from t(39), and the normal multiplier (2.80) understates the
 # detectable effect relative to the t one (2.87). When supplied, BOTH terms use qt(); NULL keeps
@@ -101,8 +101,8 @@ compute_ddd_mde <- function(model, coef_name = "Mother:Post:WFH_Exposure",
 
   # Returned as a one-row data frame as well as the scalar list, so export_all_results() can write
   # it: the layer only recognises data frames and ggplots, so a list of scalars reaches no file.
-  # The paper cites all three MDEs (2.6059 for hours, 0.2031/0.2022 for employment) and none of
-  # them was on disk before 2026-09-19. Same fix as run_pretrend_joint_test()'s.
+  # The paper cites all three MDEs, so they have to be on disk. Same pattern as
+  # run_pretrend_joint_test().
   tbl <- data.frame(
     coef_name      = coef_name,
     point_estimate = unname(point_estimate),

@@ -25,19 +25,18 @@
 #      rather than from hand-computed cell SEs, which assumed the four cells were independent
 #      subsamples and understated the SE by roughly 1.6-1.85x. See scripts/clustered_se.R.
 #
-# Quartiles are fixed at four rather than parameterised, because the reused assign_wfh_quartile()
-# (robustness/age_balance_robustness.R) hardcodes labels = 1:4, and because quartiles are what the
+# Quartiles are fixed at four rather than parameterised, because the shared assign_wfh_quartile()
+# (scripts/assign_wfh_quartile.R) hardcodes labels = 1:4, and because quartiles are what the
 # Lee-bounds and age-balance specs already use.
 library(tidyverse)
 library(fixest)
 source(file.path("scripts", "paper_theme.R"))
 source(file.path("scripts", "clustered_se.R"))
 source(file.path("scripts", "occupation_exposure_breaks.R"))
-source(file.path("robustness", "age_balance_robustness.R"))
+source(file.path("scripts", "assign_wfh_quartile.R"))
 
-# `breaks` (added 2026-09-22): quartile edges to reuse instead of recomputing. When NULL the edges
-# are computed here by compute_occupation_exposure_breaks(), the rule this function used to carry
-# inline; main.R takes the returned `breaks` and hands them to the binned DDD
+# `breaks`: quartile edges to reuse instead of recomputing. When NULL they are computed here by
+# compute_occupation_exposure_breaks(); main.R takes the returned `breaks` and hands them to the binned DDD
 # (scripts/hours_ddd_binned.R) and the absence footnote so all three share one set of bins.
 build_hours_dose_response <- function(cleaned_df, exposure_index,
                                       measure_label = "occupation-level calibrated WFH exposure",

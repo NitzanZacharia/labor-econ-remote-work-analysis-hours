@@ -28,6 +28,8 @@
 library(tidyverse)
 library(fixest)
 source(file.path("scripts", "data_processing.R"))
+source(file.path("scripts", "occupation_exposure_breaks.R"))
+source(file.path("scripts", "assign_wfh_quartile.R"))
 
 compute_pre_period_quartile_breaks <- function(cleaned_df, exposure_cells) {
   # Derived from exposure_cells' own columns, not hardcoded -- build_exposure_cells()'s cell_vars
@@ -35,24 +37,11 @@ compute_pre_period_quartile_breaks <- function(cleaned_df, exposure_cells) {
   # join would fan out silently rather than error. exposure_cells always has exactly
   # cell_vars + WFH_Exposure + n_cell.
   exposure_join_vars <- setdiff(names(exposure_cells), c("WFH_Exposure", "n_cell"))
-  pre_wfh <- cleaned_df %>%
-    filter(ShnatSeker < 2020) %>%
+  # Same rule as the occupation-level edges (pre-period rows, row-level quantiles, duplicate-break
+  # guard), applied to the cell-based measure once it is joined on.
+  cleaned_df %>%
     left_join(exposure_cells, by = exposure_join_vars) %>%
-    filter(!is.na(WFH_Exposure)) %>%
-    pull(WFH_Exposure)
-
-  breaks <- quantile(pre_wfh, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
-  if (any(duplicated(breaks))) {
-    stop("compute_pre_period_quartile_breaks: duplicate quartile breakpoints (a mass point sits ",
-         "exactly on a boundary) -- cut() would silently produce fewer than 4 bins. Inspect the ",
-         "pre-period WFH_Exposure distribution before proceeding.")
-  }
-  breaks
-}
-
-assign_wfh_quartile <- function(df, breaks) {
-  df %>% mutate(WFH_Exposure_Q = as.integer(cut(WFH_Exposure, breaks = breaks, labels = 1:4,
-                                                 include.lowest = TRUE)))
+    compute_occupation_exposure_breaks(caller = "compute_pre_period_quartile_breaks")
 }
 
 # ── 1. Diagnose: is the imbalance uniform, or specific to the lowest quartile? ──────────────────
