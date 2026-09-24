@@ -240,7 +240,7 @@ every file there is produced by the current pipeline.
   Full precision: lower 3.125517 / 1.143991; point 3.231854 / 1.053815; upper 3.443446 / 1.021983.
   The "point" here (3.2319, SE 1.0538) differs slightly from §1.3's 3.224 (SE 1.022) because this
   function additionally requires a matched *cell*-based exposure — stated in the script header.
-  N for the three fits (`outputs/hours_lee_bounds_table.csv`, `n_obs`): point 242,552; lower 241,166; upper 241,167 (1,386 and 1,385 rows trimmed).
+  N for the three fits (`outputs/hours_lee_bounds_table.csv`, `n_obs`): point 242,552; lower 241,166; upper 241,167. The gap to the point fit (1,386 and 1,385) is smaller than the 1,396 rows trimmed (`outputs/hours_lee_bounds_n_trimmed.csv`) because some trimmed rows had a missing control and were never in the fit.
 - **95% Imbens–Manski CI for the identified set: [1.021, 5.324]**, `c_α = 1.839787` — excludes
   zero. Recomputed 2026-09-21 by sourcing `scripts/imbens_manski_ci.R`; **not in any CSV**.
   - ⚠ **Historical note worth keeping.** Between the harmonization and the selection-rate fix, the
