@@ -6,8 +6,8 @@ records what the full `Rscript main.R` re-run produced and what the paper now sa
 
 ## Motivation
 
-`docs/grade-reports/2026-09-23-seminar-grade-report.md` (86/100) lists fourteen deductions. Two are identification
-concerns the previous response did not reach: the headline is not robust to the only fully
+The 2026-09-23 seminar grade report (86/100; removed from the repo 2026-09-24, git history keeps
+it) lists fourteen deductions. Two are identification concerns the previous response did not reach: the headline is not robust to the only fully
 pre-treatment exposure index and the calibrated index was chosen as primary after the results
 were known (Methods, 3 points); and occupation is measured contemporaneously, so post-2021
 sorting of mothers into teleworkable occupations is an unaddressed channel (Methods, 2 points).
