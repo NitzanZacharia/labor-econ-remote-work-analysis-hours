@@ -391,7 +391,9 @@ Figure~\ref{fig:dose-response} computes the same difference-in-differences separ
 each quartile of occupational WFH exposure. The bottom three quartiles return $-0.32$, $0.27$ and
 $-0.02$ hours, none distinguishable from zero; the top quartile returns $1.55$ hours (95\% CI
 $[0.74, 2.36]$). The near-zero average is therefore a weighted average of three nulls and one
-substantial positive difference, visible without any regression. The response is not linear in
+substantial positive difference. The figure is a description rather than an independent causal
+test: occupational composition and time-varying confounders can differ across quartiles, which
+is what the regressions of Section~\ref{sec:results} address. The response is not linear in
 exposure: the bottom three quartiles span exposure values of $0.00$ to $0.30$ and the top
 quartile $0.30$ to $0.75$, so most of the regressor's dispersion, and the identifying contrast,
 sits in one tail.
@@ -406,7 +408,9 @@ sits in one tail.
 code. Each point is the raw difference-in-differences within one quartile of the occupation-level
 calibrated exposure measure, from unweighted cell means with no controls; bars are 95\% confidence
 intervals clustered by individual. Breakpoints are computed on pre-period rows and applied to all
-years; each quartile's exposure range is printed beneath its tick.
+years; each quartile's exposure range is printed beneath its tick. The $1.55$ hours in the top
+quartile is that quartile's own difference-in-differences; the raw contrast between the top and
+bottom quartiles is $1.55 - (-0.32) = 1.87$ hours.
 \end{minipage}
 \end{figure}
 
