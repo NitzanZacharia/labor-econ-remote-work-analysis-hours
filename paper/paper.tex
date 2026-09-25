@@ -187,16 +187,20 @@ across a pre-period of 2017--2019 and a post-period of 2021--2023, excluding 202
 (Section~\ref{sec:data}). A difference-in-differences on this contrast estimates the change in
 the hours penalty. A triple-differences model that interacts it with an occupation's WFH exposure
 tests whether remote work is the \emph{mechanism}, by asking whether the change is larger in jobs
-that can actually be done from home.
+that can actually be done from home. Its identifying assumption concerns how the motherhood gap
+\emph{within} occupations would have evolved across exposure levels absent the shift; pre-period
+event studies probe that assumption rather than verify it.
 
 Mothers' hours did not rise on average: the DiD is $0.23$ hours (SE $0.18$), a reasonably precise
 null. The effect lives in the interaction with occupational WFH exposure, $3.22$ additional
-weekly hours per unit of exposure, or $1.8$ hours between the top and bottom quartiles of
-occupations, the same order as the $1.74$-hour intensive-margin penalty itself, while the implied
-change at zero exposure is if anything negative. Because the exposure score varies across only
-forty occupations, we report three inference procedures that place the estimate at the $1\%$,
-$5\%$ and $10\%$ levels. It survives the specification, selection, outcome-coding,
-leave-one-occupation-out and calibration checks of Section~\ref{sec:results}, mothers did not
+weekly hours per unit of exposure, or $1.71$ hours between the mean exposures of the top and
+bottom quartiles of occupations (a quartile-indicator specification puts the top-versus-bottom
+contrast at $1.84$ hours), the same order as the $1.74$-hour intensive-margin penalty itself,
+while the implied change at zero exposure is if anything negative. Because the exposure score
+varies across only forty occupations, we report three inference procedures, whose $p$-values run
+from $0.003$ (analytic) through $0.032$ (permutation) to $0.056$ (wild cluster bootstrap). It
+survives the specification, selection, outcome-coding, leave-one-occupation-out and calibration
+checks of Section~\ref{sec:results}, mothers did not
 sort toward teleworkable occupations after 2021, the gradient is largest for mothers of children
 under five, and fathers show the opposite gradient. On the employment margin the DiD is a
 precise zero and the DDD is too imprecise to be informative.
