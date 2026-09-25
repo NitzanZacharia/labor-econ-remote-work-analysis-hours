@@ -595,10 +595,15 @@ working mothers, those in more WFH-exposed occupations saw a larger post-2021 in
 hours relative to childless women in the same occupations. The index has a standard deviation of
 $0.199$, so the estimate is $0.64$ hours per standard deviation, and between the quartiles of
 Figure~\ref{fig:dose-response}, whose mean exposures are $0.06$ and $0.59$, the regression
-implies $1.71$ hours a week against $1.87$ from the raw cell means. At zero exposure the implied
-change for mothers is $-0.539$ (SE $0.336$), and the gradient is net of whatever happened to
-hours in teleworkable occupations for all women. The estimate is $3.15$ analytic standard errors
-from zero, qualified by the bootstrap and permutation $p$-values of Section~\ref{sec:res-robust};
+implies $1.71$ hours a week against $1.87$ from the raw cell means. These, together with the
+$1.55$-hour top-quartile difference-in-differences of Figure~\ref{fig:dose-response}, are three
+different quantities: the regression-implied contrast between the quartile means, the raw
+contrast between the two quartiles' own differences-in-differences, and the raw change within
+the top quartile alone. None is an estimate of another, and the text keeps them apart. At zero
+exposure the implied change for mothers is $-0.539$ (SE $0.336$), and the gradient is net of
+whatever happened to hours in teleworkable occupations for all women. The estimate is $3.15$
+analytic standard errors from zero, qualified by the bootstrap and permutation $p$-values of
+Section~\ref{sec:res-robust};
 the minimum detectable effect on the $t_{39}$ reference is $2.94$ hours per unit, or $0.58$ per
 standard deviation, so an effect of this size is detectable without much room to spare.
 
@@ -739,8 +744,8 @@ occupations produce a $|t|$ at least as large as the observed $3.15$ (Appendix
 Figure~\ref{fig:permutation}). A design with this cluster structure produces an exposure gradient
 as large as ours about three times in a hundred when exposure carries no information, which is
 the falsification a placebo should supply and a fathers' regression, a different and also-treated
-population, cannot. The estimate is significant at the $1\%$, $5\%$ and $10\%$ levels under the
-three procedures, and we report all three rather than choosing among them.
+population, cannot. The strength of the statistical conclusion therefore depends on the inference
+procedure, and we report all three rather than choosing among them.
 
 \begin{table}[htbp]
 \centering
@@ -819,7 +824,8 @@ trend common to all workers in teleworkable jobs cannot produce a positive gradi
 beside a negative one for fathers, and a negative gradient for fathers is what within-household
 reallocation would look like if mothers' additional paid hours were matched by fathers'
 additional care hours. We report that as a reading the data are consistent with, not as a result
-the design identifies.
+the design identifies. Individual mothers and fathers are not linked in the data, and the
+fathers' coefficient is itself imprecise.
 
 \begin{table}[htbp]
 \centering
