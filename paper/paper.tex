@@ -279,18 +279,21 @@ The data are individual-level microdata from the Israeli Central Bureau of Stati
 Survey for the survey years 2017--2019 and 2021--2023. The analysis sample is women aged 25--59
 (CBS age-group codes 3--7). A woman is a \emph{mother} if she has any child under 17 in the
 household and childless otherwise; \emph{Post} equals one for survey years 2021 and later. The
-year 2020 is excluded because its arrangements were emergency improvisation rather than the
-settled remote-work practice whose effect we want to measure, and because no 2020 CBS extract
-exists for this project.
+comparison group therefore includes women whose children are grown and women who become mothers
+within the window (Section~\ref{sec:limitations}). The year 2020 is excluded because its
+arrangements were emergency improvisation rather than the settled remote-work practice whose
+effect we want to measure, and because no 2020 CBS extract exists for this project.
 
 The primary outcome is \emph{usual weekly work hours}, recorded by the CBS in bins and assigned
 each bin's median (Appendix~\ref{sec:app-data} gives the coding and a 2017 recording correction).
 Hours are the only intensive-margin outcome the survey supports: the extract records how a wage
 is paid but not its amount. Hours are defined for women who are employed \emph{and} worked in the
-survey's reference week, in every year, which makes the hours population identical across years
-at the cost of about $10\%$ of each year's employed sample and narrows the estimand to usual
-hours among women who were working (Section~\ref{sec:limitations}). The secondary outcome is a
-binary employment indicator (unemployed and not-in-labor-force are both zero). All regressions
+survey's reference week, in every year, a harmonization made necessary by a different zero-hours
+recording convention in the 2017 extract (Appendix~\ref{sec:app-data}); it makes the hours
+population identical across years at the cost of about $10\%$ of each year's employed sample and
+narrows the estimand to usual hours among women who were working (Section~\ref{sec:limitations}).
+The secondary outcome is a binary employment indicator (unemployed and not-in-labor-force are
+both zero). All regressions
 include the same categorical controls: marital status, religion, age group, district of residence
 and highest educational attainment (six groups); age enters as the CBS age-group code because the
 extract contains no continuous age. CBS survey weights are deliberately not applied in any
@@ -307,6 +310,8 @@ This is pre-period by construction, but it is a US task-based measure and miscla
 occupations where Israeli practice diverged: teaching scores $0.966$ on it, yet Israeli schools
 were fully in person throughout the 2022--23 survey years (Appendix~\ref{sec:appendix-exposure}).
 
+% TODO(merge): "fixed before any estimate is read" is a verifiable claim; cite the dated decision
+% note in docs/decisions/ that recorded the rule, or soften to "fixed ex ante" if none exists.
 \emph{Calibrated (primary).} The rule that selects the primary measure is fixed before any
 estimate is read: the score the headline uses must be anchored on pre-period task content, so
 that it cannot be built from the post-2021 hours it is meant to explain, and must not place in the
@@ -317,8 +322,9 @@ It replaces the external score with the realized 2022--23 Israeli WFH share only
 are far apart and the gap is statistically distinguishable from noise; ten of the forty
 occupations are swapped, teaching and clerical support among them (rule, scores and fit in
 Appendix~\ref{sec:appendix-exposure}). Because the swap test draws on 2022--23 data, inside the
-post-period, the calibrated measure is a documented compromise rather than a fully pre-treatment
-index; Section~\ref{sec:res-robust} tests whether the calibration is what produces the result.
+post-period, the calibrated measure is \emph{partly post-treatment}, a documented compromise
+rather than a fully pre-treatment index; Section~\ref{sec:res-robust} tests whether the
+calibration is what produces the result.
 
 \emph{Realized.} The realized Israeli WFH share by occupation, anchored to 2021. Post-treatment
 by construction, it is reported as a bound.
