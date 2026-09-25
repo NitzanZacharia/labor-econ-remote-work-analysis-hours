@@ -449,10 +449,12 @@ post-2021 change in teleworkable occupations common to mothers and childless wom
 the pre-existing level of the penalty across occupations, and $\delta_4$ is the post-shift change
 for mothers at \emph{zero} exposure, not an average effect. Following \citet{olden2022}, the DDD
 requires a single parallel-trends assumption: that the mother/non-mother gap in high- versus
-low-exposure jobs would have evolved in parallel absent the shift to remote work. For the hours
-DDD, $\WFH_j$ is the calibrated occupation-level score and the sample is employed women matched
-to a two-digit occupation; for the employment DDD, $\WFH$ is the cell-based index, the sample is
-all women, and a $\Mother \times$ age-group interaction is added for the pre-period age imbalance.
+low-exposure jobs would have evolved in parallel absent the shift to remote work. Insignificant
+pre-period coefficients are evidence about that assumption, not a verification of it. For the
+hours DDD, $\WFH_j$ is the calibrated occupation-level score and the sample is employed women
+matched to a two-digit occupation; for the employment DDD, $\WFH$ is the cell-based index, the
+sample is all women, and a $\Mother \times$ age-group interaction is added for the pre-period age
+imbalance.
 
 Equation~\eqref{eq:ddd} makes each lower-order occupation-level difference linear in exposure,
 an unnecessary restriction with forty occupations, and \citet{callaway2024} show that comparing
@@ -487,9 +489,10 @@ that approximation: for the headline coefficient and for the pre-period coeffici
 triple-difference event study we also report wild cluster bootstrap $p$-values, with Rademacher
 weights, the null imposed and $9{,}999$ draws \citep{roodman2019, fischer2021}, and
 Section~\ref{sec:diagnostics} adds a permutation test that relies on no asymptotic approximation
-at all. The joint pre-period test remains the analytic Wald $F$, since a joint bootstrap test is
-not available in the implementation used. The employment DDD is clustered on the
-age-by-education-by-district cell (about 210 clusters).
+at all. The three procedures answer related but different questions, and where they disagree the
+disagreement is part of the evidence. The joint pre-period test remains the analytic Wald $F$,
+since a joint bootstrap test is not available in the implementation used. The employment DDD is
+clustered on the age-by-education-by-district cell (about 210 clusters).
 
 \subsection{Selection into employment: Lee bounds}\label{sec:lee}
 
@@ -500,7 +503,8 @@ trimmed from the top of that cell's hours distribution for a lower bound and fro
 an upper bound, the model is refit, and the \citet{imbens2004} interval for the identified set
 is reported. For the DDD the trimming is done within quartiles of the cell-based index, which is
 defined for the non-employed. Appendix~\ref{sec:app-lee} gives the construction and its
-assumptions.
+assumptions. The bounds address excess selection under monotonicity; they cannot address
+selection that violates it, nor differences in absence unrelated to excess selection.
 
 \subsection{Diagnostics, falsification, and the fathers' comparison}\label{sec:diagnostics}
 
