@@ -75,9 +75,11 @@ page (November 2020).
 `kleven2019countries` "2019a" and `kleven2019denmark` "2019b"; §2 cites b before a. Left as is
 because the paragraph is built around the Danish study.
 
-## 3. Copyediting proposals (NOT applied)
+## 3. Copyediting proposals — ALL TEN APPLIED on 2026-09-26 at the author's request
 
-Line numbers refer to the post-edit file. Each is a before → after with a one-line reason.
+Originally listed as proposals only. The author asked for all ten to be applied as written; they
+are now in `paper.tex` and the PDF was recompiled again (0 errors, 0 BibTeX warnings, 34 pages).
+Line numbers below refer to the file as it stood before these ten edits.
 
 **Accuracy-tightening (from §1 "Imprecise" rows)**
 
@@ -137,6 +139,11 @@ Line numbers refer to the post-edit file. Each is a before → after with a one-
 5. `harrington2025`: DOI added; provenance comment added.
 6. `callaway2024`: DOI added.
 7. `barrero2021`: author accents aligned with `barrero2023`; comment added.
+
+8. The ten copyedits in §3 (Kleven wording, Bloom wording, Pabilonia wording, Alon citation
+   framing, "call-center", "Both premises have empirical support", the three-way sentence split,
+   "post-acute data (2021--2023)", the Callaway phrasing, and the sentence break before "Goldin's
+   framework"), applied at the author's request.
 
 `paper/paper.pdf` recompiled (pdflatex, bibtex, pdflatex, pdflatex from `paper/`); 34 pages;
 no "labels may have changed" warning, so no fifth pass was needed.
