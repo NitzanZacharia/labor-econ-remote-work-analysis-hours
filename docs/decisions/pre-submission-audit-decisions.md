@@ -6,13 +6,13 @@ records every item still waiting on an author decision, ordered by whether it bl
 
 ## Deferred — circle back before submission
 
-The author asked on 2026-09-19 to park these four and return to them at the end. They are the
-complete outstanding list; everything else in this register is either resolved or actioned.
+The author asked on 2026-09-19 to park these four and return to them at the end. All four are now
+closed. What remains open is D3, D4 and D11 in the tiers below; D10, D12 and D13 are noted only.
 
 | # | Item | Why it is parked | What closes it |
 |---|---|---|---|
-| D1 | The Conclusion | Author writes it last | Replace the skeleton block at `paper/paper.tex` with your own prose, and delete the banner |
-| D2 | Furlough sentence | Author is checking for a CBS source | Either the citation, or the reworded sentence in the D2 entry below |
+| ~~D1~~ | ~~The Conclusion~~ | **CLOSED 2026-09-26** | The co-author's Conclusion now stands in `paper/paper.tex`; the skeleton block, red banners and `\usepackage{xcolor}` are gone. See below. |
+| ~~D2~~ | ~~Furlough sentence~~ | **CLOSED 2026-09-26** | Option (c): the passage was cut in the 2026-09-23 structural pass; neither `paper.tex` nor `appendix.tex` mentions furlough. See below. |
 | ~~D5~~ | ~~Crosswalk provenance~~ | **CLOSED 2026-09-23** | Derivation reproduced exactly from Dingel & Neiman plus the BLS crosswalk. See below. |
 | ~~D15~~ | ~~Null-placebo caveat~~ | **CLOSED 2026-09-19** | Decided: leave it out, keep only the hours placebo. See below. |
 
@@ -78,7 +78,12 @@ could fairly pick up.
 
 ## Tier 1 — blocks submission
 
-### D1. The Conclusion is still the red draft block
+### D1. The Conclusion is still the red draft block — CLOSED 2026-09-26
+
+**Closed 2026-09-26.** The Conclusion was written by the co-author and held in the condensed draft
+of the paper (deleted the same day, in git history); it now replaces the skeleton in
+`paper/paper.tex` verbatim. The two red banners and `\usepackage{xcolor}` went with the skeleton.
+The original entry follows for the record.
 
 **Still open as of 2026-09-21.** The block is the Conclusion skeleton in `paper/paper.tex`, marked
 by the `SKELETON -- NOT SUBMITTABLE TEXT` comment and the two red
@@ -97,7 +102,11 @@ same as writing it.
 formatting one. Nothing else in this register outranks it. Removing it also frees
 `\usepackage{xcolor}` (commented `% draft-conclusion flag`), which exists only for the red flag.
 
-### D2. The furlough sentence is an uncited data claim
+### D2. The furlough sentence is an uncited data claim — CLOSED 2026-09-26
+
+**Closed 2026-09-26.** Option (c) happened in practice: the Halat passage was cut in the
+2026-09-23 structural pass, and neither `paper/paper.tex` nor `paper/appendix.tex` mentions
+furlough now. No source is needed. The original entry follows for the record.
 
 `paper/paper.tex`'s Data section. You chose to keep it and supply a CBS source; the source has not
 arrived. The claim is that the employment indicator counts furloughed workers as employed. The

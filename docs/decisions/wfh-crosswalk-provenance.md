@@ -77,7 +77,8 @@ data/israeli_cbs_wfh_2digit.csv        <- provenance: see "Answer" above
   -> build_exposure_isco2()            scripts/wfh_exposure_cells.R:8
   -> calibrate_isco_exposure()         scripts/wfh_exposure_cells.R:32   (swaps 10 of 40 occupations)
   -> outputs/wfh_exposure_calibrated.csv
-  -> run_hours_ddd_regression()        the 3.407 triple interaction, the paper's central claim
+  -> run_hours_ddd_regression()        the triple interaction, the paper's central claim (3.407 when
+                                       this was written; 3.224 since the 2026-09-21 harmonization)
 ```
 
 The file supplies `wfh_probability_2d`, the theoretical teleworkability score per two-digit

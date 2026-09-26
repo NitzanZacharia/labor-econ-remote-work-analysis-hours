@@ -3,7 +3,7 @@
 **Purpose.** Fact-extraction pass for the seminar paper. No prose, no LaTeX. Every number is
 tagged with the exact file it was read from. Where the only source is a console message quoted in
 a decision memo (never exported to `outputs/`), that is stated explicitly. Anything not confirmable
-from a repo artifact was marked `[TODO: confirm]` and unverified citation fields `[VERIFY]`; as of 2026-09-24 no marker of either kind remains.
+from a repo artifact was marked `[TODO: confirm]` and unverified citation fields `[VERIFY]`. No `[TODO: confirm]` remains; every `[VERIFY]` field was checked against Crossref/NBER on 2026-09-19 (see the `paper/references.bib` header), and any label still visible in §6 is a closed item kept for the record.
 
 **Authors (paper byline):** Inbal Moryles and Nitzan Zacharia. (The research doc's byline spells
 the first author "Inbal Muriel" — that spelling is wrong; do not copy it into the paper.)
@@ -292,7 +292,7 @@ Framing: "directionally robust, not point-estimate robust." The external index s
 insignificant, which is the form the paper's "measurement is part of the result" argument needs —
 the mechanism is visible only once exposure is measured as Israeli jobs were actually done.
 
-**Added 2026-09-22 (editorial audit, `paper/notes/editorial-audit-2026-09-22.md` step 2).** Three
+**Added 2026-09-22 (editorial audit step 2; the audit note is in git history).** Three
 more rows in the paper's robustness table, all from `run_hours_ddd_regression()` call sites in
 `main.R` §8a with no new econometric machinery:
 
@@ -321,7 +321,7 @@ the paper's implied Q4−Q1 effect of 3.224 × 0.531 = 1.71 hours against the ra
 
 Source: `outputs/age_balance_robustness_hours_ddd_age_interacted.csv`,
 `outputs/age_balance_robustness_hours_ddd_reweighted.csv` (produced with
-`RUN_AGE_BALANCE_ROBUSTNESS <- TRUE`, which is now the default; `docs/hours-intensive-margin-analysis.md` §3).
+`RUN_AGE_BALANCE_ROBUSTNESS <- TRUE`, which is now the default).
 
 | Spec | `Mother x Post x WFH_Exposure` | SE | Sig. | N |
 |---|---|---|---|---|
@@ -343,9 +343,9 @@ rising from group 4 to group 7 with only groups 4 and 5 significant — the earl
 Underlying imbalance (`outputs/age_balance_robustness_age_imbalance_by_quartile.csv`, pre-period
 mean `GilNK` gap Mother − non-Mother by cell-exposure quartile): Q1 −0.974 (t = −94.0), Q2 −0.735
 (t = −62.8), Q3 −0.169 (t = −12.0), Q4 +0.057 (t = 5.0).
-⚠ `docs/hours-intensive-margin-analysis.md` §1 quotes "−0.797 … to +0.239" and `docs/HLD.md` §4.2
-quotes "~0.8, t≈−81"; the current CSV says −0.974 / +0.057. The docs appear to predate the
-`BirthContinent` change to the exposure cells (which shifts quartile membership). Cite the CSV.
+(`docs/HLD.md` §4.2 was refreshed to these figures on 2026-09-19; older docs quoted "~0.8, t≈−81"
+from before the `BirthContinent` change to the exposure cells, which shifts quartile membership.
+Cite the CSV.)
 
 ### 1.8 [PRIMARY] Pre-trend / event study (hours)
 
@@ -492,14 +492,14 @@ VIF = 1.40 (7-var cells). `WFH_Exposure`'s main effect is **not** dropped in Spe
 
 ### 2.3 [SECONDARY] "Underpowered, not null" — MDE record
 
-Source chain: `docs/decisions/null-vs-power-audit.md` (diagnosis, pre-fix numbers) →
-`docs/decisions/exposure-cell-granularity-fix.md` (fix + current numbers) →
+Source chain: `docs/decisions/exposure-cell-granularity-fix.md` (its "B1/B2 diagnostics" section:
+diagnosis and pre-fix numbers; then the fix and current numbers) →
 `docs/decisions/hours-ddd-pivot.md` (resolution = pivot). MDE formula: `SE × 2.8016`
 (`scripts/ddd_mde_diagnostics.R`, α = 0.05, power = 0.80). Baseline employment rate 0.7737.
 
 | Design stage | Spec | Point est. | SE | MDE | MDE / baseline | MDE / |point| | Source |
 |---|---|---|---|---|---|---|---|
-| Original (4-var cells = FE) | 1 | 0.1033 | 0.1419 | 0.3975 | 51.4% | 3.8× | null-vs-power-audit.md B2 |
+| Original (4-var cells = FE) | 1 | 0.1033 | 0.1419 | 0.3975 | 51.4% | 3.8× | granularity-fix memo, B2 table |
 | Original | 2 | 0.1309 | 0.1399 | 0.3920 | 50.7% | 3.0× | same |
 | +MatzavMishpachti+Dat (6-var) | 1 | −0.0331 | 0.0890 | 0.2494 | 32.2% | 7.5× | granularity-fix.md "Post-fix numbers" |
 | +… (6-var) | 2 | −0.0260 | 0.0881 | 0.2469 | 31.9% | 9.5× | same |
@@ -522,15 +522,15 @@ Source chain: `docs/decisions/null-vs-power-audit.md` (diagnosis, pre-fix number
 > (hours incl. zeros) leaves the triple interaction at 0.45 of its own MDE; a one-sided test buys
 > 11%; finer cells were already exhausted over two rounds (51% → 32% → 26%).
 
-- **Verbatim verdict** (`null-vs-power-audit.md`, "Verdict"): "**Underpowered, not a genuine
+- **Verbatim verdict** (granularity-fix memo, B1/B2 section, "Verdict"): "**Underpowered, not a genuine
   null.** The null `Mother:Post:WFH_Exposure` result is not informative about whether a
   WFH-exposure-driven motherhood employment effect exists — the design could not have detected a
   real effect unless that effect were implausibly large."
 - **Verbatim, current design** (`exposure-cell-granularity-fix.md`, "Post-change numbers"): "Still
   well inside the (now smaller, but still substantial) MDE — this remains an
   underpowered-not-informative result … not a newly-significant finding."
-- ⚠ `docs/decisions/hours-ddd-pivot.md` "Motivation" and `docs/hours-intensive-margin-analysis.md`
-  §4 say the MDE is "roughly 4x the point estimate". The 4× ratio belongs to the *original* design
+- ⚠ `docs/decisions/hours-ddd-pivot.md` "Motivation" says the MDE is "roughly 4x the point
+  estimate". The 4× ratio belongs to the *original* design
   (0.3975/0.1033). With current numbers the MDE is ~8–10× the point estimate. The "26% of baseline"
   figure is correct for the current design.
 - **First-stage relevance** (`outputs/null_vs_power_audit_wfh_first_stage_table.csv`, `Post==1`
@@ -698,6 +698,29 @@ corroboration without that caveat.
 
 ---
 
+### 3.5 Notes carried over from the retired hours narrative doc (2026-09-26)
+
+The hours narrative doc (`hours-intensive-margin-analysis`, formerly under `docs/`; retired
+2026-09-26, git history keeps it) duplicated this digest's numbers. Two pieces of prose from it have no other home:
+
+**Timing.** The gradual rise from an insignificant 2021 estimate to a significant 2023 one (§1) is
+consistent with WFH adoption and household time-reallocation being a multi-year adjustment, not an
+instantaneous response to the initial 2020–21 shock — plausible given that occupational WFH norms
+were still settling over 2021–2023 (`docs/decisions/checkpoint6-wfh-anchor-year.md` makes the same
+point about the exposure measure's own anchor-year choice).
+
+**Limitations of the gender placebo (§3.4), stated plainly.** (1) No second-stage occupation-level
+mechanism regression is run for the male placebo — `run_hours_gender_ddd_placebo()` does not
+implement one, so the placebo rests on the triple-interaction point estimate alone. (2) Men's labor
+supply is shaped by institutional factors the controls do not model (differential reserve-duty
+exposure, different typical retirement timing) that could move men's hours across 2017–2023 for
+reasons unrelated to WFH or fatherhood; nothing about that points toward the specific pattern
+observed (an exposure gradient with the opposite sign from mothers'). (3) The women/men z-tests
+compare independently fitted coefficients rather than a single fully interacted
+`Mother*Post*WFH_Exposure*Sex` model; the independent-samples covariance argument makes that valid,
+but a joint specification sharing `DEFAULT_CONTROLS` across sexes would be the natural next
+robustness step if a reviewer asks for one model rather than two compared post hoc.
+
 ## 4. Treatment timing and exposure-anchor rationale
 
 ### 4.1 Post = 2021–2023 vs. 2017–2019; 2020 excluded
@@ -839,8 +862,7 @@ to exposure across quartiles (12.4 / 8.6 / 8.2 / 10.1% in 2017), but this cannot
   small-cluster correction (wild bootstrap would need `fwildclusterboot`, not added)
   (`docs/decisions/calibrated-exposure-and-cell-ddd.md`; `main.R` §8b comment).
 - ISCO masking: pooled `ISCO_masked` coefficient 0.045* (SE 0.021), within-R² 9.45e-5 — "no strong
-  evidence" of bias, not a clean bill of health (`docs/hours-intensive-margin-analysis.md` §3;
-  `outputs/isco_masking_sensitivity_*.csv`).
+  evidence" of bias, not a clean bill of health (`outputs/isco_masking_sensitivity_*.csv`).
 - Calibrated exposure uses 2022–23 realized data (inside the post period) — a documented
   compromise (`docs/decisions/calibrated-exposure-and-cell-ddd.md`, measure 2).
 - Age control is categorical `GilNK`, not age/age² (no continuous age in the extract) —
@@ -951,8 +973,7 @@ to the paper.**
    0.7737 baseline, `within_mde` TRUE for both — the employment design cannot detect its own point
    estimate). The `within_mde` column makes the paper's "underpowered, not null" argument
    machine-checkable rather than a claim a reader has to recompute.
-   The narrative doc's "68% of the point estimate" was a mis-statement; the current share-of-estimate figure is **88.8%** (2.86398/3.22404). Corrected in
-   `docs/hours-intensive-margin-analysis.md` on the same day.
+   The (since retired) hours narrative doc's "68% of the point estimate" was a mis-statement; the current share-of-estimate figure is **88.8%** (2.86398/3.22404).
 4. ~~Pre-trend joint Wald F-tests — console only (§1.8).~~ **Resolved 2026-09-19:** the test now
    runs unconditionally and exports `outputs/pretrend_wald_{hours,employment}.csv`. The paper's
    parallel-trends evidence is reproducible by a default `Rscript main.R`.

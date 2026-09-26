@@ -9,7 +9,7 @@ specification. Treat that memo as this one's eventual resolution, not just this 
 
 ## Background
 
-`docs/decisions/null-vs-power-audit.md` established that the primary DDD's null
+The null-vs-power audit (its B1/B2 diagnostics are reproduced at the end of this memo) established that the primary DDD's null
 `Mother:Post:WFH_Exposure` result is not a genuine null — the design's minimum detectable effect
 (MDE) was ~0.39-0.40 (both specs), roughly 51% of the baseline employment rate, while the actual
 point estimates were only 0.103 (Spec 1) / 0.131 (Spec 2). That memo didn't diagnose *why* the
@@ -100,8 +100,8 @@ unexpected drop in Spec 2, including this one, rather than silently whitelisting
 ## Post-fix numbers (Candidate 3, real data, full pipeline)
 
 Confirmed end-to-end against the real CBS extract via a full `main.R` run with
-`RUN_NULL_VS_POWER_AUDIT`/`RUN_AGE_BALANCE_ROBUSTNESS` both temporarily on (then reverted to their
-committed `FALSE` defaults):
+`RUN_NULL_VS_POWER_AUDIT`/`RUN_AGE_BALANCE_ROBUSTNESS` both temporarily on (they defaulted to
+`FALSE` at the time; both have defaulted to `TRUE` since 2026-09-19):
 
 - **Primary DDD, real formulas (including `Mother:GilNK`)**: Spec 1
   `Mother:Post:WFH_Exposure` = −0.0331 (SE 0.0890); Spec 2 = −0.0260 (SE 0.0881) — matches the
@@ -143,10 +143,45 @@ committed `FALSE` defaults):
   `calibrate_isco_exposure()`'s pattern): designed but not needed — Candidate 3's cell-size support
   was already adequate (99.96% of cells above n=100).
 
-## Relationship to `docs/decisions/null-vs-power-audit.md`
+## Background: the B1/B2 diagnostics (merged from the null-vs-power audit memo, 2026-09-26)
 
-That memo's root-cause diagnosis (why the null was uninformative) is superseded by this one; its
-own real-data numbers are left intact as a historical record of the pre-fix design, not rewritten.
+The null-vs-power audit was a separate memo until 2026-09-26; its root-cause diagnosis (why the
+null was uninformative) is superseded by this one, and its real-data numbers below describe the
+**pre-fix** design. They are kept as the historical record, not rewritten. The two diagnostics
+(`scripts/wfh_first_stage_check.R`, `scripts/ddd_mde_diagnostics.R`) still run in `main.R` §8d
+behind `RUN_NULL_VS_POWER_AUDIT` (default `TRUE` since 2026-09-19, because the paper cites the
+first-stage figures) and export `null_vs_power_audit_*` to `outputs/`, aggregate-only.
+
+**B1 — first-stage relevance.** `check_wfh_first_stage_relevance()` tests whether the pre-period
+cell shift-share `WFH_Exposure` predicts realized `WFH_RefWeek`, which is observed for `Post == 1`
+only, so this is a within-post-period check rather than a differenced first stage. Real data,
+`Post == 1` subsample (n = 113,844):
+
+| Spec | `WFH_Exposure` coefficient | Interpretation |
+|---|---|---|
+| Level | **1.787*** (SE 0.137)** | Large, highly significant, expected sign: the exposure measure predicts real WFH-taking. |
+| Dynamic, `x ShnatSeker=2022` | 0.012 (SE 0.020, n.s.) | No detectable widening of the gradient in 2022. |
+| Dynamic, `x ShnatSeker=2023` | 0.042. (SE 0.022, p<0.1) | Small, marginally significant widening by 2023. |
+
+**B2 — minimum detectable effect, pre-fix design.** `compute_ddd_mde()` (closed-form MDE from each
+model's own cluster-robust SE; α = 0.05, power = 0.80; the multiplier was later moved to t(39), see
+`docs/ROADMAP.md` Checkpoint 15):
+
+| Spec | Point estimate | SE | MDE | Baseline employment rate | MDE as % of baseline |
+|---|---|---|---|---|---|
+| Spec 1 (additive controls) | 0.1033 | 0.1419 | **0.3975** | 0.7737 | **51.4%** |
+| Spec 2 (interacted cell FE) | 0.1309 | 0.1399 | **0.3920** | 0.7737 | **50.7%** |
+
+**Verdict.** Underpowered, not a genuine null. The null `Mother:Post:WFH_Exposure` result is not
+informative about whether a WFH-exposure-driven motherhood employment effect exists — the design
+could not have detected a real effect unless that effect were implausibly large (about half the
+baseline employment rate). B1 rules out a meaningless regressor; the loss is precision, rooted in
+`WFH_Exposure` varying only across ~210 demographic cells and, in Spec 1, overlapping ~74–77% with
+its own controls (`docs/decisions/calibrated-exposure-and-cell-ddd.md`,
+`scripts/ddd_collinearity_diagnostics.R`). The rest of this memo is the fix. Two follow-ups the
+audit deferred (a leave-one-occupation-out check and a post-window sensitivity around the 2023
+event-study coefficient) were later built for the hours DDD (Checkpoint 15's leave-one-out refits;
+the ex-2023 robustness row).
 
 ## Update: adding `BirthContinent` (same design, a 7th safe dimension)
 

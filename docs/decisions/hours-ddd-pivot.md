@@ -82,6 +82,12 @@ and realized occupation-level exposure measures, mirroring the pattern the secon
 
 ## Real-data results
 
+> **Superseded numbers (note added 2026-09-26).** Everything in this section was measured before
+> the 2026-09-21 hours-population harmonization (`docs/decisions/hours-population-harmonization.md`,
+> Checkpoint 13). The live headline is 3.224 (SE 1.022, Imbens–Manski [1.021, 5.324]); see
+> `paper/notes/results_digest.md` §1 and `outputs/ddd_hours_table.csv`. The section is kept as the
+> record of what the pivot decision was based on.
+
 **Point estimate** (`run_hours_ddd_regression()`, women 25-59, `Employed == 1`, 281,622 of 288,400
 employed rows — 97.6% — retained a matched occupation-level exposure; 275,708 rows after listwise
 deletion on controls):

@@ -428,14 +428,14 @@ check_spec1_collinearity(ddd_df: tibble, cell_fe_vars: character, controls: char
 check_wfh_first_stage_relevance(ddd_df: tibble, controls: character = DEFAULT_CONTROLS) ->
   invisible(list(level_reg = fixest, dynamic_reg = fixest, table = etable))
 # First-stage relevance check: does WFH_Exposure predict realized WFH_RefWeek (Post==1 only)? See
-# docs/decisions/null-vs-power-audit.md.
+# docs/decisions/exposure-cell-granularity-fix.md (B1/B2 section).
 
 compute_ddd_mde(model: fixest, coef_name: character(1) = "Mother:Post:WFH_Exposure",
                  sig_level: numeric(1) = 0.05, power: numeric(1) = 0.8,
                  baseline_rate: numeric(1) = NULL) ->
   invisible(list(coef_name, point_estimate, se, sig_level, power, mde, within_mde))
-# Closed-form minimum detectable effect for a fitted model's coefficient. Base R only (qnorm()) --
-# see docs/decisions/null-vs-power-audit.md.
+# Closed-form minimum detectable effect for a fitted model's coefficient. Base R only --
+# see docs/decisions/exposure-cell-granularity-fix.md (B1/B2 section).
 
 # ── robustness/balance_test.R / age_balance_robustness.R / pretrend_wald_test.R ─────────────
 # Secondary DDD's own occupation-level robustness regression (ddd_regression.R's

@@ -53,9 +53,14 @@ to what `Mother == 0`'s own pre/post change in selection implies — a parallel-
 counterfactual:
 
 ```
-s_ab = P(Employed == 1 | Mother == a, Post == b)     for a, b in {0, 1}
+s_ab = P(hours observed | Mother == a, Post == b)     for a, b in {0, 1}
 s11_counterfactual = s10 + (s01 - s00)
 ```
+
+(Since 2026-09-21 the selection rate is `mean(!is.na(WorkHoursCont))` — worked in the reference
+week — rather than `Employed == 1`, because the hours outcome is defined on reference-week workers;
+see `docs/decisions/hours-population-harmonization.md`, "Follow-up: the Lee-bounds selection rate".
+The original memo used `P(Employed == 1 | ...)`; the logic below is unchanged.)
 
 If the actual `s11` exceeds this counterfactual, the excess share
 `p = 1 - s11_counterfactual / s11` is trimmed from the `Mother == 1 & Post == 1` cell's

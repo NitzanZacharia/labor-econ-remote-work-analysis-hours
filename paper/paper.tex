@@ -7,7 +7,7 @@
 % FE and quartile-binned DDD), Table 4 blocks for outcome coding and inference (wild bootstrap,
 % permutation test), the falsification subsection, the child-age heterogeneity subsection and its
 % table/figure, the occupation-level first stage and the appendix table of the forty scores.
-% EDITORIAL PASS 2026-09-22 (paper/notes/editorial-audit-2026-09-22.md, section M). Step 1 was
+% EDITORIAL PASS 2026-09-22 (audit note retired 2026-09-26, in git history; section M). Step 1 was
 % text-only. Step 2 added six artifacts from a full pipeline re-run the same day, all in outputs/:
 %   - ddd_hours_unswapped.csv (DDD on the 30 unswapped occupations), ddd_hours_ex2023.csv and
 %     intensive_margin_ex2023.csv (DDD and DiD without 2023), ddd_hours_twoway_cluster.csv;
@@ -18,14 +18,16 @@
 % regressor_iqr columns, which pre-date the audit. Every pre-existing CSV reproduced byte for byte.
 % Step 3 (same day) added four Crossref-verified citations (bib header lists them), the earnings
 % sentence in 3.1 (the codebook has no earnings amount), and single-spaced the regression tables.
-% The only remaining "% TODO(<item>)" comment is J/D11: the Conclusion and the fixed date.
-% MERGE PASS 2026-09-25 (docs/MERGE_PLAN.md). Language from docs/concise_20_pages.tex folded in:
+% The only remaining "% TODO(<item>)" comment is D11: the fixed submission date.
+% MERGE PASS 2026-09-25 (merge plan and condensed draft retired 2026-09-26, in git history).
+% Language from the condensed draft folded in:
 % p-values reported directly in place of "1%/5%/10% levels"; 1.71 / 1.87 / 1.55 kept as three
 % distinct quantities; identifying assumption stated in the Introduction; comparison-group and
 % harmonization caveats moved up to Section 3; permutation-exchangeability caveat added to
 % Limitations. Step 7d (promoting the Lee-bounds table) was skipped: the appendix no longer
-% inputs it. A second "% TODO(merge)" comment now sits above the calibration rule (Step 4d).
-% No number changed. Conclusion untouched.
+% inputs it. Step 4d's "fixed before any estimate is read" was softened to "fixed ex ante" on
+% 2026-09-26, since no dated note records the rule being fixed before estimation.
+% No number changed.
 % EVERY hours-derived figure below was re-verified 2026-09-21 against a full pipeline re-run after
 % the hours population was harmonized across survey years (docs/decisions/hours-population-
 % harmonization.md, Checkpoint 13) and the Lee-bounds selection rate was redefined on the
@@ -39,9 +41,10 @@
 %     post-date the digest and are not listed in it;
 %   - the hours-DDD constant (30.51) comes from outputs/ddd_hours_table.csv, which the digest's
 %     own table omits;
-%   - a handful of values (the MDEs, both Imbens-Manski intervals, the joint Wald tests, the
-%     two-sample z-tests, the 1.9% panel share) are console-only: reproducible by re-running the
-%     pipeline but written to no file. See results_digest.md section 7.
+%   - the MDEs, both Imbens-Manski intervals, the joint Wald tests and the two-sample z-tests
+%     were console-only when first transcribed and have since been exported (mde_hours.csv,
+%     *_lee_bounds_imbens_manski.csv, pretrend_wald_*.csv, hours_subgroup_ztests.csv); the 1.9%
+%     panel share is still console-only. results_digest.md section 7 tracks each one.
 % Compiled with pdflatex + bibtex (four passes); bibliography: paper/references.bib.
 \documentclass[12pt,a4paper]{article}
 
@@ -64,7 +67,6 @@
 \renewcommand{\floatpagefraction}{0.7}
 \setcounter{topnumber}{3}\setcounter{totalnumber}{4}
 \usepackage[authoryear,round]{natbib}
-\usepackage{xcolor} % draft-conclusion flag
 \usepackage{hyperref}
 \hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
 % hypertexnames=false gives every anchor a sequential internal name instead of one derived from
@@ -125,7 +127,7 @@
 
     \vfill
 
-    % TODO(J/D11): replace \today with the fixed submission date when the Conclusion is written.
+    % TODO(D11): replace \today with the fixed submission date.
     {\large \textbf{Submission Date:} \today\par}
 
 \end{titlepage}
@@ -321,10 +323,8 @@ This is pre-period by construction, but it is a US task-based measure and miscla
 occupations where Israeli practice diverged: teaching scores $0.966$ on it, yet Israeli schools
 were fully in person throughout the 2022--23 survey years (Appendix~\ref{sec:appendix-exposure}).
 
-% TODO(merge): "fixed before any estimate is read" is a verifiable claim; cite the dated decision
-% note in docs/decisions/ that recorded the rule, or soften to "fixed ex ante" if none exists.
-\emph{Calibrated (primary).} The rule that selects the primary measure is fixed before any
-estimate is read: the score the headline uses must be anchored on pre-period task content, so
+\emph{Calibrated (primary).} The rule that selects the primary measure is fixed ex ante: the
+score the headline uses must be anchored on pre-period task content, so
 that it cannot be built from the post-2021 hours it is meant to explain, and must not place in the
 treated tail occupations that Israeli institutions kept in person. The external index fails the
 second condition and the realized index the first; the calibrated index is the only one of the
@@ -984,57 +984,21 @@ statistics. The one exception is internal to constructing the cell-based exposur
 \section{Conclusion}\label{sec:conclusion}
 %======================================================================
 
-% =====================================================================================
-% SKELETON -- NOT SUBMITTABLE TEXT. REPLACE THIS ENTIRE BLOCK WITH YOUR OWN PROSE.
-%
-% The assignment requires this section to be written individually by the student
-% (paper/archive/old_paper.tex:209-213, now only in git history). What follows is a five-paragraph structure with the
-% claims each paragraph can rest on, in note form, with the section where each is established.
-% Target 400-500 words and at most three numbers in the prose. Write your own sentences from it.
-%
-% The previously-committed model answer was removed on 2026-09-19. If you want it back for
-% self-comparison it is in git history: `git show d662aa3^:paper/paper.tex`.
-% The Conclusion in docs/concise_20_pages.tex covers skeleton paragraphs 1, 2, 4 and 5 but omits
-% paragraph 3 ("which mothers", and the measurement point). Use it only as a coverage check.
-%
-% Every figure below was verified against a committed artifact during the pre-submission
-% audit (see docs/decisions/pre-submission-audit-decisions.md). Delete this whole block, banner and
-% all, once your text is in, and drop \usepackage{xcolor} with it.
-% =====================================================================================
-\noindent\textbf{\color{red}[SKELETON ONLY --- REPLACE WITH YOUR OWN TEXT BEFORE SUBMISSION]}
+Using Israeli survey data, we ask whether the expansion of remote work coincided with a change in
+the motherhood penalty in usual weekly hours. The average change among women observed working is
+small, whereas the post-2021 change in the mother/comparison gap increases with an occupation's
+calibrated WFH exposure. The strongest contrast is at the top of the exposure distribution and
+among mothers with younger children. Those patterns are consistent with greater scheduling
+flexibility helping some already employed mothers supply more paid hours.
 
-\begin{enumerate}\itshape\small
-\item \textbf{Paragraph 1 --- the question and the move.} \citet{harrington2025} for the US; this
-paper takes it to Israel \emph{and} to hours conditional on working. Not a replication
-(Sections~\ref{sec:lit}, \ref{sec:data}).
-
-\item \textbf{Paragraph 2 --- the result as a conjunction.} No average effect: the hours DiD is
-$0.228$ (SE $0.181$), a reasonably precise null that the selection correction widens rather
-than overturns. An effect confined to teleworkable work: the triple interaction is $3.224$
-(SE $1.022$, $p<0.01$), survives the generalized correction (Imbens--Manski $[1.021, 5.324]$) and
-two age-balance specifications, and at zero exposure the implied change is negative. Fathers show
-an opposite-signed gradient ($-1.762$, SE $1.015$, $p = 0.09$), and the women/men difference is
-$z = 3.461$ (Sections~\ref{sec:res-did}--\ref{sec:res-subgroup}).
-
-\item \textbf{Paragraph 3 --- what it means.} Goldin's time-constraint mechanism: the response is
-where the work can be done from home, and nowhere else. A result about \emph{which} mothers
-benefit, not about mothers as a group. Measurement is part of it: the mechanism is visible only
-once exposure is measured as Israeli jobs were actually done (Section~\ref{sec:discussion}).
-
-\item \textbf{Paragraph 4 --- what the design cannot say.} Employment: the DiD is a precise null,
-the DDD is uninformative (MDE $1.43$ percentage points per SD of exposure, two to three times the
-Harrington benchmark), and the two should not be conflated. Earnings: not observed. The calibrated
-exposure is partly post-treatment; the 2023 year includes the war; inference rests on forty
-clusters; estimates are unweighted (Sections~\ref{sec:res-extensive}, \ref{sec:limitations}).
-
-\item \textbf{Paragraph 5 --- policy reading and next steps.} WFH availability bears on how
-intensively mothers already employed in teleworkable jobs work, not on whether mothers are
-employed. Next: an earnings outcome, which needs income data linked to the survey since the
-extract carries none; a higher-powered test of the employment margin; a jointly estimated model
-letting the mechanism differ by sex and population group.
-\end{enumerate}
-
-\noindent\textbf{\color{red}[END SKELETON --- DELETE THIS BLOCK]}
+The result is conditional and does not establish a universal benefit from remote work. The
+exposure score partly uses post-period WFH information; the wholly external score yields a weaker
+result, pre-trend tests have limited power, and inference varies with the procedure. Employment is
+an important separate margin, but its exposure interaction is too imprecise here to settle the
+question. The data also contain no earnings amount. Stronger evidence would link hours with
+earnings and household time use, measure exposure before treatment in the Israeli setting, and
+estimate women's and men's responses together on a design that better separates access to WFH
+from occupation choice.
 
 %======================================================================
 \begin{spacing}{1}
