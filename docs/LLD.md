@@ -231,7 +231,7 @@ run_intensive_margin_lee_bounds(cleaned_df: tibble, controls: character = DEFAUL
 # for full design and results. Wired into main.R section 8a, unconditional (no feature flag), run
 # three times -- once each for the calibrated/external/realized occupation-level exposure measures.
 # The secondary DDD's own equivalent (ddd_regression.R's run_ddd_regression()) was removed -- see
-# docs/decisions/employment-ddd-robustness-removal.md.
+# docs/decisions/employment-ddd-robustness-removal.md (deleted 2026-09-24, git c800efe^).
 run_hours_ddd_regression(cleaned_df: tibble, exposure_index: tibble,
                           controls: character = DEFAULT_CONTROLS) ->
   invisible(list(
@@ -439,7 +439,8 @@ compute_ddd_mde(model: fixest, coef_name: character(1) = "Mother:Post:WFH_Exposu
 
 # ── robustness/balance_test.R / age_balance_robustness.R / pretrend_wald_test.R ─────────────
 # Secondary DDD's own occupation-level robustness regression (ddd_regression.R's
-# run_ddd_regression()) was removed -- see docs/decisions/employment-ddd-robustness-removal.md.
+# run_ddd_regression()) was removed -- see docs/decisions/employment-ddd-robustness-removal.md
+# (deleted 2026-09-24, git c800efe^).
 run_balance_test(cleaned_df: tibble, controls: character = DEFAULT_CONTROLS,
                   exposure_cells: tibble = NULL, exposure_calibrated: tibble = NULL,
                   exposure_csv_path: character(1) = "data/israeli_cbs_wfh_2digit.csv") ->

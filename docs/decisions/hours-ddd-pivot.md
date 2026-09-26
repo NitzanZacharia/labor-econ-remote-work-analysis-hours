@@ -48,8 +48,8 @@ deferred ("not requested for this pivot") has since been added directly to
 `run_hours_ddd_regression()` (per-occupation `Mother:Post` estimates from
 `run_intensive_margin_reg()`, precision-weighted against exposure) — `ddd_regression.R` itself was
 separately removed as part of deprecating the secondary DDD's own occupation-level robustness
-variants; see `docs/decisions/employment-ddd-robustness-removal.md`. The two changes are unrelated
-except in timing.
+variants; see `docs/decisions/employment-ddd-robustness-removal.md` (deleted 2026-09-24, in git
+at `c800efe^`). The two changes are unrelated except in timing.
 
 **Generalized Lee bounds** (`scripts/hours_ddd_lee_bounds.R`, `run_hours_ddd_lee_bounds()`): the
 key design decision (confirmed with the user before implementation) is that the Lee-bounds
@@ -78,7 +78,7 @@ primary specification); the extensive-margin (`Employed`) DDD moved to §8b as t
 specification. Also run three times as of the same update — once each for the calibrated, external,
 and realized occupation-level exposure measures, mirroring the pattern the secondary DDD's own
 (since-removed) occupation-level robustness variants used — see
-`docs/decisions/employment-ddd-robustness-removal.md`.
+`docs/decisions/employment-ddd-robustness-removal.md` (deleted 2026-09-24, in git at `c800efe^`).
 
 ## Real-data results
 

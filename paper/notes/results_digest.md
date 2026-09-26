@@ -772,7 +772,7 @@ Source: `docs/decisions/checkpoint6-wfh-anchor-year.md` (Status: DECIDED — Pat
 
 | Item | Notes (verbatim) |
 |---|---|
-| Survey weights (`MishkalSofi`, etc.) are not applied in any outcome regression | Deliberate, not an oversight — do not add without raising it first. `build_exposure_cells()` is the one exception (weights the exposure regressor's own construction, not a survey-representativeness correction). A second, not-yet-approved exception (`robustness/phase2_robustness.R`'s `run_ddd_weights_check()`) was removed along with that file — see `docs/decisions/employment-ddd-robustness-removal.md`. |
+| Survey weights (`MishkalSofi`, etc.) are not applied in any outcome regression | Deliberate, not an oversight — do not add without raising it first. `build_exposure_cells()` is the one exception (weights the exposure regressor's own construction, not a survey-representativeness correction). A second, not-yet-approved exception (`robustness/phase2_robustness.R`'s `run_ddd_weights_check()`) was removed along with that file — see `docs/decisions/employment-ddd-robustness-removal.md` (deleted 2026-09-24, in git at `c800efe^`). |
 | Lee (2009) bounds only handle excess selection in one direction | Under-selection in the `Mother==1,Post==1` cell isn't addressed by this construction. As of the 2026-09-09 audit fix, the bounds also report a per-model SE/CI and an Imbens-Manski (2004) CI for the identified set, not just bare point estimates. The hours-DDD pivot generalizes this same machinery to the triple-interaction (`Mother x Post x WFH_Exposure`) specification, stratifying the selection counterfactual by cell-based exposure quartile. |
 | Calibrated-exposure / cell-based-DDD methodology | Records why an earlier ad hoc gap-threshold rule was replaced with a statistical test, and why the DDD's primary spec is now cell-based rather than occupation-level. As of the 2026-09-09 audit fix, the calibrated/realized measures are built from a population that also includes men (`exposure_population_df`), not the women-only analysis sample. |
 | `GilNK` (age-group) imbalance between Mother and non-Mother, concentrated in the lowest `WFH_Exposure` quartile | Confirmed against real data (2026-09-09): the gap is largest in Q1 (~0.8 age-group units, t≈-81) and shrinks/reverses by Q4. Comparison specs exist for both the secondary DDD (age-interacted; `GilNK`-reweighted) and the primary hours DDD (same two comparison specs, occupation-level exposure) but none has replaced either DDD's own primary spec — that's a separate, still-open decision. |
@@ -982,7 +982,8 @@ to the paper.**
 
 ## 8. 2026-09-22 grade-report response — new artifacts and numbers
 
-Added by `docs/decisions/grade-report-response.md` (Checkpoint 14). Every number below is read
+Added by the Checkpoint 14 grade-report response (`docs/decisions/grade-report-response.md`,
+deleted 2026-09-24, in git at `c800efe^`). Every number below is read
 from the named `outputs/` file written by the same default `Rscript main.R` run; the paper's
 tables are now generated from that run (`paper/tables/*.tex`, via `build_paper_tables()`), so
 Tables 1–7 and A1 are not transcribed at all. Significance codes as in the header.
