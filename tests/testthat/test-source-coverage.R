@@ -25,7 +25,7 @@ test_that("helper-setup.R sources every function-bearing file in scripts/ and ro
 
 test_that("every file in scripts/ is sourced by an entry point or by another script", {
   callers <- c(
-    file.path(project_root, c("main.R", "run_mismatch.R")),
+    file.path(project_root, "main.R"),
     list.files(file.path(project_root, "scripts"),    pattern = "[.]R$", full.names = TRUE),
     list.files(file.path(project_root, "robustness"), pattern = "[.]R$", full.names = TRUE)
   )

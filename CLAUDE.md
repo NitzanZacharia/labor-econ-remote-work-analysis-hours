@@ -19,8 +19,8 @@
   `paper/appendix.tex` inside their hand-written table floats. Never edit them by hand; change `scripts/build_paper_tables.R`
   and re-run the pipeline. `paper/tables/auto_notes.tex` holds the generated note macros
   (`\autonoteHours` etc.) the table notes use.
-- `main.R` is the orchestrator and stays at the repo root, alongside `run_tests.R` and
-  `run_mismatch.R`. Every other .R file defines one function, lives in `scripts/`, and is
+- `main.R` is the orchestrator and stays at the repo root, alongside `run_tests.R`. Every
+  other .R file defines one function, lives in `scripts/`, and is
   `source()`d via a root-relative, path-qualified call (`source(file.path("scripts", "foo.R"))`) —
   never a bare filename, since cwd is assumed to be the repo root wherever sourcing happens.
   `robustness/` is the one exception to "one function per file": it holds the multi-function

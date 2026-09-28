@@ -6,7 +6,6 @@ source(file.path("scripts", "data_processing.R"))
 source(file.path("scripts", "comparative_statistics.R"))
 source(file.path("scripts", "descriptive_table.R"))
 source(file.path("scripts", "basic_regression.R"))
-source(file.path("scripts", "basic_reg_compared_data.R"))  # manual robustness call only (README "Setup & running"); not run by the pipeline
 source(file.path("scripts", "Diagnostics.R"))
 source(file.path("scripts", "hours_diagnostics.R"))
 source(file.path("scripts", "employment_by_child_age.R"))

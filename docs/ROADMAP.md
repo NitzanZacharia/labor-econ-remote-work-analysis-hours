@@ -58,7 +58,7 @@ Confirm it passes silently against the current 6 CSVs. Then negative-test: copy 
 
 **Implementation Tasks:**
 - Define `DEFAULT_CONTROLS <- c("MatzavMishpachti", "Dat", "GilNK", "MachozMegurim", "TeudaGvoha")` once, at the top of `data_processing.R` (already sourced by every other file).
-- Replace the local `controls <- c(...)` block in `basic_regression.R`, `basic_reg_compared_data.R`, and `employment_by_child_age.R` with a reference to `DEFAULT_CONTROLS`.
+- Replace the local `controls <- c(...)` block in `basic_regression.R`, `basic_reg_compared_data.R` (since removed, 2026-09-28), and `employment_by_child_age.R` with a reference to `DEFAULT_CONTROLS`.
 - Replace the inline control list in `Diagnostics.R`'s `feols()` formula the same way.
 
 **Verification Step:**

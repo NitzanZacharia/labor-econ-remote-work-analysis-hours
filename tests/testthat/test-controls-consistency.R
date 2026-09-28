@@ -15,13 +15,11 @@ test_that("DEFAULT_CONTROLS has the expected 5 controls, in the documented order
   )
 })
 
-test_that("controls vector is identical (== DEFAULT_CONTROLS) across the three files that define it", {
+test_that("controls vector is identical (== DEFAULT_CONTROLS) across the two files that define it", {
   c1 <- extract_controls_vector(file.path(project_root, "scripts", "basic_regression.R"))
-  c2 <- extract_controls_vector(file.path(project_root, "scripts", "basic_reg_compared_data.R"))
   c3 <- extract_controls_vector(file.path(project_root, "scripts", "employment_by_child_age.R"))
 
   expect_identical(c1, DEFAULT_CONTROLS)
-  expect_identical(c2, DEFAULT_CONTROLS)
   expect_identical(c3, DEFAULT_CONTROLS)
 })
 
