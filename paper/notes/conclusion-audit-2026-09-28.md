@@ -1,8 +1,10 @@
 # Conclusion audit: `paper/paper.tex` §9 (pre-submission)
 
-**Date:** 2026-09-28. **Scope:** the Conclusion (`paper.tex:1010-1027`, two paragraphs, 186
-words), read against the Abstract (178-195), the Introduction (198-259), the Results lead
-(601-611), the Discussion (896-953) and the Limitations (956-1007) as committed at `4802830`.
+**Date:** 2026-09-28. **Scope:** the Conclusion (`paper.tex:1089-1103`, two paragraphs, 186
+words), read against the Abstract (162-179), the Introduction (182-244), the Results lead
+(589-596), the Discussion (937-1014) and the Limitations (1016-1083). Analysis written at
+`4802830`; the drafts in §3 and their line references were brought up to `ca0eb93`, after the
+referee-review response (`docs/admin/review.md`), later the same day.
 **Rule applied (author's choice):** analysis and proposals only. `paper.tex` was NOT edited and
 the paper was not recompiled. The current text was written by the co-author and moved in verbatim
 on 2026-09-26; whether and how to replace it is the authors' joint call.
@@ -22,7 +24,7 @@ no number is added.
 
 ---
 
-## 1. Current text (verbatim, `paper.tex:1013-1027`)
+## 1. Current text (verbatim, `paper.tex:1089-1103`)
 
 ```latex
 Using Israeli survey data, we ask whether the expansion of remote work coincided with a change in
@@ -86,7 +88,7 @@ Every factual claim in the Conclusion, and where the paper supports it.
 
 | # | Claim (line) | Supporting line(s) | Verdict |
 |---|---|---|---|
-| 1 | Average change among women observed working is small (1014-1015) | 233-234 (DiD 0.23, SE 0.18); 617-619 (MDE ~0.51, "reasonably precise null") | OK |
+| 1 | Average change among women observed working is small (1090-1091) | 217-218 (DiD 0.23, SE 0.18, "a null"); 606-609 (95% CI $[-0.13, 0.58]$; MDE ~0.51) | OK |
 | 2 | Post-2021 change in the gap increases with calibrated WFH exposure (1015-1016) | 235-236; 602-605 | OK (wording: "mother/comparison" is not the paper's term) |
 | 3 | Strongest contrast at the top of the exposure distribution (1016) | 238 ("concentrated in the most teleworkable quartile"); 914-923 | OK |
 | 4 | Strongest among mothers with younger children (1016-1017) | 239-240; 822 | OK |
@@ -117,25 +119,29 @@ line below; no number is added, the same discipline as the 2026-09-27 Introducti
 passes; (ii) Limitations are pointed to, not re-listed; (iii) the co-author's research-agenda
 sentence is kept, lightly edited; (iv) only existing macros, `\citep` keys (`goldin2014`,
 `harrington2025`) and `\ref` labels (`sec:limitations`, `sec:res-extensive`) are used, so any
-version compiles as a drop-in replacement for lines 1013-1027.
+version compiles as a drop-in replacement for lines 1089-1103.
 
-Shared number provenance:
+Shared number provenance (lines at `ca0eb93`):
 
 | Literal | `paper.tex` line(s) |
 |---|---|
-| DiD 0.23 (SE 0.18); "rules out average gains much above half an hour a week" | 233-234; 617-618 |
-| 3.22 hours per unit of exposure | 235; 186 (SE 1.02) |
-| 1.71 hours between the top and bottom quartile means | 235-236; 187; 661 |
-| "recovered roughly three fifths of their penalty" (top quartile) | 920-921 |
-| "recovered none of it" (bottom quartile, implied change -0.35) | 922-923 |
-| Largest for mothers of children under five; declines with age of youngest child | 239-240; 191-192 |
-| Fathers: gradient of the opposite sign | 240-241; 837 |
-| Forty occupation clusters; three inference procedures | 241-243; 188-190; 972-973 |
-| Pre-treatment external index: positive and insignificant | 964; 245-247 |
-| Employment DDD uninformative, "neither for nor against" | 891-893 |
-| US: WFH raised mothers' employment and income | 211-214 |
-| "signature rather than its proof" | 942 |
-| "which mothers ... rather than mothers as a group" | 193-194 |
+| DiD 0.23 (SE 0.18), "a null"; 95% CI "excludes average gains above about half an hour a week" | 217-218; 606-609 |
+| 3.22 hours per unit of exposure | 219; 170 (SE 1.02) |
+| 1.71 hours between the top and bottom quartile means | 219-220; 171 |
+| "recovered roughly three fifths of their penalty" (top quartile) | 972 |
+| "recovered none of it" (bottom quartile) | 974 |
+| "behaves as a flexibility mechanism should"; largest for mothers of children under five; declines with age of youngest child | 222-224; 175-176 |
+| Fathers: gradient of the opposite sign | 224-225; 176 |
+| Forty occupation clusters; three inference procedures | 225-228; 172-174; 1037-1040 |
+| Supporting checks share the forty clusters; bootstrap $p$ above 5%, headline 0.056 | 946-957 |
+| Result requires reclassifying teaching; Israeli schools in person; US task content scores it teleworkable | 229-233; 748-752; 1022-1026 |
+| Pre-treatment external index: positive and insignificant | 231-233; 1024 |
+| Marital checks: gradient positive but only marginally significant | 1075-1076; 767-778 |
+| Employment DDD uninformative, "neither for nor against" | 932-934 |
+| US: WFH raised mothers' employment and income | 195-198 |
+| "signature rather than its proof" | 1002 |
+| Policy reading: which mothers, access unequally distributed | 1009-1012 |
+| "which mothers ... rather than mothers as a group" | 177-178 |
 
 ### 3.A Version A: findings-forward (recommended)
 
@@ -151,23 +157,30 @@ best for a reader who goes straight to the end.
 ```latex
 Did remote work narrow the motherhood penalty in hours? On average, no: among employed Israeli
 women, the mother/childless gap in usual weekly hours did not change after 2021, a
-difference-in-differences of $0.23$ hours (SE $0.18$) that rules out average gains much above half
-an hour a week. Where the work can be done from home, yes: the post-2021 change in the gap rises
-with an occupation's WFH exposure, by $3.22$ hours per unit of exposure, or $1.71$ hours a week
-between the most and least teleworkable quartiles of occupations. Mothers in the most teleworkable
-jobs recovered roughly three fifths of their pre-period penalty; mothers in the least teleworkable
-jobs recovered none of it. And the gradient behaves as a flexibility mechanism should: it is
-largest for mothers of children under five, declines with the age of the youngest child, and has
-the opposite sign for fathers in the same occupations.
+difference-in-differences of $0.23$ hours (SE $0.18$) whose 95\% confidence interval excludes
+average gains above about half an hour a week. Where the work can be done from home, yes: the
+post-2021 change in the gap rises with an occupation's WFH exposure, by $3.22$ hours per unit of
+exposure, or $1.71$ hours a week between the most and least teleworkable quartiles of
+occupations. Mothers in the most teleworkable jobs recovered roughly three fifths of their
+pre-period penalty; mothers in the least teleworkable jobs recovered none of it. And the gradient
+behaves as a flexibility mechanism should: it is largest for mothers of children under five,
+declines with the age of the youngest child, and has the opposite sign for fathers in the same
+occupations.
 
 We read this pattern as the signature of a relaxed time constraint \citep{goldin2014} rather than
-its proof. Relative to the US evidence, where remote work raised mothers' employment and income
-\citep{harrington2025}, the Israeli response appears on the intensive margin, in how much mothers
-who already hold teleworkable jobs work rather than in whether mothers hold jobs; the employment
-margin is estimated too imprecisely here to say either way (Section~\ref{sec:res-extensive}). Two
-limitations condition the reading (Section~\ref{sec:limitations}): the one exposure measure built
-entirely from pre-treatment information yields a positive but insignificant estimate, and with
-forty occupation clusters the headline's precision is the range across three inference procedures
+its proof: the supporting checks are estimated on the same forty occupation clusters as the
+headline, and where a wild cluster bootstrap $p$-value is available it lies above the 5\% level,
+the headline's own at $0.056$. Relative to the US evidence, where remote work raised mothers'
+employment and income \citep{harrington2025}, the Israeli response appears on the intensive
+margin, in how much mothers who already hold teleworkable jobs work rather than in whether mothers
+hold jobs; the employment margin is estimated too imprecisely here to say either way
+(Section~\ref{sec:res-extensive}). Three limitations condition the reading
+(Section~\ref{sec:limitations}). The result requires reclassifying teaching, which US task
+content scores as teleworkable and Israeli schools kept in person, and the one exposure measure
+built entirely from pre-treatment information yields a positive but insignificant estimate.
+Mothers and childless women differ in marital status in a way that tracks exposure, and the two
+marital checks leave the gradient positive but only marginally significant. And with forty
+occupation clusters the headline's precision is the range across three inference procedures
 rather than a single $p$-value.
 
 The policy implication is correspondingly narrow. Remote work matters for which mothers can work
@@ -177,12 +190,16 @@ treatment in the Israeli setting, and estimate women's and men's responses toget
 that separates access to WFH from occupation choice.
 ```
 
-**Length.** 327 words (current: 186). Three paragraphs.
+**Length.** About 400 words (current: 186). Three paragraphs. If length matters more, drop the
+sentence beginning "Mothers and childless women differ" and write "Two limitations"; the marital
+point then stays only in Limitations.
 
 **Drops vs. current:** the restated question; "universal benefit"; the four-caveat list; the
 earnings sentence. **Adds:** the answer as the first sentence; magnitudes (0.23, 3.22, 1.71,
-three fifths / none); the fathers' gradient; the mechanism reading with `goldin2014`; the US
-comparison with `harrington2025`; the policy reading; the "which mothers" close; two `\ref`s.
+three fifths / none); the fathers' gradient; the mechanism reading with `goldin2014` and the
+bootstrap qualification; the US comparison with `harrington2025`; the three named limitations
+(teaching reclassification, marital imbalance, small-cluster inference); the policy reading; the
+"which mothers" close; two `\ref`s.
 
 ### 3.B Version B: question-to-implication (close the Introduction's loop)
 
@@ -210,20 +227,22 @@ that flexibility relaxes is binding, for mothers of young children most of all, 
 allows it, the intensive-margin penalty shrinks; where the job does not allow it, nothing changes.
 Because teleworkable jobs are unequally distributed across mothers, the gain for mothers as a group
 is smaller than the gradient alone suggests, and this paper cannot size it. The identifying
-assumption is not directly testable, and the estimate rests on a calibrated exposure measure and
+assumption is not directly testable, and the estimate rests on reclassifying teaching within the
+exposure measure, on a comparison group whose marital composition shifts with exposure, and on
 forty occupation clusters (Section~\ref{sec:limitations}). What would settle the mechanism is
 evidence that links hours with earnings and household time use, measures exposure before treatment
 in the Israeli setting, and estimates women's and men's responses together on a design that
 separates access to remote work from occupation choice.
 ```
 
-**Length.** 285 words. Two paragraphs.
+**Length.** About 300 words. Two paragraphs.
 
 **Drops vs. current:** the restated question; the four-caveat list; the earnings sentence; the
 employment-margin sentence (the Results and Discussion already carry it, and the Abstract's
 verdict on it stands). **Adds:** the Introduction's framing as the opening; 1.71 and the
 three-fifths / none pairing; the fathers' gradient; the access / unequal-distribution
-implication (949-953); one `\ref`.
+implication (1009-1012); the three named dependencies (teaching, marital composition, forty
+clusters); one `\ref`.
 
 **Trade-off to flag.** Dropping the employment margin from the Conclusion is a deliberate choice
 here. If the authors want it kept, insert after "nothing changes.": "Whether remote work also
@@ -245,9 +264,11 @@ among mothers with younger children, and fathers in the same occupations show a 
 opposite sign. Those patterns are consistent with greater scheduling flexibility helping mothers
 who already hold teleworkable jobs supply more paid hours.
 
-The result is conditional. The one exposure measure built entirely from pre-treatment information
-yields a weaker, insignificant estimate, and the headline's precision depends on the inference
-procedure (Section~\ref{sec:limitations}). Employment is an important separate margin, but its
+The result is conditional. It requires reclassifying teaching, which Israeli schools kept in
+person, and the one exposure measure built entirely from pre-treatment information yields a
+weaker, insignificant estimate; the two marital checks leave the gradient only marginally
+significant, and the headline's precision depends on the inference procedure
+(Section~\ref{sec:limitations}). Employment is an important separate margin, but its
 exposure interaction is too imprecise here to settle the question either way. Stronger evidence
 would link hours with earnings and household time use, measure exposure before treatment in the
 Israeli setting, and estimate women's and men's responses together on a design that better
@@ -255,25 +276,27 @@ separates access to WFH from occupation choice. The result is about which mother
 remote work rather than about mothers as a group.
 ```
 
-**Length.** 203 words. Two paragraphs.
+**Length.** About 220 words. Two paragraphs.
 
-**The six changes, as a diff against 1013-1027:**
+**The six changes, as a diff against 1089-1103:**
 
-1. L1013-1014 "Using Israeli survey data, we ask whether the expansion of remote work coincided
+1. L1089-1090 "Using Israeli survey data, we ask whether the expansion of remote work coincided
    with a change in the motherhood penalty in usual weekly hours." → "Remote work did not narrow
    the motherhood penalty in hours for employed Israeli women on average, but it did where the
    work can be done from home."
-2. L1015 "mother/comparison gap" → "mother/childless gap".
-3. L1016-1017 "...among mothers with younger children." → "...among mothers with younger
+2. L1091 "mother/comparison gap" → "mother/childless gap".
+3. L1092-1093 "...among mothers with younger children." → "...among mothers with younger
    children, and fathers in the same occupations show a gradient of the opposite sign."
-4. L1018 "some already employed mothers" → "mothers who already hold teleworkable jobs".
-5. L1020-1022 "The result is conditional and does not establish a universal benefit from remote
+4. L1094 "some already employed mothers" → "mothers who already hold teleworkable jobs".
+5. L1096-1098 "The result is conditional and does not establish a universal benefit from remote
    work. The exposure score partly uses post-period WFH information; the wholly external score
    yields a weaker result, pre-trend tests have limited power, and inference varies with the
-   procedure." → "The result is conditional. The one exposure measure built entirely from
-   pre-treatment information yields a weaker, insignificant estimate, and the headline's
-   precision depends on the inference procedure (Section~\ref{sec:limitations})."
-6. L1024 "The data also contain no earnings amount." deleted; "either way" appended to the
+   procedure." → "The result is conditional. It requires reclassifying teaching, which Israeli
+   schools kept in person, and the one exposure measure built entirely from pre-treatment
+   information yields a weaker, insignificant estimate; the two marital checks leave the
+   gradient only marginally significant, and the headline's precision depends on the inference
+   procedure (Section~\ref{sec:limitations})."
+6. L1100 "The data also contain no earnings amount." deleted; "either way" appended to the
    employment sentence; closing sentence "The result is about which mothers benefit from remote
    work rather than about mothers as a group." appended (from the Abstract, 193-194).
 
@@ -290,7 +313,7 @@ remote work rather than about mothers as a group.
 | Employment margin | Yes | Yes + `\ref` | Dropped (optional insert) | Yes |
 | Policy reading (access, unequal) | No | Yes | Yes, developed | No |
 | "Which mothers" close | No | Yes | Yes, paraphrased | Yes |
-| Words | 186 | 327 | 285 | 203 |
+| Words | 186 | ~400 | ~300 | ~220 |
 | Fidelity to co-author's voice | -- | Low | Low | High |
 
 ## 5. Recommendation and how to apply
@@ -298,7 +321,7 @@ remote work rather than about mothers as a group.
 **Recommendation: Version A.** The Conclusion was excluded from both grade reports at the
 authors' request, so the submitted version will be read for the first time; it should carry the
 same "three findings" spine as the Introduction and Results and give the reader the numbers the
-Abstract promised. A is 141 words longer than the current text, but it replaces repetition with
+Abstract promised. A is about 210 words longer than the current text, but it replaces repetition with
 content, which is the direction the grade report asked for. If the co-author prefers to keep
 their draft, **Version C** applies the same fixes at a fifth of the delta. **Version B** is the
 choice if the authors want the paper to end on its argument rather than its estimates; the
@@ -309,15 +332,16 @@ place of A's third.
 
 **To apply (not done here):**
 
-1. Replace `paper/paper.tex` lines 1013-1027 with the chosen block.
+1. Replace `paper/paper.tex` lines 1089-1103 (the two paragraphs under `\section{Conclusion}`)
+   with the chosen block.
 2. Add a dated header comment line at the top of `paper.tex`, in the style of the
    2026-09-27 "INTRODUCTION AND ABSTRACT PASS" note (line 46), stating that the Conclusion was
    rewritten and that no number was added.
 3. Recompile from `paper/`: `pdflatex`, `bibtex`, `pdflatex`, `pdflatex` (one more `pdflatex`
    if the log warns that labels may have changed). Check the log for undefined references; the
    only new `\ref`s are `sec:limitations` and `sec:res-extensive`, both defined.
-4. Update `README.md`'s section summary if it paraphrases the Conclusion (it was audited against
-   the paper on 2026-09-28 at `778948e`).
+4. Update `README.md`'s section summary if it paraphrases the Conclusion (it does not as of
+   `ca0eb93`; it only points to this note).
 
 ## 6. Not done / open items
 
@@ -332,3 +356,4 @@ place of A's third.
 - The Abstract's "which mothers" line is now used in A, B and C; if adopted, the Abstract and
   Conclusion will end on the same sentence. That is conventional, but the authors may prefer to
   vary one of them.
+
