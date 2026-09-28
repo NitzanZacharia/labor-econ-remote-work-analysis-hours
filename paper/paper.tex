@@ -38,6 +38,7 @@
 % that now hold inference (sec:res-ddd) and the calibration checks (sec:res-ddd-diag). No number
 % changed; the one new literal is the 2.4--4.3 range in the robustness subsection, derived from
 % Table~\ref{tab:robust} (see the comment beside it).
+% INTRODUCTION AND ABSTRACT PASS 2026-09-27 (audit phase 2): the Introduction now opens on the flexibility question, previews the three findings in the order Results reports them, and adds a contribution paragraph and roadmap; the Abstract is lightly tightened. No number changed and none was added.
 % EVERY hours-derived figure below was re-verified 2026-09-21 against a full pipeline re-run after
 % the hours population was harmonized across survey years (docs/decisions/hours-population-
 % harmonization.md, Checkpoint 13) and the Lee-bounds selection rate was redefined on the
@@ -158,70 +159,83 @@
 \noindent
 We ask whether the post-pandemic rise of work from home (WFH) narrowed the motherhood penalty in
 usual weekly hours among employed women in Israel. We use Central Bureau of Statistics (CBS)
-Labor Force Survey microdata on women aged 25--59 in 2017--2019 and 2021--2023. We estimate
-difference-in-differences (DiD) and triple-differences (DDD) models of usual weekly hours, using
-an Israeli-calibrated occupational WFH-exposure index as the third difference. Employed mothers'
+Labor Force Survey microdata on women aged 25--59 in 2017--2019 and 2021--2023 to estimate
+difference-in-differences (DiD) and triple-differences (DDD) models of usual weekly hours, with an
+Israeli-calibrated occupational WFH-exposure index as the third difference. Employed mothers'
 hours did not change on average ($0.23$ hours, SE $0.18$), but they rose where the work can be
-done from home. The triple interaction is $3.22$ hours per unit of exposure (SE $1.02$), or
+done from home: the triple interaction is $3.22$ hours per unit of exposure (SE $1.02$), or
 $1.71$ hours a week between the mean exposures of the most and least teleworkable quartiles of
-occupations. Because exposure varies across only forty occupations we
-report three inference procedures: the analytic $p$-value is $0.003$, the permutation $p$-value
-$0.032$ and the wild cluster bootstrap $p$-value $0.056$. It survives a saturated fixed-effects
-specification, a selection correction and the removal of any single occupation, it is largest
-for mothers of children under five, and fathers show the opposite gradient. The employment
-margin is estimated too imprecisely to support a comparable conclusion. The result is about
-\emph{which} mothers benefit from remote work rather than about mothers as a group.
+occupations. Because exposure varies across only forty occupations we report three inference
+procedures: the analytic $p$-value is $0.003$, the permutation $p$-value $0.032$ and the wild
+cluster bootstrap $p$-value $0.056$. The gradient survives a saturated fixed-effects
+specification, a selection correction and the removal of any single occupation; it is largest for
+mothers of children under five, and fathers show the opposite gradient. The employment margin is
+estimated too imprecisely to support a comparable conclusion. The result is about \emph{which}
+mothers benefit from remote work rather than about mothers as a group.
 \end{abstract}
 
 %======================================================================
 \section{Introduction}
 %======================================================================
 
-\citet{harrington2025} pose a simple question for the United States: has the rise of work from
-home reduced the motherhood penalty in the labor market? Their answer is yes on the extensive
-margin and on income: a 10\% rise in WFH raises mothers' employment by roughly $0.78$ percentage
-points relative to other women, and employed mothers' incomes rise by about $1.3\%$. This paper
-asks the same question of a different country and a different margin. We use Israeli CBS Labor
-Force Survey microdata to test whether the post-COVID shift to remote work altered the motherhood
-penalty in \emph{usual weekly work hours} among employed women. We also estimate the employment
-margin, but for reasons of statistical power documented in Section~\ref{sec:res-extensive} we
-treat it as secondary.
+The shift to remote work is a rare natural experiment in workplace flexibility. Unlike the acute
+disruption of 2020, work from home has proven to be a persistent feature of the post-pandemic
+labor market \citep{barrero2021}, and flexibility is what \citet{goldin2014} identifies as the
+last major driver of the remaining gender pay gap. Temporal and locational flexibility is a good
+mothers pay for, in lower wages or slower promotion, so a shock that lowers the cost of supplying
+it should be detectable in mothers' labor supply, and for mothers already employed most directly
+in how many hours they supply. This paper asks whether the post-COVID shift to remote work altered
+the motherhood penalty in \emph{usual weekly work hours} among employed women in Israel, using
+Central Bureau of Statistics (CBS) Labor Force Survey microdata for 2017--2023.
 
-\noindent The shift to remote work is a rare natural experiment in workplace flexibility, which
-\citet{goldin2014} identifies as the last major driver of the remaining gender pay gap. Temporal
-and locational flexibility is a good mothers pay for, in lower wages or slower promotion, and a
-shock that lowers the cost of supplying it should be detectable in mothers' labor supply, for
-mothers already employed most directly in how many hours they supply. Unlike the acute disruption
-of 2020, WFH has proven to be a persistent feature of the post-pandemic labor market
-\citep{barrero2021}. The stakes are particularly high in Israel, which combines a productive,
-internationally integrated labor market with the OECD's highest total fertility rate, $2.87$
-children per woman in 2024 against an OECD average of $1.40$ \citep{oecd2025fertility}: an
-unusually large share of the female workforce is at any time the mother of a young child, so an
-intensive-margin response to flexibility has first-order consequences for aggregate labor input.
+The question has been asked once before, for the United States. \citet{harrington2025} find that
+work from home reduced the motherhood penalty on the extensive margin and on income: a 10\% rise
+in WFH raises mothers' employment by roughly $0.78$ percentage points relative to other women, and
+employed mothers' incomes rise by about $1.3\%$. We ask it of a different country and a different
+margin. Israel combines a productive, internationally integrated labor market with the OECD's
+highest total fertility rate, $2.87$ children per woman in 2024 against an OECD average of $1.40$
+\citep{oecd2025fertility}, so an unusually large share of its female workforce is at any time the
+mother of a young child, and an intensive-margin response to flexibility has first-order
+consequences for aggregate labor input. Between $13\%$ and $16\%$ of employed Israeli women aged
+25--59 usually worked from home in 2021--2023, the first years in which the survey asked. We also
+estimate the employment margin, but for reasons of statistical power documented in
+Section~\ref{sec:res-extensive} we treat it as secondary.
 
-\noindent Our design exploits the pandemic as the moment at which remote work became a mainstream practice:
-in Israel, where the survey began asking only in 2021, between $13\%$ and $16\%$ of employed
-women aged 25--59 usually worked from home in 2021--2023. We compare mothers and childless women
-across a pre-period of 2017--2019 and a post-period of 2021--2023, excluding 2020
-(Section~\ref{sec:data}). A difference-in-differences on this contrast estimates the change in
-the hours penalty. A triple-differences model that interacts it with an occupation's WFH exposure
-tests whether remote work is the \emph{mechanism}, by asking whether the change is larger in jobs
-that can actually be done from home. Its identifying assumption concerns how the motherhood gap
-\emph{within} occupations would have evolved across exposure levels absent the shift; pre-period
-event studies probe that assumption rather than verify it.
+Our design exploits the pandemic as the moment at which remote work became a mainstream practice.
+We compare mothers and childless women across a pre-period of 2017--2019 and a post-period of
+2021--2023, excluding 2020 (Section~\ref{sec:data}). A difference-in-differences on this contrast
+estimates the change in the hours penalty. A triple-differences model that interacts it with an
+occupation's WFH exposure tests whether remote work is the \emph{mechanism}, by asking whether the
+change is larger in jobs that can actually be done from home. Its identifying assumption concerns
+how the motherhood gap \emph{within} occupations would have evolved across exposure levels absent
+the shift; pre-period event studies probe that assumption rather than verify it.
 
-\noindent Mothers' hours did not rise on average: the DiD is $0.23$ hours (SE $0.18$), a
-reasonably precise null. The effect lives in the interaction with occupational WFH exposure,
-$3.22$ additional weekly hours per unit of exposure, or $1.71$ hours between the mean exposures
-of the top and bottom quartiles of occupations (a quartile-indicator specification puts the
-top-versus-bottom contrast at $1.84$ hours), the same order as the $1.74$-hour intensive-margin
-penalty itself, while the implied change at zero exposure is if anything negative. Because the
-exposure score varies across only forty occupations, we report analytic, permutation and wild
-cluster bootstrap inference side by side, and the strength of the statistical conclusion depends
-on which is used (Section~\ref{sec:res-ddd}). Section~\ref{sec:results} subjects the estimate
-to specification, selection, outcome-coding, leave-one-occupation-out and calibration checks, a
-test of sorting across occupations, and heterogeneity by the age of the youngest child and by
-sex; none of them overturns it.
+Three findings emerge. Mothers' hours did not rise on average: the DiD is $0.23$ hours
+(SE $0.18$), a reasonably precise null. The penalty did narrow where the work can be done from
+home: the triple interaction is $3.22$ additional weekly hours per unit of exposure, or $1.71$
+hours between the mean exposures of the top and bottom quartiles of occupations, the same order as
+the $1.74$-hour intensive-margin penalty itself, while the implied change at zero exposure is if
+anything negative and the response is concentrated in the most teleworkable quartile. And the
+gradient behaves as a flexibility mechanism should: it is largest for mothers of children under
+five and declines with the age of the youngest child, and fathers in the same occupations show a
+gradient of the opposite sign. Because the exposure score varies across only forty occupations, we
+report analytic, permutation and wild cluster bootstrap inference side by side, and the strength
+of the statistical conclusion depends on which is used (Section~\ref{sec:res-ddd}). The estimate
+survives specification, selection, outcome-coding, leave-one-occupation-out and calibration checks
+and a test of sorting across occupations, although the one exposure measure built entirely from
+pre-treatment information yields a weaker, insignificant estimate
+(Section~\ref{sec:res-ddd-diag}).
+
+Relative to the US evidence, the paper moves the question to the intensive margin, where the
+penalty operates through how much mothers who hold jobs can work rather than through whether they
+hold them; it measures exposure with an index calibrated to realized Israeli remote work rather
+than imported unchanged; and it treats the small number of occupation clusters as part of the
+evidence rather than as a nuisance. To our knowledge it also provides the first estimate of the
+Israeli motherhood penalty in hours conditional on working. Section~\ref{sec:lit} reviews the
+literature, Sections~\ref{sec:data} and~\ref{sec:descriptives} describe the data and the raw
+patterns, Section~\ref{sec:strategy} sets out the design, Section~\ref{sec:results} reports the
+results, and Sections~\ref{sec:discussion}--\ref{sec:conclusion} interpret them and state their
+limits.
 
 %======================================================================
 \section{Literature Review}\label{sec:lit}
