@@ -4,9 +4,10 @@
   installed-package semantics). Dependencies: tidyverse + fixest, plus `fwildclusterboot` (and
   `dqrng`, which it draws from) used ONLY for the wild-cluster-bootstrap p-values on the hours DDD
   in `robustness/hours_ddd_inference.R`, added 2026-09-22 with the user's approval
-  (docs/decisions/grade-report-response.md). It is loaded with `requireNamespace()` inside the
-  function, never `library()` at file top, so the test suite runs without it. Do not add any
-  other dependency without flagging it in your response first.
+  (docs/decisions/grade-report-response.md, deleted 2026-09-24, in git at c800efe^). It is
+  loaded with `requireNamespace()` inside the function, never `library()` at file top, so the
+  test suite runs without it. Do not add any other dependency without flagging it in your
+  response first.
 - The "one function per file" rule below is the intent, not a universal fact. Five files in
   `scripts/` already hold more than one, each for a stated reason: `validation.R` (4 — a family of
   data-quality checks), `wfh_exposure_cells.R` (3 — the exposure-construction chain),

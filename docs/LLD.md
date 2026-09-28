@@ -231,7 +231,7 @@ run_intensive_margin_lee_bounds(cleaned_df: tibble, controls: character = DEFAUL
 # for full design and results. Wired into main.R section 8a, unconditional (no feature flag), run
 # three times -- once each for the calibrated/external/realized occupation-level exposure measures.
 # The secondary DDD's own equivalent (ddd_regression.R's run_ddd_regression()) was removed -- see
-# docs/decisions/employment-ddd-robustness-removal.md.
+# docs/decisions/employment-ddd-robustness-removal.md (deleted 2026-09-24, git c800efe^).
 run_hours_ddd_regression(cleaned_df: tibble, exposure_index: tibble,
                           controls: character = DEFAULT_CONTROLS) ->
   invisible(list(
@@ -428,18 +428,19 @@ check_spec1_collinearity(ddd_df: tibble, cell_fe_vars: character, controls: char
 check_wfh_first_stage_relevance(ddd_df: tibble, controls: character = DEFAULT_CONTROLS) ->
   invisible(list(level_reg = fixest, dynamic_reg = fixest, table = etable))
 # First-stage relevance check: does WFH_Exposure predict realized WFH_RefWeek (Post==1 only)? See
-# docs/decisions/null-vs-power-audit.md.
+# docs/decisions/exposure-cell-granularity-fix.md (B1/B2 section).
 
 compute_ddd_mde(model: fixest, coef_name: character(1) = "Mother:Post:WFH_Exposure",
                  sig_level: numeric(1) = 0.05, power: numeric(1) = 0.8,
                  baseline_rate: numeric(1) = NULL) ->
   invisible(list(coef_name, point_estimate, se, sig_level, power, mde, within_mde))
-# Closed-form minimum detectable effect for a fitted model's coefficient. Base R only (qnorm()) --
-# see docs/decisions/null-vs-power-audit.md.
+# Closed-form minimum detectable effect for a fitted model's coefficient. Base R only --
+# see docs/decisions/exposure-cell-granularity-fix.md (B1/B2 section).
 
 # ── robustness/balance_test.R / age_balance_robustness.R / pretrend_wald_test.R ─────────────
 # Secondary DDD's own occupation-level robustness regression (ddd_regression.R's
-# run_ddd_regression()) was removed -- see docs/decisions/employment-ddd-robustness-removal.md.
+# run_ddd_regression()) was removed -- see docs/decisions/employment-ddd-robustness-removal.md
+# (deleted 2026-09-24, git c800efe^).
 run_balance_test(cleaned_df: tibble, controls: character = DEFAULT_CONTROLS,
                   exposure_cells: tibble = NULL, exposure_calibrated: tibble = NULL,
                   exposure_csv_path: character(1) = "data/israeli_cbs_wfh_2digit.csv") ->

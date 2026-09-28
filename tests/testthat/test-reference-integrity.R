@@ -27,7 +27,14 @@ known_removed <- c(
   "outputs/figures/hours_ddd_by_child_age.pdf",
   # The pre-pivot manuscript draft, archived 2026-09-17 and deleted 2026-09-23 (git history keeps
   # it); two memos cite it as the source of numbers that were corrected during the pivot.
-  "paper/archive/old_paper.tex"
+  "paper/archive/old_paper.tex",
+  # Three memos deleted 2026-09-24 (commit c800efe, "removed stale md's"): the two grade-report
+  # responses (ROADMAP Checkpoints 14 and 15) and the employment-DDD robustness-removal note.
+  # main.R and scripts/ comments still cite them by item ID; the prose docs say where they went
+  # (git show c800efe^:docs/decisions/<name>.md).
+  "docs/decisions/grade-report-response.md",
+  "docs/decisions/grade-report-2-response.md",
+  "docs/decisions/employment-ddd-robustness-removal.md"
 )
 
 test_that("every repo-relative path referenced in a .R or .md file resolves", {

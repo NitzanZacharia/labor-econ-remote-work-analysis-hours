@@ -162,7 +162,7 @@ needed to drop the paper's 2018–2019 restriction on the identifying assumption
    defect, and it is fixed. It should be replaced by a short note that the hours population is
    harmonized on reference-week work and why.
 2. **The identifying assumption no longer needs narrowing to 2018–2019** — §6.3, §5.4 (Lee bounds),
-   §8 and conclusion-skeleton item 9 all inherit that restriction and can drop it.
+   §8 and the Conclusion all inherit that restriction and can drop it.
 3. **§4.3 "Hours year by year" exists solely to narrate the 2017 anomaly** and must be rewritten.
 4. **The hours DiD is no longer significant.** The paper already demoted it to "suggestive" because
    its Lee bounds crossed zero; it is now insignificant on its own terms, and the bounds
@@ -180,7 +180,7 @@ needed to drop the paper's 2018–2019 restriction on the identifying assumption
   does not run against the 2,342 affected male rows in the default pipeline.
 - `paper/paper.pdf` (tracked) is now inconsistent with `outputs/`. The paper transcription is a
   separate pass — ~150 hours-derived numbers across `paper.tex`, `results_digest.md`,
-  `docs/hours-intensive-margin-analysis.md`, two decision memos, `README.md:132` and
+  the hours narrative doc (since retired), two decision memos, `README.md:132` and
   `docs/HLD.md:98`.
 - Latent, pre-existing: both Lee-bounds files sort `NA` last in `arrange()`. The Step-2 filter
   removes the exposure today, but the ordering itself is still NA-naive if a future extract

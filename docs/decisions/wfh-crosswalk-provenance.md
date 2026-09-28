@@ -1,8 +1,8 @@
 # Open question: provenance of `data/israeli_cbs_wfh_2digit.csv`
 
 **Status: CLOSED 2026-09-23. The derivation is known and reproduces the file exactly.**
-Raised by the pre-submission audit, 2026-09-19, and tracked as D5 in
-`docs/decisions/pre-submission-audit-decisions.md`, where it is now struck. The `% VERIFY` comment in
+Raised by the pre-submission audit, 2026-09-19, and tracked as D5 in its decision register
+(retired 2026-09-28 once every item was closed; in git history). The `% VERIFY` comment in
 `paper/references.bib` is resolved, the BLS crosswalk is cited in the appendix
 (`bls2012crosswalk`), and the two "undocumented" sentences in the paper are gone — see "Where the
 answer is recorded" below.
@@ -59,9 +59,10 @@ both are public at the addresses above.
   `bls2012crosswalk` entry added; `paper/appendix.tex` (exposure-construction paragraph) states
   the derivation and cites it; the Limitations sentence in `paper/paper.tex` no longer calls the
   crosswalk undocumented — done 2026-09-23.
-- `docs/decisions/pre-submission-audit-decisions.md` — D5 struck, with a closed entry — done 2026-09-23.
-- `README.md` (`data/` description) and `paper/notes/results_digest.md` (its own `[VERIFY]`
-  marker for this item) — not updated; neither is read by the paper.
+- The pre-submission decision register (retired 2026-09-28, in git history) — D5 struck, with a closed entry — done 2026-09-23.
+- `README.md` (`data/` description) — not updated; it is not read by the paper.
+  `paper/notes/results_digest.md` — its `[VERIFY]` marker for this item was closed on 2026-09-19
+  (see the digest's header note).
 
 ---
 
@@ -77,7 +78,8 @@ data/israeli_cbs_wfh_2digit.csv        <- provenance: see "Answer" above
   -> build_exposure_isco2()            scripts/wfh_exposure_cells.R:8
   -> calibrate_isco_exposure()         scripts/wfh_exposure_cells.R:32   (swaps 10 of 40 occupations)
   -> outputs/wfh_exposure_calibrated.csv
-  -> run_hours_ddd_regression()        the 3.407 triple interaction, the paper's central claim
+  -> run_hours_ddd_regression()        the triple interaction, the paper's central claim (3.407 when
+                                       this was written; 3.224 since the 2026-09-21 harmonization)
 ```
 
 The file supplies `wfh_probability_2d`, the theoretical teleworkability score per two-digit

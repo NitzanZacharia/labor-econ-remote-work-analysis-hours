@@ -123,19 +123,14 @@ shows are levels, which must not be read against the employment DiD of `tab:emp-
 2026-09-22 cut of the pre/post figure shrinks this hazard rather than removing it: the pre/post
 comparison survives as a §4.5 footnote, with the caveat in the same sentence as the numbers.
 
-## Verification
+## Verification (as of 2026-09-20; numbers superseded)
 
-- `Rscript run_tests.R` — 732 passing, 0 failures (was 721 before this work; 5 new test files plus
-  amendments to 3 existing ones).
-- `Rscript main.R` — exit 0; writes six `outputs/figures/*.pdf` and
-  `outputs/hours_mechanism_data.csv` (37 rows).
-- `pdflatex`/`bibtex`/`pdflatex`×2 from inside `paper/` — 34 pages, no "file not found", no
-  undefined citations or references, 0 BibTeX warnings, and the same 4 overfull hboxes the paper
-  had before this change (all in §6, none in the new section).
-
-Real-data values now shown in the paper: raw hours DiD **+0.878 (SE 0.099)** against the estimated
-0.8261; per-quartile raw DiDs **0.39 / 0.75 / 0.47 / 2.24**; raw mother-minus-non-mother hours gap
-**−3.30 (2017), −1.57 (2018), −1.68 (2019), −1.46 (2021), −1.56 (2022), −0.83 (2023)**.
+Tests, pipeline and paper compile were green at the time (732 tests, 34 pages). The real-data
+values first shown in the paper by this layer — raw hours DiD +0.878 against the estimated 0.8261,
+per-quartile raw DiDs 0.39 / 0.75 / 0.47 / 2.24, and the 2017 mother gap of −3.30 — all predate the
+2026-09-21 hours-population harmonization and are **historical**; the live figures come from
+`outputs/hours_descriptives_*.csv` and `outputs/hours_dose_response_*.csv`, and the digest
+(`paper/notes/results_digest.md` §1) records the current ones.
 
 ---
 
@@ -179,4 +174,4 @@ Two further changes to the figure set in the paper, neither touching `main.R`'s 
 
 - `fig:childage` (`outputs/figures/hours_ddd_by_child_age.pdf`) is no longer included in the paper. It plotted exactly the DDD column of Table 5 with its confidence intervals and added no information to the table; it remains a browsing artifact under `outputs/figures/`.
 - The DiD and DDD event studies (`hours_event_study.pdf`, `hours_ddd_event_study.pdf`) share one two-panel float, `fig:pretrend`, at 0.48 text-width each; `fig:pretrend-ddd` labels the same float so existing cross-references resolve.
-- `fig:hours-by-year`, `fig:permutation`, Table 3 (Lee bounds) and Table 7 (extensive margin) moved to `paper/appendix.tex` (Appendix A, D, C and D). See `docs/decisions/paper-structural-cut.md`.
+- `fig:hours-by-year`, `fig:permutation`, Table 3 (Lee bounds) and Table 7 (extensive margin) moved to `paper/appendix.tex` (Appendix A, D, C and D). See `docs/ROADMAP.md` Checkpoint 15.

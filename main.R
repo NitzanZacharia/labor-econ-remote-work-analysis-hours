@@ -37,8 +37,8 @@ source(file.path("scripts", "hours_subgroup_comparison.R"))
 source(file.path("scripts", "paper_theme.R"))
 source(file.path("scripts", "hours_descriptive_plots.R"))
 source(file.path("scripts", "hours_dose_response.R"))
-# Two descriptives the editorial audit asked for (paper/notes/editorial-audit-2026-09-22.md, items
-# B2 and I1): the Israeli realized-WFH share by year, and the reference-week absence share by
+# Two descriptives the 2026-09-22 editorial audit asked for (items B2 and I1; the audit note is
+# in git history): the Israeli realized-WFH share by year, and the reference-week absence share by
 # exposure quartile.
 source(file.path("scripts", "wfh_share_by_year.R"))
 source(file.path("scripts", "absence_by_exposure_quartile.R"))
@@ -348,7 +348,7 @@ message("Running primary DDD robustness variant (hours, realized Israeli index, 
 hours_ddd_realized <- run_hours_ddd_regression(cleaned_df, exposure_realized)
 
 # Three further sensitivity rows for the paper's robustness table
-# (paper/notes/editorial-audit-2026-09-22.md, items G6, I5 and F3). None needs a new function: run_hours_ddd_regression() is generic over its data frame and its exposure index.
+# (2026-09-22 editorial audit, items G6, I5 and F3; note in git history). None needs a new function: run_hours_ddd_regression() is generic over its data frame and its exposure index.
 #
 # (G6) Unswapped occupations only. calibrate_isco_exposure() swaps 10 of 40 occupations to their
 # realized 2022-23 share, which sits inside the post-period; on the 30 it leaves alone the
@@ -691,7 +691,7 @@ if (RUN_AGE_BALANCE_ROBUSTNESS) {
 
 }
 
-# ── 8d. Null-vs-power audit (docs/decisions/null-vs-power-audit.md) ───────────────────────────
+# ── 8d. Null-vs-power audit (docs/decisions/exposure-cell-granularity-fix.md, B1/B2 section) ──
 # ON by default, same framing as 8c: a diagnostic on top of the employment DDD (8b), not a
 # replacement. Exists to answer what the null Mother:Post:WFH_Exposure result alone cannot -- is
 # this design well-powered enough to detect a plausible effect, or is the null uninformative?
@@ -1024,7 +1024,7 @@ export_all_results(results_to_export)
 # the repo. Every plot the paper has cut (the hours 2x2 panel, the two employment-by-child-age
 # panels, the mobility series, the child-age forest plot, the mechanism scatter) is still on disk
 # as a PNG; the reasons for each cut are in docs/decisions/paper-figure-layer.md and
-# docs/decisions/paper-structural-cut.md.
+# docs/ROADMAP.md's Checkpoint 15 (the 2026-09-23 structural cut).
 message("Exporting paper figures (vector PDF) to outputs/figures/...")
 paper_figures <- list(
   hours_by_year         = list(plot = hours_descriptives$plots$by_year,    width = 5.0, height = 5.0),

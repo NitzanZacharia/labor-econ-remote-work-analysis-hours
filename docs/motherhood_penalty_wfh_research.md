@@ -3,6 +3,14 @@
 
 **Researchers:** Inbal Muriel and Nitzan Zacharia (2026)
 
+> **Status (note added 2026-09-26): the original research plan, kept as the specification the
+> decision memos cite by Part and section.** It is not maintained as a description of the
+> implementation — `README.md`, `docs/HLD.md` and `docs/LLD.md` are. In particular: the Part 1 §VI
+> status block is historical; Part 3 §1's instruction to drop the work-mobility variable was
+> refined (see `docs/HLD.md` §4.3); Part 4 §4's 2020 anchor year is superseded by
+> `docs/decisions/checkpoint6-wfh-anchor-year.md` (2021); and the primary outcome is now weekly
+> hours (`docs/decisions/hours-ddd-pivot.md`).
+
 ---
 
 ## Part 1: Robust Research Outline
