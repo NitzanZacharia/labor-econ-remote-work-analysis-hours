@@ -7,7 +7,7 @@ records every item still waiting on an author decision, ordered by whether it bl
 ## Deferred — circle back before submission
 
 The author asked on 2026-09-19 to park these four and return to them at the end. All four are now
-closed. What remains open is D3, D4 and D11 in the tiers below; D10, D12 and D13 are noted only.
+closed. What remains open is D3 and D4 in the tiers below; D10, D12 and D13 are noted only.
 
 | # | Item | Why it is parked | What closes it |
 |---|---|---|---|
@@ -252,8 +252,8 @@ magnitudes, which this close to submission is a real risk. Recommendation: leave
 
 ## Tier 4 — noted, no action unless you want it
 
-- **D11. Title-page date.** `paper/paper.tex`'s title block uses `\today`, so the printed date is whatever day
-  it was last compiled. Fix to the real submission date if that matters.
+- ~~**D11. Title-page date.**~~ **CLOSED 2026-09-28:** both `\today` uses in `paper/paper.tex`
+  (title block and the "Submission Date" line) now read October 15, 2026, the submission date.
 - **D12. Figure path.** `paper/paper.tex`'s figures include `../outputs/...`, so the paper compiles only
   from inside `paper/`. Copying the PDF into `paper/` would make the folder self-contained.
 - **D13. `outputs/israeli_market_mismatch.csv`** was committed in `7967624` because `outputs/` is
