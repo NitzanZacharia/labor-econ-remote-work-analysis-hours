@@ -1,29 +1,8 @@
 # exposure_sorting_check.R
-# Does the post-2021 change in mothers' OCCUPATIONS, rather than in their hours, drive the hours
-# DDD? (docs/decisions/grade-report-2-response.md, Methods 2.)
-#
-# The hours DDD assigns each woman the exposure score of her current occupation. Occupation is
-# observed at the same time as the outcome, so it is itself a potential outcome of the treatment:
-# if remote work drew mothers into teleworkable occupations after 2021 at a different rate than
-# childless women, the post-period composition of mothers inside high-exposure occupations changes
-# for reasons that have nothing to do with hours choices, and the triple interaction picks that
-# up. The Lee bounds (hours_ddd_lee_bounds.R) handle selection into EMPLOYMENT and the saturated
-# specification absorbs occupation-level shocks; neither speaks to selection ACROSS occupations.
-#
-# The direct check is a difference-in-differences with the exposure score itself as the outcome,
-# on the DDD's own estimation sample: did mothers' mean occupational exposure move relative to
-# childless women's after 2021? Three versions are fitted --
-#
-#   (i)   WFH_Exposure  ~ Mother * Post + controls              the mean-exposure DiD
-#   (ii)  TopQuartile   ~ Mother * Post + controls              a linear probability model on being
-#                                                              in Figure 2's top exposure quartile
-#   (iii) WFH_Exposure  ~ Mother + i(year) + i(year, Mother)    the event-study form of (i), so a
-#                                                              gradual reallocation is visible
-#
-# -- all clustered by individual, since the outcome here varies at the individual level (the
-# occupation she holds), not at the occupation level. A null on (i) and (ii) is evidence against
-# sorting large enough to matter; a positive estimate says the hours DDD should be read alongside
-# the pre-period-exposure bound in hours_ddd_cell_exposure.R.
+# Sorting check: did mothers move into teleworkable occupations after 2021? A DiD with the
+# exposure score itself as the outcome, on the hours DDD's sample: (i) mean exposure, (ii) a
+# top-quartile indicator, (iii) the event-study form of (i). Clustered by individual, since the
+# outcome varies at the individual level.
 library(tidyverse)
 library(fixest)
 source(file.path("scripts", "data_processing.R"))
@@ -38,9 +17,7 @@ run_exposure_sorting_check <- function(cleaned_df, exposure_index, breaks,
          "(build_hours_dose_response()$breaks).")
   }
 
-  # The DDD's estimation sample: employed, occupation-matched, and with the hours outcome observed
-  # (reference-week workers), so the sorting question is asked of exactly the women whose hours
-  # the headline is estimated on. `outcome_sample = NULL` widens it to all matched employed women.
+  # The DDD's estimation sample; outcome_sample = NULL widens it to all matched employed women.
   df <- cleaned_df %>%
     filter(Employed == 1) %>%
     inner_join(
@@ -93,8 +70,7 @@ run_exposure_sorting_check <- function(cleaned_df, exposure_index, breaks,
     mutate(estimate_per_pre_sd = if_else(outcome == "Occupation-level WFH exposure (mean)",
                                          estimate / pre_sd_exposure, NA_real_))
 
-  # Event-study form: needs the survey-year column. Skipped, with a message, on a frame without it
-  # (the synthetic fixtures without with_years = TRUE), never silently.
+  # Event-study form; skipped without a survey-year column.
   es_coefs <- NULL
   m_es     <- NULL
   if ("ShnatSeker" %in% names(df)) {

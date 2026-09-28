@@ -1,18 +1,5 @@
-# Hours-outcome (intensive-margin) counterpart to gender_placebo.R's run_gender_placebo() /
-# run_gender_ddd_placebo(), added for the hours pivot (docs/decisions/hours-ddd-pivot.md) so the
-# project's now-primary dependent variable has the same gender-placebo validation coverage the
-# old primary (Employed) DV already had. Reuses run_intensive_margin_reg() as-is: the "Mother"
-# column is sex-agnostic in its derivation (1 if any children <17), so for this male subsample it's
-# conceptually read as "Father" without any code/column rename -- same convention as
-# gender_placebo.R.
-#
-# The DDD placebo below mirrors hours_ddd_regression.R's run_hours_ddd_regression(), NOT
-# gender_placebo.R's run_gender_ddd_placebo(): the primary hours DDD's regressor is the PURE
-# occupation-level WFH_Exposure (exposure_index), not the cell-based measure -- so, unlike
-# run_gender_ddd_placebo(), this does not need to rebuild a cell-based exposure measure on the male
-# subsample at all. Occupation-level exposure is sex-agnostic (an occupation's teleworkability
-# doesn't depend on who's asked), so the same exposure_index built from women's data is reused
-# unchanged, exactly as run_hours_ddd_regression() itself does.
+# Hours DiD and DDD on the male subsample, with "Mother" read as "Father". The occupation-level
+# exposure index is sex-agnostic and reused unchanged.
 library(tidyverse)
 library(fixest)
 source(file.path("scripts", "data_processing.R"))
@@ -22,10 +9,7 @@ source(file.path("scripts", "wfh_exposure_cells.R"))
 source(file.path("scripts", "ddd_collinearity_diagnostics.R"))
 source(file.path("scripts", "placebo_male_frame.R"))
 
-# Pure function: fits the hours DDD placebo on an already-cleaned male subsample (restricted to
-# Employed == 1, same as run_hours_ddd_regression()) plus an already-built occupation-level
-# exposure index. Split out from run_hours_gender_placebo() so it can be unit-tested directly
-# against a purpose-built synthetic panel (see test-hours_gender_placebo.R).
+# Fits the hours DDD on an already-cleaned male subsample.
 run_hours_gender_ddd_placebo <- function(cleaned_men, exposure_index, controls = DEFAULT_CONTROLS) {
   n_employed <- sum(cleaned_men$Employed == 1, na.rm = TRUE)
 
@@ -47,8 +31,7 @@ run_hours_gender_ddd_placebo <- function(cleaned_men, exposure_index, controls =
     return(list(n_employed = n_employed, n_matched = 0, model = NULL))
   }
 
-  # Clustered on occupation code, not IDPUF: WFH_Exposure here is occupation-constant, mirroring
-  # run_hours_ddd_regression()'s own clustering choice (a Moulton problem otherwise).
+  # Clustered on occupation, as run_hours_ddd_regression().
   model <- tryCatch({
     formula_ddd <- as.formula(paste(
       "WorkHoursCont ~ Mother * Post * WFH_Exposure +", paste(controls, collapse = " + ")
@@ -72,9 +55,7 @@ run_hours_gender_ddd_placebo <- function(cleaned_men, exposure_index, controls =
 
 run_hours_gender_placebo <- function(folder_path, cleaned_men = NULL, exposure_index = NULL,
                                       exposure_csv_path = file.path("data", "israeli_cbs_wfh_2digit.csv")) {
-  # exposure_index is already in the occupation_code/wfh_exposure shape this file's DDD wants, so
-  # it is only rebuilt when absent -- the shared helper returns the calibrated table in its native
-  # ISCO2/wfh_exposure_calibrated shape, reshaped below.
+  # exposure_index is rebuilt only when absent.
   inputs <- prepare_placebo_male_inputs(
     folder_path,
     cleaned_men         = cleaned_men,
@@ -94,7 +75,7 @@ run_hours_gender_placebo <- function(folder_path, cleaned_men = NULL, exposure_i
           "'has children <17' -- i.e. Father, for this population)...")
   result_hours <- run_intensive_margin_reg(cleaned_men)
 
-  # ── DDD placebo: WorkHoursCont ~ Mother*Post*WFH_Exposure + controls, male subsample ─────────
+  # DDD, male subsample
   ddd_placebo <- NULL
   if (!is.null(exposure_index)) {
     message("Running hours DDD placebo (WorkHoursCont ~ Mother*Post*WFH_Exposure + controls), male subsample...")

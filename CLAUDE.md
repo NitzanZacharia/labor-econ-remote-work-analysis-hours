@@ -19,8 +19,8 @@
   `paper/appendix.tex` inside their hand-written table floats. Never edit them by hand; change `scripts/build_paper_tables.R`
   and re-run the pipeline. `paper/tables/auto_notes.tex` holds the generated note macros
   (`\autonoteHours` etc.) the table notes use.
-- `main.R` is the orchestrator and stays at the repo root, alongside `run_tests.R` and
-  `run_mismatch.R`. Every other .R file defines one function, lives in `scripts/`, and is
+- `main.R` is the orchestrator and stays at the repo root, alongside `run_tests.R`. Every
+  other .R file defines one function, lives in `scripts/`, and is
   `source()`d via a root-relative, path-qualified call (`source(file.path("scripts", "foo.R"))`) —
   never a bare filename, since cwd is assumed to be the repo root wherever sourcing happens.
   `robustness/` is the one exception to "one function per file": it holds the multi-function
@@ -52,7 +52,14 @@
   something, the live `tests/testthat/` suite is the source of truth.
 - Every change that touches a function used elsewhere (data_processing.R, the controls list)
   needs the full `Rscript run_tests.R` suite green before you consider the task done.
-- Whenever `paper/paper.tex`, `paper/appendix.tex` or `paper/references.bib` is modified in a session, recompile before
+- `paper/code_appendix.tex` (Appendix E, added 2026-09-28) `\lstinputlisting{}`s 20 estimation
+  scripts and the block of `main.R` between its `# BEGIN employmentddd` / `# END employmentddd`
+  marker comments straight from the repo, so every comment in those files prints in the paper.
+  Keep their comments short and ASCII (non-ASCII in strings is mapped by `literate=` in
+  `paper.tex`'s `\lstset`), keep the two markers in place, and treat a script edit as a paper
+  edit that needs a recompile.
+- Whenever `paper/paper.tex`, `paper/appendix.tex`, `paper/code_appendix.tex`, `paper/references.bib`
+  or a script listed in the code appendix is modified in a session, recompile before
   finishing the turn, overwriting `paper/paper.pdf`. `latexmk` is not usable on this machine
   (MiKTeX's `latexmk` requires Perl, which isn't installed) — use the manual sequence instead:
   `pdflatex`, `bibtex`, `pdflatex`, `pdflatex`, run from within `paper/`. If the final log warns

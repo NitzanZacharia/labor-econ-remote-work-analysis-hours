@@ -1,34 +1,18 @@
 library(tidyverse)
 library(fixest)
 
-# Function to import the external, objective teleworkability index. `path` defaults to the
-# project's real data file (not present in every environment -- a known, separately-tracked gap,
-# not something this default is meant to paper over); the parameter exists so callers -- and
-# tests -- can point at a different file without editing this function.
+# The external (Dingel & Neiman) teleworkability score by two-digit ISCO-08.
 build_exposure_isco2 <- function(path = file.path("data", "israeli_cbs_wfh_2digit.csv")) {
   read_csv(path, show_col_types = FALSE) %>%
     transmute(ISCO2 = as.numeric(isco_2digit), tele_ext = wfh_probability_2d) %>%
     filter(!is.na(tele_ext))
 }
 
-# Corrects the external (Dingel & Neiman) teleworkability score where Israeli institutional
-# reality diverges sharply from the US-task-based prediction -- the standing example is teaching
-# (ISCO 23): D&N scores it 0.966 (near-ceiling teleworkable), but Israeli teachers essentially
-# don't work from home (realized 2022-23 usage 0.063) because schools stayed in-person by Ministry
-# of Education policy, not by individual choice.
-#
-# A gap this size is real, not noise, for ISCO 23 (n = 12,881). But a flat gap threshold applied
-# to every occupation regardless of sample size lets a handful of observations swap the index --
-# e.g. ISCO 63 (subsistence farmers), n = 4, would swap 0.000 -> 0.750 on that alone. So the swap
-# is only made when the gap exceeds the substantive threshold (gap_threshold) by more than the
-# realized estimate's own sampling uncertainty: a one-sided test that the TRUE gap exceeds
-# gap_threshold, at conf_level confidence, using a cluster-robust SE (cluster = IDPUF -- this
-# project's own convention everywhere else regressions are run; roughly 15,000 IDPUFs repeat
-# across the pooled 2022-2023 window this draws on by default, so an unclustered SE understates
-# uncertainty by ~54% on average -- confirmed against the real data before this threshold was
-# adopted). Occupations too thin to compute a cluster-robust SE at all (e.g. ISCO 63) fail the
-# test automatically and keep their theoretical value, the same outcome a min_n floor would give,
-# but without a second, independently-chosen number to justify.
+# Replaces the external score with the realized 2022-23 Israeli WFH share where Israeli practice
+# diverges from the US task-based prediction (teaching: 0.966 external, 0.063 realized). The swap
+# requires the gap to exceed gap_threshold by more than the realized share's cluster-robust
+# sampling uncertainty (one-sided test at conf_level), so a thin occupation cannot swap on a
+# handful of observations.
 calibrate_isco_exposure <- function(cleaned_df, exposure_isco2, wfh_col = "WFH",
                                     ref_year = c(2022, 2023), gap_threshold = 0.5,
                                     conf_level = 0.95) {
@@ -44,17 +28,8 @@ calibrate_isco_exposure <- function(cleaned_df, exposure_isco2, wfh_col = "WFH",
 
   z <- qnorm(conf_level)
 
-  # A cluster-robust SE is undefined for two known, expected reasons: fewer than 2 distinct
-  # IDPUF (feols's vcov hits a singular matrix and fixest throws an ERROR from eigen(), not a
-  # warning -- confirmed against the real data: ISCO 63's 4 rows all belong to one IDPUF, the same
-  # person surveyed 4 times in 2023, and fixest reports "infinite or missing values in 'x'"), or a
-  # constant outcome within the occupation (feols refuses an intercept-only fit on a constant DV).
-  # Both are checked explicitly and handled the same way (kept at theoretical, not swapped) rather
-  # than being funneled through a blanket tryCatch(error=..., warning=...) -- that would silently
-  # swallow a genuinely unexpected failure too (e.g. a mistyped wfh_col), turning a real bug into
-  # "nothing got swapped" with zero diagnostic trace. Any OTHER error is still caught (fixest is a
-  # third-party dependency; a truly unanticipated failure shouldn't halt the whole pipeline) but is
-  # always reported below with the specific occupation and error text, not swallowed silently.
+  # A cluster-robust SE is undefined with fewer than two IDPUFs or a constant outcome; those
+  # occupations keep the external value. Other fixest errors are reported, not swallowed.
   realized <- df %>%
     group_by(ISCO2) %>%
     group_modify(~ {
@@ -99,7 +74,8 @@ calibrate_isco_exposure <- function(cleaned_df, exposure_isco2, wfh_col = "WFH",
     arrange(desc(gap))
 }
 
-# Build shift-share exposure by demographic cells based on pre-crisis years (2017-2019)
+# Pre-period (2017-2019) shift-share exposure by demographic cell: the calibrated occupation score
+# averaged over each cell's occupational composition.
 build_exposure_cells <- function(raw_all, exposure_isco2,
                                  cell_vars = c("Min", "GilNK", "TeudaGvoha", "MachozMegurim")) {
   raw_all %>%

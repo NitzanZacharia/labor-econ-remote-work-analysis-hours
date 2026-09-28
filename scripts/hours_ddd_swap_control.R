@@ -1,31 +1,8 @@
 # hours_ddd_swap_control.R
-# A fixed-sample test of the exposure calibration
-# (docs/decisions/grade-report-2-response.md, Methods 1).
-#
-# The problem it answers. calibrate_isco_exposure() swaps ten of forty occupation scores to their
-# realized 2022-23 Israeli WFH shares, which sit inside the post-period. The paper's existing
-# defence -- re-estimate on the thirty occupations the calibration left alone -- changes the SAMPLE
-# as well as the measure: it drops nearly half the rows, including the three largest occupations.
-# A reader cannot tell whether the estimate on the thirty differs from the external-index estimate
-# on the forty because the calibration is right or because the largest occupations are gone.
-#
-# This specification holds the sample at all forty occupations and uses the fully pre-treatment
-# external (Dingel & Neiman) score as the regressor, but lets the ten swapped occupations have
-# their own level, their own motherhood gap, their own post-period change and their own change in
-# the motherhood gap:
-#
-#   WorkHoursCont ~ Mother * Post * WFH_Exposure + Mother * Post * Swapped + controls
-#
-# Mother:Post:WFH_Exposure is then the external-score gradient identified off variation in the
-# external score WITHIN the swapped and unswapped groups (the Mother:Post:Swapped term absorbs the
-# between-group difference in the post-2021 change of the motherhood gap). If the calibration
-# merely relabels ten occupations that behave like their external score says, the two triple
-# interactions should be small; if those ten occupations are genuinely mis-scored by the external
-# index -- teaching and clerical work returned to the workplace whatever their task content --
-# Mother:Post:Swapped should be negative (the external index puts them in the treated tail, and
-# they did not respond) and the external-score gradient should re-emerge once they are allowed
-# their own change. Same join, subsample and occupation-level clustering as
-# run_hours_ddd_regression(), so the row is comparable with Table 4's others.
+# Fixed-sample test of the calibration: the external score as regressor on all forty occupations,
+# with the ten swapped occupations given their own Mother x Post structure. The unswapped-30 row
+# changes the sample as well as the measure; this keeps the sample and lets Mother:Post:Swapped
+# absorb the swapped group's own post-2021 change in the motherhood gap.
 library(tidyverse)
 library(fixest)
 source(file.path("scripts", "data_processing.R"))

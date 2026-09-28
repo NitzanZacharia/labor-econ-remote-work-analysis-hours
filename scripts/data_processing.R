@@ -1,7 +1,6 @@
 library(tidyverse)
 
-# Single source of truth for the regression controls (docs/ROADMAP.md Checkpoint 3);
-# test-controls-consistency.R fails on any local copy.
+# DEFAULT_CONTROLS is the single source of truth for the regression controls.
 DEFAULT_CONTROLS <- c("MatzavMishpachti", "Dat", "GilNK", "MachozMegurim", "TeudaGvoha")
 
 load_and_clean_data <- function(folder_path, sex_filter = c("women", "men")) {
@@ -9,18 +8,14 @@ load_and_clean_data <- function(folder_path, sex_filter = c("women", "men")) {
   sex_filter <- match.arg(sex_filter)
   min_code <- if (sex_filter == "women") 2 else 1
 
-  # ── 1. Load raw data ────────────────────────────────────────────────────────
+  # 1. Load raw data
   if (!dir.exists(folder_path)) stop("Target data folder not found.")
 
   data_raw <- list.files(folder_path, pattern = "\\.csv$", full.names = TRUE) %>%
     set_names() %>%
     map_df(~read_csv(.x, guess_max = 50000, show_col_types = FALSE), .id = "file_source")
 
-  # ── 2. Filter ────────────────────────────────────────────────────────────────
-  # Min == 2 (women) or Min == 1 (men), per sex_filter -- default "women" preserves the original,
-  # unconditional Min == 2 behavior for every existing caller (Checkpoint 5: Gender Placebo Test)
-  # GilNK 3–7: age groups 25–59
-  # ShnatSeker: relevant survey years (excl. 2020)
+  # 2. Filter: sex, ages 25-59 (GilNK 3-7), survey years excluding 2020
   filtered_df <- data_raw %>%
     filter(
       Min == min_code,
@@ -28,14 +23,13 @@ load_and_clean_data <- function(folder_path, sex_filter = c("women", "men")) {
       ShnatSeker %in% c(2017, 2018, 2019, 2021, 2022, 2023)
     )
 
-  # ── 3. Create new variables ──────────────────────────────────────────────────
+  # 3. Derived variables
   # ShaotAvodaBederechKlalNK bin -> median usual weekly hours (codebook: bin bounds)
   hour_bin_median <- c(`0` = 0, `1` = 4, `2` = 11, `3` = 18, `4` = 25.5, `5` = 32,
                         `6` = 37, `7` = 42, `8` = 47, `9` = 54.5, `10` = 78.5)
 
-  # Both raw hour items (ShaotAvodaLeMaase, KamaShaot) use values in the 90s as codes
-  # ("irregular"/"unknown"), not as hour counts, so only 1-89 is a real duration. as.numeric()
-  # first because a year whose file has the column entirely empty is read as logical, not numeric.
+  # Values in the 90s of the raw hour items are CBS codes, not hours; as.numeric() first because
+  # an empty column reads as logical.
   hours_or_na <- function(x) {
     v <- suppressWarnings(as.numeric(x))
     if_else(!is.na(v) & v >= 1 & v <= 89, v, NA_real_)
@@ -45,42 +39,23 @@ load_and_clean_data <- function(folder_path, sex_filter = c("women", "men")) {
     mutate(
       Mother                 = as.integer(MisparYeladimAd17MB > 0),
       Post                   = as.integer(ShnatSeker >= 2021),
-      # Y: not Muasak==1 ("employed") is treated as "not working" (unemployed and
-      # not-in-labor-force are not distinguished), per project guidance.
+      # Employed: Muasak == 1; unemployed and not-in-labor-force are both 0.
       Employed = if_else(!is.na(Muasak) & Muasak == 1, 1L, 0L),
-      # ── WFH block (raw columns AvodaMeHaBayit / AvadMeHaBayit / KamaShaot) ──
-      # Asked from 2021 onward only -- the columns exist in the 2018-2023 schema but are empty in
-      # 100% of pre-2021 rows, so everything here is NA by design before 2021.
-      #
-      # CBS codes both yes/no items as 1 = yes, 2 = no, 9 = unknown. 9 must map to NA, NOT to 0:
-      # the previous `AvodaMeHaBayit != 1 ~ 0` rule silently recoded 2,920 "unknown" responses in
-      # 2021 alone (2.4% of employed) as "does not work from home".
-      #
-      # WFH ("usual work location", asked of every employed person) is kept as the headline
-      # measure for backward compatibility, but WFH_RefWeek is the better-behaved series: WFH's
-      # level drifts implausibly across years (15.3% -> 12.7% -> 12.4% among employed women 25-59)
-      # while WFH_RefWeek is stable (18.3% -> 19.2% -> 19.3%), and WFH_RefWeek correlates more
-      # strongly with the external teleworkability benchmark at ISCO-2 level (0.833 vs 0.796).
+      # WFH block, asked from 2021 only. CBS codes 1 = yes, 2 = no, 9 = unknown; 9 maps to NA, not 0.
       WFH = case_when(
         ShnatSeker < 2021   ~ NA_real_,
         AvodaMeHaBayit == 1 ~ 1,
         AvodaMeHaBayit == 2 ~ 0,
         .default = NA_real_          # code 9 ("unknown") and genuine missingness
       ),
-      # Reference-week behaviour. Asked only of the employed who actually worked that week
-      # (AvadBeshavua == 1), so the ~10,955 employed-but-absent per year are legitimately NA
-      # rather than 0.
+      # Reference-week WFH is asked only of those who worked that week, so the absent are NA.
       WFH_RefWeek = case_when(
         ShnatSeker < 2021  ~ NA_real_,
         AvadMeHaBayit == 1 ~ 1,
         AvadMeHaBayit == 2 ~ 0,
         .default = NA_real_
       ),
-      # Intensity. KamaShaot is asked only of WFH_RefWeek == 1 (verified: its non-empty count
-      # equals the AvadMeHaBayit == 1 count exactly), and is hours worked from home in the
-      # reference week -- confirmed KamaShaot <= ShaotAvodaLeMaase in 18,619/18,619 cases.
-      # Values 90-97 in both hour items are CBS codes ("irregular"/"unknown"), not hour counts:
-      # every KamaShaot == 97 is paired with ShaotAvodaLeMaase == 97, so they are excluded.
+      # Hours worked from home in the reference week; codes 90-97 are excluded.
       .hrs_home  = hours_or_na(KamaShaot),
       .hrs_total = hours_or_na(ShaotAvodaLeMaase),
       WFH_Hours = case_when(
@@ -103,22 +78,14 @@ load_and_clean_data <- function(folder_path, sex_filter = c("women", "men")) {
         levels = c("On-site", "Hybrid", "Fully remote")
       ),
 
-      # ── ISCO-08 occupation code ────────────────────────────────────────────
-      # CBS disclosure-masks this field: alongside real codes it contains "XX", "1X", "7X", ...
-      # 9,303 of 123,794 employed 2021 rows (7.5%) are masked across the whole file, though only
-      # 2.4% within this project's analysis sample (employed women 25-59) -- masking concentrates
-      # in thinly-populated occupation cells. as.numeric() turns all of those into NA, which the
-      # exposure-index join then drops without a word, so the mask is now recorded explicitly
-      # (ISCO_masked) and the 1-digit major group is recovered where it survives the mask (ISCO1),
-      # giving a coarser but usable fallback.
+      # CBS disclosure-masks the occupation code ("XX", "7X"); the mask is recorded and the 1-digit
+      # major group recovered where possible.
       .isco_chr = as.character(MishlachYad_ISCO_08_2),
       MishlachYad_ISCO_08_2 = suppressWarnings(as.numeric(.isco_chr)),
       ISCO_masked = !is.na(.isco_chr) & is.na(MishlachYad_ISCO_08_2),
       ISCO1 = suppressWarnings(as.numeric(str_sub(.isco_chr, 1, 1))),
 
-      # Bin-index -> median-hours lookup for ShaotAvodaBederechKlalNK's regular-hours codes
-      # (0-10). WorkHoursCont itself (including the code-11/12 irregular-hours imputation) is
-      # computed further below, after this mutate() and grouped by Post -- see that block for why.
+      # Bin median for the regular-hours codes 0-10; WorkHoursCont is completed below, by period.
       .hour_bin_val = unname(hour_bin_median[as.character(ShaotAvodaBederechKlalNK)]),
 
       # Education, grouped into broader categories (raw TeudaGvoha codes; 99 -> NA)
@@ -137,10 +104,8 @@ load_and_clean_data <- function(folder_path, sex_filter = c("women", "men")) {
                    "Academic Degree (BA/MA/PhD)", "Other/No Certificate")
       ),
 
-      # Country of birth, grouped by continent (raw SemelEretzLeda codes).
-      # Israel kept separate (dominant reference group, not a foreign continent);
-      # code 7 spans multiple continents in CBS's own coding -> "Other";
-      # code 16 is ambiguously double-labeled "unknown"/"other" in the codebook -> NA.
+      # Country of birth by continent; Israel kept separate; code 7 spans continents ("Other"),
+      # code 16 is ambiguous (NA).
       BirthContinent = factor(case_when(
         SemelEretzLeda == 10                     ~ "Israel",
         SemelEretzLeda %in% c(1, 6, 11, 14)      ~ "Asia",
@@ -151,62 +116,20 @@ load_and_clean_data <- function(folder_path, sex_filter = c("women", "men")) {
         .default = NA_character_
       )),
 
-      # Work mobility: does she commute outside her locality of residence?
-      # (DargatNayadut: 0=didn't work, 1=works in residence locality,
-      #  2-7=commutes out (increasing distance), 8=unknown)
+      # Commutes outside the locality of residence (DargatNayadut 2-7).
       WorksOutsideLocality = case_when(
         DargatNayadut == 1          ~ 0L,
         DargatNayadut %in% 2:7      ~ 1L,
         .default = NA_integer_
       )
     ) %>%
-    # Continuous work-hours variable: bins 0-10 -> their range's median (a per-row lookup,
-    # independent of period). Codes 11/12 (irregular hours, <35 / >=35 weekly) are imputed from
-    # the sample's OWN median hours among regular (non-irregular) workers in the matching range --
-    # computed separately for the pre- (Post==0) and post- (Post==1) WFH-shift periods, not pooled
-    # across 2017-2023. Pooling both periods into one constant would silently blend their hour
-    # distributions and mechanically dampen exactly the kind of period-specific intensity shift
-    # (irregular-hours workers' typical hours changing after WFH adoption) the intensive-margin
-    # DiD (intensive_margin_regression.R) is designed to detect. Code 99 (irregular, unknown
-    # extent) -> NA, same as before.
-    #
-    # Gated on Employed == 1: "usual weekly hours" is only meaningful for someone who has a job.
-    # Previously ungated, a non-employed row with a populated ShaotAvodaBederechKlalNK code (a real
-    # possibility, not just a synthetic edge case -- e.g. a data-entry quirk where the hours item
-    # wasn't nulled out) got a literal number (bin 0 -> 0.0), indistinguishable from an employed
-    # person who reported the lowest hours bin. Every existing downstream consumer already
-    # restricts to Employed == 1 before touching WorkHoursCont (intensive_margin_regression.R,
-    # intensive_margin_lee_bounds.R), so this doesn't change any regression result -- it just
-    # makes the variable itself correctly undefined for the population it was never meant to
-    # describe. The code-11/12 donor pool is restricted to Employed == 1 rows for the same reason
-    # ("median hours among regular ... workers", per the comment above).
-    #
-    # ALSO gated on AvadBeshavua == 1 (worked in the reference week), which harmonizes the hours
-    # population across survey years -- see docs/decisions/hours-population-harmonization.md.
-    # The problem this solves: bin 0 is not a "bad" code, it means "no usual hours / did not work",
-    # and CBS uses it in every year (16,821 non-employed rows in 2017, 15,601 in 2018, ...). What
-    # is 2017-specific is that the 2017 file ALSO used it for the employed-but-absent: AvadBeshavua
-    # partitions 2017's employed perfectly, with all 5,169 bin-0 rows at code 4 (did not work that
-    # week) and all 47,729 others at code 1. From 2018 on, that same population was given a real
-    # usual-hours code instead. The absentee group is ~10% of the employed in every year
-    # (9.8/10.3/10.6/12.0/9.9/10.4% for 2017-2023), so the population is stable -- only its coding
-    # changed.
-    #
-    # Gating on bin 0 alone would therefore NOT fix this: it would leave 2017 conditioning on
-    # "worked that week" while the other five years did not. Since absenteeism is mother-skewed
-    # (12.4% of employed mothers vs 7.3% of non-mothers), that is differential selection on exactly
-    # the dimension this project's estimand contrasts, and it overshoots -- the 2017 raw gap lands
-    # at -1.373 against 2018's -1.571 and 2019's -1.678, i.e. past them rather than onto them.
-    # Restricting every year to the reference-week workers instead makes the hours population
-    # identical across years, at the cost of ~10% of each year's hours sample and a slightly
-    # narrower estimand: usual hours among those who worked the reference week.
-    #
-    # The bin-0 branch below is redundant on today's data (every 2017 bin-0 row is AvadBeshavua==4,
-    # so the gate above already catches it) and is kept only as a guard: a bin-0 row that DID work
-    # the reference week would otherwise still be handed a literal 0 by the %in% 0:10 branch.
-    # Note hour_bin_median's `0` = 0 entry (top of this file) is not wrong in itself -- 0 is the
-    # right ACTUAL hours for someone who did not work. It is wrong only as a USUAL-hours value,
-    # which is what this variable is.
+    # WorkHoursCont: bin medians for codes 0-10; the irregular-hours codes 11/12 are imputed from
+    # the median of regular workers in the matching range, separately by period so a
+    # period-specific shift is not blended away. Defined only for the employed who worked in the
+    # reference week (AvadBeshavua == 1): the 2017 file recorded the employed-but-absent as zero
+    # usual hours while later years gave them a real value, and absence is mother-skewed, so the
+    # hours population is harmonized across years at the cost of about 10% of each year's
+    # employed sample.
     group_by(Post) %>%
     mutate(
       WorkHoursCont = case_when(
@@ -228,8 +151,7 @@ load_and_clean_data <- function(folder_path, sex_filter = c("women", "men")) {
       )
     )
 
-
-  # ── 4. Drop unwanted columns ─────────────────────────────────────────────────
+  # 4. Drop unused raw columns
   cols_to_drop <- c(
     "ShnotLimud", "SugBeitSeferAcharon", "AvadBeshavua2", "ChipesChodesh",
     "KamaPachot", "SibaAvadPachot", "MisparShaotNosafot", "ShaotAvodaLeMaase",
@@ -254,13 +176,7 @@ load_and_clean_data <- function(folder_path, sex_filter = c("women", "men")) {
     "SibaHifsikLaavodMityaesh", "SofShavua", "SugMachala", "SugTeuna",
     "YachalLehatchil30Mityaesh", "YamimBashavua", "ZmanLaavoda",
     "KamaPachot_Unified",
-    # Formerly dropped via 2 positional ranges (-(EizeChozemechushav:ChodeshKodemShaa) and
-    # -(MimaHaMigbala:PniyaLmaasik)); moved to explicit any_of()-based names because
-    # 2017_Data.csv lacks all 4 boundary columns entirely (confirmed: 2018-2023 have them
-    # consistently), which made the positional-range approach fail check_schema_drift() on a
-    # file that was never going to contain the columns in the first place. any_of() tolerates
-    # a name simply not existing in a given year, unlike a positional a:b range. No columns
-    # dropped here are used anywhere downstream (verified via grep before this change).
+    # Explicit names rather than positional ranges: the 2017 file lacks the boundary columns.
     "EizeChozemechushav", "HaimMemunemechushav", "HaimMenahelmechushav",
     "KamaKfufimmechushav", "KamaSchirimmechushav", "LoAvadMigbalamechushav",
     "MaasikSchirimmechushav", "MeshechChipusAvodaMityaeshNK", "MeshechChipusAvodaMuasakNK",
@@ -299,4 +215,3 @@ load_and_clean_data <- function(folder_path, sex_filter = c("women", "men")) {
 
   return(df)
 }
-

@@ -1,38 +1,11 @@
 # hours_ddd_inference.R
-# Small-cluster inference for the primary hours DDD (scripts/hours_ddd_regression.R);
-# docs/decisions/grade-report-response.md, items R1 and M2.
-# Two functions, both about the same forty-cluster problem, so this lives in robustness/ with the
-# other multi-function robustness chains rather than in scripts/.
-#
-# The headline regressor is constant within forty two-digit occupations, so standard errors are
-# clustered at that level and the reported p-values lean on a t(39) approximation. Two things
-# complement that:
-#
-#   1. run_hours_ddd_wild_bootstrap(): a wild cluster bootstrap p-value (Rademacher weights, null
-#      imposed) via fwildclusterboot::boottest(). Used for the headline triple interaction on the
-#      pooled model, and for the DDD event study's two pre-period coefficients individually and
-#      as a sum. The JOINT pre-trend test stays the analytic Wald F from pretrend_wald_test.R:
-#      fwildclusterboot's mboottest() runs only through Julia (WildBootTests.jl), which is not part
-#      of this project's toolchain. boottest() also refuses fixest's `^` fixed-effect syntax, so
-#      the saturated column (scripts/hours_ddd_saturated.R) reports analytic SEs only.
-#
-#   2. run_hours_ddd_permutation_test(): a randomization test of the sharp null that the exposure
-#      score is exchangeable across occupations. The forty occupation scores are permuted across
-#      the forty occupation codes (the Mother/Post design and every individual's occupation stay
-#      fixed), the DDD is refit, and the cluster-robust t of the triple interaction is recorded.
-#      The reference distribution is of the STUDENTIZED statistic, not the raw coefficient:
-#      reassigning exposure across occupations of very different sizes changes the coefficient's
-#      sampling variance draw to draw, so the raw coefficient is not pivotal. This is also the
-#      paper's genuine falsification test -- the fathers' comparison is a different population,
-#      not an untreated one.
-#
-# Dependency note. fwildclusterboot (and dqrng, which it draws from) is the one package beyond
-# tidyverse + fixest this project uses, flagged in CLAUDE.md and README.md. It is loaded with
-# requireNamespace() INSIDE the function, never library() at file top: tests/testthat/helper-setup.R
-# sources this file, and a top-level library() would break the whole test session on a machine
-# without it. Seeding: set.seed() alone does NOT fix boottest()'s Rademacher draws (verified:
-# two runs after set.seed(1) gave different p-values); dqrng::dqset.seed() is what the package
-# samples from, so both are set.
+# Small-cluster inference for the hours DDD, whose regressor varies across forty occupations.
+# run_hours_ddd_wild_bootstrap(): wild cluster bootstrap p-values (Rademacher, null imposed) via
+# fwildclusterboot::boottest(), for the headline and the event study's pre-period terms; the joint
+# pre-trend test stays the analytic Wald F. run_hours_ddd_permutation_test(): the forty exposure
+# scores are reassigned across occupations, the DDD refit and the cluster-robust t recorded; the
+# studentized statistic is used because the raw coefficient is not pivotal across reassignments.
+# fwildclusterboot is loaded inside the function; dqrng::dqset.seed() is what fixes its draws.
 library(tidyverse)
 library(fixest)
 source(file.path("scripts", "data_processing.R"))
@@ -60,8 +33,7 @@ run_hours_ddd_wild_bootstrap <- function(model, param, clustid = "MishlachYad_IS
     args$R <- R
     args$r <- r
   }
-  # The package prints a one-time note about reproducibility across its own versions; that is not
-  # a problem with this call and would otherwise land in every main.R log.
+  # The package's one-time reproducibility note is suppressed.
   bt <- suppressWarnings(suppressMessages(do.call(fwildclusterboot::boottest, args)))
 
   ci <- bt$conf_int
@@ -117,8 +89,7 @@ run_hours_ddd_permutation_test <- function(cleaned_df, exposure_index, n_perm = 
   t_obs <- b_obs / unname(se(m_obs)[[coef_name]])
   n_clusters <- n_distinct(df_ddd$MishlachYad_ISCO_08_2)
 
-  # Permute the occupation-level score vector and index it onto rows, rather than re-joining or
-  # mutating a 246k-row frame through dplyr each draw.
+  # Permute the score vector and index it onto rows.
   codes <- exposure_index$occupation_code
   vals  <- exposure_index$wfh_exposure
   idx   <- match(df_ddd$MishlachYad_ISCO_08_2, codes)
@@ -146,8 +117,7 @@ run_hours_ddd_permutation_test <- function(cleaned_df, exposure_index, n_perm = 
 
   ok <- is.finite(t_perm)
   n_ok <- sum(ok)
-  # Phipson & Smyth (2010): count the observed statistic among the draws, so p is never zero and
-  # its resolution is honestly 1 / (n_perm + 1).
+  # Phipson and Smyth (2010): count the observed statistic among the draws.
   p_perm_t    <- (1 + sum(abs(t_perm[ok]) >= abs(t_obs))) / (1 + n_ok)
   p_perm_coef <- (1 + sum(abs(coef_perm[ok]) >= abs(b_obs))) / (1 + n_ok)
 

@@ -196,17 +196,14 @@ run_comparative_stats(cleaned_df: tibble) ->
     plots = list(mobility = ggplot)
   ))
 
-# ── basic_regression.R / basic_reg_compared_data.R ──────────────────────────
-# Secondary (extensive-margin) regressions -- see intensive_margin_regression.R below for the
-# primary (hours) regression, per docs/decisions/hours-ddd-pivot.md.
+# ── basic_regression.R ───────────────────────────────────────────────────────
+# Secondary (extensive-margin) regression -- see intensive_margin_regression.R below for the
+# primary (hours) regression, per docs/decisions/hours-ddd-pivot.md. (basic_reg_comp(), the
+# Muasak-observed-only variant in basic_reg_compared_data.R, was never called and was removed
+# 2026-09-28.)
 basic_reg(cleaned_data: tibble) ->
   invisible(list(table = etable_df, models = list(employed = fixest)))
 # Employed ~ Mother + Post + Mother:Post + DEFAULT_CONTROLS, cluster = ~IDPUF.
-
-basic_reg_comp(cleaned_data: tibble) ->
-  invisible(list(table = etable_df, models = list(employed = fixest, employed_muasak = fixest)))
-# Same formula as basic_reg(), fit on the full sample and on filter(!is.na(Muasak)).
-# Not called from main.R by default.
 
 # ── intensive_margin_regression.R / intensive_margin_lee_bounds.R ──────────
 # Primary (intensive-margin, hours) regressions -- see docs/decisions/hours-ddd-pivot.md.
@@ -503,12 +500,6 @@ run_pretrend_joint_test(pretrend_model: fixest,
 
 # All wired into main.R behind RUN_AGE_BALANCE_ROBUSTNESS (default TRUE as of 2026-09-19) -- see
 # docs/decisions/age-balance-robustness-chain.md.
-
-# ── israeli_market_mismatch.R ────────────────────────────────────────────────
-check_market_mismatch(cleaned_df: tibble, exposure_path: character(1) = "data/israeli_cbs_wfh_2digit.csv",
-                       ...) -> tibble
-# calibrate_isco_exposure()'s output plus israel_vs_us_gap, abs_mismatch; sorted desc(abs_mismatch).
-# Descriptive-only; not sourced by main.R (invoked via run_mismatch.R).
 
 # ── export_results.R ──────────────────────────────────────────────────────
 export_all_results(results_list: list, output_dir: character(1) = "outputs") -> invisible(character)

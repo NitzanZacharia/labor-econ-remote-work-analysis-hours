@@ -1,5 +1,4 @@
-# Secondary/extensive-margin (Employed) outcome, post-hours-pivot (docs/decisions/hours-ddd-pivot.md)
-# -- intensive_margin_regression.R's run_intensive_margin_reg() is now the primary DiD.
+# Secondary DiD: employment on Mother x Post with the standard controls.
 library(tidyverse)
 library(fixest)
 source(file.path("scripts", "data_processing.R"))
@@ -28,5 +27,3 @@ basic_reg <- function(cleaned_data) {
     models  = list(employed = reg_employed)
   )))
 }
-
-

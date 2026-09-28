@@ -3,28 +3,19 @@ library(fixest)
 
 run_diagnostics <- function(cleaned_df) {
 
-  # ── 1. 2x2 DiD table ─────────────────────────────────────────────────────
-  # Employment rate by Mother/Post cells.
-  # The DiD is meaningful if:
-  #   [emp(Mother=1, Post=1) - emp(Mother=1, Post=0)] ≠
-  #   [emp(Mother=0, Post=1) - emp(Mother=0, Post=0)]
+  # 1. Employment rate by Mother/Post cell
   message("=== 2x2 DiD employment rates ===")
   did_table <- cleaned_df %>%
     group_by(Mother, Post) %>%
     summarise(emp_rate = mean(Employed, na.rm = TRUE), n = n(), .groups = "drop")
   print(did_table)
 
-  # ── 2. Employed variable distribution ────────────────────────────────────
+  # 2. Employed counts
   message("=== Employed variable counts ===")
   print(cleaned_df %>% count(Employed))
 
-  # ── 3. Parallel trends — event-study plot ────────────────────────────────
-  # Pre-2021 interaction coefficients should be flat if parallel trends holds.
-  # i(ShnatSeker, ref = 2019) supplies the year main effects for the Post=0
-  # group; without it, non-mothers' year-to-year variation is unmodeled and
-  # the Mother:year coefficients below conflate the mother-specific deviation
-  # with the common year trend. ref = 2019 (not factor level order) is what
-  # sets the omitted reference period in both i() terms.
+  # 3. Event study: i(ShnatSeker, ref = 2019) supplies the year effects; 2019 is the reference in
+  # both i() terms.
   message("=== Pre-trend test (event study) ===")
 
   reg_pretrend <- feols(
@@ -36,26 +27,15 @@ run_diagnostics <- function(cleaned_df) {
   )
   pretrend_table <- etable(reg_pretrend, digits = 4)
   print(pretrend_table)
-  # Draws to whatever graphics device is already active -- deliberately no dev.new()/dev.off()
-  # here. dev.new() unconditionally opens a NEW top-level device regardless of context, which is
-  # what caused every headless `Rscript main.R` run to leak an auto-numbered Rplots*.pdf into the
-  # repo root (R falls back to a default pdf() device when no interactive one is available, and
-  # nothing ever closed it). Device management belongs to the caller, matching how the test suite
-  # already handles this (see helper-setup.R's with_null_device()) -- main.R wraps this call in an
-  # explicit device targeting outputs/; tests wrap it in a null device.
+  # Draws to the active device; the caller manages the device.
   tryCatch({
-    # reg_pretrend's formula has two separate i() terms, in this order: i(ShnatSeker, ref=2019)
-    # (year main effects, index 1) then i(ShnatSeker, Mother, ref=2019) (the Mother x Year
-    # interaction, index 2 -- the actual parallel-trends test this plot is titled for). iplot()'s
-    # i.select defaults to 1, i.e. the FIRST i() term -- without i.select = 2 here, this would
-    # silently plot the year main effects instead of the Mother x Year interaction the title
-    # claims to show, with no error to flag the mismatch.
+    # i.select = 2 picks the Mother x year interaction, not the year main effects.
     iplot(reg_pretrend, i.select = 2, main = "Event-study: Mother x Year (ref = 2019)")
   }, error = function(e) {
     message("iplot failed: ", e$message)
   })
 
-  # ── 4. Missing-value audit ────────────────────────────────────────────────
+  # 4. NA counts
   message("=== NA counts for regression variables ===")
   na_summary <- cleaned_df %>%
     select(Employed, Mother, Post, MatzavMishpachti, Dat, GilNK,
@@ -63,7 +43,7 @@ run_diagnostics <- function(cleaned_df) {
     summarise(across(everything(), ~sum(is.na(.))))
   print(na_summary)
 
-  # ── 5. Are missings on Employed systematic? ───────────────────────────────
+  # 5. Missingness pattern for Employed
   message("=== Missingness pattern for Employed ===")
   miss_pattern <- cleaned_df %>%
     mutate(emp_missing = is.na(Employed)) %>%
@@ -76,7 +56,7 @@ run_diagnostics <- function(cleaned_df) {
     )
   print(miss_pattern)
 
-  # ── 6. Peek at rows where Employed is NA ─────────────────────────────────
+  # 6. Sample rows with Employed missing
   message("=== Sample rows with Employed = NA ===")
   cleaned_df %>%
     filter(is.na(Employed)) %>%

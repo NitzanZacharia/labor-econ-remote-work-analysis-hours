@@ -1,5 +1,5 @@
 # test-basic_regression.R
-# Priority 2: basic_reg() and basic_reg_comp() contract tests, plus a hand-computable synthetic
+# Priority 2: basic_reg() contract tests, plus a hand-computable synthetic
 # DiD check on a saturated 2x2 design (exact arithmetic, no simulation/randomness needed).
 
 cleaned <- load_and_clean_data(fixtures_dir)
@@ -53,12 +53,3 @@ test_that("basic_reg recovers an exact hand-computable DiD effect on a saturated
   expect_equal(did_coef, 0.3, tolerance = 1e-8)
 })
 
-test_that("basic_reg_comp returns the documented structure and fits both models on fixture data", {
-  out <- capture.output(res <- basic_reg_comp(cleaned))
-  expect_type(res, "list")
-  expect_true(all(c("table", "models") %in% names(res)))
-  expect_s3_class(res$models$employed, "fixest")
-  expect_s3_class(res$models$employed_muasak, "fixest")
-  # the Muasak-observed-only model must have fewer or equal observations than the full sample
-  expect_lte(nobs(res$models$employed_muasak), nobs(res$models$employed))
-})

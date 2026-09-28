@@ -1,19 +1,10 @@
-# Checkpoint 4 (docs/ROADMAP.md): the intensive-margin (weekly work hours) DiD, per the research
-# doc's core DiD spec (Part 2 §1 / Part 4 §2), which models both an employment indicator and
-# weekly work hours. As of the hours pivot (docs/decisions/hours-ddd-pivot.md), this is the
-# project's PRIMARY dependent-variable regression; basic_regression.R's extensive-margin (Employed)
-# model is the secondary/comparison regression. Hours are only meaningful conditional on being
-# employed, so this is estimated on the Employed == 1 subsample.
+# Primary DiD: usual weekly hours on Mother x Post with the standard controls, on the employed.
 library(tidyverse)
 library(fixest)
 source(file.path("scripts", "data_processing.R"))
 
-# `year_fe` (docs/decisions/grade-report-response.md, item M1) replaces the single Post
-# main effect with survey-year effects, i(ShnatSeker, ref = ref_year), while keeping Mother:Post as
-# the coefficient of interest. The pooled 2x2 is the paper's column (1); the year-effects version
-# is a robustness row, since pooling six years into two periods lets year-specific movements in
-# hours (visible in Figure 1) load onto the Post intercept. Default FALSE reproduces every existing
-# call byte for byte.
+# year_fe replaces the single Post effect with survey-year effects (a robustness row); Mother:Post
+# stays the coefficient of interest.
 run_intensive_margin_reg <- function(cleaned_df, controls = DEFAULT_CONTROLS, year_fe = FALSE,
                                      ref_year = 2019) {
 

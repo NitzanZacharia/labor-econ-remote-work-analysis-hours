@@ -83,6 +83,27 @@
 \renewcommand{\floatpagefraction}{0.7}
 \setcounter{topnumber}{3}\setcounter{totalnumber}{4}
 \usepackage[authoryear,round]{natbib}
+% Replication-code appendix (code_appendix.tex): listings must load before hyperref.
+% The code is set in Inconsolata (zi4), which is far more legible than Latin Modern Mono at 6pt
+% and narrower; inconsolata.sty makes it the document's \ttdefault, so that is restored to lmtt
+% right after, and code_appendix.tex switches to zi4 for Appendix E only.
+\usepackage{array}
+\usepackage{capt-of}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{needspace}
+\usepackage[varqu,var0]{inconsolata}
+\renewcommand*{\ttdefault}{lmtt}
+\lstset{
+  language=R, basicstyle=\fontfamily{zi4}\fontsize{6}{7}\selectfont,
+  columns=fullflexible, keepspaces=true, showstringspaces=false,
+  breaklines=true, breakatwhitespace=false,
+  postbreak=\mbox{\textcolor{gray}{$\hookrightarrow$}\space},
+  commentstyle=\color{black!60}, keywordstyle=\color{blue!45!black}\bfseries,
+  stringstyle=\color{purple!55!black}, numbers=none,
+  frame=lines, framerule=0.3pt, framesep=2pt, aboveskip=2pt, belowskip=0pt, tabsize=2,
+  literate={–}{{--}}1 {—}{{---}}1 {×}{{$\times$}}1 {²}{{$^{2}$}}1 {≠}{{$\neq$}}1 {§}{{\S}}1 {─}{{-}}1
+}
 \usepackage{hyperref}
 \hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
 % hypertexnames=false gives every anchor a sequential internal name instead of one derived from
@@ -340,7 +361,8 @@ both zero). All regressions
 include the same categorical controls: marital status, religion, age group, district of residence
 and highest educational attainment (six groups); age enters as the CBS age-group code because the
 extract contains no continuous age. CBS survey weights are deliberately not applied in any
-outcome regression (Section~\ref{sec:limitations}).
+outcome regression (Section~\ref{sec:limitations}). Replication code is listed in
+Appendix~\ref{sec:app-code}.
 
 \subsection{Constructing WFH exposure}\label{sec:exposure}
 
@@ -1020,5 +1042,6 @@ from occupation choice.
 \setcounter{table}{0}\renewcommand{\thetable}{A\arabic{table}}
 \setcounter{figure}{0}\renewcommand{\thefigure}{A\arabic{figure}}
 \input{appendix}
+\input{code_appendix}
 
 \end{document}
