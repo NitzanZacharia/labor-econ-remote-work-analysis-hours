@@ -7,7 +7,7 @@ records every item still waiting on an author decision, ordered by whether it bl
 ## Deferred — circle back before submission
 
 The author asked on 2026-09-19 to park these four and return to them at the end. All four are now
-closed. What remains open is D3 and D4 in the tiers below; D10, D12 and D13 are noted only.
+closed. What remains open is D3 (the course bibliography rule); D10, D12 and D13 are noted only.
 
 | # | Item | Why it is parked | What closes it |
 |---|---|---|---|
@@ -142,7 +142,14 @@ needed; or confirm `apalike` is acceptable and the item closes.
 **Impact.** This is the one place the paper may fail an explicit stated requirement. Cheap to
 check, potentially expensive to miss. Hand-formatting 15 entries is about an hour.
 
-### D4. The Kleven suffix order
+### D4. The Kleven suffix order — CLOSED 2026-09-28
+
+**Closed 2026-09-28: accepted as is.** In an author–year style the a/b suffixes follow the reference
+list's alphabetical order, not the order of first citation, so meeting 2019b before 2019a is
+conventional, not an error. Reordering the sentences would invert the paragraph's argument, and the
+`key` field cannot force the suffix in `apalike` when an author field is present. If D3 ends in a
+hand-formatted bibliography, the suffixes are reassigned in that pass anyway. The original entry
+follows for the record.
 
 `paper/paper.tex`'s Literature Review citations of Kleven et al. `apalike` labels the cross-country paper 2019a and the Denmark
 paper 2019b by title sort, and the Literature Review cites b before a. I deliberately did not fix
