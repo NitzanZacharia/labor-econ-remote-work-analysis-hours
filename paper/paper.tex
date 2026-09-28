@@ -264,13 +264,20 @@ limits.
 \section{Literature Review}\label{sec:lit}
 %======================================================================
 
+Three questions organize the literature this paper draws on. Why does a motherhood penalty
+persist in labor markets where women's education and experience match men's, and is the
+inflexibility of jobs the reason? Does remote work, the largest shift in that inflexibility in
+decades, raise or lower the hours mothers supply, and does it narrow or widen gender gaps? And
+how can an economy-wide change in remote work be measured, and its effect identified, when no
+one is assigned to it at random? We take the three in turn, then collect what is known for
+Israel and state what this paper adds.
+
 \paragraph{The motherhood penalty and the flexibility mechanism.}
-The child penalty is one of the most robust facts in labor economics. Danish administrative
-data show that women's earnings fall by roughly 20\% in the long run relative to men's after a
-first birth, through reduced hours, exit from the labor market and moves into family-friendly,
-lower-paying jobs \citep{kleven2019denmark}, and the same pattern appears in all six countries of
-a cross-country comparison, with the size of the penalty tracking gender norms rather than family
-policy \citep{kleven2019countries}. Hours are one of
+The child penalty is one of the most robust facts in labor economics: across countries with
+very different family policies, women's earnings fall sharply and persistently relative to
+men's after a first birth, through reduced hours, exit from employment and moves into
+family-friendly, lower-paying jobs, and the size of the penalty tracks gender norms rather than
+policy \citep{kleven2019denmark, kleven2019countries}. Hours are one of
 the channels, which is why an intervention that changes the time cost of combining work and care
 could move the intensive margin even where it does not move employment. The remaining gap has
 been located in the structure of jobs \citep{goldin2014}: firms in many occupations pay
@@ -283,53 +290,75 @@ from home \citep{maspallais2017}, and the skilled gender gap is concentrated whe
 rewarded and narrows where substitutes for household time are cheap \citep{cortespan2019}. Remote
 work may also cut the other way, through lower visibility and slower advancement,
 so the sign is an empirical question. Goldin's framework says where to look for it: in the
-gradient of the response across occupations by teleworkability, not in its average. For Israel,
-the sorting of women into lower-paying firms, even within the same industry, is a first-order
-driver of the gender wage gap, while pay differences within firms contribute little
-\citep{buzaglo2023}, a reminder that any occupation-level measure captures only part of the
-heterogeneity.
+gradient of the response across occupations by teleworkability, not in its average.
 
 \paragraph{What remote work does to hours and to gender gaps.}
-Work from home settled at roughly a quarter of paid US workdays after 2021
-\citep{barrero2021, barrero2023}, freeing time that workers report splitting between paid work,
-care and leisure \citep{aksoy2023}. The direct evidence on hours points both ways:
-information-technology professionals who moved home in 2020 worked more hours while output fell
-slightly, so that measured productivity dropped by $8$--$19\%$ \citep{gibbs2023}, while American
-time diaries show that on remote days part of the time saved goes to family time and, for women,
-to household production, and that teleworking mothers report more interruptions to their workday
-\citep{pabilonia2022}. Those two results bracket
-the question this paper asks of mothers: whether the time remote work frees is returned to paid
-hours or absorbed by care. Among call-center workers, who selects into remote work differs
-sharply from what remote work does to them \citep{emanuelharrington2024}, which is why the
-design below measures \emph{exposure} from occupational content rather than from realized
-remote-work status. The experimental evidence on gender gaps is encouraging: randomly assigned
-home working raised both minutes worked per shift and output \citep{bloom2015}, and randomly
-assigned flexibility shifted the division of household tasks toward men \citep{angelici2024}.
-The acute 2020 evidence is not: women in WFH-feasible jobs absorbed a larger share of the
-childcare that school closures created \citep{adamsprassl2020}, as anticipated early in the
-pandemic \citep{alon2020}, and in Israel the 2020 lockdown reallocated paid and unpaid labor
-within households in gender-unequal ways \citep{yaish2021}. This paper uses post-acute data
-(2021--2023) rather than data from the initial shock. The paper closest to ours
-is the US study \citep{harrington2025} whose employment and income results the Introduction
-summarizes;
-their employment effect is driven by fields with high returns to hours and inflexible demands on
-time, and their income result is an intensive-margin finding of which hours are one channel, so
-our hours estimate is its closest analogue, without treating the two countries or the two
-outcomes as equivalent. For Israel, estimated motherhood penalties in employment and earnings
-differ across ethno-religious groups \citep{budig2023}; there is, to our knowledge, no published
-Israeli estimate of the penalty in hours
-conditional on working, so the level we report has no direct domestic benchmark.
+Remote work is now a settled feature of rich-country labor markets rather than a pandemic
+expedient, accounting for roughly a quarter of paid workdays in the United States since 2021
+\citep{barrero2021, barrero2023}, and the time it frees is split between paid work, care and
+leisure rather than returned to the employer in full \citep{aksoy2023}. Whether it raises hours
+is therefore not settled by the commute alone, and the direct evidence points both ways. Under
+randomized home working and in the pandemic move home, time worked rose, in the latter case
+without output keeping pace \citep{bloom2015, gibbs2023}; against this, time-use data show that
+on remote days part of the saved time goes to family and, for women, to household production,
+and that teleworking mothers face more interruptions to the workday \citep{pabilonia2022}.
+Those findings bracket the question this paper asks of mothers: whether the time remote work
+frees is returned to paid hours or absorbed by care. Two further regularities shape how the
+question can be asked. First, who selects into remote work differs sharply from what remote
+work does to a given worker \citep{emanuelharrington2024}, so a credible design must measure
+\emph{exposure} to remote work from the content of jobs rather than from realized remote-work
+status. Second, the effect on gender gaps depends on when it is measured. Under randomized or
+voluntary flexibility, household tasks shift toward men \citep{angelici2024}; under the acute
+2020 shock, with schools closed, women in WFH-feasible jobs absorbed the larger share of the
+childcare that resulted, as was anticipated at the time \citep{alon2020, adamsprassl2020}.
+Evidence on the post-acute period, once schools reopened and remote work became a job attribute
+rather than a lockdown condition, is much thinner, and it is that period this paper studies. The
+one study of remote work and the motherhood penalty in it \citep{harrington2025} finds that WFH
+raised US mothers' employment and income, with the employment effect concentrated in fields with
+high returns to hours and inflexible time demands. Hours are one channel of its income result,
+which makes our estimate its closest analogue while leaving open whether an intensive-margin
+effect exists on its own, and in a different country.
 
 \paragraph{Measurement and identification.}
-Occupations have been classified by whether their tasks can be performed entirely at home, a
-criterion 37\% of US jobs meet \citep{dingel2020}; that classification, mapped to two-digit
-ISCO-08 codes, is
-the starting point for our exposure index, calibrated against realized Israeli behavior
-(Section~\ref{sec:exposure}), for which a descriptive baseline exists \citep{madhala2020}.
-Because the third difference is a continuous exposure score rather than a treated/untreated
-split, the design belongs to the continuous-treatment difference-in-differences family
-\citep{callaway2024}, two of whose results on how to read a single slope coefficient are taken up
-in Section~\ref{sec:strategy}.
+Because remote work is chosen, the literature measures it in two ways: ex ante, by whether an
+occupation's tasks can be performed entirely at home, a criterion over a third of US employment
+meets \citep{dingel2020}; or ex post, by the share of workers in an occupation who actually work
+from home. The first is immune to selection but fixed by task content, so it scores an
+occupation identically in every country; the second reflects local practice but is itself a
+labor-market outcome. The two diverge wherever institutions overrode task content, as they did
+for teaching, which task content scores as fully teleworkable but which Israeli schools kept in
+person throughout the survey years. Our exposure index starts from the task-based classification
+mapped to two-digit ISCO-08 codes and calibrates it against realized Israeli remote work
+(Section~\ref{sec:exposure}), for which a pre-pandemic descriptive baseline exists
+\citep{madhala2020}. On identification, a continuous exposure score places the design in the
+continuous-treatment difference-in-differences family, whose recent results caution that a
+single slope compares outcomes across exposure levels, requires parallel trends across those
+levels rather than within them, and averages the comparisons with weights that need not be
+positive \citep{callaway2024}. Section~\ref{sec:strategy} takes up the two results that bear on
+reading our coefficient.
+
+\paragraph{What is known for Israel.}
+The Israeli evidence concerns other margins and other shocks. The gender wage gap is driven
+mainly by the sorting of women into lower-paying firms, even within industry, with pay
+differences within firms contributing little \citep{buzaglo2023}, a reminder that any
+occupation-level exposure measure captures only part of the relevant heterogeneity. Motherhood
+penalties in employment and earnings differ across ethno-religious groups \citep{budig2023},
+and the 2020 lockdown reallocated paid and unpaid work within households in gender-unequal ways
+\citep{yaish2021}. There is, to our knowledge, no published Israeli estimate of the motherhood
+penalty in hours conditional on working, so the level we report has no domestic benchmark, and
+no Israeli study asks whether remote work changed any margin of the penalty.
+
+\paragraph{What this paper adds.}
+Against these strands the contribution is specific. To the flexibility literature it brings the
+first estimate of the Israeli motherhood penalty in hours conditional on working, and a direct
+test of whether remote work changed that penalty on the intensive margin, a margin the US
+evidence reaches only indirectly through income. To the remote-work literature it brings
+post-acute rather than lockdown-period evidence, from an economy where mothers of young
+children are an unusually large share of the female workforce. To the measurement question it
+shows, through the teaching occupations, that calibrating a task-based exposure index to local
+practice can decide the result (Section~\ref{sec:res-ddd-diag}), and it treats the small number
+of occupation clusters as part of the evidence, reporting three inference procedures side by
+side rather than one.
 
 %======================================================================
 \section{Data and Institutional Context}\label{sec:data}
