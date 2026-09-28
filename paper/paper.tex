@@ -225,10 +225,11 @@ five and declines with the age of the youngest child, and fathers in the same oc
 gradient of the opposite sign. Because the exposure score varies across only forty occupations, we
 report analytic, permutation and wild cluster bootstrap inference side by side, and the strength
 of the statistical conclusion depends on which is used (Section~\ref{sec:res-ddd}). The estimate
-survives specification, selection, outcome-coding, leave-one-occupation-out and calibration checks
-and a test of sorting across occupations, although the one exposure measure built entirely from
-pre-treatment information yields a weaker, insignificant estimate
-(Section~\ref{sec:res-ddd-diag}).
+survives specification, selection, outcome-coding and leave-one-occupation-out checks and a test
+of sorting across occupations. It does depend on the calibration of the exposure index in one
+identifiable way: reclassifying teaching, which US task content scores as teleworkable but
+Israeli schools kept in person, is what separates it from the weaker, insignificant estimate the
+one fully pre-treatment exposure measure yields (Section~\ref{sec:res-ddd-diag}).
 
 Relative to the US evidence, the paper moves the question to the intensive margin, where the
 penalty operates through how much mothers who hold jobs can work rather than through whether they
@@ -786,8 +787,8 @@ Across every specification in the table that keeps a calibrated index, the tripl
 between $2.2$ and $4.3$ hours. The wild cluster bootstrap column of Table~\ref{tab:robust}
 tempers the stars: the analytic test over-rejects with forty clusters, and on the bootstrap the
 calibrated-index rows range from $p = 0.02$ (unswapped occupations, men-only calibration) to
-$p = 0.13$ (marital interaction), with the sample and outcome-coding rows all within two
-hundredths of the headline's own $0.056$.
+$p = 0.13$ (marital interaction), with the remaining sample and outcome-coding rows all within
+two hundredths of the headline's own $0.056$.
 % The 2.2--4.3 range is the minimum and maximum over Table 3's calibrated-index rows: age-interacted
 % 3.205, reweighted 2.597, married only 2.743, marital interacted 2.191, calibrated on men only
 % 3.869, unswapped occupations 4.309, excluding 2023 2.979, leave-one-occupation-out
@@ -814,8 +815,9 @@ teleworkable jobs across the full-time boundary.
 from equation~\eqref{eq:ddd}, women working in the reference week, standard controls, calibrated
 exposure, clustered by occupation with the cluster count in the last column, $p$ the
 analytic $t(G-1)$ $p$-value and $p$ (boot) the wild cluster bootstrap $p$-value of the same
-coefficient (Rademacher weights, null imposed, $9{,}999$ draws), blank where the row is not an
-occupation-clustered refit. The men-only row calibrates the index on men's realized 2022--23 WFH
+coefficient (Rademacher weights, null imposed, $9{,}999$ draws), blank where the row is not a
+one-way occupation-clustered refit of a single model (the two-way-clustered, leave-one-out,
+sorting and cell-index rows). The men-only row calibrates the index on men's realized 2022--23 WFH
 shares; the teaching-only row moves ISCO 23 alone from its external score to its realized share
 and leaves the other thirty-nine at the external score; the married-only row drops marital
 status from the controls; the marital-interacted row adds marital status $\times \Post \times
@@ -934,7 +936,8 @@ leave-one-out range that never leaves the headline's standard error, a monotone 
 gradient, an opposite-signed fathers' gradient and a selection correction that barely moves the
 bounds. Those checks are not independent confirmations: every one of them is estimated on the
 same forty occupation clusters as the headline, and where a wild cluster bootstrap $p$-value is
-available it puts the check, like the headline itself, at or just above the 5\% level
+available it lies above the 5\% level, from $0.06$ for the youngest child-age group to $0.15$
+for the fathers' gradient, with the headline itself at $0.056$
 (Tables~\ref{tab:robust}--\ref{tab:subgroup}). What the checks establish is that the gradient is
 not an artifact of one specification, one occupation, one sample or one outcome coding; how
 precisely it is estimated remains the question the three inference procedures answer
@@ -956,8 +959,9 @@ least teleworkable jobs recovered none of it. Commuting time alone does not acco
 size. Workers save about 72 minutes per day worked from home and return roughly 40\% of that
 time to their jobs, the rest going to leisure and care \citep{aksoy2023}, so two remote days a
 week add about one hour of paid work, not two and a half. And the $1.4$ hours is an average over
-\emph{all} mothers in top-quartile jobs, only a minority of whom work from home in a given week
-(Appendix Table~\ref{tab:exposure-scores}), so the response per mother who actually does is
+\emph{all} mothers in top-quartile jobs, and even in those occupations only a minority of
+workers are at home in the reference week (the pooled shares by occupation in Appendix
+Table~\ref{tab:exposure-scores}), so the response per mother who actually works from home is
 several times larger than the commute she saves. That points to the channel of the framework in
 Section~\ref{sec:lit}: flexibility in \emph{when} hours are worked, hours split around care,
 rather than travel time returned to work. The timing is
