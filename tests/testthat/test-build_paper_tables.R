@@ -88,11 +88,25 @@ make_paper_table_inputs <- function(seed = 91) {
     hours_ddd_twoway_model = summary(hours_ddd$model, cluster = ~IDPUF + MishlachYad_ISCO_08_2),
     intensive_yearfe = intensive_yearfe,
     hours_ddd_noimputed = hours_ddd, hours_ddd_fulltime = hours_ddd, hours_ddd_longhours = hours_ddd,
+    # The headline row plus three labelled supporting-row refits (main.R section 8f), so the
+    # bootstrap-p column's lookup is exercised; rows with no label print blank.
     hours_wild_bootstrap = tibble::tibble(
-      label = "headline", param = "Mother:Post:WFH_Exposure",
-      estimate = unname(coef(hours_ddd$model)[["Mother:Post:WFH_Exposure"]]), t_stat = -3,
-      p_boot = 0, ci_low = -5, ci_high = -1, B = 9999L, n_clusters = 12L,
+      label = c("headline", "hours_ddd_external", "hours_ddd_jewish", "hours_ddd_swap_control"),
+      param = c(rep("Mother:Post:WFH_Exposure", 3), "Mother:Post:Swapped"),
+      estimate = c(unname(coef(hours_ddd$model)[["Mother:Post:WFH_Exposure"]]), 0.7, 2.8, -1.3),
+      t_stat = c(-3, 0.8, 3.1, -1.5),
+      p_boot = c(0, 0.4321, 0.0123, 0.2), ci_low = -5, ci_high = -1, B = 9999L, n_clusters = 12L,
       weights = "rademacher", null_imposed = TRUE, seed = 1L),
+    # Referee-review inputs (docs/admin/review.md, items 1-3).
+    hours_ddd_married_only = hours_ddd,
+    hours_ddd_marital_interacted = list(model = hours_ddd$model, n_clusters = 12L),
+    hours_ddd_teaching_swap = hours_ddd,
+    hours_ddd_topbin60 = hours_ddd, hours_ddd_topbin_lpm = hours_ddd, hours_ddd_absentees = hours_ddd,
+    calibration_threshold_sweep = list(table = tibble::tibble(
+      threshold = c(0.5, 0.3, 0.9), n_swapped = c(5L, 8L, 0L),
+      swapped_codes = c("23, 41, 25, 31, 33", "23, 41, 25, 31, 33, 34, 43, 52", ""),
+      estimate = c(3.224, 3.93, 0.672), se = c(1.022, 2.82, 0.884), p_value = c(0.0031, 0.17, 0.45),
+      n = 246326L, n_clusters = 40L)),
     hours_permutation = list(table = tibble::tibble(p_perm = 0.012, n_perm = 999L)),
     intensive_jewish = intensive_jewish, intensive_arab = intensive_arab,
     hours_ddd_jewish = hours_ddd_jewish, hours_ddd_arab = hours_ddd_arab,
@@ -107,7 +121,7 @@ make_paper_table_inputs <- function(seed = 91) {
 
 expected_tables <- c("tab_descriptives", "tab_hours", "tab_lee_selection", "tab_lee_bounds",
                      "tab_robust", "tab_subgroup", "tab_childage", "tab_extensive",
-                     "tab_exposure_scores", "tab_balance_quartile")
+                     "tab_exposure_scores", "tab_balance_quartile", "tab_calibration_sweep")
 
 count_cols <- function(line) {
   # Columns a body line occupies: 1 + number of & separators + extra columns claimed by
@@ -164,13 +178,38 @@ test_that("Table 4 carries a Clusters column and the grade-report-2 rows; hours 
   inputs <- make_paper_table_inputs()
   res <- build_paper_tables(inputs)
   rob <- res$tables$tab_robust
-  expect_match(rob[1], "\\{lccccc\\}")
+  expect_match(rob[1], "\\{lcccccc\\}")
   expect_true(any(grepl("Clusters", rob)))
+  expect_true(any(grepl("\\$p\\$ \\(boot\\)", rob)))
   for (needle in c("Calibrated on men only", "swapped-occupation terms", "Swapped\\}\\$ \\(same model\\)",
                    "Leave-one-occupation-out", "Occupational sorting", "Pre-period cell exposure",
-                   "Exposure score as outcome", "Top-quartile indicator")) {
+                   "Exposure score as outcome", "Top-quartile indicator",
+                   "teaching \\(ISCO 23\\) alone swapped", "Married women only",
+                   "Marital status", "Age and marital balance",
+                   "Absentees at usual hours", "Top bin \\(\\$60\\+\\$\\) recoded", "Top-bin indicator")) {
     expect_true(any(grepl(needle, rob)), info = needle)
   }
+  # The bootstrap-p column: looked up by label (and by term for the swap-control's second row);
+  # a row without a bootstrap refit prints an empty cell there.
+  ext_row <- rob[grepl("External \\(Dingel--Neiman\\)", rob)]
+  expect_true(grepl("0.4321", ext_row, fixed = TRUE))
+  swapped_row <- rob[grepl("Swapped\\}\\$ \\(same model\\)", rob)]
+  expect_true(grepl("0.2000", swapped_row, fixed = TRUE))
+  married_row <- rob[grepl("Married women only", rob)]
+  married_cells <- trimws(strsplit(sub(" \\\\\\\\$", "", married_row), "&", fixed = TRUE)[[1]])
+  expect_length(married_cells, 7)
+  expect_equal(married_cells[5], "")
+  # Tables 5 and 6 carry the same column after the DDD standard error.
+  sub <- res$tables$tab_subgroup
+  expect_match(sub[1], "\\{lccccccc\\}")
+  expect_true(grepl("0.0123", sub[grepl("^Jewish women", sub)], fixed = TRUE))
+  expect_true(any(grepl("cmidrule\\(lr\\)\\{5-8\\}", sub)))
+  expect_match(res$tables$tab_childage[1], "\\{lccccccc\\}")
+  # The sweep table sorts by threshold and stars from its own p-values.
+  sw <- res$tables$tab_calibration_sweep
+  body <- sw[grepl("^0\\.[0-9]{2} &", sw)]
+  expect_equal(sub(" &.*$", "", body), c("0.30", "0.50", "0.90"))
+  expect_true(grepl("\\$3.224\\$\\\\sym\\{\\*\\*\\}", body[2]))
   # The unswapped row's cluster count is the model's own, the primary row's is the full count.
   primary <- rob[grepl("Calibrated \\(primary\\)", rob)]
   expect_true(grepl(paste0("& ", inputs$hours_ddd$n_clusters, " \\\\\\\\$"), primary))

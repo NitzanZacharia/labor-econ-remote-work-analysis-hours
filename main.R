@@ -53,6 +53,8 @@ source(file.path("scripts", "hours_ddd_cell_exposure.R"))
 source(file.path("scripts", "hours_ddd_leave_one_out.R"))
 source(file.path("scripts", "build_leave_one_out_plot.R"))
 source(file.path("scripts", "build_balance_by_exposure_quartile.R"))
+source(file.path("scripts", "hours_ddd_marital_interacted.R"))
+source(file.path("scripts", "calibration_threshold_sweep.R"))
 
 # 2. Paths
 message("Edit folder paths if needed!")
@@ -284,10 +286,23 @@ hours_ddd_noimputed <- run_hours_ddd_regression(
 hours_outcome_df <- cleaned_df %>%
   mutate(
     FullTime  = if_else(is.na(WorkHoursCont), NA_integer_, as.integer(WorkHoursCont >= 35)),
-    LongHours = if_else(is.na(WorkHoursCont), NA_integer_, as.integer(WorkHoursCont >= 40))
+    LongHours = if_else(is.na(WorkHoursCont), NA_integer_, as.integer(WorkHoursCont >= 40)),
+    # Top bin (60+ hours, coded 78.5): recoded to 60, and as an indicator (review item 6)
+    TopBin60  = if_else(!is.na(WorkHoursCont) & ShaotAvodaBederechKlalNK == 10, 60, WorkHoursCont),
+    TopBinInd = if_else(is.na(WorkHoursCont), NA_integer_, as.integer(ShaotAvodaBederechKlalNK == 10))
   )
 hours_ddd_fulltime  <- run_hours_ddd_regression(hours_outcome_df, hours_exposure_index, outcome = "FullTime")
 hours_ddd_longhours <- run_hours_ddd_regression(hours_outcome_df, hours_exposure_index, outcome = "LongHours")
+hours_ddd_topbin60  <- run_hours_ddd_regression(hours_outcome_df, hours_exposure_index, outcome = "TopBin60",
+                                                run_mechanism = FALSE)
+hours_ddd_topbin_lpm <- run_hours_ddd_regression(hours_outcome_df, hours_exposure_index, outcome = "TopBinInd")
+
+# Absentees included at their reported usual hours, 2018-2023 (review item 11)
+message("Running the hours DDD with reference-week absentees included at usual hours (2018-2023)...")
+hours_ddd_absentees <- run_hours_ddd_regression(
+  filter(cleaned_df, ShnatSeker >= 2018), hours_exposure_index,
+  outcome = "WorkHoursUsualAll", run_mechanism = FALSE
+)
 # Baseline shares of the two indicators
 hours_outcome_shares <- hours_outcome_df %>%
   filter(Employed == 1, !is.na(WorkHoursCont)) %>%
@@ -314,6 +329,19 @@ hours_ddd_calib_men <- list(
   n_occupations = nrow(exposure_calibrated_men),
   swapped_codes = sort(exposure_calibrated_men$ISCO2[exposure_calibrated_men$swap]),
   index         = exposure_calibrated_men
+)
+
+# Teaching alone reclassified: the external index with only ISCO 23 moved to its realized share
+message("Running the hours DDD on the external index with teaching (ISCO 23) alone swapped...")
+exposure_teaching_only <- exposure_calibrated %>%
+  mutate(wfh_exposure = if_else(ISCO2 == 23 & !is.na(realized_wfh), realized_wfh, tele_ext)) %>%
+  select(occupation_code = ISCO2, wfh_exposure)
+hours_ddd_teaching_swap <- run_hours_ddd_regression(cleaned_df, exposure_teaching_only, run_mechanism = FALSE)
+
+# Calibration gap-threshold sweep (appendix table)
+message("Sweeping the calibration gap threshold and refitting the hours DDD at each value...")
+calibration_threshold_sweep <- run_calibration_threshold_sweep(
+  cleaned_df, exposure_population_df, exposure_external
 )
 
 message("Running the fixed-sample calibration test (external index + swapped-occupation terms, all occupations)...")
@@ -421,7 +449,6 @@ hours_ddd_childage_comparison <- build_hours_subgroup_comparison(
   x_label  = "Mother x Post x WFH_Exposure (95% CI)"
 )
 
-# BEGIN employmentddd
 # 8b. Secondary DDD (employment): cell-based exposure, full sample, two specifications
 message("Running secondary (employment) DDD (cell-based exposure, calibrated, full sample)...")
 ddd_df <- cleaned_df %>%
@@ -458,7 +485,6 @@ print(employment_ddd_table)
 
 message("Checking Spec 1's collinearity at runtime (see comment above)...")
 check_spec1_collinearity(ddd_df, cell_fe_vars, DEFAULT_CONTROLS)  # prints its own report
-# END employmentddd
 
 # 8c. Age-balance robustness chain
 RUN_AGE_BALANCE_ROBUSTNESS <- TRUE
@@ -485,6 +511,17 @@ if (RUN_AGE_BALANCE_ROBUSTNESS) {
   message("Running GilNK-reweighted comparison spec for the hours DDD (pre-period raking weights)...")
   hours_ddd_reweighted <- run_hours_ddd_reweighted(cleaned_df, exposure_cells, hours_exposure_index)
 }
+
+# Marital balance (docs/admin/review.md, item 1): married women only, and marital status
+# interacted with Post x WFH_Exposure. Marital status is constant on the married subsample, so it
+# leaves the controls there.
+message("Running the hours DDD on married women only...")
+hours_ddd_married_only <- run_hours_ddd_regression(
+  filter(cleaned_df, MatzavMishpachti == 1), hours_exposure_index,
+  controls = setdiff(DEFAULT_CONTROLS, "MatzavMishpachti"), run_mechanism = FALSE
+)
+message("Running the marital-status-interacted hours DDD (marital x Post x WFH_Exposure added)...")
+hours_ddd_marital_interacted <- run_hours_ddd_marital_interacted(cleaned_df, hours_exposure_index)
 
 # 8d. Null-vs-power audit (employment DDD)
 RUN_NULL_VS_POWER_AUDIT <- TRUE
@@ -516,6 +553,52 @@ hours_wild_bootstrap <- bind_rows(
                                B = WILD_BOOTSTRAP_B, seed = INFERENCE_SEED, label = "pretrend_2017_plus_2018")$table
 )
 print(as.data.frame(hours_wild_bootstrap %>% select(label, estimate, t_stat, p_boot, ci_low, ci_high, B, n_clusters)), digits = 4)
+
+# Bootstrap p-values for the supporting DDD rows of Tables 4-6 (docs/admin/review.md, item 2):
+# every occupation-clustered refit, labelled by its build_paper_tables() input name. A refit the
+# bootstrap cannot handle is reported and left blank in the table rather than stopping the run.
+message("Running wild cluster bootstrap on the supporting DDD rows...")
+boot_specs <- c(
+  list(
+    list(label = "hours_ddd_external",           model = hours_ddd_external$model),
+    list(label = "hours_ddd_realized",           model = hours_ddd_realized$model),
+    list(label = "hours_ddd_calib_men",          model = hours_ddd_calib_men$result$model),
+    list(label = "hours_ddd_teaching_swap",      model = hours_ddd_teaching_swap$model),
+    list(label = "hours_ddd_swap_control",       model = hours_ddd_swap_control$model),
+    list(label = "hours_ddd_swap_control",       model = hours_ddd_swap_control$model, param = "Mother:Post:Swapped"),
+    list(label = "hours_ddd_age_interacted",     model = hours_ddd_age_interacted$model),
+    list(label = "hours_ddd_reweighted",         model = hours_ddd_reweighted$model),
+    list(label = "hours_ddd_married_only",       model = hours_ddd_married_only$model),
+    list(label = "hours_ddd_marital_interacted", model = hours_ddd_marital_interacted$model),
+    list(label = "hours_ddd_unswapped",          model = hours_ddd_unswapped$model),
+    list(label = "hours_ddd_ex2023",             model = hours_ddd_ex2023$model),
+    list(label = "hours_ddd_noimputed",          model = hours_ddd_noimputed$model),
+    list(label = "hours_ddd_fulltime",           model = hours_ddd_fulltime$model),
+    list(label = "hours_ddd_longhours",          model = hours_ddd_longhours$model),
+    list(label = "hours_ddd_topbin60",           model = hours_ddd_topbin60$model),
+    list(label = "hours_ddd_topbin_lpm",         model = hours_ddd_topbin_lpm$model),
+    list(label = "hours_ddd_absentees",          model = hours_ddd_absentees$model),
+    list(label = "hours_ddd_jewish",             model = hours_ddd_jewish$model),
+    list(label = "hours_ddd_arab",               model = hours_ddd_arab$model),
+    list(label = "hours_gender_placebo_ddd",     model = hours_gender_placebo$ddd_placebo$model)
+  ),
+  lapply(names(hours_ddd_by_child_age$models$ddd), function(bin) {
+    list(label = paste0("hours_ddd_child_age_", bin), model = hours_ddd_by_child_age$models$ddd[[bin]])
+  })
+)
+boot_rows <- lapply(boot_specs, function(s) {
+  param <- if (is.null(s$param)) "Mother:Post:WFH_Exposure" else s$param
+  tryCatch(
+    run_hours_ddd_wild_bootstrap(s$model, param, B = WILD_BOOTSTRAP_B, seed = INFERENCE_SEED,
+                                 label = s$label)$table,
+    error = function(e) {
+      message(sprintf("  wild bootstrap skipped for %s [%s]: %s", s$label, param, conditionMessage(e)))
+      NULL
+    }
+  )
+})
+hours_wild_bootstrap <- bind_rows(hours_wild_bootstrap, bind_rows(boot_rows))
+print(as.data.frame(hours_wild_bootstrap %>% select(label, param, estimate, p_boot, n_clusters)), digits = 4)
 
 RUN_PERMUTATION_TEST <- TRUE
 N_PERMUTATIONS       <- 999
@@ -595,7 +678,16 @@ paper_tables <- build_paper_tables(list(
   hours_ddd_cell_exposure  = hours_ddd_cell_exposure,
   exposure_sorting_check   = exposure_sorting_check,
   hours_ddd_leave_one_out  = hours_ddd_leave_one_out,
-  balance_by_quartile      = balance_by_quartile
+  balance_by_quartile      = balance_by_quartile,
+  # 2026-09-28 referee-review response (docs/admin/review.md, items 1-3).
+  hours_ddd_married_only       = hours_ddd_married_only,
+  hours_ddd_marital_interacted = hours_ddd_marital_interacted,
+  hours_ddd_teaching_swap      = hours_ddd_teaching_swap,
+  calibration_threshold_sweep  = calibration_threshold_sweep,
+  # Review items 6 and 11.
+  hours_ddd_topbin60           = hours_ddd_topbin60,
+  hours_ddd_topbin_lpm         = hours_ddd_topbin_lpm,
+  hours_ddd_absentees          = hours_ddd_absentees
 ))
 
 # 9. Export (check_idpuf_panel_structure()'s per-person tables are deliberately not exported)
@@ -615,6 +707,8 @@ results_to_export <- list(
   pretrend_wald_hours = pretrend_wald_hours$table,
   pretrend_wald_hours_ddd = pretrend_wald_hours_ddd$table,
   isco_masking_sensitivity = isco_masking_check,
+  isco_masking_model = if (is.null(isco_masking_check$model)) NULL else
+    etable(isco_masking_check$model, headers = c("WFH ~ ISCO_masked | ISCO1"), digits = 4),
   wfh_exposure_external = exposure_external,
   wfh_exposure_calibrated = exposure_calibrated,
   wfh_exposure_realized = exposure_realized,
@@ -682,6 +776,14 @@ results_to_export <- list(
                                      summary = hours_ddd_leave_one_out$summary,
                                      plot = if (is.null(hours_ddd_leave_one_out_plot)) NULL else hours_ddd_leave_one_out_plot$plot),
   balance_by_exposure_quartile = balance_by_quartile$table,
+  ddd_hours_married_only       = hours_ddd_married_only$table,
+  ddd_hours_marital_interacted = etable(hours_ddd_marital_interacted$model,
+                                        headers = c("Hours DDD, marital-status interacted"), digits = 4),
+  ddd_hours_teaching_swap      = hours_ddd_teaching_swap$table,
+  calibration_threshold_sweep  = calibration_threshold_sweep$table,
+  ddd_hours_topbin60           = hours_ddd_topbin60$table,
+  ddd_hours_topbin_lpm         = hours_ddd_topbin_lpm$table,
+  ddd_hours_absentees          = hours_ddd_absentees$table,
   hours_lee_bounds_imbens_manski      = as.data.frame(hours_lee_bounds$imbens_manski_ci),
   intensive_margin_lee_bounds_imbens_manski = as.data.frame(intensive_lee_bounds$imbens_manski_ci)
 )

@@ -83,6 +83,9 @@ source(file.path("scripts", "hours_ddd_cell_exposure.R"))
 source(file.path("scripts", "hours_ddd_leave_one_out.R"))
 source(file.path("scripts", "build_leave_one_out_plot.R"))
 source(file.path("scripts", "build_balance_by_exposure_quartile.R"))
+# 2026-09-28 referee-review response (docs/admin/review.md, items 1 and 3).
+source(file.path("scripts", "hours_ddd_marital_interacted.R"))
+source(file.path("scripts", "calibration_threshold_sweep.R"))
 
 # The 3 robustness-chain scripts below live in robustness/, not scripts/ -- each defines several
 # related functions (a diagnostic + one or more regression specs sharing it), not the single
