@@ -1,16 +1,45 @@
-% code_appendix.tex -- the replication-code appendix, \input{} by paper.tex after appendix.tex.
-% Every listing is \lstinputlisting{}'d from the repository file itself (paths relative to
-% paper/, like the figures), so the appendix cannot drift from the code that produced the
-% results. The main.R excerpt is pulled by the "# BEGIN employmentddd" / "# END employmentddd"
-% marker comments in main.R, not by line numbers. Comments in the listed files were condensed
-% for print on 2026-09-28; no code changed. The preamble of paper.tex loads listings, xcolor,
-% multicol, pdflscape, array and capt-of and sets \lstset.
+% code_appendix.tex -- the replication-code appendix, \input{} by paper.tex after appendix.tex
+% (it is the last thing in the document). Every listing is \lstinputlisting{}'d from the
+% repository file itself (paths relative to paper/, like the figures), so the appendix cannot
+% drift from the code that produced the results. The main.R excerpt is pulled by the
+% "# BEGIN employmentddd" / "# END employmentddd" marker comments in main.R, not by line numbers.
+% Comments in the listed files were condensed for print on 2026-09-28; no code changed.
+%
+% Layout (2026-09-28): portrait. The section heading, the intro and Table A4 fill one ordinary
+% page; \twocolumn then switches to LaTeX's native two-column mode for the listings (the
+% heading-plus-table block is a full page, so \twocolumn[...] cannot start the columns beneath
+% it). Native two-column (rather than multicol) breaks each column with the ordinary page
+% builder, so \needspace keeps every heading with its code. Each script is one
+% block: a bold file-name header, a rule, the code, a closing rule (listings' frame=lines). The
+% preamble of paper.tex loads listings, xcolor, needspace, inconsolata, array and capt-of and
+% sets \lstset; the code font (zi4) becomes the typewriter font for this appendix only. The
+% last page's columns are left unbalanced: balance.sty only works when \balance lands in the
+% first column of the final page, which moves whenever a listed script changes.
+
+\renewcommand*{\ttdefault}{zi4}
+
+% Group heading: "E.n  Title", kept with at least a header and some code below it.
+\newcounter{codegroup}
+\newcommand{\codegroup}[1]{%
+  \stepcounter{codegroup}%
+  \needspace{120pt}%                   % heading + a file header + ~10 lines of 7pt code
+  \vspace{10pt plus 4pt minus 2pt}%
+  \noindent{\normalsize\bfseries\thesection.\arabic{codegroup}\quad #1}\par\nobreak
+  \vspace{2pt}}
+% Script header: bold file name above the listing's top rule, never separated from its code.
+\newcommand{\codefile}[1]{%
+  \needspace{90pt}%                    % header + ~10 lines of 7pt code stay together
+  \vspace{7pt plus 2pt minus 1pt}%
+  \noindent{\fontsize{7.5}{9}\selectfont\bfseries\ttfamily #1}\par\nobreak}
 
 %======================================================================
+\clearpage
 \section{Replication code}\label{sec:app-code}
 %======================================================================
-
-The analysis is a set of R scripts. \texttt{main.R} orchestrates the pipeline: it loads and
+% Starts on a fresh page and is single-spaced like the code it introduces, so that the heading,
+% this paragraph and Table A4 fill exactly one page.
+\begin{spacing}{1}
+\noindent The analysis is a set of R scripts. \texttt{main.R} orchestrates the pipeline: it loads and
 cleans the CBS microdata (cached beside the raw files), builds the exposure measures, fits every
 model, and writes the results to \texttt{outputs/} and the tables to \texttt{paper/tables/};
 \texttt{Rscript main.R} reproduces every number in this paper. Each file under
@@ -24,13 +53,13 @@ diagnostics, is named in Table~\ref{tab:code-index} with the function it wraps o
 number appears. Regressions use \texttt{fixest}; the wild cluster bootstrap uses
 \texttt{fwildclusterboot}. The raw CBS microdata are not distributed with the code.
 
-% Not a float: the landscape block that follows forces a page break, so a floating table would be
-% pushed onto a page of its own. \captionof (capt-of) keeps the caption and the table number.
+% Not a float: \twocolumn below forces a page break, and a floating table would be pushed onto
+% a page of its own. \captionof (capt-of) keeps the caption and the table number.
 \begin{center}
 \begin{minipage}{\textwidth}
 \captionof{table}{Scripts not listed: pipeline, wrappers, figures, tables, export and guards}\label{tab:code-index}
-\renewcommand{\baselinestretch}{1}\scriptsize
-\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.47\textwidth}>{\raggedright\arraybackslash}p{0.50\textwidth}@{}}
+\renewcommand{\baselinestretch}{1}\scriptsize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.39\textwidth}>{\raggedright\arraybackslash}p{0.59\textwidth}@{}}
 \toprule
 File & Role \\
 \midrule
@@ -71,50 +100,67 @@ File & Role \\
 \end{tabular}
 \end{minipage}
 \end{center}
-
-\begin{landscape}
-\begin{spacing}{1}
-\setlength{\columnsep}{12pt}
-\lstset{columns=fullflexible}
-\begin{multicols}{3}
-
-\subsection*{Data}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/data\_processing.R}]{../scripts/data_processing.R}
-
-\subsection*{Exposure measures}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/wfh\_exposure\_cells.R}]{../scripts/wfh_exposure_cells.R}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/wfh\_exposure\_index.R}]{../scripts/wfh_exposure_index.R}
-
-\subsection*{DiD and DDD specifications}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/intensive\_margin\_regression.R}]{../scripts/intensive_margin_regression.R}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/basic\_regression.R}]{../scripts/basic_regression.R}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily main.R, section 8b (employment DDD)},
-  linerange=employmentddd-employmentddd, rangebeginprefix=\#\ BEGIN\ , rangeendprefix=\#\ END\ ,
-  includerangemarker=false]{../main.R}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/hours\_ddd\_regression.R}]{../scripts/hours_ddd_regression.R}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/hours\_ddd\_saturated.R}]{../scripts/hours_ddd_saturated.R}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/hours\_ddd\_binned.R}]{../scripts/hours_ddd_binned.R}
-
-\subsection*{Event studies}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/hours\_diagnostics.R}]{../scripts/hours_diagnostics.R}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/hours\_ddd\_event\_study.R}]{../scripts/hours_ddd_event_study.R}
-
-\subsection*{Selection bounds}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/lee\_trim\_proportion.R}]{../scripts/lee_trim_proportion.R}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/lee\_trim\_cell.R}]{../scripts/lee_trim_cell.R}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/imbens\_manski\_ci.R}]{../scripts/imbens_manski_ci.R}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/intensive\_margin\_lee\_bounds.R}]{../scripts/intensive_margin_lee_bounds.R}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/hours\_ddd\_lee\_bounds.R}]{../scripts/hours_ddd_lee_bounds.R}
-
-\subsection*{Inference}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily robustness/hours\_ddd\_inference.R}]{../robustness/hours_ddd_inference.R}
-
-\subsection*{Calibration and sorting checks}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/hours\_ddd\_swap\_control.R}]{../scripts/hours_ddd_swap_control.R}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/exposure\_sorting\_check.R}]{../scripts/exposure_sorting_check.R}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/hours\_ddd\_cell\_exposure.R}]{../scripts/hours_ddd_cell_exposure.R}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily robustness/age\_balance\_robustness.R}]{../robustness/age_balance_robustness.R}
-
-\end{multicols}
 \end{spacing}
-\end{landscape}
+
+\twocolumn
+\singlespacing
+\raggedbottom
+\setlength{\columnsep}{16pt}
+\setlength{\columnseprule}{0.3pt}
+
+\codegroup{Data}
+\codefile{scripts/data\_processing.R}
+\lstinputlisting{../scripts/data_processing.R}
+
+\codegroup{Exposure measures}
+\codefile{scripts/wfh\_exposure\_cells.R}
+\lstinputlisting{../scripts/wfh_exposure_cells.R}
+\codefile{scripts/wfh\_exposure\_index.R}
+\lstinputlisting{../scripts/wfh_exposure_index.R}
+
+\codegroup{DiD and DDD specifications}
+\codefile{scripts/intensive\_margin\_regression.R}
+\lstinputlisting{../scripts/intensive_margin_regression.R}
+\codefile{scripts/basic\_regression.R}
+\lstinputlisting{../scripts/basic_regression.R}
+\codefile{main.R, section 8b (employment DDD)}
+\lstinputlisting[linerange=employmentddd-employmentddd, rangebeginprefix=\#\ BEGIN\ ,
+  rangeendprefix=\#\ END\ , includerangemarker=false]{../main.R}
+\codefile{scripts/hours\_ddd\_regression.R}
+\lstinputlisting{../scripts/hours_ddd_regression.R}
+\codefile{scripts/hours\_ddd\_saturated.R}
+\lstinputlisting{../scripts/hours_ddd_saturated.R}
+\codefile{scripts/hours\_ddd\_binned.R}
+\lstinputlisting{../scripts/hours_ddd_binned.R}
+
+\codegroup{Event studies}
+\codefile{scripts/hours\_diagnostics.R}
+\lstinputlisting{../scripts/hours_diagnostics.R}
+\codefile{scripts/hours\_ddd\_event\_study.R}
+\lstinputlisting{../scripts/hours_ddd_event_study.R}
+
+\codegroup{Selection bounds}
+\codefile{scripts/lee\_trim\_proportion.R}
+\lstinputlisting{../scripts/lee_trim_proportion.R}
+\codefile{scripts/lee\_trim\_cell.R}
+\lstinputlisting{../scripts/lee_trim_cell.R}
+\codefile{scripts/imbens\_manski\_ci.R}
+\lstinputlisting{../scripts/imbens_manski_ci.R}
+\codefile{scripts/intensive\_margin\_lee\_bounds.R}
+\lstinputlisting{../scripts/intensive_margin_lee_bounds.R}
+\codefile{scripts/hours\_ddd\_lee\_bounds.R}
+\lstinputlisting{../scripts/hours_ddd_lee_bounds.R}
+
+\codegroup{Inference}
+\codefile{robustness/hours\_ddd\_inference.R}
+\lstinputlisting{../robustness/hours_ddd_inference.R}
+
+\codegroup{Calibration and sorting checks}
+\codefile{scripts/hours\_ddd\_swap\_control.R}
+\lstinputlisting{../scripts/hours_ddd_swap_control.R}
+\codefile{scripts/exposure\_sorting\_check.R}
+\lstinputlisting{../scripts/exposure_sorting_check.R}
+\codefile{scripts/hours\_ddd\_cell\_exposure.R}
+\lstinputlisting{../scripts/hours_ddd_cell_exposure.R}
+\codefile{robustness/age\_balance\_robustness.R}
+\lstinputlisting{../robustness/age_balance_robustness.R}
