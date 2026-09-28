@@ -1,23 +1,7 @@
 # hours_ddd_cell_exposure.R
-# The hours DDD with a PRE-PERIOD exposure regressor that cannot respond to the treatment
-# (docs/decisions/grade-report-2-response.md, Methods 2, occupational sorting). The companion diagnostic is
-# exposure_sorting_check.R; this file is the bound.
-#
-# The headline regressor is the calibrated score of the occupation a woman holds WHEN SURVEYED, so
-# a mother who moved into a teleworkable job after 2021 carries a higher exposure in the post-period
-# than she did before. The demographic-cell index main.R builds for the employment DDD
-# (build_exposure_cells(): the calibrated score averaged over each cell's 2017-2019 occupational
-# composition, cells defined by sex, age group, education, district, marital status, religion and
-# continent of birth) is fixed at its pre-period value for every woman in a cell, whatever job she
-# holds later. Re-estimating the hours DDD on that index therefore gives an estimate that
-# post-period occupational sorting cannot produce -- an intention-to-treat on pre-period exposure.
-#
-# Two things it costs, both stated in the paper. The cell index is a much coarser and much less
-# dispersed regressor (SD about 0.07 against 0.20 for the occupation-level score), so the per-unit
-# coefficient is on a different scale and only the per-SD figure is comparable; and it measures
-# exposure with error relative to the woman's actual occupation, which attenuates toward zero.
-# Same formula as run_hours_ddd_regression(); clustered on the coarser demographic cell the
-# employment DDD clusters on (main.R §8b), since that is the level the regressor varies at.
+# The hours DDD on the pre-period demographic-cell index, which a woman's later occupation cannot
+# move: a bound on occupational sorting. The cell index is coarser and far less dispersed than the
+# occupation score, so only the per-SD figure is comparable. Clustered on the demographic cell.
 library(tidyverse)
 library(fixest)
 source(file.path("scripts", "data_processing.R"))

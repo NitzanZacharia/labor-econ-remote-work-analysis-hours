@@ -1,36 +1,11 @@
 # ddd_mde_diagnostics.R
-# Closed-form minimum-detectable-effect (MDE) diagnostic for the primary DDD's triple interaction.
-# check_spec1_collinearity() (ddd_collinearity_diagnostics.R) already quantifies how much of
-# WFH_Exposure's cross-cell variance survives after partialling out its own controls (~25.5% in
-# Spec 1), and Spec 2 identifies the triple interaction off within-cell variation only -- this
-# function turns those SEs into an interpretable "smallest true effect this design could reliably
-# detect" number, so a null Mother:Post:WFH_Exposure coefficient can be read as "genuinely null" vs.
-# "underpowered to see a plausible effect."
-#
-# Standard closed-form MDE for a linear-model coefficient (Duflo, Glennerster & Kremer 2007):
-#   MDE = SE * (qnorm(1 - sig_level / 2) + qnorm(power))
-# No simulation and no new dependency -- qnorm() is base R, matching this repo's existing
-# base-R-only convention for statistical diagnostics (ddd_collinearity_diagnostics.R explicitly
-# avoids adding car for the same reason).
+# Closed-form minimum detectable effect for a triple interaction:
+# MDE = SE * (q(1 - alpha/2) + q(power)), so a null can be read as genuinely null or underpowered.
 library(fixest)
 
-# `regressor` (optional): the numeric vector of the interacted regressor -- WFH_Exposure -- on the
-# estimation sample. Supply it and the MDE is ALSO reported per standard deviation and per
-# interquartile range of that regressor, not only per unit.
-#
-# Why this matters. The MDE is a coefficient: an effect per ONE UNIT of the
-# regressor. Comparing it to a baseline rate silently assumes the regressor moves a full unit.
-# WFH_Exposure never does: on the analysis sample its weighted SD is 0.081, its IQR 0.105, and its
-# entire observed range is 0 to 0.75. Reporting only the per-unit figure made the employment DDD
-# look ~8-10x underpowered against the literature when the honest per-SD comparison is ~2-3x. The
-# scale-free ratio MDE/|point estimate| is unaffected by any of this and remains the strongest
-# statement of the power problem.
-# `df` (docs/decisions/grade-report-2-response.md, MDE note): the degrees of freedom of the t
-# reference distribution the model's inference actually uses. With forty occupation clusters the
-# hours DDD's p-values come from t(39), and the normal multiplier (2.80) understates the
-# detectable effect relative to the t one (2.87). When supplied, BOTH terms use qt(); NULL keeps
-# the normal closed form, which is exact for the individual-clustered employment specifications
-# (tens of thousands of clusters) and is what every existing caller gets.
+# regressor: the interacted regressor's values on the estimation sample, so the MDE is also
+# reported per SD and per IQR. df: degrees of freedom of the t reference the model's inference
+# uses (39 for the hours DDD); NULL keeps the normal multiplier.
 compute_ddd_mde <- function(model, coef_name = "Mother:Post:WFH_Exposure",
                              sig_level = 0.05, power = 0.8, baseline_rate = NULL,
                              regressor = NULL, df = NULL) {
@@ -75,9 +50,6 @@ compute_ddd_mde <- function(model, coef_name = "Mother:Post:WFH_Exposure",
     coef_name, point_estimate, se, sig_level, power * 100, multiplier,
     if (is.null(df)) ", normal" else sprintf(", t(%g)", df), mde,
     if (!is.null(baseline_rate)) {
-      # "baseline" deliberately left unnamed: main.R passes the baseline employment rate for the
-      # employment DDD but mean weekly hours for the hours DDD, and hardcoding "employment rate"
-      # here printed "baseline employment rate = 38.2446" for the hours call, which reads as a bug.
       sprintf(" (baseline = %.4f, i.e. MDE is %.1f%% of baseline)",
               baseline_rate, 100 * mde / baseline_rate)
     } else ""
@@ -99,10 +71,7 @@ compute_ddd_mde <- function(model, coef_name = "Mother:Post:WFH_Exposure",
     ))
   }
 
-  # Returned as a one-row data frame as well as the scalar list, so export_all_results() can write
-  # it: the layer only recognises data frames and ggplots, so a list of scalars reaches no file.
-  # The paper cites all three MDEs, so they have to be on disk. Same pattern as
-  # run_pretrend_joint_test().
+  # One-row data frame so the export layer writes it.
   tbl <- data.frame(
     coef_name      = coef_name,
     point_estimate = unname(point_estimate),

@@ -1,27 +1,8 @@
 # hours_ddd_binned.R
-# Quartile-binned version of the primary hours DDD (scripts/hours_ddd_regression.R);
-# docs/decisions/grade-report-response.md, item M1.
-#
-# The pooled DDD reports one slope per unit of exposure. Figure 2 (build_hours_dose_response())
-# shows that the raw dose-response is not linear: three quartiles near zero and one well above.
-# This specification replaces the continuous score with the quartile it falls in, so the paper can
-# report the Q4-vs-Q1 contrast as a coefficient with a standard error instead of reading it off a
-# figure with no controls. The bins are the SAME bins as Figure 2 -- main.R passes that figure's
-# `breaks` in, and assign_wfh_quartile() is the same cut() step -- so the table and the figure
-# describe the same four groups of occupations.
-#
-#   WorkHoursCont ~ Mother * Post * i(WFH_Exposure_Q, ref = 1) + controls
-#
-# expands to the full set of two-way terms plus three triple interactions, one per non-reference
-# quartile. Coefficients are extracted BY NAME ("Mother:Post:WFH_Exposure_Q::4"), never by etable
-# label (which prints "Mother x Post x WFH_Exposure_Q = 4") -- the same rule
-# tidy_event_study_coefs() follows for the event studies.
-#
-# Because the breakpoints come from the row-level pre-period distribution, the bins are
-# worker-weighted and hold unequal numbers of OCCUPATIONS. Occupation is the cluster, so a
-# quartile coefficient resting on a handful of occupations is less precisely estimated than its
-# row count suggests; the per-quartile occupation counts are returned and printed in Table 2 for
-# that reason.
+# Quartile-binned hours DDD: the exposure score replaced by the pre-period quartile it falls in
+# (the dose-response figure's bins, passed in as breaks), so the top-vs-bottom contrast carries a
+# standard error. Coefficients are extracted by name. Bins are worker-weighted and hold unequal
+# numbers of occupations, which is the cluster, so the per-quartile occupation counts are returned.
 library(tidyverse)
 library(fixest)
 source(file.path("scripts", "data_processing.R"))
@@ -52,8 +33,7 @@ run_hours_ddd_binned <- function(cleaned_df, exposure_index, breaks, controls = 
     n_matched, n_employed, 100 * n_matched / n_employed
   ))
 
-  # Occupations and estimation rows per quartile. The row count uses the outcome's own
-  # non-missing rows so it matches what feols estimates on, not the matched frame.
+  # Occupations and estimation rows per quartile.
   quartile_sizes <- df_ddd %>%
     filter(!is.na(.data[[outcome]])) %>%
     group_by(WFH_Exposure_Q) %>%

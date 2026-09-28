@@ -1,21 +1,7 @@
 # isco_masking_diagnostics.R
-# Sensitivity check for CBS's ISCO-08 disclosure-masking and the WFH-exposure index (audit
-# finding: masking concentrates in thinly-populated occupation cells -- 7.5% of all employed 2021
-# rows, 2.4% of the analysis sample -- and every place ISCO2 is used as a join key
-# (wfh_exposure_index.R, wfh_exposure_cells.R) drops masked rows via !is.na(). If masked
-# occupations differ systematically in realized WFH from unmasked ones, the exposure index is
-# built on a non-random subsample of occupations, biasing it in an unknown direction).
-#
-# This can't be resolved outright -- a fully-masked "XX" row carries zero occupation signal at any
-# resolution and is necessarily excluded here too. But a PARTIALLY masked row ("7X") still has its
-# 1-digit major group recoverable as ISCO1 (data_processing.R). Comparing realized WFH between
-# masked and unmasked rows *within the same ISCO1 major group* is therefore a defensible, if
-# imperfect, proxy check:
-#   - if masked and unmasked rows look similar within a major group, that's reassuring (though not
-#     proof -- masking could still correlate with a finer distinction ISCO1 can't see);
-#   - if they look different even after conditioning on the coarse occupation family, that's
-#     evidence the masking-driven exclusion could be biasing the exposure index, and the gap
-#     reported below quantifies by how much, group by group.
+# Proxy check on the disclosure-masked occupation rows the exposure index drops: compare realized
+# WFH between masked and unmasked rows within the same ISCO1 major group, which a partially masked
+# code ("7X") still identifies.
 library(tidyverse)
 library(fixest)
 source(file.path("scripts", "data_processing.R"))
@@ -26,18 +12,12 @@ check_isco_masking_sensitivity <- function(cleaned_df, wfh_col = "WFH", ref_year
     filter(
       ShnatSeker %in% ref_year,
       Employed == 1,
-      !is.na(ISCO1),               # excludes fully-masked ("XX") rows -- no signal survives at all
+      !is.na(ISCO1),               # fully masked rows carry no signal
       !is.na(.data[[wfh_col]])
     ) %>%
     mutate(mask_label = if_else(ISCO_masked, "masked", "unmasked"))
 
-  # ── Descriptive comparison: mean realized WFH, masked vs. unmasked, within each ISCO1 group ──
-  # tidyr::complete() guarantees both mask_label levels exist for every ISCO1 group even when the
-  # whole filtered sample happens to contain only masked (or only unmasked) rows -- otherwise
-  # pivot_wider() below would never create one of the two mean_wfh_*/n_* column families at all,
-  # and the gap mutate() would error on a genuinely missing column rather than produce a graceful
-  # NA (this is the ISCO1==3 case in test-isco_masking_diagnostics.R: an occupation with no masked
-  # rows at all still needs a comparison_wide row, just with mean_wfh_masked/gap == NA).
+  # complete() keeps both mask levels for every ISCO1 group so the wide comparison never lacks a column.
   by_group <- df %>%
     group_by(ISCO1, mask_label) %>%
     summarise(mean_wfh = mean(.data[[wfh_col]]), n = n(), .groups = "drop") %>%
@@ -51,15 +31,7 @@ check_isco_masking_sensitivity <- function(cleaned_df, wfh_col = "WFH", ref_year
   message("check_isco_masking_sensitivity: realized WFH, masked vs. unmasked, by ISCO1 major group:")
   print(as.data.frame(comparison_wide), digits = 3)
 
-  # ── Formal test: does masking status predict WFH after absorbing ISCO1 major-group FE? ──
-  # ISCO1 as a fixed effect (not an additive control) makes this an exactly within-group
-  # comparison, matching comparison_wide above -- a group with only masked or only unmasked rows
-  # is constant on ISCO_masked and contributes nothing (correctly absorbed by its own FE, not an
-  # error). But feols refuses to fit at all on fewer than 2 total rows (a real possibility on a
-  # small/thin ref_year x Employed x !is.na(ISCO1) x !is.na(wfh_col) slice) -- the same class of
-  # "too little data to compute anything" case calibrate_isco_exposure() already guards for, so
-  # it's handled the same way here: skip the fit, report why, and let the descriptive comparison
-  # above stand on its own.
+  # Within-group test: masking status on WFH with ISCO1 fixed effects. Skipped on fewer than two rows.
   reg <- NULL
   if (nrow(df) < 2) {
     message(sprintf(

@@ -1,30 +1,9 @@
 # age_balance_robustness.R
-# Follow-up to the Phase 1b balance test: GilNK (age group) is imbalanced between Mother==1 and
-# Mother==0 in the pre-period, concentrated in the lowest WFH_Exposure quartile, even though GilNK
-# is already an additive DEFAULT_CONTROLS term. Builds three COMPARISON specs against the primary
-# DDD's formulas (main.R's ddd_employment_additive / ddd_employment_fe) -- does NOT modify main.R.
-#
-#   1. diagnose_gilnk_by_quartile() -- age gap by Mother status, per WFH_Exposure quartile.
-#   2. run_ddd_age_interacted()     -- adds Mother:GilNK (a fully saturated age x motherhood term)
-#      to both of those formulas, on top of the existing DEFAULT_CONTROLS.
-#   3. build_gilnk_rake_weights() + run_ddd_reweighted() -- pre-period-derived weights that
-#      equalize each Mother group's GilNK distribution (within WFH_Exposure quartile) to the
-#      pooled pre-period quartile distribution, then applied to the full-period regression. For a
-#      single discrete covariate with adequate cell sizes this is the exact solution entropy
-#      balancing would also converge to (both minimize KL divergence to the same target marginal;
-#      the two diverge only when exact reweighting is infeasible, e.g. a target cell with zero
-#      support in one group -- build_gilnk_rake_weights() checks for and reports that). Kept
-#      dependency-free (no new package) per CLAUDE.md's "flag before adding a dependency".
-#   4. run_hours_ddd_age_interacted() / run_hours_ddd_reweighted() -- hours-outcome (primary DDD)
-#      analogs of #2/#3, added for the hours pivot (docs/decisions/hours-ddd-pivot.md). See their
-#      own header comment below for how they differ structurally from #2/#3.
-#
-# All three use the SAME WFH_Exposure quartile definition -- breakpoints computed once from the
-# pre-period distribution via compute_pre_period_quartile_breaks(), then applied identically to
-# pre- and full-period rows via cut(). Computing quartiles independently on two different row sets
-# (e.g. two separate ntile() calls) would silently misalign the quartile labels between the
-# weight-building step and the full-period regression, since ntile()'s cutpoints depend on
-# whichever rows it happens to be ranking.
+# Age-balance robustness chain. GilNK (age group) is imbalanced between mothers and non-mothers
+# in the pre-period, and the gap varies by exposure quartile. Two comparison specifications for
+# each DDD: Mother:GilNK added to the formula, and pre-period raking weights that equalize each
+# Mother group's GilNK distribution within exposure quartile. Quartile edges are computed once on
+# the pre-period rows and applied everywhere.
 library(tidyverse)
 library(fixest)
 source(file.path("scripts", "data_processing.R"))
@@ -32,19 +11,14 @@ source(file.path("scripts", "occupation_exposure_breaks.R"))
 source(file.path("scripts", "assign_wfh_quartile.R"))
 
 compute_pre_period_quartile_breaks <- function(cleaned_df, exposure_cells) {
-  # Derived from exposure_cells' own columns, not hardcoded -- build_exposure_cells()'s cell_vars
-  # can be finer than the original 4-variable set (see main.R's primary spec); a hardcoded 4-key
-  # join would fan out silently rather than error. exposure_cells always has exactly
-  # cell_vars + WFH_Exposure + n_cell.
+  # Join keys are derived from exposure_cells' own columns.
   exposure_join_vars <- setdiff(names(exposure_cells), c("WFH_Exposure", "n_cell"))
-  # Same rule as the occupation-level edges (pre-period rows, row-level quantiles, duplicate-break
-  # guard), applied to the cell-based measure once it is joined on.
   cleaned_df %>%
     left_join(exposure_cells, by = exposure_join_vars) %>%
     compute_occupation_exposure_breaks(caller = "compute_pre_period_quartile_breaks")
 }
 
-# ── 1. Diagnose: is the imbalance uniform, or specific to the lowest quartile? ──────────────────
+# 1. Age gap by Mother status, per exposure quartile
 diagnose_gilnk_by_quartile <- function(cleaned_df, exposure_cells) {
   gilnk_num <- function(x) as.numeric(as.character(x))
   breaks <- compute_pre_period_quartile_breaks(cleaned_df, exposure_cells)
@@ -60,8 +34,7 @@ diagnose_gilnk_by_quartile <- function(cleaned_df, exposure_cells) {
     group_by(WFH_Exposure_Q) %>%
     group_modify(~ {
       tt <- t.test(gilnk_num(GilNK) ~ Mother, data = .x)
-      # t.test()'s own $statistic is (group0 - group1)/se; flip sign to match the Mother1-minus-0
-      # direction used for the reported gap, per the convention established in balance_test.R.
+      # Sign flipped to Mother 1 minus 0.
       tibble(
         mean_GilNK_Mother0 = unname(tt$estimate[1]),
         mean_GilNK_Mother1 = unname(tt$estimate[2]),
@@ -79,14 +52,11 @@ diagnose_gilnk_by_quartile <- function(cleaned_df, exposure_cells) {
   invisible(list(gap_by_quartile = gap, breaks = breaks, pre_df = pre_df))
 }
 
-# ── 2. Interacted-control spec: add Mother:GilNK to the two employment-DDD formulas ───────────
+# 2. Employment DDD with Mother:GilNK added
 run_ddd_age_interacted <- function(cleaned_df, exposure_cells, controls = DEFAULT_CONTROLS) {
   cell_fe_vars   <- c("GilNK", "TeudaGvoha", "MachozMegurim")
   other_controls <- setdiff(controls, cell_fe_vars)
-  # Cell-level, not ~IDPUF: WFH_Exposure is constant within a (GilNK, TeudaGvoha, MachozMegurim)
-  # cell, so individual-level clustering misses the correlation a shared exposure value and shared
-  # unobserved cell shocks induce (Moulton problem) -- matches main.R's primary-spec fix (see
-  # docs/decisions/calibrated-exposure-and-cell-ddd.md and age-balance-robustness-chain.md).
+  # Clustered on the cell the regressor varies at.
   cluster_formula <- as.formula(paste("~", paste(cell_fe_vars, collapse = "^")))
 
   exposure_join_vars <- setdiff(names(exposure_cells), c("WFH_Exposure", "n_cell"))
@@ -98,9 +68,7 @@ run_ddd_age_interacted <- function(cleaned_df, exposure_cells, controls = DEFAUL
                       paste(controls, collapse = " + "))),
     data = ddd_df, cluster = cluster_formula
   )
-  # GilNK's main effect is already absorbed into the cell FE here; Mother:GilNK is not (the FE
-  # groups by GilNK^TeudaGvoha^MachozMegurim jointly, not by an individual's own Mother status
-  # within that cell), so adding it still adds new, non-redundant information to this spec.
+  # Mother:GilNK is not absorbed by the cell FE.
   fe <- feols(
     as.formula(paste("Employed ~ Mother * Post * WFH_Exposure + Mother:GilNK +",
                       paste(other_controls, collapse = " + "),
@@ -115,7 +83,7 @@ run_ddd_age_interacted <- function(cleaned_df, exposure_cells, controls = DEFAUL
   invisible(list(additive = additive, fe = fe))
 }
 
-# ── 3. Reweighted spec: raking weights on GilNK, pre-period, applied to the full period ─────────
+# 3. Raking weights on GilNK within exposure quartile, from the pre-period
 build_gilnk_rake_weights <- function(cleaned_df, exposure_cells) {
   breaks <- compute_pre_period_quartile_breaks(cleaned_df, exposure_cells)
 
@@ -155,18 +123,8 @@ build_gilnk_rake_weights <- function(cleaned_df, exposure_cells) {
   list(weights = weights_tbl %>% select(WFH_Exposure_Q, Mother, GilNK, rake_weight), breaks = breaks)
 }
 
-# ── 4. Hours-outcome (primary DDD) age-balance analogs ───────────────────────────────────────────
-# Added for the hours pivot's gender/robustness-parity pass (docs/decisions/hours-ddd-pivot.md).
-# Unlike run_ddd_age_interacted()/run_ddd_reweighted() above, these mirror hours_ddd_regression.R's
-# ACTUAL formula -- pure occupation-level WFH_Exposure (exposure_index), Employed==1 subsample,
-# clustered on occupation code -- not the cell-based formula the (now-secondary) employment DDD
-# uses, since the primary hours DDD's real regressor is occupation-level. run_hours_ddd_reweighted()
-# still reuses build_gilnk_rake_weights()'s cell-based quartile grouping unchanged for the weight
-# computation itself (the "grouping role" the cell-based measure already serves for
-# hours_ddd_lee_bounds.R's selection correction), then joins the occupation-level exposure_index for
-# the actual regression -- the same "two exposure measures, two roles" split documented in that
-# file's header comment.
-
+# 4. Hours analogs: occupation-level exposure as regressor, clustered on occupation; the cell
+# quartiles serve only to assign the raking weights.
 run_hours_ddd_age_interacted <- function(cleaned_df, exposure_index, controls = DEFAULT_CONTROLS) {
   df_ddd <- cleaned_df %>%
     filter(Employed == 1) %>%
@@ -192,9 +150,7 @@ run_hours_ddd_reweighted <- function(cleaned_df, exposure_cells, exposure_index,
 
   exposure_join_vars <- setdiff(names(exposure_cells), c("WFH_Exposure", "n_cell"))
 
-  # Cell-based WFH_Exposure is used only to assign each row's rake weight (WFH_Exposure_Q x Mother
-  # x GilNK cell) -- renamed WFH_Exposure_Cell so it doesn't collide with the occupation-level
-  # WFH_Exposure joined in next, which is what the regression formula below actually uses.
+  # Cell exposure assigns the weight; occupation exposure is the regressor.
   ddd_df <- cleaned_df %>%
     filter(Employed == 1) %>%
     left_join(exposure_cells, by = exposure_join_vars) %>%
@@ -236,10 +192,7 @@ run_ddd_reweighted <- function(cleaned_df, exposure_cells, controls = DEFAULT_CO
   other_controls <- setdiff(controls, cell_fe_vars)
   cluster_formula <- as.formula(paste("~", paste(cell_fe_vars, collapse = "^")))
 
-  # Weights are keyed on (WFH_Exposure quartile x Mother x GilNK), a triple that exists
-  # identically pre- and post-period, so the same pre-period-derived weight applies to every row
-  # sharing that triple across the full sample, per "apply those weights to the full-period
-  # regression".
+  # Weights are keyed on (quartile, Mother, GilNK), so pre-period weights apply to every row.
   exposure_join_vars <- setdiff(names(exposure_cells), c("WFH_Exposure", "n_cell"))
   ddd_df <- cleaned_df %>%
     left_join(exposure_cells, by = exposure_join_vars) %>%

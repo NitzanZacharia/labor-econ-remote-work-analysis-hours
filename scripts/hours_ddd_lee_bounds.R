@@ -1,46 +1,10 @@
 # hours_ddd_lee_bounds.R
-# Generalizes intensive_margin_lee_bounds.R's DiD-adapted Lee (2009) trimming bounds from the plain
-# 2x2 (Mother x Post) intensive-margin regression to hours_ddd_regression.R's triple-interaction
-# DDD (Mother x Post x WFH_Exposure). See docs/decisions/hours-ddd-pivot.md for the full rationale.
-#
-# ── Why this function uses TWO different WFH_Exposure measures ─────────────────────────────────
-# The regression's regressor is the occupation-level exposure, which is undefined for the
-# non-employed -- the very rows whose absence the bounds correct for. The selection counterfactual
-# s_ab therefore has to be stratified by something observable before employment: quartiles of the
-# demographic-cell WFH_Exposure (build_exposure_cells(), defined for the full sample), via
-# compute_pre_period_quartile_breaks()/assign_wfh_quartile(). Cell quartiles decide WHO is bounded
-# together; the occupation-level score is what the bounded regression estimates against. Neither
-# measure can play the other's role (docs/decisions/exposure-cell-granularity-fix.md).
-#
-# ── The bound construction, generalized from intensive_margin_lee_bounds.R ─────────────────────
-# For each quartile q of the cell-based WFH_Exposure (computed on the FULL cell-matched sample,
-# employed and non-employed alike):
-#   s_ab(q) = P(hours observed | Mother==a, Post==b, WFH_Exposure_Q==q)  for a,b in {0,1}
-#             (employed AND worked the reference week -- the estimation sample, not the employed;
-#              see docs/decisions/hours-population-harmonization.md)
-#   s11_counterfactual(q) = s10(q) + (s01(q) - s00(q))
-# If s11(q) exceeds this counterfactual, trim_prop(q) = 1 - s11_counterfactual(q)/s11(q) is trimmed
-# from that quartile's own Mother==1 & Post==1 slice of the EMPLOYED, occupation-matched sample
-# (top-trim by WorkHoursCont for the lower bound, bottom-trim for the upper bound -- same
-# monotone-selection assumption as the original function). Each quartile is trimmed independently,
-# using its own selection rates -- this tests whether excess selection itself is concentrated in
-# particular exposure quartiles, not just present on average. The four quartiles' trimmed subsets
-# are recombined into one lower-bound sample and one upper-bound sample, and the full triple-
-# interaction formula is refit on point/lower/upper exactly as hours_ddd_regression.R specifies it.
-#
-# ── Limitations (in addition to intensive_margin_lee_bounds.R's own, which all still apply here:
-# only handles EXCESS selection, relies on the extensive-margin DiD's own parallel-trends
-# assumption, assumes monotone selection, ties broken by row order) ────────────────────────────
-# - The "point" (untrimmed) fit here additionally requires a matched CELL-based exposure (to be
-#   assignable to a quartile), on top of hours_ddd_regression.R's own occupation-match requirement
-#   -- so this function's own point estimate can differ very slightly in sample from calling
-#   run_hours_ddd_regression() directly (the ~1.3% of rows with no matched exposure cell, per
-#   docs/decisions/exposure-cell-granularity-fix.md, are additionally excluded here).
-# - A quartile with very few Mother==1,Post==1 rows makes that quartile's own trim_prop noisy, and
-#   if excess selection is detected in a quartile with a small denominator, the trim itself may
-#   remove nearly all of that quartile's post-period mothers. n_by_quartile in the diagnostics
-#   output should be checked before trusting the bounds; a warning is emitted for any quartile
-#   below MIN_CELL_WARN rows.
+# Lee bounds for the hours DDD, generalized from intensive_margin_lee_bounds.R. The regressor is
+# the occupation-level score, undefined for the non-employed, so the selection counterfactual is
+# computed within quartiles of the pre-period demographic-cell index, which is defined for
+# everyone. Each quartile is trimmed on its own excess share and the triple-interaction formula is
+# refit on the recombined samples. The point fit here additionally requires a matched cell, so it
+# can differ slightly from run_hours_ddd_regression()'s.
 library(tidyverse)
 library(fixest)
 source(file.path("scripts", "data_processing.R"))
@@ -57,8 +21,7 @@ run_hours_ddd_lee_bounds <- function(cleaned_df, exposure_index, exposure_cells,
   exposure_join_vars <- setdiff(names(exposure_cells), c("WFH_Exposure", "n_cell"))
   breaks <- compute_pre_period_quartile_breaks(cleaned_df, exposure_cells)
 
-  # Full sample (employed + non-employed) with a matched cell-based exposure, quartile-assigned --
-  # this is what the selection-rate counterfactual is computed on.
+  # Full sample with a matched cell index, quartile-assigned: what the selection rates use.
   full_df <- cleaned_df %>%
     left_join(exposure_cells, by = exposure_join_vars) %>%
     filter(!is.na(WFH_Exposure)) %>%
@@ -67,10 +30,7 @@ run_hours_ddd_lee_bounds <- function(cleaned_df, exposure_index, exposure_cells,
 
   quartiles <- sort(unique(full_df$WFH_Exposure_Q))
 
-  # Share whose OUTCOME IS OBSERVED, not share employed -- same reasoning as the identical change in
-  # intensive_margin_lee_bounds.R: the hours population is reference-week workers, so deriving the
-  # trim proportion from the employment rate would apply it to a different denominator than the one
-  # it was computed on.
+  # Share whose hours are observed, not share employed.
   get_rate <- function(m, p, q) {
     sub <- full_df$WorkHoursCont[full_df$Mother == m & full_df$Post == p &
                                    full_df$WFH_Exposure_Q == q]
@@ -102,13 +62,7 @@ run_hours_ddd_lee_bounds <- function(cleaned_df, exposure_index, exposure_cells,
     ))
   }
 
-  # Employed, occupation-matched sample (mirrors hours_ddd_regression.R's join), carrying forward
-  # each row's cell-based WFH_Exposure_Q from full_df.
-  # !is.na(WorkHoursCont) restricts to the ESTIMATION sample. Same reason as the identical filter
-  # in intensive_margin_lee_bounds.R: after the hours population was harmonized to reference-week
-  # workers (docs/decisions/hours-population-harmonization.md) the Mother==1,Post==1 cells carry
-  # ~12% NA-hours rows, and arrange() sorts NA last -- so the per-quartile lower bound would trim
-  # unobserved rows rather than the highest-hours ones, on an inflated n_cell_q denominator.
+  # Employed, occupation-matched, observed-hours sample carrying each row's cell quartile.
   employed_df <- full_df %>%
     filter(Employed == 1, !is.na(WorkHoursCont)) %>%
     inner_join(
@@ -135,8 +89,7 @@ run_hours_ddd_lee_bounds <- function(cleaned_df, exposure_index, exposure_cells,
 
   rhs    <- paste("Mother*Post*WFH_Exposure", paste(controls, collapse = " + "), sep = " + ")
   formula_hours <- as.formula(paste("WorkHoursCont ~", rhs))
-  # Same Moulton reasoning as hours_ddd_regression.R: WFH_Exposure here is the occupation-level
-  # measure, assigned at ~40 ISCO-2 groups, not the individual.
+  # Clustered on occupation, as the headline is.
   fit_on <- function(df) feols(formula_hours, data = df, cluster = ~MishlachYad_ISCO_08_2)
 
   point_reg <- fit_on(employed_df)
@@ -154,8 +107,6 @@ run_hours_ddd_lee_bounds <- function(cleaned_df, exposure_index, exposure_cells,
     se      = c(se_lower, se_point, se_upper),
     ci_low  = c(co(lower_reg) - z * se_lower, co(point_reg) - z * se_point, co(upper_reg) - z * se_upper),
     ci_high = c(co(lower_reg) + z * se_lower, co(point_reg) + z * se_point, co(upper_reg) + z * se_upper),
-    # Rows the three fits used: the trimmed samples are smaller than the point sample by
-    # n_trimmed_total; exported so the N of each bound is on disk, not console-only.
     n_obs   = c(nobs(lower_reg), nobs(point_reg), nobs(upper_reg))
   )
   print(as.data.frame(bounds_table), digits = 4)

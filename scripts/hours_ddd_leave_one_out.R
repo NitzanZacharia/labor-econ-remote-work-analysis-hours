@@ -1,18 +1,7 @@
 # hours_ddd_leave_one_out.R
-# Leave-one-occupation-out sensitivity of the hours DDD's triple interaction
-# (docs/decisions/grade-report-2-response.md, Robustness 1).
-#
-# Why. The regressor varies across forty occupations, the top exposure quartile holds six of them,
-# and two of those (ICT professionals, science and engineering professionals) are among the
-# largest cells in the sample. A coefficient that rests on one occupation is a different finding
-# from one that survives the removal of any. This refits run_hours_ddd_regression() forty times,
-# each time without one occupation, and records the triple interaction. The summary the paper
-# prints is the range of the forty estimates and the occupations whose removal moves the estimate
-# by more than one headline standard error (an influence rule, not a significance test).
-#
-# Each refit is the primary function on the filtered frame -- the same pattern main.R uses for the
-# Jewish/Arab and child-age rows -- with the per-occupation mechanism stage switched off. Forty
-# feols fits on ~240k rows take about a minute.
+# Leave-one-occupation-out: forty refits of the hours DDD, each without one occupation. The
+# summary is the range of estimates and the occupations whose removal moves the estimate by more
+# than one headline SE.
 library(tidyverse)
 library(fixest)
 source(file.path("scripts", "data_processing.R"))

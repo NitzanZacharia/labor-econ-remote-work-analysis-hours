@@ -1,25 +1,8 @@
 # hours_ddd_by_child_age.R
-# The hours DiD and DDD re-estimated by the age of the mother's youngest child
-# (docs/decisions/grade-report-response.md, item R2).
-#
-# The paper's mechanism -- remote work relaxing a binding time constraint -- predicts that the
-# hours response is concentrated among mothers whose care obligations bind hardest, i.e. mothers
-# of young children, and is near zero for mothers whose youngest child is fifteen or sixteen. The
-# CBS extract carries the youngest child's age bin (GilYeledTzairMBNK: 0 = no child under 17,
-# 1 = 0-1, 2 = 2-4, 3 = 5-9, 4 = 10-14, 5 = 15-17), which employment_by_child_age.R already uses
-# for the employment margin but which entered no hours specification until this file. It is the
-# most direct test of the mechanism the data allow, and it also speaks to the "who is childless"
-# limitation by separating mothers of teenagers from the rest.
-#
-# Sample construction is the one thing to get right here. Each bin's regression uses that bin's
-# mothers PLUS ALL CHILDLESS WOMEN: restricting to the bin's mothers alone would make Mother a
-# constant and Mother:Post unidentified. The childless control group is therefore the same in every
-# row, and the rows differ only in which mothers are compared to it.
-#
-# Both regressions are the existing primary functions called on the filtered frame -- exactly how
-# main.R already produces the Jewish/Arab rows -- so no new econometrics is introduced. The DDD's
-# per-occupation mechanism stage is skipped (run_mechanism = FALSE): it is a repo diagnostic the
-# paper does not print, and refitting it for every bin would add forty fits per row for nothing.
+# Hours DiD and DDD by the age of the mother's youngest child (GilYeledTzairMBNK bins). Each bin's
+# mothers are compared with ALL childless women, so the control group is the same in every row.
+# Both regressions are the primary functions on the filtered frame; the per-occupation second
+# stage is skipped.
 library(tidyverse)
 library(fixest)
 source(file.path("scripts", "data_processing.R"))

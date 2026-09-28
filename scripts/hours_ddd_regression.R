@@ -1,37 +1,16 @@
 # hours_ddd_regression.R
-# The primary triple-interaction DDD (Mother*Post*WFH_Exposure) on the hours-worked outcome,
-# restricted (by construction) to the Employed == 1 subsample. See
-# docs/decisions/hours-ddd-pivot.md for the full rationale.
-#
-# The exposure regressor here is the PURE occupation-level measure (exposure_calibrated's
-# wfh_exposure_calibrated, joined by MishlachYad_ISCO_08_2 -- ~40 ISCO-2 groups), not the
-# demographic-cell-based WFH_Exposure the extensive-margin primary DDD uses. That measure was
-# rejected for the extensive margin specifically because occupation is undefined for the
-# non-employed, and Employed (the extensive DDD's own outcome) would then be conditioned on itself
-# (docs/decisions/exposure-cell-granularity-fix.md). WorkHoursCont is already, by construction,
-# undefined for anyone with Employed != 1 (data_processing.R's WorkHoursCont derivation) --
-# conditioning the hours regression on employment is baked into the question itself, not introduced by this exposure
-# choice. Dropping non-employed rows still introduces a real selection-on-a-mediator problem for
-# the hours estimate (if WFH differentially pulls marginal mothers into employment, the post-period
-# employed-mother sample isn't compositionally comparable to the pre-period one) -- that's bounded
-# separately by hours_ddd_lee_bounds.R's run_hours_ddd_lee_bounds(), run alongside this point
-# estimate, not instead of it.
-#
-# Also includes a second-stage occupation-by-occupation mechanism regression (added for the
-# gender/robustness-parity pass following the hours pivot): per-occupation Mother:Post estimates
-# from run_intensive_margin_reg(), precision-weighted against occupation-level exposure -- see
-# below.
+# Primary triple difference: usual weekly hours on Mother x Post x WFH_Exposure, with the
+# occupation-level exposure score joined by two-digit ISCO code, on the employed. Conditioning on
+# employment is intrinsic to an hours outcome; the selection it introduces is bounded separately
+# by run_hours_ddd_lee_bounds(). Also fits a per-occupation second stage (a repo diagnostic).
 library(tidyverse)
 library(fixest)
 source(file.path("scripts", "data_processing.R"))
 source(file.path("scripts", "ddd_collinearity_diagnostics.R"))
 source(file.path("scripts", "intensive_margin_regression.R"))
 
-# `outcome` and `run_mechanism` (docs/decisions/grade-report-response.md, item M3). `outcome` lets the same specification be estimated on
-# an alternative coding of the hours variable (a full-time or long-hours indicator built in
-# main.R) without a second copy of this function; the default reproduces every existing call.
-# `run_mechanism` switches off the per-occupation second stage below, which is a repo diagnostic
-# on WorkHoursCont specifically and has no meaning for a binary outcome or a subgroup row.
+# outcome allows the same specification on an alternative coding of hours; run_mechanism switches
+# off the per-occupation second stage.
 run_hours_ddd_regression <- function(cleaned_df, exposure_index, controls = DEFAULT_CONTROLS,
                                      outcome = "WorkHoursCont",
                                      run_mechanism = identical(outcome, "WorkHoursCont")) {
@@ -42,11 +21,7 @@ run_hours_ddd_regression <- function(cleaned_df, exposure_index, controls = DEFA
 
   n_employed <- sum(cleaned_df$Employed == 1, na.rm = TRUE)
 
-  # Attach each employed row's occupation-level WFH exposure by joining on the occupation code.
-  # inner_join() already drops rows with no occupation code (non-employed, or a disclosure-masked
-  # ISCO for the employed) -- the explicit filter(Employed == 1) is kept anyway for readability and
-  # as a defensive check, since WorkHoursCont being NA for Employed != 1 rows would otherwise make
-  # their exclusion implicit rather than stated.
+  # Join each employed row's occupation-level exposure; rows without a matched code drop out.
   df_ddd <- cleaned_df %>%
     filter(Employed == 1) %>%
     inner_join(
@@ -55,8 +30,7 @@ run_hours_ddd_regression <- function(cleaned_df, exposure_index, controls = DEFA
     )
 
   n_matched  <- nrow(df_ddd)
-  # Occupation is the cluster; the count is returned so the paper's robustness table can print it
-  # per row (the unswapped-occupations row has 30, every other row 40).
+  # Occupation is the cluster; the count is returned for the robustness table.
   n_clusters <- n_distinct(df_ddd$MishlachYad_ISCO_08_2)
   message(sprintf(
     "run_hours_ddd_regression: %d of %d employed rows (%.1f%%) retained an occupation-level WFH_Exposure match (dropped: disclosure-masked or unmapped ISCO codes); %d occupation clusters.",
@@ -69,9 +43,7 @@ run_hours_ddd_regression <- function(cleaned_df, exposure_index, controls = DEFA
     sep = " + "
   )
   formula_ddd <- as.formula(paste(outcome, "~", rhs_ddd))
-  # WFH_Exposure is assigned at the occupation level (~40 ISCO-2 groups), not the individual --
-  # cluster on the occupation code, the level the regressor of interest actually varies at, not
-  # IDPUF (a Moulton problem otherwise).
+  # Clustered on occupation, the level the regressor varies at.
   reg_ddd <- feols(formula_ddd, data = df_ddd, cluster = ~MishlachYad_ISCO_08_2)
   check_for_dropped_coefficients(reg_ddd, "run_hours_ddd_regression()'s triple interaction")
 
@@ -93,14 +65,8 @@ run_hours_ddd_regression <- function(cleaned_df, exposure_index, controls = DEFA
     )))
   }
 
-  # ── Model 2: second-stage mechanism regression ──────────────────────────────
-  # For each occupation, fits run_intensive_margin_reg() (WorkHoursCont, Employed==1) on that
-  # occupation's own subset and extracts its Mother:Post estimate (beta_j) and cluster-robust SE
-  # (se_j). beta_j's precision varies enormously across occupations, so the second-stage
-  # regression of beta_j on wfh_exposure is precision-weighted (1/se_j^2) rather than unweighted --
-  # the usual approach for a two-step meta-regression on generated regressands. Occupations with
-  # too little data to fit are dropped from the mechanism regression rather than erroring the
-  # whole function.
+  # Second stage: each occupation's own Mother:Post estimate regressed on its exposure,
+  # precision-weighted.
   occ_stats <- bind_rows(lapply(exposure_index$occupation_code, function(code) {
     df_occ <- filter(df_ddd, MishlachYad_ISCO_08_2 == code)
     fit <- tryCatch({
@@ -144,9 +110,7 @@ run_hours_ddd_regression <- function(cleaned_df, exposure_index, controls = DEFA
     n_employed = n_employed,
     n_matched  = n_matched,
     n_clusters = n_clusters,
-    # The regressor's own values on the estimation sample, so compute_ddd_mde() can report the MDE
-    # per SD/IQR of exposure rather than only per unit. A bare numeric vector, not a data frame,
-    # so export_all_results() ignores it (it is row-level and has no business in outputs/).
+    # The regressor's values on the estimation sample, for the per-SD MDE.
     exposure_vector = df_ddd$WFH_Exposure,
     models     = list(ddd = reg_ddd, mechanism = reg_mechanism),
     mechanism_data = mechanism_df,
