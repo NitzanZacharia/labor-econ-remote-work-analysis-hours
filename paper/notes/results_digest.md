@@ -765,7 +765,8 @@ Source: `docs/decisions/checkpoint6-wfh-anchor-year.md` (Status: DECIDED — Pat
   adaptation was uneven across occupations … a 2021-based index could rank occupations' 'exposure'
   meaningfully differently than a 2020-based one would have."
 - **Where the 2021-anchored index is actually used now:** only as the *realized* robustness
-  variant (§1.6, coef 6.416*). The primary hours DDD uses the *calibrated* index, which draws on
+  variant (§1.6, coef 5.195*; 6.416 before the 2026-09-21 harmonization). The primary hours DDD
+  uses the *calibrated* index, which draws on
   realized **2022–23** data (not 2021) for its swap test — itself a "documented compromise, not a
   fully pre-treatment measure" (`docs/decisions/calibrated-exposure-and-cell-ddd.md`, measure 2).
   The secondary employment DDD's cell measure is built from 2017–19 occupational composition

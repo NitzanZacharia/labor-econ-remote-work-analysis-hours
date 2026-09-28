@@ -60,8 +60,9 @@ both are public at the addresses above.
   the derivation and cites it; the Limitations sentence in `paper/paper.tex` no longer calls the
   crosswalk undocumented — done 2026-09-23.
 - The pre-submission decision register (retired 2026-09-28, in git history) — D5 struck, with a closed entry — done 2026-09-23.
-- `README.md` (`data/` description) and `paper/notes/results_digest.md` (its own `[VERIFY]`
-  marker for this item) — not updated; neither is read by the paper.
+- `README.md` (`data/` description) — not updated; it is not read by the paper.
+  `paper/notes/results_digest.md` — its `[VERIFY]` marker for this item was closed on 2026-09-19
+  (see the digest's header note).
 
 ---
 
