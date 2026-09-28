@@ -1,8 +1,10 @@
 % code_appendix.tex -- the replication-code appendix, \input{} by paper.tex after appendix.tex.
 % Every listing is \lstinputlisting{}'d from the repository file itself (paths relative to
 % paper/, like the figures), so the appendix cannot drift from the code that produced the
-% results. Comments in the listed files were condensed for print on 2026-09-28; no code changed.
-% The preamble of paper.tex loads listings, xcolor, multicol and pdflscape and sets \lstset.
+% results. The main.R excerpt is pulled by the "# BEGIN employmentddd" / "# END employmentddd"
+% marker comments in main.R, not by line numbers. Comments in the listed files were condensed
+% for print on 2026-09-28; no code changed. The preamble of paper.tex loads listings, xcolor,
+% multicol, pdflscape, array and capt-of and sets \lstset.
 
 %======================================================================
 \section{Replication code}\label{sec:app-code}
@@ -13,24 +15,34 @@ cleans the CBS microdata (cached beside the raw files), builds the exposure meas
 model, and writes the results to \texttt{outputs/} and the tables to \texttt{paper/tables/};
 \texttt{Rscript main.R} reproduces every number in this paper. Each file under
 \texttt{scripts/} defines one function; the multi-function robustness chains live under
-\texttt{robustness/}. The listings below are the estimation code, grouped by role: the pipeline,
-data construction, the exposure measures, the DiD and DDD specifications, the event studies and
-pre-trend tests, the selection bounds, inference and power, the calibration, sorting and
-influence checks, and the heterogeneity splits. The helpers that draw the figures, assemble the
-tables and export the results are named in Table~\ref{tab:code-index} and omitted. Regressions
-use \texttt{fixest}; the wild cluster bootstrap uses \texttt{fwildclusterboot}. The raw CBS
-microdata are not distributed with the code.
+\texttt{robustness/}. The listings below are the estimation code, grouped by role: data
+construction, the exposure measures, the DiD and DDD specifications, the event studies, the
+selection bounds, inference, and the calibration and sorting checks. Everything else, the
+pipeline orchestration, the wrappers and loops that call the primary functions on subsamples,
+the helpers that draw the figures, assemble the tables and export the results, and the secondary
+diagnostics, is named in Table~\ref{tab:code-index} with the function it wraps or the place its
+number appears. Regressions use \texttt{fixest}; the wild cluster bootstrap uses
+\texttt{fwildclusterboot}. The raw CBS microdata are not distributed with the code.
 
 % Not a float: the landscape block that follows forces a page break, so a floating table would be
 % pushed onto a page of its own. \captionof (capt-of) keeps the caption and the table number.
 \begin{center}
 \begin{minipage}{\textwidth}
-\captionof{table}{Scripts not listed: figures, tables, export and guards}\label{tab:code-index}
+\captionof{table}{Scripts not listed: pipeline, wrappers, figures, tables, export and guards}\label{tab:code-index}
 \renewcommand{\baselinestretch}{1}\scriptsize
 \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.47\textwidth}>{\raggedright\arraybackslash}p{0.50\textwidth}@{}}
 \toprule
 File & Role \\
 \midrule
+\multicolumn{2}{@{}l}{\emph{Pipeline and wrappers}} \\
+\texttt{main.R} (all but section 8b) & Orchestration: loads and caches the data, calls every function below in order, exports the results \\
+\texttt{scripts/placebo\_male\_frame.R} & Loads, validates and caches the male subsample \\
+\texttt{scripts/hours\_gender\_placebo.R} & \texttt{run\_intensive\_margin\_reg()} and the hours DDD formula on the male subsample; Table~\ref{tab:subgroup} \\
+\texttt{scripts/hours\_ddd\_by\_child\_age.R} & The two primary functions on each child-age bin's mothers plus all childless women; Table~\ref{tab:childage} \\
+\texttt{scripts/hours\_ddd\_leave\_one\_out.R} & Forty refits of \texttt{run\_hours\_ddd\_regression()}, one occupation removed each time; Figure~\ref{fig:loo} \\
+\texttt{robustness/pretrend\_wald\_test.R} & \texttt{fixest::wald()} on the pre-2020 event-study terms; Figure~\ref{fig:pretrend} notes \\
+\texttt{scripts/tidy\_event\_study\_coefs.R} & Extracts the year-interaction coefficients for plotting and export \\
+\texttt{scripts/occupation\_exposure\_breaks.R}, \texttt{scripts/assign\_wfh\_quartile.R} & Pre-period worker-weighted quartile edges of the exposure score, and the \texttt{cut()} that applies them \\
 \multicolumn{2}{@{}l}{\emph{Descriptive figures and tables}} \\
 \texttt{scripts/descriptive\_table.R} & Table~\ref{tab:descriptives} \\
 \texttt{scripts/hours\_descriptive\_plots.R} & Figure~\ref{fig:hours-by-year}, panel (a) \\
@@ -50,6 +62,9 @@ File & Role \\
 \texttt{scripts/export\_results.R}, \texttt{scripts/export\_paper\_figures.R} & CSV and PNG export of every result; vector PDFs of the paper's figures \\
 \multicolumn{2}{@{}l}{\emph{Guards and secondary diagnostics}} \\
 \texttt{scripts/validation.R} & Data-quality and schema checks on the cleaned data \\
+\texttt{scripts/Diagnostics.R} & Employment 2$\times$2 table, missingness audits and the employment event study (the hours specification with \texttt{Employed} as outcome); Section~\ref{sec:res-extensive} \\
+\texttt{scripts/ddd\_mde\_diagnostics.R} & The minimum detectable effect of Section~\ref{sec:strategy}, $\mathrm{SE}\,(t_{0.975} + t_{0.80})$, per unit, SD and IQR of the regressor \\
+\texttt{scripts/isco\_masking\_diagnostics.R} & Masked-versus-unmasked occupation check within ISCO major groups (Section~\ref{sec:limitations}) \\
 \texttt{scripts/ddd\_collinearity\_diagnostics.R} & Dropped-coefficient guard; collinearity report for the employment DDD \\
 \texttt{robustness/balance\_test.R} & Pre-period covariate balance by cell-exposure quartile \\
 \bottomrule
@@ -63,32 +78,26 @@ File & Role \\
 \lstset{columns=fullflexible}
 \begin{multicols}{3}
 
-\subsection*{Pipeline}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily main.R}]{../main.R}
-
 \subsection*{Data}
 \lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/data\_processing.R}]{../scripts/data_processing.R}
 
 \subsection*{Exposure measures}
 \lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/wfh\_exposure\_cells.R}]{../scripts/wfh_exposure_cells.R}
 \lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/wfh\_exposure\_index.R}]{../scripts/wfh_exposure_index.R}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/occupation\_exposure\_breaks.R}]{../scripts/occupation_exposure_breaks.R}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/assign\_wfh\_quartile.R}]{../scripts/assign_wfh_quartile.R}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/isco\_masking\_diagnostics.R}]{../scripts/isco_masking_diagnostics.R}
 
 \subsection*{DiD and DDD specifications}
 \lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/intensive\_margin\_regression.R}]{../scripts/intensive_margin_regression.R}
 \lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/basic\_regression.R}]{../scripts/basic_regression.R}
+\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily main.R, section 8b (employment DDD)},
+  linerange=employmentddd-employmentddd, rangebeginprefix=\#\ BEGIN\ , rangeendprefix=\#\ END\ ,
+  includerangemarker=false]{../main.R}
 \lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/hours\_ddd\_regression.R}]{../scripts/hours_ddd_regression.R}
 \lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/hours\_ddd\_saturated.R}]{../scripts/hours_ddd_saturated.R}
 \lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/hours\_ddd\_binned.R}]{../scripts/hours_ddd_binned.R}
 
-\subsection*{Event studies and pre-trend tests}
+\subsection*{Event studies}
 \lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/hours\_diagnostics.R}]{../scripts/hours_diagnostics.R}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/Diagnostics.R}]{../scripts/Diagnostics.R}
 \lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/hours\_ddd\_event\_study.R}]{../scripts/hours_ddd_event_study.R}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/tidy\_event\_study\_coefs.R}]{../scripts/tidy_event_study_coefs.R}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily robustness/pretrend\_wald\_test.R}]{../robustness/pretrend_wald_test.R}
 
 \subsection*{Selection bounds}
 \lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/lee\_trim\_proportion.R}]{../scripts/lee_trim_proportion.R}
@@ -97,21 +106,14 @@ File & Role \\
 \lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/intensive\_margin\_lee\_bounds.R}]{../scripts/intensive_margin_lee_bounds.R}
 \lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/hours\_ddd\_lee\_bounds.R}]{../scripts/hours_ddd_lee_bounds.R}
 
-\subsection*{Inference and power}
+\subsection*{Inference}
 \lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily robustness/hours\_ddd\_inference.R}]{../robustness/hours_ddd_inference.R}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/ddd\_mde\_diagnostics.R}]{../scripts/ddd_mde_diagnostics.R}
 
-\subsection*{Calibration, sorting and influence checks}
+\subsection*{Calibration and sorting checks}
 \lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/hours\_ddd\_swap\_control.R}]{../scripts/hours_ddd_swap_control.R}
 \lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/exposure\_sorting\_check.R}]{../scripts/exposure_sorting_check.R}
 \lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/hours\_ddd\_cell\_exposure.R}]{../scripts/hours_ddd_cell_exposure.R}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/hours\_ddd\_leave\_one\_out.R}]{../scripts/hours_ddd_leave_one_out.R}
 \lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily robustness/age\_balance\_robustness.R}]{../robustness/age_balance_robustness.R}
-
-\subsection*{Heterogeneity and the fathers' comparison}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/hours\_ddd\_by\_child\_age.R}]{../scripts/hours_ddd_by_child_age.R}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/placebo\_male\_frame.R}]{../scripts/placebo_male_frame.R}
-\lstinputlisting[title={\normalfont\footnotesize\bfseries\ttfamily scripts/hours\_gender\_placebo.R}]{../scripts/hours_gender_placebo.R}
 
 \end{multicols}
 \end{spacing}

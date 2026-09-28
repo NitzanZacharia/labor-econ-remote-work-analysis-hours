@@ -421,6 +421,7 @@ hours_ddd_childage_comparison <- build_hours_subgroup_comparison(
   x_label  = "Mother x Post x WFH_Exposure (95% CI)"
 )
 
+# BEGIN employmentddd
 # 8b. Secondary DDD (employment): cell-based exposure, full sample, two specifications
 message("Running secondary (employment) DDD (cell-based exposure, calibrated, full sample)...")
 ddd_df <- cleaned_df %>%
@@ -457,6 +458,7 @@ print(employment_ddd_table)
 
 message("Checking Spec 1's collinearity at runtime (see comment above)...")
 check_spec1_collinearity(ddd_df, cell_fe_vars, DEFAULT_CONTROLS)  # prints its own report
+# END employmentddd
 
 # 8c. Age-balance robustness chain
 RUN_AGE_BALANCE_ROBUSTNESS <- TRUE
