@@ -101,6 +101,7 @@ make_paper_table_inputs <- function(seed = 91) {
     hours_ddd_married_only = hours_ddd,
     hours_ddd_marital_interacted = list(model = hours_ddd$model, n_clusters = 12L),
     hours_ddd_teaching_swap = hours_ddd,
+    hours_ddd_topbin60 = hours_ddd, hours_ddd_topbin_lpm = hours_ddd, hours_ddd_absentees = hours_ddd,
     calibration_threshold_sweep = list(table = tibble::tibble(
       threshold = c(0.5, 0.3, 0.9), n_swapped = c(5L, 8L, 0L),
       swapped_codes = c("23, 41, 25, 31, 33", "23, 41, 25, 31, 33, 34, 43, 52", ""),
@@ -184,7 +185,8 @@ test_that("Table 4 carries a Clusters column and the grade-report-2 rows; hours 
                    "Leave-one-occupation-out", "Occupational sorting", "Pre-period cell exposure",
                    "Exposure score as outcome", "Top-quartile indicator",
                    "teaching \\(ISCO 23\\) alone swapped", "Married women only",
-                   "Marital status", "Age and marital balance")) {
+                   "Marital status", "Age and marital balance",
+                   "Absentees at usual hours", "Top bin \\(\\$60\\+\\$\\) recoded", "Top-bin indicator")) {
     expect_true(any(grepl(needle, rob)), info = needle)
   }
   # The bootstrap-p column: looked up by label (and by term for the swap-control's second row);

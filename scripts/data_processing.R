@@ -140,6 +140,17 @@ load_and_clean_data <- function(folder_path, sex_filter = c("women", "men")) {
         ShaotAvodaBederechKlalNK == 11      ~ median(.hour_bin_val[Employed == 1 & ShaotAvodaBederechKlalNK %in% 1:5], na.rm = TRUE),
         ShaotAvodaBederechKlalNK == 12      ~ median(.hour_bin_val[Employed == 1 & ShaotAvodaBederechKlalNK %in% 6:10], na.rm = TRUE),
         .default = NA_real_
+      ),
+      # Same coding without the reference-week gate: absentees keep their reported usual hours.
+      # 2017 absentees carry code 0 and stay NA, so this column is comparable from 2018 on only
+      # (robustness row, docs/admin/review.md item 11).
+      WorkHoursUsualAll = case_when(
+        Employed != 1                      ~ NA_real_,
+        ShaotAvodaBederechKlalNK == 0      ~ NA_real_,
+        ShaotAvodaBederechKlalNK %in% 0:10 ~ .hour_bin_val,
+        ShaotAvodaBederechKlalNK == 11      ~ median(.hour_bin_val[Employed == 1 & ShaotAvodaBederechKlalNK %in% 1:5], na.rm = TRUE),
+        ShaotAvodaBederechKlalNK == 12      ~ median(.hour_bin_val[Employed == 1 & ShaotAvodaBederechKlalNK %in% 6:10], na.rm = TRUE),
+        .default = NA_real_
       )
     ) %>%
     ungroup() %>%

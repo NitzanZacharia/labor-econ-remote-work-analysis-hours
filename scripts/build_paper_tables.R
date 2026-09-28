@@ -39,7 +39,9 @@ build_paper_tables <- function(r) {
     "exposure_sorting_check", "hours_ddd_leave_one_out", "balance_by_quartile",
     # Referee-review inputs (docs/admin/review.md, items 1-3).
     "hours_ddd_married_only", "hours_ddd_marital_interacted", "hours_ddd_teaching_swap",
-    "calibration_threshold_sweep"
+    "calibration_threshold_sweep",
+    # Referee-review inputs, items 6 and 11.
+    "hours_ddd_topbin60", "hours_ddd_topbin_lpm", "hours_ddd_absentees"
   )
   missing <- setdiff(need, names(r))
   if (length(missing) > 0) {
@@ -386,6 +388,8 @@ build_paper_tables <- function(r) {
              boot = "hours_ddd_unswapped"),
     spec_row("\\quad Excluding survey year 2023", r$hours_ddd_ex2023$model, clusters = r$hours_ddd_ex2023$n_clusters,
              boot = "hours_ddd_ex2023"),
+    spec_row("\\quad Absentees at usual hours, 2018--2023", r$hours_ddd_absentees$model,
+             clusters = r$hours_ddd_absentees$n_clusters, boot = "hours_ddd_absentees"),
     loo_row,
     span("\\emph{Occupational sorting}", 7),
     cell_row,
@@ -397,6 +401,10 @@ build_paper_tables <- function(r) {
              boot = "hours_ddd_fulltime"),
     spec_row("\\quad Long-hours indicator ($\\geq 40$ hours)", r$hours_ddd_longhours$model, clusters = r$hours_ddd_longhours$n_clusters,
              boot = "hours_ddd_longhours"),
+    spec_row("\\quad Top bin ($60+$) recoded to 60 hours", r$hours_ddd_topbin60$model,
+             clusters = r$hours_ddd_topbin60$n_clusters, boot = "hours_ddd_topbin60"),
+    spec_row("\\quad Top-bin indicator ($60+$ hours)", r$hours_ddd_topbin_lpm$model,
+             clusters = r$hours_ddd_topbin_lpm$n_clusters, boot = "hours_ddd_topbin_lpm"),
     span("\\emph{Inference on the primary estimate}", 7),
     spec_row("\\quad Two-way clustering (ind., occ.)", r$hours_ddd_twoway_model,
              clusters = sprintf("%s $\\times$ ind.", fN(n_occ_primary))),

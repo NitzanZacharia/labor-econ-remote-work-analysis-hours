@@ -286,10 +286,23 @@ hours_ddd_noimputed <- run_hours_ddd_regression(
 hours_outcome_df <- cleaned_df %>%
   mutate(
     FullTime  = if_else(is.na(WorkHoursCont), NA_integer_, as.integer(WorkHoursCont >= 35)),
-    LongHours = if_else(is.na(WorkHoursCont), NA_integer_, as.integer(WorkHoursCont >= 40))
+    LongHours = if_else(is.na(WorkHoursCont), NA_integer_, as.integer(WorkHoursCont >= 40)),
+    # Top bin (60+ hours, coded 78.5): recoded to 60, and as an indicator (review item 6)
+    TopBin60  = if_else(!is.na(WorkHoursCont) & ShaotAvodaBederechKlalNK == 10, 60, WorkHoursCont),
+    TopBinInd = if_else(is.na(WorkHoursCont), NA_integer_, as.integer(ShaotAvodaBederechKlalNK == 10))
   )
 hours_ddd_fulltime  <- run_hours_ddd_regression(hours_outcome_df, hours_exposure_index, outcome = "FullTime")
 hours_ddd_longhours <- run_hours_ddd_regression(hours_outcome_df, hours_exposure_index, outcome = "LongHours")
+hours_ddd_topbin60  <- run_hours_ddd_regression(hours_outcome_df, hours_exposure_index, outcome = "TopBin60",
+                                                run_mechanism = FALSE)
+hours_ddd_topbin_lpm <- run_hours_ddd_regression(hours_outcome_df, hours_exposure_index, outcome = "TopBinInd")
+
+# Absentees included at their reported usual hours, 2018-2023 (review item 11)
+message("Running the hours DDD with reference-week absentees included at usual hours (2018-2023)...")
+hours_ddd_absentees <- run_hours_ddd_regression(
+  filter(cleaned_df, ShnatSeker >= 2018), hours_exposure_index,
+  outcome = "WorkHoursUsualAll", run_mechanism = FALSE
+)
 # Baseline shares of the two indicators
 hours_outcome_shares <- hours_outcome_df %>%
   filter(Employed == 1, !is.na(WorkHoursCont)) %>%
@@ -562,6 +575,9 @@ boot_specs <- c(
     list(label = "hours_ddd_noimputed",          model = hours_ddd_noimputed$model),
     list(label = "hours_ddd_fulltime",           model = hours_ddd_fulltime$model),
     list(label = "hours_ddd_longhours",          model = hours_ddd_longhours$model),
+    list(label = "hours_ddd_topbin60",           model = hours_ddd_topbin60$model),
+    list(label = "hours_ddd_topbin_lpm",         model = hours_ddd_topbin_lpm$model),
+    list(label = "hours_ddd_absentees",          model = hours_ddd_absentees$model),
     list(label = "hours_ddd_jewish",             model = hours_ddd_jewish$model),
     list(label = "hours_ddd_arab",               model = hours_ddd_arab$model),
     list(label = "hours_gender_placebo_ddd",     model = hours_gender_placebo$ddd_placebo$model)
@@ -667,7 +683,11 @@ paper_tables <- build_paper_tables(list(
   hours_ddd_married_only       = hours_ddd_married_only,
   hours_ddd_marital_interacted = hours_ddd_marital_interacted,
   hours_ddd_teaching_swap      = hours_ddd_teaching_swap,
-  calibration_threshold_sweep  = calibration_threshold_sweep
+  calibration_threshold_sweep  = calibration_threshold_sweep,
+  # Review items 6 and 11.
+  hours_ddd_topbin60           = hours_ddd_topbin60,
+  hours_ddd_topbin_lpm         = hours_ddd_topbin_lpm,
+  hours_ddd_absentees          = hours_ddd_absentees
 ))
 
 # 9. Export (check_idpuf_panel_structure()'s per-person tables are deliberately not exported)
@@ -687,6 +707,8 @@ results_to_export <- list(
   pretrend_wald_hours = pretrend_wald_hours$table,
   pretrend_wald_hours_ddd = pretrend_wald_hours_ddd$table,
   isco_masking_sensitivity = isco_masking_check,
+  isco_masking_model = if (is.null(isco_masking_check$model)) NULL else
+    etable(isco_masking_check$model, headers = c("WFH ~ ISCO_masked | ISCO1"), digits = 4),
   wfh_exposure_external = exposure_external,
   wfh_exposure_calibrated = exposure_calibrated,
   wfh_exposure_realized = exposure_realized,
@@ -759,6 +781,9 @@ results_to_export <- list(
                                         headers = c("Hours DDD, marital-status interacted"), digits = 4),
   ddd_hours_teaching_swap      = hours_ddd_teaching_swap$table,
   calibration_threshold_sweep  = calibration_threshold_sweep$table,
+  ddd_hours_topbin60           = hours_ddd_topbin60$table,
+  ddd_hours_topbin_lpm         = hours_ddd_topbin_lpm$table,
+  ddd_hours_absentees          = hours_ddd_absentees$table,
   hours_lee_bounds_imbens_manski      = as.data.frame(hours_lee_bounds$imbens_manski_ci),
   intensive_margin_lee_bounds_imbens_manski = as.data.frame(intensive_lee_bounds$imbens_manski_ci)
 )

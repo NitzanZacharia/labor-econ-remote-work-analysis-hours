@@ -75,6 +75,28 @@ test_that("WorkHoursCont: defined only for reference-week workers (population ha
   expect_true(all(cleaned$AvadBeshavua[observed] == 1))
 })
 
+test_that("WorkHoursUsualAll: WorkHoursCont's coding without the reference-week gate", {
+  # Same bin medians and imputation, but absentees keep their reported usual hours. Code 0
+  # (the 2017 absentee convention) and the non-employed stay NA.
+  hour_bin_median <- c(`1` = 4, `2` = 11, `3` = 18, `4` = 25.5, `5` = 32,
+                        `6` = 37, `7` = 42, `8` = 47, `9` = 54.5, `10` = 78.5)
+  emp <- cleaned$Employed == 1 & !is.na(cleaned$ShaotAvodaBederechKlalNK)
+  for (code in 1:10) {
+    vals <- cleaned$WorkHoursUsualAll[emp & cleaned$ShaotAvodaBederechKlalNK == code]
+    expect_true(all(vals == hour_bin_median[[as.character(code)]]), info = code)
+  }
+  expect_true(all(is.na(cleaned$WorkHoursUsualAll[emp & cleaned$ShaotAvodaBederechKlalNK == 0])))
+  expect_true(all(is.na(cleaned$WorkHoursUsualAll[cleaned$Employed != 1])))
+  # Wherever the reference-week outcome is observed the two columns agree ...
+  observed <- !is.na(cleaned$WorkHoursCont)
+  expect_equal(cleaned$WorkHoursUsualAll[observed], cleaned$WorkHoursCont[observed])
+  # ... and the only extra rows are employed absentees with a real hours code.
+  extra <- !is.na(cleaned$WorkHoursUsualAll) & is.na(cleaned$WorkHoursCont)
+  expect_gt(sum(extra), 0)
+  expect_true(all(cleaned$Employed[extra] == 1))
+  expect_true(all(cleaned$AvadBeshavua[extra] != 1))
+})
+
 test_that("WorkHoursCont: code 99 -> NA", {
   vals <- cleaned$WorkHoursCont[cleaned$ShaotAvodaBederechKlalNK == 99]
   expect_gt(length(vals), 0)

@@ -48,9 +48,9 @@ of the pre/post boundary, so an individual fixed-effects design was considered a
 
 \paragraph{Hours year by year.}
 Panel~(a) of Figure~\ref{fig:hours-by-year} unpools the pre-period. The raw mother-minus-non-mother gap is
-$-1.37$ hours in 2017, $-1.48$ in 2018 and $-1.67$ in 2019, three years within a third of an hour
-of each other and each within the others' confidence bounds: the groups were not diverging before
-treatment. The post-period path is $-1.37$, $-1.53$ and $-0.80$, not monotone and not
+$-1.37$ hours in 2017, $-1.48$ in 2018 and $-1.67$ in 2019, a widening of $0.3$ hours over two
+years that is monotone but within sampling error, each year lying inside the others' confidence
+bounds. The post-period path is $-1.37$, $-1.53$ and $-0.80$, not monotone and not
 individually distinguishable, so the timing reading in the Discussion rests on the event studies
 of Figure~\ref{fig:pretrend}, not on this series.
 
@@ -90,6 +90,18 @@ realized shares are computed on men and women together; Table~\ref{tab:robust} r
 from men alone. The realized index used as a bound is the realized Israeli WFH share by
 occupation, anchored to 2021 (no 2020 extract exists) with a minimum of 200 observations per
 occupation.
+
+\paragraph{Masked occupation codes.}
+The CBS masks some two-digit occupation codes for disclosure control, and those rows carry no
+exposure score and drop out of the hours DDD. A partially masked code still identifies the
+one-digit major group, so the check compares realized WFH between masked and unmasked employed
+women within the same major group in 2022--23. Among professionals (major group 2), the
+masked rows work from home at a share of $0.29$ against $0.16$ for the unmasked ones, on
+$207$ masked observations; in the other major groups the masked rows are fewer and the gaps
+are small or negative.
+% PHASE-2 FILL-IN (review item 10): add "Pooled across major groups the masked-minus-unmasked
+% difference is XX (SE XX), significant at the 5% level and negligible in explanatory power."
+% Number from outputs/isco_masking_model.csv after Run A.
 
 \paragraph{Fit.}
 Across the forty occupations, on men and women pooled over 2021--23, the calibrated score has a
