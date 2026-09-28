@@ -73,7 +73,7 @@ O*NET-SOC occupation
 in their published classification is matched to every ISCO-08 unit group the crosswalk lists
 for its six-digit SOC code, and the score of a sub-major group is the unweighted mean of their
 binary indicator over the matched pairs; armed-forces groups have no counterpart in their data
-and carry no score. The replication code (Appendix~\ref{sec:app-code}) re-derives the forty
+and carry no score. The replication code re-derives the forty
 scores (Table~\ref{tab:exposure-scores}) from the two public source files and checks them against
 the file the pipeline reads. Teaching (ISCO 23) is the clearest case of a US task-based score
 misclassifying Israeli practice: it scores $0.966$ on the external index, yet Israeli schools,
@@ -119,6 +119,33 @@ the calibration's benchmark; Swap: the calibration replaced the external score w
 Calib.: the score the hours DDD uses. Ref.-wk 21--23: share who worked from home in the survey
 reference week over 2021--23, men and women pooled, with $N$ the pooled employed sample carrying
 that item. Codes 1--3 (armed forces) carry no external score and are not in the sample.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\paragraph{Sensitivity to the swap threshold.}
+The calibration rule swaps an occupation when its external-minus-realized gap exceeds $0.5$ by
+more than sampling noise. Table~\ref{tab:calibration-sweep} refits the hours DDD with that
+threshold moved from $0.30$ to $0.90$. Lowering it swaps more occupations and the estimate grows
+noisier; from $0.75$ upward only teaching and clerical support are swapped, and at $0.90$,
+above the largest gap, nothing is swapped and the row is the external-index estimate of
+Table~\ref{tab:robust}. The estimate is positive at every threshold, and the step from the
+external index to any positive threshold is the reclassification of teaching, which
+Table~\ref{tab:robust}'s teaching-only row isolates.
+
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Hours DDD by calibration gap threshold}\label{tab:calibration-sweep}
+\renewcommand{\baselinestretch}{1}\footnotesize
+\setlength{\tabcolsep}{5pt}
+\input{tables/tab_calibration_sweep.tex}
+\begin{tablenotes}\footnotesize
+\item $\Mother \times \Post \times \WFH$ from equation~\eqref{eq:ddd}, women working in the
+reference week, standard controls, clustered by occupation, with the exposure index recalibrated
+at the gap threshold in the first column (the significance test on the gap is unchanged). The
+$0.50$ row is the headline of Table~\ref{tab:hours}; a row with no occupation swapped is the
+external Dingel--Neiman index. Stars follow the paper's legend on the analytic $t(G-1)$ test.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}

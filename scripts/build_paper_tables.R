@@ -36,7 +36,10 @@ build_paper_tables <- function(r) {
     "wfh_occupation_first_stage",
     # Grade-report-2 inputs (docs/decisions/grade-report-2-response.md).
     "hours_ddd_calib_men", "hours_ddd_swap_control", "hours_ddd_cell_exposure",
-    "exposure_sorting_check", "hours_ddd_leave_one_out", "balance_by_quartile"
+    "exposure_sorting_check", "hours_ddd_leave_one_out", "balance_by_quartile",
+    # Referee-review inputs (docs/admin/review.md, items 1-3).
+    "hours_ddd_married_only", "hours_ddd_marital_interacted", "hours_ddd_teaching_swap",
+    "calibration_threshold_sweep"
   )
   missing <- setdiff(need, names(r))
   if (length(missing) > 0) {
@@ -283,20 +286,29 @@ build_paper_tables <- function(r) {
   trip <- "Mother:Post:WFH_Exposure"
   # `stars = FALSE` for the rows whose p-value is NOT the analytic one (bootstrap, permutation):
   # analytic stars beside a bootstrap p would contradict the row's own column.
-  # Six cells per row: label, coefficient, SE, p, N, clusters. `clusters` is printed as given when
-  # supplied (a count, or "individual"), else recovered from the model's t degrees of freedom.
+  # Seven cells per row: label, coefficient, SE, p, bootstrap p, N, clusters. `clusters` is
+  # printed as given when supplied (a count, or "individual"), else recovered from the model's t
+  # degrees of freedom. `boot` is the label main.R gave the row's wild-bootstrap refit in
+  # hours_wild_bootstrap; a row with no bootstrap (or none run) prints a blank cell.
+  wb  <- r$hours_wild_bootstrap
+  wb_head <- wb[wb$label == "headline", ]
+  if (nrow(wb_head) == 0) stop("build_paper_tables: hours_wild_bootstrap has no 'headline' row.")
+  pboot <- function(label, term = trip) {
+    if (is.null(label)) return("")
+    row <- wb[wb$label == label & wb$param == term, ]
+    if (nrow(row) == 0) "" else fp(row$p_boot[1])
+  }
   spec_row <- function(label, m, term = trip, p_override = NULL, se_override = NULL, stars = TRUE,
-                       clusters = NULL, coef_override = NULL, n_override = NULL, digits = 3) {
+                       clusters = NULL, coef_override = NULL, n_override = NULL, digits = 3,
+                       boot = NULL) {
     c(label,
       if (is.null(coef_override)) tex_coef_cell(m, term, digits = digits, stars = stars)[1] else coef_override,
       if (is.null(se_override)) dec(se_of(m, term), digits) else se_override,
       if (is.null(p_override)) fp(p_of(m, term)) else p_override,
+      pboot(boot, term),
       if (is.null(n_override)) fN(n_of(m)) else n_override,
       if (is.null(clusters)) n_cl(m) else if (is.numeric(clusters)) fN(clusters) else clusters)
   }
-  wb  <- r$hours_wild_bootstrap
-  wb_head <- wb[wb$label == "headline", ]
-  if (nrow(wb_head) == 0) stop("build_paper_tables: hours_wild_bootstrap has no 'headline' row.")
   # The permutation test sits behind RUN_PERMUTATION_TEST in main.R; without it the row is
   # omitted rather than printed blank, so a dev run cannot leave an empty p in the paper.
   pm  <- if (is.null(r$hours_permutation)) NULL else r$hours_permutation$table
@@ -310,14 +322,17 @@ build_paper_tables <- function(r) {
   cm <- r$hours_ddd_calib_men
   calib_men_row <- spec_row(
     sprintf("\\quad Calibrated on men only (%d of %d swapped)", as.integer(cm$n_swapped), as.integer(cm$n_occupations)),
-    cm$result$model, clusters = cm$result$n_clusters
+    cm$result$model, clusters = cm$result$n_clusters, boot = "hours_ddd_calib_men"
   )
+  ts <- r$hours_ddd_teaching_swap
+  teaching_row <- spec_row("\\quad External index, teaching (ISCO 23) alone swapped", ts$model,
+                           clusters = ts$n_clusters, boot = "hours_ddd_teaching_swap")
   sc <- r$hours_ddd_swap_control
   swap_rows <- rbind(
-    spec_row("\\quad External index with swapped-occupation terms (40 occ.)", sc$model,
-             clusters = sc$n_clusters),
+    spec_row("\\quad External index, swapped-occupation terms added", sc$model,
+             clusters = sc$n_clusters, boot = "hours_ddd_swap_control"),
     spec_row("\\quad\\quad $\\Mother \\times \\Post \\times \\mathrm{Swapped}$ (same model)", sc$model,
-             term = "Mother:Post:Swapped", clusters = sc$n_clusters)
+             term = "Mother:Post:Swapped", clusters = sc$n_clusters, boot = "hours_ddd_swap_control")
   )
   loo <- r$hours_ddd_leave_one_out$summary
   loo_row <- c(
@@ -327,6 +342,7 @@ build_paper_tables <- function(r) {
     "",
     sprintf("$[%s,\\ %s]$", formatC(loo$min_p_value, digits = 4, format = "f"),
             formatC(loo$max_p_value, digits = 4, format = "f")),
+    "",
     "",
     fN(n_occ_primary - 1)
   )
@@ -347,38 +363,50 @@ build_paper_tables <- function(r) {
              term = "Mother:Post", clusters = "individual")
   )
   robust_rows <- rbind(
-    span("\\emph{Exposure measure}", 6),
-    spec_row("\\quad Calibrated (primary)", m_ddd, clusters = n_occ_primary),
-    spec_row("\\quad External (Dingel--Neiman)", r$hours_ddd_external$model, clusters = r$hours_ddd_external$n_clusters),
-    spec_row("\\quad Realized (2021 anchor)", r$hours_ddd_realized$model, clusters = r$hours_ddd_realized$n_clusters),
+    span("\\emph{Exposure measure}", 7),
+    spec_row("\\quad Calibrated (primary)", m_ddd, clusters = n_occ_primary, boot = "headline"),
+    spec_row("\\quad External (Dingel--Neiman)", r$hours_ddd_external$model, clusters = r$hours_ddd_external$n_clusters,
+             boot = "hours_ddd_external"),
+    spec_row("\\quad Realized (2021 anchor)", r$hours_ddd_realized$model, clusters = r$hours_ddd_realized$n_clusters,
+             boot = "hours_ddd_realized"),
     calib_men_row,
+    teaching_row,
     swap_rows,
-    span("\\emph{Age balance}", 6),
+    span("\\emph{Age and marital balance}", 7),
     spec_row("\\quad Age-interacted ($+\\,\\Mother \\times$ age group)", r$hours_ddd_age_interacted$model,
-             clusters = r$hours_ddd_age_interacted$n_clusters),
+             clusters = r$hours_ddd_age_interacted$n_clusters, boot = "hours_ddd_age_interacted"),
     spec_row("\\quad Reweighted (pre-period age-group raking)", r$hours_ddd_reweighted$model,
-             clusters = r$hours_ddd_reweighted$n_clusters),
-    span("\\emph{Sample}", 6),
-    spec_row("\\quad Unswapped occupations only", r$hours_ddd_unswapped$model, clusters = r$hours_ddd_unswapped$n_clusters),
-    spec_row("\\quad Excluding survey year 2023", r$hours_ddd_ex2023$model, clusters = r$hours_ddd_ex2023$n_clusters),
+             clusters = r$hours_ddd_reweighted$n_clusters, boot = "hours_ddd_reweighted"),
+    spec_row("\\quad Married women only", r$hours_ddd_married_only$model,
+             clusters = r$hours_ddd_married_only$n_clusters, boot = "hours_ddd_married_only"),
+    spec_row("\\quad Marital status $\\times \\Post \\times \\WFH$ added", r$hours_ddd_marital_interacted$model,
+             clusters = r$hours_ddd_marital_interacted$n_clusters, boot = "hours_ddd_marital_interacted"),
+    span("\\emph{Sample}", 7),
+    spec_row("\\quad Unswapped occupations only", r$hours_ddd_unswapped$model, clusters = r$hours_ddd_unswapped$n_clusters,
+             boot = "hours_ddd_unswapped"),
+    spec_row("\\quad Excluding survey year 2023", r$hours_ddd_ex2023$model, clusters = r$hours_ddd_ex2023$n_clusters,
+             boot = "hours_ddd_ex2023"),
     loo_row,
-    span("\\emph{Occupational sorting}", 6),
+    span("\\emph{Occupational sorting}", 7),
     cell_row,
     sort_rows,
-    span("\\emph{Outcome coding}", 6),
-    spec_row("\\quad Irregular-hours codes dropped, not imputed", r$hours_ddd_noimputed$model, clusters = r$hours_ddd_noimputed$n_clusters),
-    spec_row("\\quad Full-time indicator ($\\geq 35$ hours)", r$hours_ddd_fulltime$model, clusters = r$hours_ddd_fulltime$n_clusters),
-    spec_row("\\quad Long-hours indicator ($\\geq 40$ hours)", r$hours_ddd_longhours$model, clusters = r$hours_ddd_longhours$n_clusters),
-    span("\\emph{Inference on the primary estimate}", 6),
-    spec_row("\\quad Two-way clustering (individual, occupation)", r$hours_ddd_twoway_model,
+    span("\\emph{Outcome coding}", 7),
+    spec_row("\\quad Irregular-hours codes dropped, not imputed", r$hours_ddd_noimputed$model, clusters = r$hours_ddd_noimputed$n_clusters,
+             boot = "hours_ddd_noimputed"),
+    spec_row("\\quad Full-time indicator ($\\geq 35$ hours)", r$hours_ddd_fulltime$model, clusters = r$hours_ddd_fulltime$n_clusters,
+             boot = "hours_ddd_fulltime"),
+    spec_row("\\quad Long-hours indicator ($\\geq 40$ hours)", r$hours_ddd_longhours$model, clusters = r$hours_ddd_longhours$n_clusters,
+             boot = "hours_ddd_longhours"),
+    span("\\emph{Inference on the primary estimate}", 7),
+    spec_row("\\quad Two-way clustering (ind., occ.)", r$hours_ddd_twoway_model,
              clusters = sprintf("%s $\\times$ ind.", fN(n_occ_primary))),
     spec_row(sprintf("\\quad Wild cluster bootstrap ($B = %s$)", fN(wb_head$B[1])), m_ddd,
              p_override = fp(wb_head$p_boot[1]), stars = FALSE, clusters = n_occ_primary),
     perm_row
   )
   tables$tab_robust <- format_tex_table_body(
-    robust_rows, colspec = "lccccc",
-    header = list(c("Specification", "Coefficient", "SE", "$p$", "$N$", "Clusters"))
+    robust_rows, colspec = "lcccccc",
+    header = list(c("Specification", "Coefficient", "SE", "$p$", "$p$ (boot)", "$N$", "Clusters"))
   )
 
   # ── Table 5: subgroups and the fathers' comparison ────────────────────────────────────────
@@ -394,11 +422,14 @@ build_paper_tables <- function(r) {
     "Arab women"          = r$hours_ddd_arab$model,
     "Men (fathers vs.\\ childless)" = r$hours_gender_placebo$ddd_placebo$model
   )
-  sub_rows <- t(mapply(function(lab, md, mt) c(
+  # Bootstrap labels of the DDD models, in the order of ddd_models (main.R section 8f).
+  ddd_boot <- c("headline", "hours_ddd_jewish", "hours_ddd_arab", "hours_gender_placebo_ddd")
+  mc4     <- function(text) c(sprintf("\\multicolumn{4}{c}{%s}", text), NA, NA, NA)
+  sub_rows <- t(mapply(function(lab, md, mt, bl) c(
     lab,
     tex_coef_cell(md, "Mother:Post")[1], f3(se_of(md, "Mother:Post")), fN(n_of(md)),
-    tex_coef_cell(mt, trip)[1], f3(se_of(mt, trip)), fN(n_of(mt))
-  ), names(did_models), did_models, ddd_models))
+    tex_coef_cell(mt, trip)[1], f3(se_of(mt, trip)), pboot(bl), fN(n_of(mt))
+  ), names(did_models), did_models, ddd_models, ddd_boot))
   ci_txt <- function(m, term) {
     b <- coef_of(m, term); s <- se_of(m, term)
     if (is.na(b)) return("")
@@ -418,18 +449,18 @@ build_paper_tables <- function(r) {
                               formatC(z[["p"]], digits = 3, format = "f"))
   sub_rows <- rbind(
     sub_rows,
-    c("95\\% CI, Jewish", mc3(ci_txt(did_models[[2]], "Mother:Post")), mc3(ci_txt(ddd_models[[2]], trip))),
-    c("95\\% CI, Arab", mc3(ci_txt(did_models[[3]], "Mother:Post")), mc3(ci_txt(ddd_models[[3]], trip))),
-    c("Jewish vs.\\ Arab, $z$ ($p$)", mc3(ztxt(z_ja_did)), mc3(ztxt(z_ja_ddd))),
-    c("Women vs.\\ men, $z$ ($p$)", mc3(ztxt(z_wm_did)), mc3(ztxt(z_wm_ddd)))
+    c("95\\% CI, Jewish", mc3(ci_txt(did_models[[2]], "Mother:Post")), mc4(ci_txt(ddd_models[[2]], trip))),
+    c("95\\% CI, Arab", mc3(ci_txt(did_models[[3]], "Mother:Post")), mc4(ci_txt(ddd_models[[3]], trip))),
+    c("Jewish vs.\\ Arab, $z$ ($p$)", mc3(ztxt(z_ja_did)), mc4(ztxt(z_ja_ddd))),
+    c("Women vs.\\ men, $z$ ($p$)", mc3(ztxt(z_wm_did)), mc4(ztxt(z_wm_ddd)))
   )
   two_panel_header <- list(
-    c("", mc3("DiD: $\\Mother \\times \\Post$"), mc3("DDD: $\\Mother \\times \\Post \\times \\WFH$")),
-    "\\cmidrule(lr){2-4}\\cmidrule(lr){5-7}",
-    c("Subgroup", "Coef.", "SE", "$N$", "Coef.", "SE", "$N$")
+    c("", mc3("DiD: $\\Mother \\times \\Post$"), mc4("DDD: $\\Mother \\times \\Post \\times \\WFH$")),
+    "\\cmidrule(lr){2-4}\\cmidrule(lr){5-8}",
+    c("Subgroup", "Coef.", "SE", "$N$", "Coef.", "SE", "$p$ (boot)", "$N$")
   )
   tables$tab_subgroup <- format_tex_table_body(
-    sub_rows, colspec = "lcccccc", header = two_panel_header, midrule_after = 4
+    sub_rows, colspec = "lccccccc", header = two_panel_header, midrule_after = 4
   )
   subgroup_ztests <- tibble(
     comparison = c("Jewish vs Arab", "Jewish vs Arab", "Women vs men", "Women vs men"),
@@ -449,7 +480,7 @@ build_paper_tables <- function(r) {
   ca_rows <- rbind(
     c("All mothers (Table~\\ref{tab:hours})",
       tex_coef_cell(m_did, "Mother:Post")[1], f3(se_of(m_did, "Mother:Post")), fN(n_of(m_did)),
-      tex_coef_cell(m_ddd, trip)[1], f3(se_of(m_ddd, trip)), fN(n_of(m_ddd)))
+      tex_coef_cell(m_ddd, trip)[1], f3(se_of(m_ddd, trip)), pboot("headline"), fN(n_of(m_ddd)))
   )
   for (i in seq_len(nrow(ca))) {
     lab <- gsub("-", "--", ca$child_age_bin[i])
@@ -458,13 +489,13 @@ build_paper_tables <- function(r) {
       tex_coef_cell(ca_models$did[[ca$child_age_bin[i]]], "Mother:Post")[1],
       f3(ca$did_se[i]), fN(ca$did_n[i]),
       tex_coef_cell(ca_models$ddd[[ca$child_age_bin[i]]], trip)[1],
-      f3(ca$ddd_se[i]), fN(ca$ddd_n[i])
+      f3(ca$ddd_se[i]), pboot(paste0("hours_ddd_child_age_", ca$child_age_bin[i])), fN(ca$ddd_n[i])
     ))
   }
   ca_header <- two_panel_header
   ca_header[[3]][1] <- "Sample of mothers"
   tables$tab_childage <- format_tex_table_body(
-    ca_rows, colspec = "lcccccc", header = ca_header, midrule_after = 1
+    ca_rows, colspec = "lccccccc", header = ca_header, midrule_after = 1
   )
   notes["autonoteChildAge"] <- dropped_note(c(
     setNames(ca_models$did, paste0("the ", gsub("-", "--", names(ca_models$did)), " DiD")),
@@ -570,6 +601,25 @@ build_paper_tables <- function(r) {
     bal_rows, colspec = paste0("l", strrep("c", length(q_levels))),
     header = list(c("Mothers minus childless women, pre-period", paste0("Q", q_levels))),
     midrule_after = n_bal_coef
+  )
+
+  # ── Appendix Table A3: calibration gap-threshold sweep ───────────────────────────────────
+  # One row per threshold: how many occupations the rule swaps and the hours DDD triple
+  # interaction on that index. The 0.5 row is the headline; a row with zero swaps is the external
+  # index (docs/admin/review.md, item 3).
+  sw <- r$calibration_threshold_sweep$table
+  sw <- sw[order(sw$threshold), ]
+  sweep_rows <- t(apply(sw, 1, function(x) c(
+    formatC(as.numeric(x[["threshold"]]), digits = 2, format = "f"),
+    as.character(as.integer(x[["n_swapped"]])),
+    paste0(dec(as.numeric(x[["estimate"]]), 3), star_of(as.numeric(x[["p_value"]]))),
+    dec(as.numeric(x[["se"]]), 3),
+    fp(as.numeric(x[["p_value"]])),
+    fN(as.numeric(x[["n_clusters"]]))
+  )))
+  tables$tab_calibration_sweep <- format_tex_table_body(
+    sweep_rows, colspec = "lccccc",
+    header = list(c("Gap threshold", "Occupations swapped", "Coefficient", "SE", "$p$", "Clusters"))
   )
 
   invisible(list(tables = tables, notes = notes, subgroup_ztests = subgroup_ztests))

@@ -168,10 +168,14 @@ run_hours_ddd_reweighted <- function(cleaned_df, exposure_cells, exposure_index,
   if (n_missing > 0) {
     message(sprintf(
       paste0("run_hours_ddd_reweighted: %d of %d rows (%.1f%%) have no pre-period-derived weight ",
-             "for their (quartile, Mother, GilNK) cell -- dropped by feols's listwise deletion."),
+             "for their (quartile, Mother, GilNK) cell -- dropped before the fit."),
       n_missing, n_total, 100 * n_missing / n_total
     ))
   }
+  # Complete cases taken here rather than by feols's listwise deletion: with weights in the fit,
+  # the wild bootstrap re-reads the model's data and needs its rows to match the fit's exactly.
+  ddd_df <- ddd_df %>%
+    filter(!is.na(rake_weight), !is.na(WorkHoursCont), if_all(all_of(controls), ~ !is.na(.x)))
 
   model <- feols(
     as.formula(paste("WorkHoursCont ~ Mother * Post * WFH_Exposure +", paste(controls, collapse = " + "))),
@@ -181,7 +185,7 @@ run_hours_ddd_reweighted <- function(cleaned_df, exposure_cells, exposure_index,
   print(etable(model, headers = c("Hours DDD, reweighted"), digits = 4))
 
   invisible(list(rake = rake, model = model,
-                 n_clusters = n_distinct(ddd_df$MishlachYad_ISCO_08_2[!is.na(ddd_df$rake_weight)])))
+                 n_clusters = n_distinct(ddd_df$MishlachYad_ISCO_08_2)))
 }
 
 run_ddd_reweighted <- function(cleaned_df, exposure_cells, controls = DEFAULT_CONTROLS,

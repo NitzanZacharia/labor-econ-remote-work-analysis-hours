@@ -52,14 +52,10 @@
   something, the live `tests/testthat/` suite is the source of truth.
 - Every change that touches a function used elsewhere (data_processing.R, the controls list)
   needs the full `Rscript run_tests.R` suite green before you consider the task done.
-- `paper/code_appendix.tex` (Appendix E, added 2026-09-28) `\lstinputlisting{}`s 20 estimation
-  scripts and the block of `main.R` between its `# BEGIN employmentddd` / `# END employmentddd`
-  marker comments straight from the repo, so every comment in those files prints in the paper.
-  Keep their comments short and ASCII (non-ASCII in strings is mapped by `literate=` in
-  `paper.tex`'s `\lstset`), keep the two markers in place, and treat a script edit as a paper
-  edit that needs a recompile.
-- Whenever `paper/paper.tex`, `paper/appendix.tex`, `paper/code_appendix.tex`, `paper/references.bib`
-  or a script listed in the code appendix is modified in a session, recompile before
+- The paper does not list code; a footnote in Section 3.1 of `paper/paper.tex` links to the
+  GitHub repository instead (the code appendix of 2026-09-28 was removed the same day).
+- Whenever `paper/paper.tex`, `paper/appendix.tex` or `paper/references.bib`
+  is modified in a session, recompile before
   finishing the turn, overwriting `paper/paper.pdf`. `latexmk` is not usable on this machine
   (MiKTeX's `latexmk` requires Perl, which isn't installed) — use the manual sequence instead:
   `pdflatex`, `bibtex`, `pdflatex`, `pdflatex`, run from within `paper/`. If the final log warns
