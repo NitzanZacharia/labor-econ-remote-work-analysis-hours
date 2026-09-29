@@ -847,15 +847,14 @@ smaller than one bin width, but dropping the two imputed irregular-hours codes c
 because 35 and 40 hours are exact bin edges the same specification can be estimated as a linear
 probability model on either threshold: the probability of usually working at least 35 hours, and at
 least 40, rises by about $2$ percentage points per standard deviation of exposure ($1.9$ and $2.1$)
-for mothers relative to childless women after 2021. The effect is a shift of mothers in
-teleworkable jobs across the full-time boundary.
-% PHASE-2 FILL-IN (review item 6): replace the sentence above with:
-% "The top of the distribution matters too. The open 60-plus bin is assigned 78.5 hours; recoding
-% it to 60 gives XX (SE XX), and a linear probability model for being in that bin gives a triple
-% interaction of XX (SE XX). The effect therefore appears both at the full-time boundary and at
-% the top of the distribution, where it partly reflects childless women in teleworkable jobs
-% leaving very long hours." Numbers from tab_robust.tex rows "Top bin (60+) recoded" and
-% "Top-bin indicator".
+for mothers relative to childless women after 2021. The top of the distribution matters too.
+The open $60$-plus bin is assigned $78.5$ hours, the centre of its range, a coding choice rather
+than a measurement; recoding it to $60$ gives $2.589$\sym{**} (SE $0.917$), a fifth below the
+headline, and a linear probability model for being in that bin gives a triple interaction of
+$0.034$\sym{***} (SE $0.009$), so mothers' share of the longest-hours bin rose relative to
+childless women's where the work can be done from home. The effect therefore appears both at
+the full-time boundary and at the top of the distribution, and its size depends in part on the
+value assigned to the open bin.
 
 \begin{table}[htbp]
 \centering
@@ -1092,14 +1091,12 @@ the least teleworkable quartile, and among mothers it fell after 2021 in the top
 rising in the bottom one (Appendix~\ref{sec:app-data}). The bounds of Section~\ref{sec:lee}
 therefore define selection on the observed-hours sample; they handle only \emph{excess}
 selection under monotonicity and found little to correct, which is not the same as the concern
-being absent.
-% PHASE-2 FILL-IN (review item 11): append to the paragraph above:
-% "The absence margin itself can be checked directly, because 98% of employed-but-absent women
-% carry an occupation code: adding them at their reported usual hours on 2018--2023, the years
-% in which the survey recorded those hours, moves the estimate to XX (SE XX)
-% (Table~\ref{tab:robust}). Trimming bounds on the absence margin are left for future work."
-% Number from tab_robust.tex row "Absentees at usual hours". Drop the 98% figure unless the
-% pipeline prints it (it is the review's own count).
+being absent. The absence margin itself can be checked directly, because employed women absent
+from work in the reference week still carry an occupation code: adding them at their reported
+usual hours on 2018--2023, the years in which the survey recorded those hours, gives
+$3.076$\sym{***} (SE $0.861$; bootstrap $p = 0.07$) against the headline's $3.224$
+(Table~\ref{tab:robust}), so the reference-week restriction is not what produces the gradient.
+Trimming bounds on the absence margin itself are left for future work.
 
 \paragraph{Sample and period.}
 The 2023 coefficient is the largest in both event studies, and the 2023 survey year includes the
