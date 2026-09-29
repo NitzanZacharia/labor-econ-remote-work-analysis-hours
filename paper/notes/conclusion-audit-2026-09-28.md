@@ -9,6 +9,23 @@ referee-review response (`docs/admin/review.md`), later the same day.
 the paper was not recompiled. The current text was written by the co-author and moved in verbatim
 on 2026-09-26; whether and how to replace it is the authors' joint call.
 
+**Status at `57d9452` (2026-09-29).** The Conclusion is still the co-author's text, verbatim, now
+at `paper.tex:1137-1151`; nothing below has been applied. Since `ca0eb93` the referee-review
+response (items 5–22 on 2026-09-29, items 1–4, 6, 10 and 11 the day before) edited the Abstract,
+Introduction, Results, Discussion and Limitations, so every line number below has shifted
+(current anchors: Abstract 178–198, Introduction 201–270, Results 637, Discussion 988,
+Limitations 1063, Conclusion 1134). None of those edits changes a verdict in the claim ledger
+(§2.3) or a number in the drafts (§3): the DiD null and its confidence interval, 3.22 / 1.71, the
+three-fifths / none pairing, the fathers' gradient, the bootstrap qualification, the teaching
+reclassification and the marital checks all still read as quoted. One premise did change: the
+Abstract no longer ends on "which mothers benefit ... rather than mothers as a group"; since the
+2026-09-28 co-author pass it ends on the intensive-margin implication ("raises intensive-margin
+labor supply for mothers in teleworkable occupations specifically, rather than reducing the
+motherhood penalty across the board"). §2.2 item 5 and the matching §2.4 row therefore no longer
+describe a line the Abstract carries, and the closing sentence of Versions A, B and C now
+paraphrases the Discussion's policy reading rather than repeating the Abstract, which also
+retires the duplication concern in §6. The recommendation (Version A, C as fallback) stands.
+
 **Bottom line.** Nothing in the Conclusion is wrong: all ten factual claims trace to a supported
 line in the paper (§2.3). The problems are of alignment and emphasis. The section was written
 before the Introduction, Abstract and Results were rebuilt on 2026-09-27 around "three findings"
