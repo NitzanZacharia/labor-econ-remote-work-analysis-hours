@@ -333,66 +333,65 @@ practice can decide the result (Section~\ref{sec:res-ddd-diag}).
 
 The data are individual-level microdata from the Israeli Central Bureau of Statistics Labor Force
 Survey for the survey years 2017--2019 and 2021--2023. The analysis sample is women aged 25--59
-(CBS age-group codes 3--7). A woman is a \emph{mother} if she has any child aged 17 or younger in the
-household and childless otherwise; \emph{Post} equals one for survey years 2021 and later. The
-comparison group therefore includes women whose children are grown and women who become mothers
-within the window (Section~\ref{sec:limitations}). The year 2020 is excluded because its
-arrangements were emergency improvisation, not the settled practice we want to measure, and
-because no 2020 CBS extract exists for this project.
+(CBS age-group codes 3--7). A woman is a \emph{mother} if she has any child aged 17 or younger in
+the household and childless otherwise. \emph{Post} equals one for survey years 2021 and later.
+The comparison group therefore includes women whose children are grown and women who become
+mothers within the window (Section~\ref{sec:limitations}). The year 2020 is excluded: its
+arrangements were emergency improvisation, not settled practice, and no 2020 extract exists for
+this project.
 
 \noindent The primary outcome is \emph{usual weekly work hours}, recorded by the CBS in bins and assigned
-each bin's median (Appendix~\ref{sec:app-data} gives the coding and a 2017 recording correction).
-Hours are the only intensive-margin outcome the survey supports: the extract records how a wage
-is paid but not its amount. Hours are defined for women who are employed \emph{and} worked in the
-survey's reference week, in every year, a harmonization made necessary by a different zero-hours
-recording convention in the 2017 extract (Appendix~\ref{sec:app-data}). It costs about $10\%$ of
-each year's employed sample and narrows the estimand to usual hours among women who were working
+each bin's median (coding in Appendix~\ref{sec:app-data}). Hours are the only intensive-margin
+outcome the survey supports: the extract records how a wage is paid but not its amount. Hours
+are defined, in every year, for women who are employed \emph{and} worked in the survey's
+reference week, because the 2017 extract records zero hours differently
+(Appendix~\ref{sec:app-data}). This restriction costs about $10\%$ of each year's employed sample
+and narrows the estimand to usual hours among women who were working
 (Section~\ref{sec:limitations}). The secondary outcome is a binary employment indicator
 (unemployed and not-in-labor-force are both zero).
 
 All regressions include the same categorical controls: marital status, religion, age group,
-district of residence and highest educational attainment (six groups); age enters as the CBS
+district of residence and highest educational attainment (six groups). Age enters as the CBS
 age-group code because the extract contains no continuous age. CBS survey weights are
-deliberately not applied in any outcome regression (Section~\ref{sec:limitations}). The
-replication code is available in the project's Git
+deliberately not applied in any outcome regression (Section~\ref{sec:limitations}). Replication
+code is in the project's Git
 repository.\footnote{\url{https://github.com/NitzanZacharia/labor-econ-remote-work-analysis-hours.git}}
 
 \subsection{Constructing WFH exposure}\label{sec:exposure}
 
-Realized WFH status is itself a labor-market outcome, jointly determined with hours, so the
-mechanism test needs an occupation-level measure of \emph{exposure} to remote work that the
-individual does not choose. The rule that selects the primary measure is fixed ex ante: the
-headline score must be anchored on pre-period task content, so that it cannot be built from the
-post-2021 hours it is meant to explain, and must not place in the treated tail occupations that
-Israeli institutions kept in person. We build three measures and report each.
+Realized WFH status is itself a labor-market outcome, jointly determined with hours. The
+mechanism test therefore needs an occupation-level measure of \emph{exposure} to remote work that
+the individual does not choose. Two ex-ante conditions select the primary measure. The score
+must be anchored on pre-period task content, so that it cannot be built from the post-2021 hours
+it is meant to explain. It must also not place in the treated tail occupations that Israeli
+institutions kept in person. We build three measures and report each.
 
 \noindent \emph{External.} The Dingel--Neiman teleworkability score \citep{dingel2020} at the
-two-digit ISCO-08 level. This is pre-period by construction, but it is a US task-based measure
-and misclassifies occupations where Israeli practice diverged, so it fails the second condition:
-teaching scores $0.966$ on it, yet Israeli schools were fully in person throughout the 2022--23
-survey years (Appendix~\ref{sec:appendix-exposure}).
+two-digit ISCO-08 level. It is pre-period by construction, but as a US task-based measure it
+misclassifies occupations where Israeli practice diverged, failing the second condition.
+Teaching scores $0.966$, yet Israeli schools were fully in person throughout the 2022--23 survey
+years (Appendix~\ref{sec:appendix-exposure}).
 
-\emph{Realized.} The realized Israeli WFH share by occupation, anchored to 2021. Post-treatment
-by construction, it fails the first condition.
+\emph{Realized.} The realized Israeli WFH share by occupation, anchored to 2021. It is
+post-treatment by construction, failing the first condition.
 
 \emph{Calibrated (primary).} This index replaces the external score with the realized 2022--23
-Israeli WFH share only where the two are far apart and the gap is statistically distinguishable
-from noise; ten of the forty occupations are swapped, teaching and clerical support among them
-(rule, scores and fit in Appendix~\ref{sec:appendix-exposure}). It is the only measure that meets
-both conditions, so it is primary, and the other two are reported as bounds in
-Section~\ref{sec:res-ddd-diag}. Because the swap test draws on 2022--23 data, inside the
-post-period, the calibrated measure is \emph{partly post-treatment}; Section~\ref{sec:res-ddd-diag}
-tests whether the calibration is what produces the result.
+share only where the gap is large and statistically distinguishable from noise. Ten of the forty
+occupations are swapped, teaching and clerical support among them (rule, scores and fit in
+Appendix~\ref{sec:appendix-exposure}). It alone meets both conditions, so it is primary; the
+other two are reported as bounds in Section~\ref{sec:res-ddd-diag}. Because the swap test uses
+2022--23 data, the calibrated measure is \emph{partly post-treatment}.
+Section~\ref{sec:res-ddd-diag} tests whether the calibration produces the result.
 
-A fourth measure serves three roles. For the employment DDD, occupation is undefined for the
-non-employed, so that specification uses a pre-period (2017--2019) shift-share index by
-demographic cell (sex, age group, education, district, marital status, religion and continent of
-birth; 8,884 cells), equal to the mean of the calibrated occupation score over the cell's
-pre-period occupational composition and defined for employed and non-employed women alike. The
-same index stratifies the selection correction of Section~\ref{sec:lee}, and because a woman's
-post-2021 occupation cannot move it, it also bounds occupational sorting in
-Section~\ref{sec:res-ddd-diag}. Its dispersion is a third of the occupation-level index's, so
-coefficients on the two are compared per standard deviation, not per unit.
+A fourth measure serves three roles. Occupation is undefined for the non-employed, so the
+employment DDD uses a pre-period (2017--2019) shift-share index by demographic cell (sex, age
+group, education, district, marital status, religion and continent of birth; 8,884 cells). It
+averages the calibrated occupation score over the cell's pre-period occupational composition and
+is therefore defined for employed and non-employed women alike. The same index stratifies the
+selection correction of Section~\ref{sec:lee}. Because a woman's post-2021 occupation cannot
+move it, it also bounds occupational sorting in Section~\ref{sec:res-ddd-diag}. Its dispersion
+is a third of the occupation-level index's, so coefficients on the two are compared per standard
+deviation, not per unit.
 
 %======================================================================
 \section{Descriptive Statistics}\label{sec:descriptives}
