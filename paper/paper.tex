@@ -935,76 +935,69 @@ two nulls should not be read as one verdict.
 \section{Discussion}\label{sec:discussion}
 %======================================================================
 
-Among mothers who remain in work there is no post-2021 hours effect on average, and a large one
-in teleworkable occupations: a triple interaction of about $3.2$ hours per unit of exposure and
-an implied change at zero exposure that is if anything negative. This is consistent with WFH access relaxing a binding time constraint for
-mothers in teleworkable jobs, the flexibility mechanism \citep{goldin2014}, and hard to
-reconcile with a
-general recovery common to all women, which would have raised hours across occupations rather
-than only where the work can be done from home. The checks of the preceding section establish
-that the gradient is not an artifact of one specification, one occupation, one sample or one
-outcome coding. They are not independent confirmations: every one is estimated on the same forty
-occupation clusters as the headline, and where a wild cluster bootstrap $p$-value is available it
-lies above the 5\% level, from $0.06$ for the youngest child-age group to $0.15$ for the
-fathers' gradient, with the headline itself at $0.056$
-(Tables~\ref{tab:robust}--\ref{tab:subgroup}). How precisely the gradient is estimated remains
-the question the three inference procedures answer differently. It is identified off a concrete
-contrast: teaching and clerical support, which Israeli practice kept in person, placed low
-against the professional occupations placed high. Among the latter, science and engineering
-professionals (ISCO 21) carry the most weight, since removing them gives the leave-one-out
-minimum of $2.415$, while ICT professionals, high on every exposure measure, work slightly
-against the gradient, since removing them raises it to $3.287$ (Appendix Figure~\ref{fig:loo}).
+Among mothers who remain in work there is no post-2021 hours effect on average and a large one
+in teleworkable occupations. The triple interaction is about $3.2$ hours per unit of exposure,
+and the implied change at zero exposure is if anything negative. This pattern is consistent with
+WFH access relaxing a binding time constraint for mothers in teleworkable jobs, the flexibility
+mechanism \citep{goldin2014}. A general recovery common to all women would instead have raised
+hours across occupations, not only where the work can be done from home. The checks of the
+preceding section show that no single specification, occupation, sample or outcome coding
+produces the gradient. They are not independent confirmations: all share the headline's forty
+occupation clusters, and the wild cluster bootstrap $p$-values beside them mostly lie above the
+5\% level (Tables~\ref{tab:robust}--\ref{tab:subgroup}). The gradient is identified off a
+concrete contrast: teaching and clerical support, which Israeli practice kept in person, placed
+low against the professional occupations placed high. Among the latter, science and engineering
+professionals (ISCO 21) carry the most weight; removing them gives the leave-one-out minimum of
+$2.415$. ICT professionals, high on every exposure measure, work slightly against the gradient;
+removing them raises it to $3.287$ (Appendix Figure~\ref{fig:loo}).
 
 \noindent The magnitude is economically meaningful where it applies. For a mother at the top quartile's
-mean exposure the regression implies a post-2021 change of about $1.4$ hours a week
-($-0.54 + 3.22 \times 0.59$), and the raw top-quartile difference-in-differences of
-Figure~\ref{fig:dose-response} is $1.55$. That $1.4$ is the fitted change \emph{at} top-quartile
+mean exposure of $0.59$, the regression implies a post-2021 change of about $1.4$ hours a week
+($-0.54 + 3.22 \times 0.59$), close to the raw top-quartile difference-in-differences of
+Figure~\ref{fig:dose-response}. That $1.4$ is the fitted change \emph{at} top-quartile
 exposure, distinct from the $1.71$-hour fitted contrast \emph{between} the quartile means. The
-relevant penalty is the one in those same jobs, not the average:
-column~(2) of Table~\ref{tab:hours} puts the pre-period
-motherhood gap at $-1.45 - 1.30 \times 0.59 \approx -2.2$ hours at that exposure, so mothers in
-the most teleworkable jobs recovered roughly three fifths of their penalty after 2021. At the
-bottom quartile's mean exposure of $0.06$ the implied change is $-0.35$ hours: mothers in the
-least teleworkable jobs recovered none of it. Commuting time alone does not account for the
-size. Workers save about 72 minutes per day worked from home and return roughly 40\% of that
-time to their jobs, the rest going to leisure and care \citep{aksoy2023}, so two remote days a
-week add about one hour of paid work, not two and a half. The $1.4$ hours also averages over
-\emph{all} mothers in top-quartile jobs, and even in those occupations only a minority of
-workers are at home in the reference week (the pooled shares by occupation in Appendix
-Table~\ref{tab:exposure-scores}), so the response per mother who actually works from home is
-several times larger than the commute she saves. That points to the channel of the framework in
-Section~\ref{sec:lit}: flexibility in \emph{when} hours are worked, hours split around care,
-rather than travel time returned to work. The timing is
-consistent with a multi-year adjustment: the DDD event study rises from $3.0$ in 2021 to $4.0$
-in 2023 (on the 2023 year, see Section~\ref{sec:limitations}).
+relevant penalty is the one in those same jobs: column~(2) of Table~\ref{tab:hours} puts the
+pre-period gap at that exposure at $-1.45 - 1.30 \times 0.59 \approx -2.2$ hours, so these
+mothers recovered roughly three fifths of it after 2021. At the bottom quartile's mean exposure
+of $0.06$ the implied change is $-0.35$ hours: mothers in the least teleworkable jobs recovered
+none of it. Commuting time alone does not account for the size. Workers save about 72 minutes
+per day worked from home and return roughly 40\% of that time to their jobs, the rest going to
+leisure and care \citep{aksoy2023}. Two remote days a week therefore add about one hour of paid
+work, not two and a half. The $1.4$ hours also averages over \emph{all} mothers in top-quartile
+jobs, yet even there only a minority of workers are at home in the reference week (Appendix
+Table~\ref{tab:exposure-scores}). The response per mother who actually works from home is
+therefore several times larger than the commute she saves. That points to the channel of the
+framework in Section~\ref{sec:lit}: flexibility in \emph{when} hours are worked, hours split
+around care, rather than travel time returned to work. The timing is consistent with a
+multi-year adjustment: the DDD event study rises from 2021 to 2023 (on the 2023 year, see
+Section~\ref{sec:limitations}).
 
-\noindent A general recovery is not the only alternative to that mechanism; three demand-side accounts
-also fit a gradient by teleworkability. Employers in professional and ICT occupations may have
-changed the contracts they offer mothers after 2021, with no change in mothers' constraints; the
-saturated specification absorbs any occupation-by-year shock common to mothers and childless
-women, so this needs a change aimed at mothers in teleworkable occupations specifically. The
-2021--22 technology hiring boom raised hours in exposed occupations for everyone; the fathers'
-opposite-signed gradient rules out a shock common to all workers in those occupations, but not
-one that fell on mothers alone. And usual hours are self-reported: if mothers working from home
-report the hours they are available while fathers report the hours they work, the two gradients
-would diverge as observed with no change in labor supplied. The child-age gradient does not
-separate the two readings: teleworking mothers of young children report more interruptions to
-the workday \citep{pabilonia2022}, so the gap between hours available and hours worked would
-itself be largest for mothers of infants, the pattern the gradient shows. The fathers' gradient
-and the saturated specification are the arguments that remain. None of the three is excluded by
-the design, and we read the exposure
-gradient as the time-constraint mechanism's signature rather than its proof.
+\noindent A general recovery is not the only alternative to that mechanism. Three demand-side accounts
+also fit a gradient by teleworkability. First, employers in professional and ICT occupations may
+have changed the contracts they offer mothers after 2021, with no change in mothers'
+constraints. The saturated specification absorbs any occupation-by-year shock common to mothers
+and childless women, so this account needs a change aimed at mothers in teleworkable occupations
+specifically. Second, the 2021--22 technology hiring boom raised hours in exposed occupations
+for everyone. The fathers' opposite-signed gradient rules out a shock common to all workers in
+those occupations, but not one that fell on mothers alone. Third, usual hours are self-reported.
+If mothers working from home report the hours they are available while fathers report the hours
+they work, the two gradients would diverge as observed with no change in labor supplied. The
+child-age gradient does not separate the two readings. Teleworking mothers of young children
+report more interruptions to the workday \citep{pabilonia2022}. The gap between hours available
+and hours worked would then itself be largest for mothers of infants, the pattern the gradient
+shows. None of the three is excluded by the design. We read the exposure gradient as the
+time-constraint mechanism's signature rather than its proof.
 
 \noindent Why hours and not employment? The employment DDD is not a failed test of the mechanism but an
-uninformative one (Section~\ref{sec:res-extensive}). Substantively the two results are coherent:
-the effect operates on \emph{how much} mothers in teleworkable jobs work, not on \emph{whether}
-they are employed, which is a leading channel of the child penalty \citep{kleven2019denmark},
-and it is where our findings depart from the US evidence on employment and income
-\citep{harrington2025}. The policy reading is correspondingly narrow: WFH
-availability matters for how intensively mothers who already hold \emph{teleworkable} jobs can
-work, not for whether mothers in general hold jobs; and access to those jobs is itself unequally
-distributed across mothers, so the population-wide gain is smaller than the gradient alone
-suggests and cannot be sized without representative weighting.
+uninformative one (Section~\ref{sec:res-extensive}). The two results are coherent. The effect
+operates on \emph{how much} mothers in teleworkable jobs work, not on \emph{whether} they are
+employed, a leading channel of the child penalty \citep{kleven2019denmark}. That is where our
+findings depart from the US evidence on employment and income \citep{harrington2025}. The policy
+reading is correspondingly narrow. WFH availability matters for how intensively mothers who
+already hold \emph{teleworkable} jobs can work, not for whether mothers in general hold jobs.
+Access to those jobs is itself unequally distributed across mothers, so the population-wide gain
+is smaller than the gradient alone suggests and cannot be sized without representative
+weighting.
 
 %======================================================================
 \section{Limitations}\label{sec:limitations}
