@@ -479,16 +479,16 @@ For outcome $Y_{it}$ (weekly hours conditional on working that week, or employme
 Y_{it} = \beta_0 + \beta_1 \Mother_i + \beta_2 \Post_t + \beta_3 (\Mother_i \times \Post_t)
 + X'_{it}\gamma + \varepsilon_{it},
 \end{equation}
-where $X_{it}$ is the control vector of Section~\ref{sec:data} and $\beta_3$ is the differential
+where $X_{it}$ is the control vector of Section~\ref{sec:data}. $\beta_3$ is the differential
 change in the outcome for mothers relative to childless women after the shift to remote work.
 
 \subsection{Triple differences}
 
 The flexibility framework \citep{goldin2014} yields one testable hypothesis: after 2021,
 mothers' usual hours conditional on working rise relative to childless women's in proportion to
-their occupation's WFH exposure, with no response where the work cannot be done from home. The
-exposure gradient, not the average change, is the object of interest, so we interact the DiD with
-occupational WFH exposure:
+their occupation's WFH exposure. Where the work cannot be done from home, there is no response.
+The exposure gradient, not the average change, is the object of interest, so we interact the DiD
+with occupational WFH exposure:
 \begin{equation}\label{eq:ddd}
 \begin{split}
 Y_{it} = {}& \alpha + \delta_1 \Mother_i + \delta_2 \Post_t + \delta_3 \WFH_{j(i)}
@@ -498,23 +498,22 @@ Y_{it} = {}& \alpha + \delta_1 \Mother_i + \delta_2 \Post_t + \delta_3 \WFH_{j(i
 \end{split}
 \end{equation}
 where $j(i)$ is individual $i$'s occupation. $\delta_7$ asks whether the post-shift change for
-mothers relative to non-mothers is larger in more exposed occupations; $\delta_6$ absorbs any
-post-2021 change in teleworkable occupations common to mothers and childless women, $\delta_5$
-the pre-existing level of the penalty across occupations, and $\delta_4$ is the post-shift change
-for mothers at \emph{zero} exposure, not an average effect. The DDD requires a single
-parallel-trends assumption \citep{olden2022}: that the mother/non-mother gap in high- versus
-low-exposure jobs would have evolved in parallel absent the shift to remote work. Insignificant
-pre-period coefficients are evidence about that assumption, not a verification of it. For the
-hours DDD, $\WFH_j$ is the calibrated occupation-level score and the sample is employed women
-matched to a two-digit occupation; for the employment DDD, $\WFH$ is the cell-based index, the
-sample is all women, and a $\Mother \times$ age-group interaction is added for the pre-period age
-imbalance.
+mothers relative to non-mothers is larger in more exposed occupations. $\delta_6$ absorbs any
+post-2021 change in teleworkable occupations common to mothers and childless women, and
+$\delta_5$ the pre-existing level of the penalty across occupations.
+$\delta_4$ is the post-shift change for mothers at \emph{zero} exposure, not an average effect.
+The DDD requires a single parallel-trends assumption \citep{olden2022}: that the
+mother/non-mother gap in high- versus low-exposure jobs would have evolved in parallel absent the
+shift to remote work. Insignificant pre-period coefficients are evidence about that assumption,
+not a verification of it. The hours DDD uses the calibrated occupation score, $\WFH_j$, on
+employed women matched to a two-digit occupation. The employment DDD uses the cell-based index on
+all women and adds a $\Mother \times$ age-group interaction for the pre-period age imbalance.
 
 \noindent Equation~\eqref{eq:ddd} makes each lower-order occupation-level difference linear in exposure,
 an unnecessary restriction with forty occupations. A single slope also compares effects
-\emph{across} exposure levels, which requires the stronger condition that occupations at
+\emph{across} exposure levels. That requires the stronger condition that occupations at
 different exposure levels would have followed the same path under any common level of exposure,
-and it is a weighted average of such comparisons whose weights need not be positive
+and the slope is a weighted average of such comparisons whose weights need not be positive
 \citep{callaway2024}. We therefore estimate two relaxations alongside it. The
 \emph{saturated} specification replaces every lower-order term with fixed effects,
 \begin{equation}\label{eq:ddd-sat}
@@ -524,71 +523,72 @@ Y_{it} = \delta_7 (\Mother_i \times \Post_t \times \WFH_{j(i)}) + X'_{it}\gamma
 where $\lambda_{jt}$, $\mu_{j,m}$ and $\nu_{m,t}$ are occupation-by-year, occupation-by-mother
 and mother-by-year effects, which absorb every lower-order term of equation~\eqref{eq:ddd} and
 any occupation-specific year shock. The \emph{binned} specification replaces $\WFH_{j(i)}$ with
-indicators for the pre-period exposure quartile the occupation falls in, the bins of
-Figure~\ref{fig:dose-response}, so that the top-versus-bottom contrast carries a standard error.
-For each DDD we also report the minimum detectable effect on the reference distribution the
-model's inference uses, $\mathrm{MDE} = \mathrm{SE}\,(t_{0.975} + t_{0.80})$, which is
-$2.87 \times \mathrm{SE}$ with 39 degrees of freedom and $2.80 \times \mathrm{SE}$ under the
-normal, so that a null can be read as ``genuinely null'' or ``underpowered.''
+indicators for the occupation's pre-period exposure quartile, the bins of
+Figure~\ref{fig:dose-response}. The top-versus-bottom contrast then carries a standard error.
 
 \subsection{Inference}\label{sec:inference}
 
 The survey is a rotating panel in which most respondents appear about four times, so
 equation~\eqref{eq:did} and every descriptive interval are clustered by individual
-(Appendix~\ref{sec:app-data} gives the panel counts). For the hours DDD the regressor is constant
-within a two-digit occupation, and standard errors are clustered at that level, leaving forty
-clusters; the reported $p$-values use a $t$ reference distribution with $G - 1 = 39$ degrees of
-freedom and a cluster-count adjustment to the variance. Forty is few enough that we do not rest on
-that approximation: for the headline coefficient and for the pre-period coefficients of the
-triple-difference event study we also report wild cluster bootstrap $p$-values, with Rademacher
-weights, the null imposed and $9{,}999$ draws \citep{roodman2019, fischer2021}, and
-Section~\ref{sec:diagnostics} adds a permutation test that relies on no asymptotic approximation
-at all. The same bootstrap is applied to every occupation-clustered robustness and subgroup
-refit and printed beside its analytic $p$-value, since a star from a test that over-rejects is
-weaker evidence than it looks. The three procedures answer related but different questions, and
-where they disagree the disagreement is part of the evidence. The joint pre-period test remains the analytic Wald $F$,
-since a joint bootstrap test is not available in the implementation used. The employment DDD is
-clustered on the age-by-education-by-district cell (about 210 clusters).
+(Appendix~\ref{sec:app-data} gives the panel counts). The employment DDD is clustered on the
+age-by-education-by-district cell (about 210 clusters). For the hours DDD the regressor is
+constant within a two-digit occupation, so standard errors are clustered at that level, leaving
+forty clusters. The reported $p$-values use a $t$ reference distribution with $G - 1 = 39$
+degrees of freedom and a cluster-count adjustment to the variance.
+
+\noindent Forty is few enough that we do not rest on that approximation. For the headline coefficient
+and the pre-period coefficients of the triple-difference event study we also report wild cluster
+bootstrap $p$-values, with Rademacher weights, the null imposed and $9{,}999$ draws
+\citep{roodman2019, fischer2021}. The same bootstrap is applied to every occupation-clustered
+robustness and subgroup refit and printed beside its analytic $p$-value, since a star from a test
+that over-rejects is weaker evidence than it looks. The joint pre-period test remains the analytic
+Wald $F$, since a joint bootstrap test is not available in the implementation used.
+Section~\ref{sec:diagnostics} adds a permutation test that needs no asymptotic approximation.
+The three procedures answer related but different questions, and where they disagree the
+disagreement is part of the evidence. For each DDD we also report the minimum detectable effect,
+$\mathrm{MDE} = \mathrm{SE}\,(t_{0.975} + t_{0.80})$, which is $2.87 \times \mathrm{SE}$ under
+the $t$ with 39 degrees of freedom and $2.80 \times \mathrm{SE}$ under the normal. A null can
+then be read as ``genuinely null'' or ``underpowered.''
 
 \subsection{Selection into employment: Lee bounds}\label{sec:lee}
 
 Hours are observed only for women who are working, and working is itself an outcome of the
-same treatment. We therefore report trimming bounds \citep{lee2009}: the share
-of post-period mothers observed with hours in excess of a parallel-trends counterfactual is
-trimmed from the top of that cell's hours distribution for a lower bound and from the bottom for
-an upper bound, the model is refit, and the Imbens--Manski interval for the identified set
-\citep{imbens2004} is reported. For the DDD the trimming is done within quartiles of the
-cell-based index, which is defined for the non-employed. Appendix~\ref{sec:app-lee} gives the
-construction and its
-assumptions. The bounds address excess selection under monotonicity; they cannot address
-selection that violates it, nor differences in absence unrelated to excess selection.
+same treatment. We therefore report trimming bounds \citep{lee2009}. The share of post-period
+mothers observed with hours in excess of a parallel-trends counterfactual is trimmed from that
+cell's hours distribution: from the top for a lower bound, from the bottom for an upper bound.
+The model is refit on each trimmed sample, and we report the Imbens--Manski interval for the
+identified set \citep{imbens2004}. For the DDD the trimming is done within quartiles of the
+cell-based index, which is defined for the non-employed. The bounds address excess selection
+under monotonicity; they cannot address selection that violates it, nor differences in absence
+unrelated to excess selection. Appendix~\ref{sec:app-lee} gives the construction and its
+assumptions.
 
 \subsection{Diagnostics, falsification, and the fathers' comparison}\label{sec:diagnostics}
 
-We estimate event-study versions of equation~\eqref{eq:did} with $\Mother \times$ year
-interactions (reference year 2019) for both outcomes and test the pre-period coefficients
-jointly; because those test the difference-in-differences assumption rather than the
-triple-differences one, we also estimate the event-study version of equation~\eqref{eq:ddd}
-itself, with $\Post$ replaced by survey-year interactions at every level, and apply the same
-joint test to its pre-period coefficients.
+We estimate event-study versions of equation~\eqref{eq:did} for both outcomes, with
+$\Mother \times$ year interactions and 2019 as the reference year, and test the pre-period
+coefficients jointly. That test bears on the difference-in-differences assumption, not the
+triple-differences one. We therefore also estimate the event-study version of
+equation~\eqref{eq:ddd}, with $\Post$ replaced by survey-year interactions at every level, and
+apply the same joint test to its pre-period coefficients.
 
 \noindent The falsification test is a permutation test on the exposure score. Under the sharp null that
 teleworkability is unrelated to the post-2021 change in the motherhood gap, the forty occupation
-scores are exchangeable, so we reassign them at random across the forty occupation codes $999$
-times, holding every woman's occupation and the mother/period structure fixed, refit
-equation~\eqref{eq:ddd}, and record the cluster-robust $t$-statistic of the triple interaction;
-the permutation $p$-value is the share of draws, counting the observed one, whose $|t|$ reaches
-the observed value \citep{phipson2010}. Because occupation is observed when the outcome is, we
-also check whether remote work drew mothers into teleworkable occupations after 2021, with a
-difference-in-differences that takes the exposure score itself as the outcome, and bound the
-channel by re-estimating the hours DDD on the pre-period cell index of
+scores are exchangeable. We therefore reassign them at random across the forty occupation codes
+$999$ times, holding every woman's occupation and the mother/period structure fixed, refit
+equation~\eqref{eq:ddd}, and record the cluster-robust $t$-statistic of the triple interaction.
+The permutation $p$-value is the share of draws, counting the observed one, whose $|t|$ reaches
+the observed value \citep{phipson2010}. Occupation is observed in the same survey as the outcome,
+so remote work could have drawn mothers into teleworkable occupations after 2021. We check this
+with a difference-in-differences that takes the exposure score itself as the outcome, and bound
+the channel by re-estimating the hours DDD on the pre-period cell index of
 Section~\ref{sec:exposure}.
 
-\noindent The remaining checks, collected in Table~\ref{tab:robust}, re-estimate the hours DDD with the
-exposure measure, the age control, the sample, the outcome coding and the inference procedure
-varied in turn, and re-estimate it by the age of the youngest child, separately for Jewish and
+\noindent The remaining checks, collected in Table~\ref{tab:robust}, re-estimate the hours DDD varying
+in turn the exposure measure, the age control, the sample, the outcome coding and the inference
+procedure. We also re-estimate it by the age of the youngest child, separately for Jewish and
 Arab women, and on the male subsample with ``mother'' read as ``father.'' The last is a
-comparison, not a placebo: fathers in teleworkable occupations are exposed to remote work exactly
+comparison, not a placebo. Fathers in teleworkable occupations are exposed to remote work exactly
 as mothers are, so a negative gradient would be evidence on household reallocation rather than on
 a confound. Two-sample $z$-tests compare coefficients across disjoint subsamples.
 
