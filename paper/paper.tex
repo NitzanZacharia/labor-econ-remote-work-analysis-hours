@@ -345,45 +345,44 @@ each bin's median (Appendix~\ref{sec:app-data} gives the coding and a 2017 recor
 Hours are the only intensive-margin outcome the survey supports: the extract records how a wage
 is paid but not its amount. Hours are defined for women who are employed \emph{and} worked in the
 survey's reference week, in every year, a harmonization made necessary by a different zero-hours
-recording convention in the 2017 extract (Appendix~\ref{sec:app-data}). It makes the hours
-population identical across years, at the cost of about $10\%$ of each year's employed sample,
-and narrows the estimand to usual hours among women who were working
-(Section~\ref{sec:limitations}).
-The secondary outcome is a binary employment indicator (unemployed and not-in-labor-force are
-both zero). All regressions
-include the same categorical controls: marital status, religion, age group, district of residence
-and highest educational attainment (six groups); age enters as the CBS age-group code because the
-extract contains no continuous age. CBS survey weights are deliberately not applied in any
-outcome regression (Section~\ref{sec:limitations}). The replication code is available in the
-project's Git repository.\footnote{\url{https://github.com/NitzanZacharia/labor-econ-remote-work-analysis-hours.git}}
+recording convention in the 2017 extract (Appendix~\ref{sec:app-data}). It costs about $10\%$ of
+each year's employed sample and narrows the estimand to usual hours among women who were working
+(Section~\ref{sec:limitations}). The secondary outcome is a binary employment indicator
+(unemployed and not-in-labor-force are both zero).
+
+All regressions include the same categorical controls: marital status, religion, age group,
+district of residence and highest educational attainment (six groups); age enters as the CBS
+age-group code because the extract contains no continuous age. CBS survey weights are
+deliberately not applied in any outcome regression (Section~\ref{sec:limitations}). The
+replication code is available in the project's Git
+repository.\footnote{\url{https://github.com/NitzanZacharia/labor-econ-remote-work-analysis-hours.git}}
 
 \subsection{Constructing WFH exposure}\label{sec:exposure}
 
 Realized WFH status is itself a labor-market outcome, jointly determined with hours, so the
 mechanism test needs an occupation-level measure of \emph{exposure} to remote work that the
-individual does not choose. We build three, each reported.
+individual does not choose. The rule that selects the primary measure is fixed ex ante: the
+headline score must be anchored on pre-period task content, so that it cannot be built from the
+post-2021 hours it is meant to explain, and must not place in the treated tail occupations that
+Israeli institutions kept in person. We build three measures and report each.
 
 \noindent \emph{External.} The Dingel--Neiman teleworkability score \citep{dingel2020} at the
-two-digit ISCO-08 level.
-This is pre-period by construction, but it is a US task-based measure and misclassifies
-occupations where Israeli practice diverged: teaching scores $0.966$ on it, yet Israeli schools
-were fully in person throughout the 2022--23 survey years (Appendix~\ref{sec:appendix-exposure}).
-
-\emph{Calibrated (primary).} The rule that selects the primary measure is fixed ex ante: the
-score the headline uses must be anchored on pre-period task content, so
-that it cannot be built from the post-2021 hours it is meant to explain, and must not place in the
-treated tail occupations that Israeli institutions kept in person. The external index fails the
-second condition and the realized index the first; only the calibrated index meets both, and
-the other two are reported as bounds in Section~\ref{sec:res-ddd-diag}.
-It replaces the external score with the realized 2022--23 Israeli WFH share only where the two
-are far apart and the gap is statistically distinguishable from noise; ten of the forty
-occupations are swapped, teaching and clerical support among them (rule, scores and fit in
-Appendix~\ref{sec:appendix-exposure}). Because the swap test draws on 2022--23 data, inside the
-post-period, the calibrated measure is \emph{partly post-treatment}, a documented compromise;
-Section~\ref{sec:res-ddd-diag} tests whether the calibration is what produces the result.
+two-digit ISCO-08 level. This is pre-period by construction, but it is a US task-based measure
+and misclassifies occupations where Israeli practice diverged, so it fails the second condition:
+teaching scores $0.966$ on it, yet Israeli schools were fully in person throughout the 2022--23
+survey years (Appendix~\ref{sec:appendix-exposure}).
 
 \emph{Realized.} The realized Israeli WFH share by occupation, anchored to 2021. Post-treatment
-by construction, it is reported as a bound.
+by construction, it fails the first condition.
+
+\emph{Calibrated (primary).} This index replaces the external score with the realized 2022--23
+Israeli WFH share only where the two are far apart and the gap is statistically distinguishable
+from noise; ten of the forty occupations are swapped, teaching and clerical support among them
+(rule, scores and fit in Appendix~\ref{sec:appendix-exposure}). It is the only measure that meets
+both conditions, so it is primary, and the other two are reported as bounds in
+Section~\ref{sec:res-ddd-diag}. Because the swap test draws on 2022--23 data, inside the
+post-period, the calibrated measure is \emph{partly post-treatment}; Section~\ref{sec:res-ddd-diag}
+tests whether the calibration is what produces the result.
 
 A fourth measure serves three roles. For the employment DDD, occupation is undefined for the
 non-employed, so that specification uses a pre-period (2017--2019) shift-share index by
