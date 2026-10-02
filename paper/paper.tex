@@ -1024,71 +1024,69 @@ suggests and cannot be sized without representative weighting.
 \section{Limitations}\label{sec:limitations}
 %======================================================================
 
-\paragraph{Identification and exposure.}
-The triple difference's own pre-trend test (Section~\ref{sec:res-ddd-diag}) shows no visible
+\paragraph{Identification and inference.}
+The triple difference's own pre-trend test (Section~\ref{sec:res-ddd}) shows no visible
 violation but lacks the power to rule one out. The exposure measure that delivers the headline
-draws on post-period Israeli data for its calibration. The result requires reclassifying
-teaching, which the external index places in the treated tail and Israeli schools kept in
-person; the fully pre-treatment external index yields a positive and insignificant estimate,
-and the checks of Section~\ref{sec:res-ddd-diag} bound how much of the gradient the
-reclassification carries. The sorting check finds no post-2021 movement of mothers across
-exposure levels but bounds the effect only imprecisely on the pre-period cell index. Exposure is
-assigned at the two-digit occupation level, forty groups, whereas
-sorting across firms, even within the same industry, is a first-order driver of Israeli gender
-gaps \citep{buzaglo2023}. Assigning every woman her occupation's mean teleworkability is
-Berkson-type error, which does not by itself bias the slope; error in the occupation score
-itself attenuates the triple interaction toward zero; and if mothers sort into more or less
-teleworkable jobs \emph{within} an occupation, the bias can run in either direction. The
-calibrated score also mixes two scales (Appendix~\ref{sec:appendix-exposure}). Occupation codes
-masked by the CBS for disclosure control are dropped when building exposure; a proxy check finds
-a small, statistically detectable difference in remote work between masked and unmasked rows
-(Appendix~\ref{sec:appendix-exposure}).
+is calibrated on post-period Israeli data, and the result requires reclassifying teaching. The
+fully pre-treatment external index yields a positive and insignificant estimate, and the checks
+of Section~\ref{sec:res-ddd-diag} bound how much of the gradient the reclassification carries.
+The sorting check finds no post-2021 movement of mothers across exposure levels, but the
+pre-period cell index bounds the effect only imprecisely. The headline's precision is the range
+of the three inference procedures in Section~\ref{sec:res-ddd}, not the analytic $p$-value
+alone. The stars in the supporting rows of Tables~\ref{tab:robust}--\ref{tab:subgroup} come from
+the analytic test, and the bootstrap $p$-values beside them mostly lie above $0.05$. The
+permutation test assumes that the forty exposure scores are exchangeable across occupations
+under its null.
 
-How precisely the headline is estimated is the range of the three inference procedures in
-Section~\ref{sec:res-ddd}, not the analytic $p$-value, and the same holds for
-the supporting rows of Tables~\ref{tab:robust}--\ref{tab:subgroup}, whose stars come from the
-analytic test and whose bootstrap $p$-values mostly lie above $0.05$. The permutation test
-itself assumes that the forty exposure scores are exchangeable across occupations under its null.
+\paragraph{Exposure measurement.}
+Exposure is assigned at the two-digit occupation level, forty groups, whereas sorting across
+firms, even within the same industry, is a first-order driver of Israeli gender gaps
+\citep{buzaglo2023}. Assigning every woman her occupation's mean teleworkability is Berkson-type
+error, which does not by itself bias the slope. Error in the occupation score itself attenuates
+the triple interaction toward zero. If mothers sort into more or less teleworkable jobs
+\emph{within} an occupation, the bias can run in either direction. The calibrated score also
+mixes two scales (Appendix~\ref{sec:appendix-exposure}). Occupation codes masked by the CBS for
+disclosure control are dropped when building exposure. A proxy check finds a small,
+statistically detectable difference in remote work between masked and unmasked rows
+(Appendix~\ref{sec:appendix-exposure}).
 
 \paragraph{The narrowed hours estimand.}
 Hours are usual hours among women who were working, not among all women holding a job, and
 roughly $10\%$ of each year's employed sample is excluded on that basis. The exclusion is not
-innocuous for the triple interaction because absence is related to exposure: it is highest in
-the least teleworkable quartile, and among mothers it fell after 2021 in the top quartile while
-rising in the bottom one (Appendix~\ref{sec:app-data}). The bounds of Section~\ref{sec:lee}
-therefore define selection on the observed-hours sample; they handle only \emph{excess}
-selection under monotonicity and found little to correct, which is not the same as the concern
-being absent. The absence margin itself can be checked directly, because employed women absent
-from work in the reference week still carry an occupation code: adding them at their reported
-usual hours on 2018--2023, the years in which the survey recorded those hours, gives
-$3.076$\sym{***} (SE $0.861$; bootstrap $p = 0.07$) against the headline's $3.224$
-(Table~\ref{tab:robust}), so the reference-week restriction is not what produces the gradient.
-Trimming bounds on the absence margin itself are left for future work.
+innocuous for the triple interaction, because absence is related to exposure. Absence is highest
+in the least teleworkable quartile, and among mothers it fell after 2021 in the top quartile
+while rising in the bottom one (Appendix~\ref{sec:app-data}). The bounds of Section~\ref{sec:lee}
+are therefore bounds on selection into the observed-hours sample. They handle only \emph{excess}
+selection under monotonicity, and finding little to correct is not the same as the concern being
+absent. The absence margin can be checked directly, because employed women absent from work in
+the reference week still carry an occupation code. Adding them at their reported usual hours on
+2018--2023, the years in which the survey recorded those hours, gives $3.076$\sym{***} (SE
+$0.861$; bootstrap $p = 0.07$) against the headline's $3.224$ (Table~\ref{tab:robust}). The
+reference-week restriction is therefore not what produces the gradient. Trimming bounds on the
+absence margin itself are left for future work.
 
-\paragraph{Sample and period.}
+\paragraph{Sample, period and comparison group.}
 The 2023 coefficient is the largest in both event studies, and the 2023 survey year includes the
-quarter in which the war that began on 7 October 2023 disrupted the labor market: reserve
-call-ups, which bear on the fathers' comparison, and school closures and evacuations, which bear
-on mothers' hours. The estimate survives dropping the year, and 2021 and 2022 are individually
-significant on the triple difference, but the 2023 point should be held more loosely. Early 2021
+quarter in which the war that began on 7 October 2023 disrupted the labor market. Reserve
+call-ups bear on the fathers' comparison, and school closures and evacuations bear on mothers'
+hours. The estimate survives dropping the year, and 2021 and 2022 are individually significant
+on the triple difference. The 2023 point should nonetheless be held more loosely. Early 2021
 likewise included a third lockdown, so the post-period is ``post-acute'' more cleanly in its
-later years than in its first. The control group is any woman aged 25--59 with no child aged 17 or younger
-in the household, so it includes women whose children are grown and women who become mothers
-within the window, as in the US study \citep{harrington2025}; if part of it responds to the
-treatment as
-mothers do, the DiD is biased toward zero. Age enters as a categorical code because the extract
-has no continuous age, and mothers and non-mothers are imbalanced on it in a way that tracks
-exposure (Appendix Table~\ref{tab:balance-quartile}); the age-interacted and reweighted
-specifications of Section~\ref{sec:res-robust} address this, and the estimate stays positive in
-both but, after reweighting, falls below the design's minimum detectable effect.
-Marital status is imbalanced in the same direction, and the two marital checks of that section
-leave the gradient positive but only marginally significant.
+later years than in its first. The comparison group includes women whose children are grown and
+women who become mothers within the window, as in the US study \citep{harrington2025}. If part
+of it responds to the treatment as mothers do, the DiD is biased toward zero. Mothers and
+non-mothers are imbalanced on the categorical age code in a way that tracks exposure (Appendix
+Table~\ref{tab:balance-quartile}). The age-interacted and reweighted specifications of
+Section~\ref{sec:res-robust} address this. The estimate stays positive in both but, after
+reweighting, falls below the design's minimum detectable effect. Marital status is imbalanced in
+the same direction, and the two marital checks of that section leave the gradient positive but
+only marginally significant.
 % The exclusion is of the whole year: the survey-month field (ChodeshSeker) is dropped at cleaning,
 % so a fourth-quarter-only exclusion would need a schema change (audit item I5).
 
 \paragraph{Survey weights.}
-CBS survey weights are intentionally not applied in any outcome regression; reported rates and
-coefficients are unweighted estimates on the analysis sample, not population-representative
+CBS survey weights are intentionally not applied in any outcome regression, so reported rates
+and coefficients are unweighted estimates on the analysis sample, not population-representative
 statistics. The one exception is internal to constructing the cell-based exposure index.
 
 %======================================================================
