@@ -69,53 +69,51 @@ an outcome.
 \paragraph{The external score.}
 The Dingel--Neiman teleworkability score \citep{dingel2020} reaches the two-digit ISCO-08 level
 through the BLS crosswalk between ISCO-08 and the 2010 SOC \citep{bls2012crosswalk}. Each
-O*NET-SOC occupation
-in their published classification is matched to every ISCO-08 unit group the crosswalk lists
-for its six-digit SOC code, and the score of a sub-major group is the unweighted mean of their
-binary indicator over the matched pairs; armed-forces groups have no counterpart in their data
-and carry no score. The replication code re-derives the forty
-scores (Table~\ref{tab:exposure-scores}) from the two public source files and checks them against
-the file the pipeline reads. Teaching (ISCO 23) is the clearest case of a US task-based score
-misclassifying Israeli practice: it scores $0.966$ on the external index, yet Israeli schools,
-closed and reopened in stages through 2020 and early 2021 \citep{somekh2021, hale2021}, were fully
-in person throughout the 2022--23 survey years, and teachers did not work from home.
+O*NET-SOC occupation in their classification is matched to every ISCO-08 unit group the
+crosswalk lists for its six-digit SOC code. The score of a sub-major group is the unweighted
+mean of their binary indicator over the matched pairs. Armed-forces groups have no counterpart
+in their data and carry no score. The replication code re-derives the forty scores
+(Table~\ref{tab:exposure-scores}) from the two public source files. Teaching (ISCO 23) is the
+clearest case of a US task-based score misclassifying Israeli practice. It scores $0.966$ on
+the external index, yet Israeli schools, closed and reopened in stages through 2020 and early
+2021 \citep{somekh2021, hale2021}, were fully in person throughout the 2022--23 survey years.
+Teachers did not work from home.
 
 \paragraph{The calibration rule.}
-The external score is replaced by the realized 2022--23 Israeli WFH share only where the gap
-between the two is large (greater than $0.5$) \emph{and} distinguishable from sampling noise by a
-one-sided test at the 95\% level with a standard error clustered by individual. Ten of the forty
-two-digit occupations are swapped: teaching falls from $0.966$ to $0.069$, clerical support
-(ISCO 41) from $1.000$ to $0.098$, ICT professionals (ISCO 25) from $1.000$ to $0.360$. The
-realized shares are computed on men and women together; Table~\ref{tab:robust} re-derives them
-from men alone. The realized index used as a bound is the realized Israeli WFH share by
-occupation, anchored to 2021 (no 2020 extract exists) with a minimum of 200 observations per
-occupation.
+The external score is replaced by the realized 2022--23 Israeli WFH share only where two
+conditions hold. The gap between the two must exceed $0.5$, and a one-sided test at the 95\%
+level, with standard errors clustered by individual, must distinguish it from sampling noise.
+Ten of the forty two-digit occupations are swapped, among them teaching, clerical support
+(ISCO 41) and ICT professionals (ISCO 25). Teaching falls from $0.966$ to $0.069$. The realized
+shares pool men and women; Table~\ref{tab:robust} re-derives them from men alone. The realized
+index reported as a bound is the realized Israeli WFH share by occupation, anchored to 2021
+because no 2020 extract exists, with a minimum of 200 observations per occupation.
 
 \paragraph{Masked occupation codes.}
-The CBS masks some two-digit occupation codes for disclosure control, and those rows carry no
+The CBS masks some two-digit occupation codes for disclosure control. Those rows carry no
 exposure score and drop out of the hours DDD. A partially masked code still identifies the
-one-digit major group, so the check compares realized WFH between masked and unmasked employed
-women within the same major group in 2022--23. Among professionals (major group 2), the
-masked rows work from home at a share of $0.29$ against $0.16$ for the unmasked ones, on
-$207$ masked observations; in the other major groups the masked rows are fewer and the gaps
-are small or negative. Pooled across major groups, with major-group fixed effects and standard
-errors clustered by individual, the masked-minus-unmasked difference in the share working from
-home is $0.045$ (SE $0.021$) on $85{,}454$ employed women: significant at the 5\% level, and
-negligible in explanatory power (within $R^2$ below $0.0001$). The dropped rows are therefore
-somewhat more teleworkable than the rows the index is built from, a small difference on few
-rows rather than a clean bill of health.
+one-digit major group, so a proxy check compares realized WFH between masked and unmasked
+employed women within the same major group in 2022--23. Among professionals (major group 2),
+masked rows work from home at a share of $0.29$ against $0.16$ for unmasked ones, on $207$
+masked observations. In the other major groups the masked rows are fewer and the gaps are small
+or negative. Pooled across major groups, with major-group fixed effects and standard errors
+clustered by individual, the masked-minus-unmasked difference in the share working from home is
+$0.045$ (SE $0.021$) on $85{,}454$ employed women. The difference is significant at the 5\%
+level and negligible in explanatory power (within $R^2$ below $0.0001$). The dropped rows are
+therefore somewhat more teleworkable than those the index is built from: a small difference on
+few rows, not a clean bill of health.
 
 \paragraph{Fit.}
 Across the forty occupations, on men and women pooled over 2021--23, the calibrated score has a
-correlation of $0.53$ with the share who worked from home in the reference week and an
-occupation-size-weighted slope of $0.40$ (SE $0.09$), so it is relevant. The raw external index
-fits better in levels (correlation $0.74$), because swapping ten occupations onto realized shares
-while leaving thirty on task-based probabilities mixes two scales. The calibration's contribution
-is not a better cross-sectional fit but the removal of ten grossly mis-scored occupations from the
-treated tail. Table~\ref{tab:exposure-scores} lists, for each occupation, the external score, the
-realized 2022--23 share the calibration tests it against, whether the score was swapped, the
-calibrated score the hours DDD uses, and the realized reference-week share over 2021--23;
-panel~(b) of Figure~\ref{fig:first-stage} plots the last against the calibrated score.
+correlation of $0.53$ with the share who worked from home in the reference week. Its
+occupation-size-weighted slope on that share is $0.40$ (SE $0.09$), so the score is relevant.
+The raw external index fits better in levels (correlation $0.74$), because swapping ten
+occupations onto realized shares while leaving thirty on task-based probabilities mixes two
+scales. The calibration's contribution is not a better cross-sectional fit but the removal of
+ten grossly mis-scored occupations from the treated tail. Table~\ref{tab:exposure-scores} lists
+the external, realized and calibrated scores by occupation; panel~(b) of
+Figure~\ref{fig:first-stage} plots the realized reference-week share against the calibrated
+score.
 
 \begin{table}[htbp]
 \centering
@@ -138,14 +136,13 @@ that item. Codes 1--3 (armed forces) carry no external score and are not in the 
 \end{table}
 
 \paragraph{Sensitivity to the swap threshold.}
-The calibration rule swaps an occupation when its external-minus-realized gap exceeds $0.5$ by
-more than sampling noise. Table~\ref{tab:calibration-sweep} refits the hours DDD with that
-threshold moved from $0.30$ to $0.90$. Lowering it swaps more occupations and the estimate grows
-noisier; from $0.75$ upward only teaching and clerical support are swapped, and at $0.90$,
-above the largest gap, nothing is swapped and the row is the external-index estimate of
-Table~\ref{tab:robust}. The estimate is positive at every threshold, and the step from the
-external index to any positive threshold is the reclassification of teaching, which
-Table~\ref{tab:robust}'s teaching-only row isolates.
+Table~\ref{tab:calibration-sweep} refits the hours DDD with the calibration's swap threshold
+moved from $0.30$ to $0.90$. Lowering it swaps more occupations and the estimate grows noisier.
+From $0.75$ upward only teaching and clerical support are swapped. At $0.90$, above the largest
+gap, nothing is swapped and the row is the external-index estimate of Table~\ref{tab:robust}.
+The estimate is positive at every threshold. The step from the external index to any positive
+threshold is the reclassification of teaching, which Table~\ref{tab:robust}'s teaching-only row
+isolates.
 
 \begin{table}[htbp]
 \centering
