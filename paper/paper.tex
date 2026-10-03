@@ -758,36 +758,33 @@ will read the headline as directionally supported rather than established.
 
 \subsection{Robustness of the gradient}\label{sec:res-robust}
 
-The remaining checks in Table~\ref{tab:robust} vary the age and marital controls, the sample and
-the outcome coding, and two of them matter. Mothers and childless women differ in age, education
-and marital status in ways that themselves vary with exposure (Appendix
-Table~\ref{tab:balance-quartile}), and such a gap is what the triple interaction is identified
-off. A $\Mother \times$ age-group interaction leaves the estimate essentially unchanged.
-Reweighting to balance pre-period age groups attenuates it by about 19\%, still significant at
-the 5\% level on the analytic test but now below the design's minimum detectable effect.
+Two of the remaining checks in Table~\ref{tab:robust} matter, and both concern balance. Mothers
+and childless women differ in age, education and marital status, and the gap itself varies with
+exposure (Appendix Table~\ref{tab:balance-quartile}). Such a gap is exactly what the triple
+interaction is identified off. A $\Mother \times$ age-group interaction leaves the estimate
+essentially unchanged. Reweighting to balance pre-period age groups attenuates it by about 19\%.
+The reweighted estimate is still significant at the 5\% level on the analytic test but now below
+the design's minimum detectable effect.
 
 Marital status is the imbalance the age checks do not touch. Most mothers are married and fewer
 than half of childless women are (Table~\ref{tab:descriptives}), and the gap widens with
 exposure. Restricting the sample to married women, or adding marital status $\times \Post \times
-\WFH$ to the specification, leaves the gradient positive but without conventional significance.
-Part of it, then, may be the comparison group
-rather than mothers: never-married childless women in teleworkable jobs, a larger share of that
-group at high exposure, may have worked fewer hours after 2021. Neither row is a clean test. The
-interaction is partly over-control, since most mothers are married and the term is estimated
-partly off them. The married subsample trades a marital confound for a life-stage one, since
-married childless women are older and often have grown children. We report both as the bounded
-version of a weakness the design cannot remove.
+\WFH$, leaves the gradient positive but without conventional significance. Part of the headline
+may therefore come from the comparison group. Never-married childless women, a larger share of it
+at high exposure, may have worked fewer hours after 2021. Neither row is a clean test. The
+interaction is estimated largely off mothers themselves, most of whom are married, so it partly
+over-controls. The married subsample trades a marital confound for a life-stage one, since
+married childless women are older and often have grown children. Both are the bounded version of
+a weakness the design cannot remove.
 
-Everything else stays close to the headline. Excluding the 2023 survey year, whose final quarter
-includes the start of the October 2023 war (Section~\ref{sec:limitations}), leaves the estimate
-within one standard error of the headline, while the plain hours DiD stays a null. So does
-removing each of the forty occupations in turn (Appendix Figure~\ref{fig:loo}), and every refit
-stays significant at the 5\% level on the analytic test. Across every specification in the table
-that keeps a calibrated index, the triple interaction lies between $2.2$ and $4.3$ hours. The
-wild cluster bootstrap column of Table~\ref{tab:robust} tempers the stars. The calibrated-index
-rows range from $p = 0.02$ (unswapped occupations, men-only calibration) to $p = 0.13$ (marital
-interaction), and the sample and outcome-coding rows all lie within two hundredths of the
-headline's own value.
+Everything else stays close to the headline. The last quarter of the 2023 survey year includes
+the start of the October 2023 war (Section~\ref{sec:limitations}). Excluding that year moves the
+estimate by less than one standard error and leaves the plain hours DiD a null. Dropping any one
+of the forty occupations does the same, and every refit stays significant at the 5\% level on the
+analytic test (Appendix Figure~\ref{fig:loo}). Across every specification in the table that keeps
+a calibrated index, the triple interaction lies between $2.2$ and $4.3$ hours. The wild cluster
+bootstrap column of Table~\ref{tab:robust} tempers the stars. Across the same rows its $p$-values
+run from $0.02$ (unswapped occupations, men-only calibration) to $0.13$ (marital interaction).
 % The 2.2--4.3 range is the minimum and maximum over Table 3's calibrated-index rows: age-interacted
 % 3.205, reweighted 2.597, married only 2.743, marital interacted 2.191, calibrated on men only
 % 3.869, unswapped occupations 4.309, excluding 2023 2.979, leave-one-occupation-out
@@ -797,15 +794,13 @@ headline's own value.
 Nor does the outcome coding drive it. Hours are a bin-median approximation and the effect is
 smaller than one bin width, but dropping the two imputed irregular-hours codes changes little.
 Because 35 and 40 hours are exact bin edges, the same specification can be estimated as a linear
-probability model on either threshold. The probability of usually working at least 35 hours, and
-at least 40, rises by about $2$ percentage points per standard deviation of exposure for mothers
-relative to childless women after 2021. The open $60$-plus bin is assigned the centre of its
-range, a coding choice rather than a measurement, and recoding it to $60$ lowers the estimate by
-a fifth. A linear probability model for being in that bin gives a significant positive triple
-interaction: mothers'
-share of the longest-hours bin rose relative to childless women's where the work can be done from
-home. The effect therefore appears both at the full-time boundary and at the top of the
-distribution, and its size depends in part on the value assigned to the open bin.
+probability model on either threshold. On both, mothers' probability of crossing it rose after
+2021 by about $2$ percentage points per standard deviation of exposure relative to childless
+women's. The open $60$-plus bin is assigned the centre of its range, a coding choice rather than
+a measurement. Recoding it to $60$ lowers the estimate by a fifth. A linear probability model for
+that bin is itself significantly positive: mothers' share of the longest-hours bin rose where the
+work can be done from home. The effect therefore appears at the full-time boundary and at the top
+of the distribution. Its size depends in part on the value assigned to the open bin.
 
 \begin{table}[htbp]
 \centering
