@@ -351,7 +351,7 @@ this project.
 each bin's median (coding in Appendix~\ref{sec:app-data}). Hours are the only intensive-margin
 outcome the survey supports: the extract records how a wage is paid but not its amount. Hours
 are defined, in every year, for women who are employed \emph{and} worked in the survey's
-reference week, because the 2017 extract records zero hours differently
+reference week, because the 2017 extract records absentees' hours as zero
 (Appendix~\ref{sec:app-data}). This restriction costs about $10\%$ of each year's employed sample
 and narrows the estimand to usual hours among women who were working
 (Section~\ref{sec:limitations}). The secondary outcome is a binary employment indicator
@@ -370,7 +370,7 @@ Realized WFH status is itself a labor-market outcome, jointly determined with ho
 mechanism test therefore needs an occupation-level measure of \emph{exposure} to remote work that
 the individual does not choose. Two ex-ante conditions select the primary measure. The score
 must be anchored on pre-period task content, so that it cannot be built from the post-2021 hours
-it is meant to explain. It must also not place in the treated tail occupations that Israeli
+it is meant to explain. Nor may it place in the treated tail any occupation that Israeli
 institutions kept in person. We build three measures and report each.
 
 \noindent \emph{External.} The Dingel--Neiman teleworkability score \citep{dingel2020} at the
@@ -408,12 +408,12 @@ deviation, not per unit.
 
 Table~\ref{tab:descriptives} describes the sample on either side of the treatment/control split.
 Mothers work \emph{fewer} hours than childless women when they work ($38.68$ versus $40.06$)
-while being slightly \emph{more} likely to be employed ($0.78$ versus $0.76$), so the penalty's
-level is visible on the intensive margin; the table cannot show whether it changed after 2021.
-The two groups are imbalanced in ways the controls must absorb: mothers are
+while being slightly \emph{more} likely to be employed ($0.78$ versus $0.76$). The penalty's
+level is therefore visible on the intensive margin, but the table cannot show whether it changed
+after 2021. The two groups are imbalanced in ways the controls must absorb. Mothers are
 the better-educated group ($48\%$ with an academic degree against $40\%$), overwhelmingly married
-($85\%$ against $47\%$), and about $0.44$ of an age-group code younger, an imbalance that tracks
-WFH exposure (Appendix Table~\ref{tab:balance-quartile}).
+($85\%$ against $47\%$), and about $0.44$ of an age-group code younger. These imbalances vary
+with WFH exposure (Appendix Table~\ref{tab:balance-quartile}).
 
 \begin{table}[htbp]
 \centering
@@ -443,7 +443,7 @@ religion, district, age group and education are the five controls in every regre
 Mothers work $38.54$ hours per week before 2021 and $38.84$ after, a gain of $0.31$ hours;
 childless women move from $40.04$ to $40.08$. The difference between those two changes,
 $0.27$ hours, is the difference-in-differences of equation~\eqref{eq:did} without a single
-control, and the regression DiD of Table~\ref{tab:hours}, $0.228$ (SE $0.181$), is within four
+control. The regression DiD of Table~\ref{tab:hours}, $0.228$ (SE $0.181$), is within four
 hundredths of an hour of it. Mothers remain well below childless women in both periods, and the
 raw gap widened by $0.3$ hours over the three pre-period years, within sampling error
 (Appendix Figure~\ref{fig:hours-by-year}).
@@ -455,9 +455,9 @@ $[0.74, 2.36]$). The near-zero average is therefore a weighted average of three 
 substantial positive difference. The figure is a description rather than an independent causal
 test: occupational composition and time-varying confounders can differ across quartiles, and
 the regressions of Section~\ref{sec:results} address that. The response is not linear in
-exposure: the bottom three quartiles span exposure values of $0.00$ to $0.30$ and the top
+exposure. The bottom three quartiles span exposure values of $0.00$ to $0.30$ and the top
 quartile $0.36$ to $0.75$ (its bin boundary is $0.30$), so most of the regressor's dispersion,
-and the identifying contrast, sits in one tail.
+and with it the identifying contrast, sits in one tail.
 
 \begin{figure}[htbp]
 \centering
@@ -519,8 +519,8 @@ all women and adds a $\Mother \times {}$ age-group interaction for the pre-perio
 \noindent Equation~\eqref{eq:ddd} makes each lower-order occupation-level difference linear in exposure,
 an unnecessary restriction with forty occupations. A single slope also compares effects
 \emph{across} exposure levels. That requires the stronger condition that occupations at
-different exposure levels would have followed the same path under any common level of exposure,
-and the slope is a weighted average of such comparisons whose weights differ from the
+different exposure levels would have followed the same path under any common level of exposure.
+Even then the slope is a weighted average of such comparisons whose weights differ from the
 distribution of exposure and, under some interpretations, are not all positive
 \citep{callaway2024}. We therefore estimate two relaxations alongside it. The
 \emph{saturated} specification replaces every lower-order term with fixed effects,
@@ -583,8 +583,9 @@ apply the same joint test to its pre-period coefficients.
 \noindent The falsification test is a permutation test on the exposure score. Under the sharp null that
 teleworkability is unrelated to the post-2021 change in the motherhood gap, the forty occupation
 scores are exchangeable. We therefore reassign them at random across the forty occupation codes
-$999$ times, holding every woman's occupation and the mother/period structure fixed, refit
-equation~\eqref{eq:ddd}, and record the cluster-robust $t$-statistic of the triple interaction.
+$999$ times, holding every woman's occupation and the mother/period structure fixed. Each draw
+refits equation~\eqref{eq:ddd} and records the cluster-robust $t$-statistic of the triple
+interaction.
 The permutation $p$-value is the share of draws, counting the observed one, whose $|t|$ reaches
 the observed value \citep{phipson2010}. Occupation is observed in the same survey as the outcome,
 so remote work could have drawn mothers into teleworkable occupations after 2021. We check this
