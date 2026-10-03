@@ -13,17 +13,22 @@
 % comment above dingel2020 and the bls2012crosswalk entry it cites.
 
 % Literature Review audit 2026-09-26 (audit note retired the same day, in git history): fields
-% re-confirmed against NBER and Crossref; DOI added for consistency with the other NBER entries.
-% The authors' September 2025 version states the paper is accepted at the National Tax Journal
-% (special issue on taxes and telework); the NBER working paper remains the citable version.
-@techreport{harrington2025,
-  author      = {Harrington, Emma and Kahn, Matthew E.},
-  title       = {Has the Rise of Work from Home Reduced the Motherhood Penalty in the Labor Market?},
-  institution = {National Bureau of Economic Research},
-  type        = {NBER Working Paper},
-  number      = {34147},
-  year        = {2025},
-  doi         = {10.3386/w34147}
+% re-confirmed against NBER and Crossref. Pre-submission audit 2026-10-03 (Phase 2, item P2-5):
+% the paper is now published in the National Tax Journal 79(2), 507-527 (June 2026); entry switched
+% from NBER Working Paper 34147 (doi 10.3386/w34147) to the journal version, Crossref-verified the
+% same day (DOI, journal, volume, issue, pages, print date 2026-06-01). The 0.78-percentage-point
+% figure the paper quotes was checked against the NBER/SSRN working-paper abstract; the publisher's
+% page blocks automated fetches, so the published text itself was not re-read. The key is kept so
+% no \citep changes; the printed year becomes 2026.
+@article{harrington2025,
+  author  = {Harrington, Emma and Kahn, Matthew E.},
+  title   = {Has the Rise of Work from Home Reduced the Motherhood Penalty in the Labor Market?},
+  journal = {National Tax Journal},
+  year    = {2026},
+  volume  = {79},
+  number  = {2},
+  pages   = {507--527},
+  doi     = {10.1086/740865}
 }
 
 @article{goldin2014,
@@ -165,7 +170,7 @@
 }
 
 @article{aksoy2023,
-  author  = {Aksoy, Cevat Giray and Barrero, Jose Maria and Bloom, Nicholas and Davis, Steven J. and Dolls, Mathias and Zarate, Pablo},
+  author  = {Aksoy, Cevat Giray and Barrero, Jos{\'e} Mar{\'i}a and Bloom, Nicholas and Davis, Steven J. and Dolls, Mathias and Zarate, Pablo},
   title   = {Time Savings When Working from Home},
   journal = {AEA Papers and Proceedings},
   year    = {2023},
@@ -279,13 +284,15 @@
   doi     = {10.1177/1536867X19830877}
 }
 
-% citation("fwildclusterboot") on the installed version (0.14.3).
+% citation("fwildclusterboot") on the installed version (0.14.3). Audit 2026-10-03 (P2-8, P2-9):
+% CRAN archived the package on 2024-05-29, so the link now points at the development repository;
+% aer-course.bst does not print a url field, so the link sits in howpublished.
 @misc{fischer2021,
-  author = {Fischer, Alexander and Roodman, David},
-  title  = {fwildclusterboot: Fast Wild Cluster Bootstrap Inference for Linear Regression Models},
-  year   = {2021},
-  note   = {R package version 0.14.3},
-  url    = {https://cran.r-project.org/package=fwildclusterboot}
+  author       = {Fischer, Alexander and Roodman, David},
+  title        = {fwildclusterboot: Fast Wild Cluster Bootstrap Inference for Linear Regression Models},
+  year         = {2021},
+  howpublished = {\url{https://github.com/s3alfisc/fwildclusterboot}},
+  note         = {R package version 0.14.3; archived from CRAN May 2024}
 }
 
 % Publisher page: https://www.degruyterbrill.com/document/doi/10.2202/1544-6115.1585/html
@@ -302,12 +309,13 @@
 
 % OECD Family Database indicator SF2.1 (2024 data: Israel 2.87 children per woman, the highest
 % TFR in the OECD): https://webfs.oecd.org/els-com/Family_Database/SF_2_1_Fertility_rates.pdf
+% Audit 2026-10-03 (P2-8): link moved from url (not printed by aer-course.bst) to howpublished.
 @misc{oecd2025fertility,
-  author = {{OECD}},
-  title  = {{OECD} Family Database, Indicator {SF2.1}: Fertility Rates},
-  year   = {2025},
-  note   = {Accessed 22 September 2026},
-  url    = {https://webfs.oecd.org/els-com/Family_Database/SF_2_1_Fertility_rates.pdf}
+  author       = {{OECD}},
+  title        = {{OECD} Family Database, Indicator {SF2.1}: Fertility Rates},
+  year         = {2025},
+  howpublished = {\url{https://webfs.oecd.org/els-com/Family_Database/SF_2_1_Fertility_rates.pdf}},
+  note         = {Accessed 22 September 2026}
 }
 
 % Publisher page: https://academic.oup.com/cid/article/73/12/2265/6103916 -- gives the 2020
