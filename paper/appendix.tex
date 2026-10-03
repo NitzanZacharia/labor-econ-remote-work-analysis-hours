@@ -4,116 +4,116 @@
 % relative to paper/, where the document compiles.
 
 %======================================================================
-\section{Data and sample details}\label{sec:app-data}
+\section{Data and Sample Details}\label{sec:app-data}
 %======================================================================
 
 \paragraph{Hours coding.}
-The CBS records usual weekly hours in bins; each bin is assigned its median ($4$, $11$, $18$,
-$25.5$, $32$, $37$, $42$, $47$, $54.5$ and $78.5$ hours) and the two irregular-hours codes are
+The CBS records usual weekly hours in bins. Each bin is assigned its median ($4$, $11$, $18$,
+$25.5$, $32$, $37$, $42$, $47$, $54.5$ and $78.5$ hours). The two irregular-hours codes are
 imputed from observed medians within the same period. Mid-distribution bins are about five hours
-wide, so an effect smaller than one bin width, such as the headline estimate, is best read as a
-shift in the share of women crossing a bin boundary. In the 2017 file, employed respondents
-absent from work in the reference week had their usual hours recorded as zero, whereas from 2018
-onward the same respondents were assigned a real value; left uncorrected, this enters the
-pre-period as roughly $5{,}200$ spurious zeros, and because absence is more common among mothers
-($12.4\%$ of employed mothers against $7.3\%$ of childless women) they fall unevenly across the
-comparison the paper makes. Defining hours on the reference-week workers in \emph{every} year
-costs about $10\%$ of each year's employed sample, makes the hours population identical across
-years, and narrows the estimand to usual hours among women who were working.
+wide, so the headline estimate, smaller than one bin width, is best read as a shift in the share
+of women crossing a bin boundary. The 2017 file also codes reference-week absence differently.
+Employed respondents absent from work that week were recorded at zero usual hours in 2017 and at
+a real value from 2018 onward. Left uncorrected, this places roughly $5{,}200$ spurious zeros in
+the pre-period. Because absence is more common among mothers ($12.4\%$ of employed mothers
+against $7.3\%$ of childless women), the zeros fall unevenly across the two groups. Defining
+hours on reference-week workers in \emph{every} year removes them and makes the hours population
+identical across years, at a cost of about $10\%$ of each year's employed sample.
 
 \paragraph{Reference-week absence and exposure.}
-Absence is related to exposure. Among employed women with a matched occupation, by the quartiles
-of Figure~\ref{fig:dose-response}, the absence shares are $14.4\%$, $8.5\%$, $9.5\%$ and $9.6\%$.
-Among mothers the top-quartile share fell from $12.1\%$ to $10.4\%$ after 2021 and the
-bottom-quartile share rose from $15.5\%$ to $16.9\%$; among childless women the top-quartile
-share is $6.1\%$ in both periods. Movement across the absence margin is therefore part of what
-selection into the observed-hours sample means, which is why the bounds of
-Appendix~\ref{sec:app-lee} define selection on that sample.
+Absence is related to exposure. Among employed women with a matched occupation, the absence
+shares by the quartiles of Figure~\ref{fig:dose-response} are $14.4\%$, $8.5\%$, $9.5\%$ and
+$9.6\%$, highest in the least teleworkable quartile. After 2021 mothers' top-quartile share fell
+from $12.1\%$ to $10.4\%$ and their bottom-quartile share rose from $15.5\%$ to $16.9\%$, while
+childless women's top-quartile share is $6.1\%$ in both periods. Selection into the
+observed-hours sample therefore includes movement across the absence margin, which is why the
+bounds of Appendix~\ref{sec:app-lee} are defined on that sample.
 
 \paragraph{Panel structure.}
 The survey is a rotating panel. The $258{,}175$ reference-week workers of
 Table~\ref{tab:descriptives} come from $64{,}602$ distinct respondents, about four observations
-each and two to three within a single survey year, with $96\%$ of rows belonging to someone who
-appears more than once; the regressions use $251{,}857$ of those rows from $63{,}199$
-respondents, the difference being the $6{,}318$ rows whose education code is missing (education
-is the only control with missing values). Treating the observations as independent would
-understate standard errors by a factor of roughly $1.8$, which is why every DiD and every
-descriptive interval is clustered by individual. The panel does not support within-person
-identification: of the $80{,}560$ women in the full sample, $1.9\%$ are interviewed on both sides
-of the pre/post boundary, so an individual fixed-effects design was considered and rejected.
+each and two to three within a single survey year. Repeat respondents account for $96\%$ of
+rows. The regressions use $251{,}857$ of those rows from $63{,}199$ respondents; the $6{,}318$
+dropped rows have a missing education code, the only control with missing values. Treating the
+observations as independent would understate standard errors by a factor of roughly $1.8$, hence
+the individual clustering of every DiD and every descriptive interval. The panel does not
+support within-person identification. Of the $80{,}560$ women in the full sample, $1.9\%$ are
+interviewed on both sides of the pre/post boundary, too few for an individual fixed-effects
+design.
 % Provenance: 1,514 of 80,560 distinct individuals (1.88%) appear in both the pre- and post-period
 % (check_idpuf_panel_structure(), scripts/validation.R). The 6,318 rows with a missing education
 % code (TeudaGvoha 99 -> NA) are the only listwise deletions: confirmed on cleaned_df.rds,
 % 2026-09-23, with zero NAs in the other four controls on the hours sample.
 
 \paragraph{Hours year by year.}
-Panel~(a) of Figure~\ref{fig:hours-by-year} unpools the pre-period. The raw mother-minus-non-mother gap is
-$-1.37$ hours in 2017, $-1.48$ in 2018 and $-1.67$ in 2019, a widening of $0.3$ hours over two
-years that is monotone but within sampling error, each year lying inside the others' confidence
-bounds. The post-period path is $-1.37$, $-1.53$ and $-0.80$, not monotone and not
-individually distinguishable, so the timing reading in the Discussion rests on the event studies
-of Figure~\ref{fig:pretrend}, not on this series.
+Panel~(a) of Figure~\ref{fig:hours-by-year} unpools the pre-period. The raw mother-minus-non-mother
+gap widens monotonically across the three pre-period years, by $0.3$ hours in all, but each year
+lies inside the others' confidence bounds. The post-period path is not monotone, and only its
+2023 point, the year Section~\ref{sec:res-did} flags, is distinguishable from the pre-period.
+The timing reading in the Discussion therefore rests on the event studies of
+Figure~\ref{fig:pretrend}, not on this series.
 
 \paragraph{Commuting.}
-Mothers were the \emph{more} mobile group in every year, working outside their locality of
-residence $48.2\%$ of the time in 2019 against $46.1\%$ of childless women, and their commuting
-fell less in 2021 ($1.5$ against $3.9$ percentage points, a difference of $2.39$ points,
-SE $1.17$). This is consistent with remote work relaxing a time constraint for women who were
-already commuting; it is descriptive evidence only, and no specification uses locality of work as
+Mothers were the \emph{more} mobile group in every year. In 2019 they worked outside their
+locality of residence $48.2\%$ of the time, against $46.1\%$ of childless women. Their commuting
+also fell less in 2021: $1.5$ against $3.9$ percentage points, a difference of $2.39$ points
+(SE $1.17$). This is consistent with remote work relaxing a time constraint for women who were
+already commuting. It is descriptive evidence only, and no specification uses locality of work as
 an outcome.
 
 %======================================================================
-\section{Exposure construction}\label{sec:appendix-exposure}
+\section{Exposure Construction}\label{sec:appendix-exposure}
 %======================================================================
 
 \paragraph{The external score.}
 The Dingel--Neiman teleworkability score \citep{dingel2020} reaches the two-digit ISCO-08 level
-through the BLS crosswalk between ISCO-08 and the 2010 SOC \citep{bls2012crosswalk}. Each
-O*NET-SOC occupation
-in their published classification is matched to every ISCO-08 unit group the crosswalk lists
-for its six-digit SOC code, and the score of a sub-major group is the unweighted mean of their
-binary indicator over the matched pairs; armed-forces groups have no counterpart in their data
-and carry no score. The replication code re-derives the forty
-scores (Table~\ref{tab:exposure-scores}) from the two public source files and checks them against
-the file the pipeline reads. Teaching (ISCO 23) is the clearest case of a US task-based score
-misclassifying Israeli practice: it scores $0.966$ on the external index, yet Israeli schools,
-closed and reopened in stages through 2020 and early 2021 \citep{somekh2021, hale2021}, were fully
-in person throughout the 2022--23 survey years, and teachers did not work from home.
+through the Bureau of Labor Statistics (BLS) crosswalk between ISCO-08 and the 2010 SOC
+\citep{bls2012crosswalk}. Each
+O*NET-SOC occupation in their classification is matched to every ISCO-08 unit group the
+crosswalk lists for its six-digit SOC code. The score of a sub-major group is the unweighted
+mean of their binary indicator over the matched pairs. Armed-forces groups have no counterpart
+in their data and carry no score. The replication code re-derives the forty scores
+(Table~\ref{tab:exposure-scores}) from the two public source files. Teaching (ISCO 23) is the
+clearest case of a US task-based score misclassifying Israeli practice. It scores $0.966$ on
+the external index, yet Israeli schools, closed and reopened in stages through 2020 and early
+2021 \citep{somekh2021, hale2021}, were fully in person throughout the 2022--23 survey years.
+Teachers did not work from home.
 
 \paragraph{The calibration rule.}
-The external score is replaced by the realized 2022--23 Israeli WFH share only where the gap
-between the two is large (greater than $0.5$) \emph{and} distinguishable from sampling noise by a
-one-sided test at the 95\% level with a standard error clustered by individual. Ten of the forty
-two-digit occupations are swapped: teaching falls from $0.966$ to $0.069$, clerical support
-(ISCO 41) from $1.000$ to $0.098$, ICT professionals (ISCO 25) from $1.000$ to $0.360$. The
-realized shares are computed on men and women together; Table~\ref{tab:robust} re-derives them
-from men alone. The realized index used as a bound is the realized Israeli WFH share by
-occupation, anchored to 2021 (no 2020 extract exists) with a minimum of 200 observations per
-occupation.
+The external score is replaced by the realized 2022--23 Israeli WFH share only where two
+conditions hold. The gap between the two must exceed $0.5$, and a one-sided test at the 95\%
+level, with standard errors clustered by individual, must distinguish it from sampling noise.
+Ten of the forty two-digit occupations are swapped, among them teaching, clerical support
+(ISCO 41) and ICT professionals (ISCO 25). Teaching falls from $0.966$ to $0.069$. The realized
+shares pool men and women; Table~\ref{tab:robust} re-derives them from men alone. The realized
+index reported as a bound is the realized Israeli WFH share by occupation, anchored to 2021
+because no 2020 extract exists, with a minimum of 200 observations per occupation.
 
 \paragraph{Masked occupation codes.}
-The CBS masks some two-digit occupation codes for disclosure control, and those rows carry no
-exposure score and drop out of the hours DDD. A partially masked code still identifies the
-one-digit major group, so the check compares realized WFH between masked and unmasked employed
-women within the same major group in 2022--23. Among professionals (major group 2), the
-masked rows work from home at a share of $0.29$ against $0.16$ for the unmasked ones, on
-$207$ masked observations; in the other major groups the masked rows are fewer and the gaps
-are small or negative.
-% PHASE-2 FILL-IN (review item 10): add "Pooled across major groups the masked-minus-unmasked
-% difference is XX (SE XX), significant at the 5% level and negligible in explanatory power."
-% Number from outputs/isco_masking_model.csv after Run A.
+The CBS masks some two-digit occupation codes for disclosure control. Those rows carry no
+exposure score and drop out of the hours DDD\@. A partially masked code still identifies the
+one-digit major group, so a proxy check compares realized WFH between masked and unmasked
+employed women within the same major group in 2022--23. Among professionals (major group 2),
+masked rows work from home at a share of $0.29$ against $0.16$ for unmasked ones, on $207$
+masked observations. In the other major groups the masked rows are fewer and the gaps are small
+or negative. Pooled across major groups, with major-group fixed effects and standard errors
+clustered by individual, the masked-minus-unmasked difference in the share working from home is
+$0.045$ (SE $0.021$) on $85{,}454$ employed women. The difference is significant at the 5\%
+level and negligible in explanatory power (within $R^2$ below $0.0001$). The dropped rows are
+therefore somewhat more teleworkable than those the index is built from: a small difference on
+few rows, not a clean bill of health.
 
 \paragraph{Fit.}
 Across the forty occupations, on men and women pooled over 2021--23, the calibrated score has a
-correlation of $0.53$ with the share who worked from home in the reference week and an
-occupation-size-weighted slope of $0.40$ (SE $0.09$), so it is relevant. The raw external index
-fits better in levels (correlation $0.74$), because swapping ten occupations onto realized shares
-while leaving thirty on task-based probabilities mixes two scales. The calibration's contribution
-is not a better cross-sectional fit but the removal of ten grossly mis-scored occupations from the
-treated tail. Table~\ref{tab:exposure-scores} lists, for each occupation, the external score, the
-realized 2022--23 share the calibration tests it against, whether the score was swapped, the
-calibrated score the hours DDD uses, and the realized reference-week share over 2021--23;
-panel~(b) of Figure~\ref{fig:first-stage} plots the last against the calibrated score.
+correlation of $0.53$ with the share who worked from home in the reference week. Its
+occupation-size-weighted slope on that share is $0.40$ (SE $0.09$), so the score is relevant.
+The raw external index fits better in levels (correlation $0.74$), because swapping ten
+occupations onto realized shares while leaving thirty on task-based probabilities mixes two
+scales. The calibration's contribution is not a better cross-sectional fit but the removal of
+ten grossly mis-scored occupations from the treated tail. Table~\ref{tab:exposure-scores} lists
+the external, realized and calibrated scores by occupation; panel~(b) of
+Figure~\ref{fig:first-stage} plots the realized reference-week share against the calibrated
+score.
 
 \begin{table}[htbp]
 \centering
@@ -121,12 +121,23 @@ panel~(b) of Figure~\ref{fig:first-stage} plots the last against the calibrated 
 \caption{External, realized and calibrated WFH exposure by two-digit occupation}\label{tab:exposure-scores}
 \renewcommand{\baselinestretch}{1}\scriptsize
 \setlength{\tabcolsep}{3pt}
+% Ragged-right paragraphs in the 5.2cm occupation column: justifying two-line names at 8pt gave
+% six underfull boxes. A p{} cell resets the paragraph shape on entry (\@arrayparboxrestore), so
+% \raggedright before the tabular has no effect; it is appended to that reset instead, scoped to
+% this group so the notes below stay justified. The generated column spec itself is the proper
+% place for this (>{\raggedright\arraybackslash}p{5.2cm} in build_paper_tables.R, next run).
+\begingroup
+\makeatletter
+\let\audit@parboxrestore\@arrayparboxrestore
+\def\@arrayparboxrestore{\audit@parboxrestore\raggedright\let\\\tabularnewline}
+\makeatother
 \input{tables/tab_exposure_scores.tex}
+\endgroup
 \begin{tablenotes}\footnotesize
 \item Ext.: the Dingel--Neiman teleworkability score \citep{dingel2020} at the two-digit ISCO-08
 level, via
 the crosswalk described above. Real.\ 22--23: share of employed
-respondents (men and women, all ages in the extract) who usually work from home in 2022--23,
+respondents (men and women aged 25--59) who usually work from home in 2022--23,
 the calibration's benchmark; Swap: the calibration replaced the external score with it.
 Calib.: the score the hours DDD uses. Ref.-wk 21--23: share who worked from home in the survey
 reference week over 2021--23, men and women pooled, with $N$ the pooled employed sample carrying
@@ -136,14 +147,13 @@ that item. Codes 1--3 (armed forces) carry no external score and are not in the 
 \end{table}
 
 \paragraph{Sensitivity to the swap threshold.}
-The calibration rule swaps an occupation when its external-minus-realized gap exceeds $0.5$ by
-more than sampling noise. Table~\ref{tab:calibration-sweep} refits the hours DDD with that
-threshold moved from $0.30$ to $0.90$. Lowering it swaps more occupations and the estimate grows
-noisier; from $0.75$ upward only teaching and clerical support are swapped, and at $0.90$,
-above the largest gap, nothing is swapped and the row is the external-index estimate of
-Table~\ref{tab:robust}. The estimate is positive at every threshold, and the step from the
-external index to any positive threshold is the reclassification of teaching, which
-Table~\ref{tab:robust}'s teaching-only row isolates.
+Table~\ref{tab:calibration-sweep} refits the hours DDD with the calibration's swap threshold
+moved from $0.30$ to $0.90$. Lowering it swaps more occupations and the estimate grows noisier.
+From $0.75$ upward only teaching and clerical support are swapped. At $0.90$, above the largest
+gap, nothing is swapped and the row is the external-index estimate of Table~\ref{tab:robust}.
+The estimate is positive at every threshold. The step from the external index to any positive
+threshold is the reclassification of teaching, which Table~\ref{tab:robust}'s teaching-only row
+isolates.
 
 \begin{table}[htbp]
 \centering
@@ -177,50 +187,55 @@ external Dingel--Neiman index. Stars follow the paper's legend on the analytic $
 \begin{minipage}{0.95\textwidth}\renewcommand{\baselinestretch}{1}\small
 \vspace{0.3em}
 \emph{Notes:} Panel~(a): women aged 25--59 who worked in the reference week, unweighted means with
-no controls; the upper panel plots each group's mean weekly hours on an axis spanning 36 to 42
-hours, the lower panel their difference, with 95\% confidence intervals clustered by individual;
-the dotted rule marks the excluded 2020 survey year, and the series break there. Panel~(b): one
+no controls. The upper panel plots each group's mean weekly hours on an axis spanning 36 to 42
+hours, the lower panel their difference, with 95\% confidence intervals clustered by individual.
+The dotted rule marks the excluded 2020 survey year, and the series break there. Panel~(b): one
 point per two-digit occupation, sized by the pooled employed sample in 2021--23; triangles are the
-ten occupations the calibration swapped to their realized value, labelled by ISCO-08 code; the
+ten occupations the calibration swapped to their realized value, labeled by ISCO-08 code; the
 dashed line is the 45-degree line. The swapped occupations sit above it because their calibrated
-value is the usual-place share, which is lower than the reference-week share everywhere; the
-thirty unswapped ones lie below it, the visual form of the scale-mixing described above.
+value is the usual-place share, which is lower than the reference-week share everywhere. Most
+of the thirty unswapped ones lie below it, the visual form of the scale-mixing described above.
+The exceptions are zero-scored manual occupations within a few hundredths of the line and
+one eight-person group (ISCO 63).
 \end{minipage}
 \end{figure}
 
 %======================================================================
-\section{The selection correction}\label{sec:app-lee}
+\section{The Selection Correction}\label{sec:app-lee}
 %======================================================================
 
 % tables/tab_lee_selection.tex and tables/tab_lee_bounds.tex are still generated by main.R
 % (build_paper_tables()) but are no longer input here; the numbers below are quoted from them.
-Let $s_{ab} = \Pr(\text{hours observed} \mid \Mother=a, \Post=b)$, the probability of being
-employed and working in the reference week. Under parallel trends in selection the
-counterfactual for post-period mothers is $s^*_{11} = s_{10} + s_{01} - s_{00}$. If $s_{11}$
-exceeds it, the excess share $1 - s^*_{11}/s_{11}$ is trimmed from the $(\Mother=1,\Post=1)$
-hours distribution, from the top for the lower bound and from the bottom for the upper bound,
-and the model is re-estimated on each trimmed sample. Trimming one tail assumes monotone
-selection, and the construction handles only excess selection in that cell. For the DDD the
-counterfactual and trim are computed within each quartile of the cell-based exposure index,
-which assumes selection depends on exposure only through that quartile, and
-equation~\eqref{eq:ddd} is refit on the recombined sample with the occupation-level regressor
-and occupation clustering. Because the parameter is partially identified, the
-Imbens--Manski interval for the identified set is reported with the bounds \citep{imbens2004}.
+Let $s_{ab} = \Pr(\text{hours observed} \mid \Mother=a, \Post=b)$, the share employed and at
+work in the reference week. Under parallel trends in selection, post-period mothers'
+counterfactual is $s^*_{11} = s_{10} + s_{01} - s_{00}$. If $s_{11}$ exceeds it, the excess
+share $1 - s^*_{11}/s_{11}$ is trimmed from their hours distribution, from the top for the
+lower bound and from the bottom for the upper. One-tail trimming assumes monotone selection and
+corrects only excess selection in that cell. For the DDD, counterfactual and trim are computed
+within quartiles of the cell-based exposure index, which assumes that selection depends on
+exposure only through the quartile. The model is re-estimated on each trimmed sample; for the
+DDD, equation~\eqref{eq:ddd} is refit on the recombined sample with the occupation-level
+regressor and occupation clustering. Each pair of bounds is reported with the Imbens--Manski
+interval for the identified set \citep{imbens2004}.
 
-For the DiD, $s_{11} = 0.696$ against $s^*_{11} = 0.683$, and trimming the $1.9\%$ excess gives
-bounds of $-0.517$ (SE $0.178$) and $0.802$ (SE $0.179$) around the $0.228$ point estimate,
-with Imbens--Manski 95\% interval $[-0.810, 1.096]$. For the DDD the excess is present in all
-four quartiles but modest, a trim of $0.80\%$ to $4.48\%$, $1{,}396$ of $72{,}820$ post-period
-working mothers; the bounds are $3.126$ (SE $1.144$) and $3.443$ (SE $1.022$) around an
-untrimmed $3.232$ (SE $1.054$), which differs from Table~\ref{tab:hours}'s $3.224$ because this
-sample additionally requires a matched cell-based exposure, and the Imbens--Manski interval is
-$[1.021, 5.324]$.
+For the DiD, $s_{11} = 0.696$ against $s^*_{11} = 0.683$, an excess of $1.9\%$. Trimming it
+gives bounds of $-0.517$ (SE $0.178$) and $0.802$ (SE $0.179$) around the $0.228$ point
+estimate, with Imbens--Manski 95\% interval $[-0.810, 1.096]$. The identified set and its
+interval both straddle zero, so the DiD null survives the correction.
+
+For the DDD the excess is present in all four quartiles but modest: a trim of $0.80\%$ to
+$4.48\%$, or $1{,}396$ of $72{,}820$ post-period working mothers. The untrimmed estimate here
+is $3.232$ (SE $1.054$) rather than Table~\ref{tab:hours}'s $3.224$, because this sample also
+requires a matched cell-based exposure. The bounds, $3.126$ (SE $1.144$) and $3.443$
+(SE $1.022$), lie within a quarter of a standard error of it, and the Imbens--Manski interval
+$[1.021, 5.324]$ excludes zero. Under monotone selection, the gradient is not an artifact of
+which mothers are observed working after 2021.
 
 %======================================================================
-\section{Additional results}\label{sec:app-results}
+\section{Additional Results}\label{sec:app-results}
 %======================================================================
 
-Figure~\ref{fig:permutation} plots the reference distribution of the permutation test: under the
+Figure~\ref{fig:permutation} plots the reference distribution of the permutation test. Under the
 sharp null the central $95\%$ of cluster-robust $t$-statistics lie between $-2.96$ and $2.60$,
 and the observed $3.15$ is exceeded in absolute value by $31$ of $999$ draws.
 Table~\ref{tab:extensive} reports the extensive-margin DiD and DDD discussed in

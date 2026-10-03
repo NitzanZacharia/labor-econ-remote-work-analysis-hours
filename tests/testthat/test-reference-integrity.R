@@ -37,6 +37,30 @@ known_removed <- c(
   "docs/decisions/employment-ddd-robustness-removal.md"
 )
 
+# Files that exist on the authors' machines but are deliberately outside version control since
+# 2026-10-03 (the matching block in .gitignore explains why): the design documents, the decision
+# memos, the referee review, the results digest and the agent configuration. Comments in main.R,
+# scripts/ and tests/ still cite them by path as the record of why something was built the way it
+# was. Those pointers resolve here and dangle in a fresh clone, so they are neither dead (unlike
+# known_removed, whose entries must NOT exist) nor checkable. A hit is skipped when it equals an
+# entry or starts with a directory entry (trailing slash).
+known_untracked <- c(
+  "docs/decisions/",
+  "docs/HLD.md",
+  "docs/LLD.md",
+  "docs/ROADMAP.md",
+  "docs/motherhood_penalty_wfh_research.md",
+  "docs/admin/review.md",
+  "paper/notes/results_digest.md",
+  "CLAUDE.md"
+)
+
+is_known_untracked <- function(path) {
+  dirs  <- known_untracked[endsWith(known_untracked, "/")]
+  files <- known_untracked[!endsWith(known_untracked, "/")]
+  path %in% files || any(startsWith(path, dirs))
+}
+
 test_that("every repo-relative path referenced in a .R or .md file resolves", {
   files <- list.files(
     project_root,
@@ -60,6 +84,7 @@ test_that("every repo-relative path referenced in a .R or .md file resolves", {
     hits <- unique(sub("[.,)]+$", "", hits))
     for (h in hits) {
       if (h %in% known_removed) next
+      if (is_known_untracked(h)) next
       if (!file.exists(file.path(project_root, h))) {
         missing <- c(missing, paste0(h, "  (referenced by ", basename(f), ")"))
       }

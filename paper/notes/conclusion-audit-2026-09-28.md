@@ -1,13 +1,54 @@
 # Conclusion audit: `paper/paper.tex` §9 (pre-submission)
 
-**Date:** 2026-09-28. **Scope:** the Conclusion (`paper.tex:1089-1103`, two paragraphs, 186
+**Date:** 2026-09-28. Re-anchored 2026-10-03 at `6454bd0`. **Scope:** the Conclusion (`paper.tex:1089-1103`, two paragraphs, 186
 words), read against the Abstract (162-179), the Introduction (182-244), the Results lead
 (589-596), the Discussion (937-1014) and the Limitations (1016-1083). Analysis written at
 `4802830`; the drafts in §3 and their line references were brought up to `ca0eb93`, after the
-referee-review response (`docs/admin/review.md`), later the same day.
+referee-review response of 2026-09-28, later the same day.
 **Rule applied (author's choice):** analysis and proposals only. `paper.tex` was NOT edited and
 the paper was not recompiled. The current text was written by the co-author and moved in verbatim
 on 2026-09-26; whether and how to replace it is the authors' joint call.
+
+**Status at `57d9452` (2026-09-29).** The Conclusion is still the co-author's text, verbatim, now
+at `paper.tex:1137-1151`; nothing below has been applied. Since `ca0eb93` the referee-review
+response (items 5–22 on 2026-09-29, items 1–4, 6, 10 and 11 the day before) edited the Abstract,
+Introduction, Results, Discussion and Limitations, so every line number below has shifted
+(current anchors: Abstract 178–198, Introduction 201–270, Results 637, Discussion 988,
+Limitations 1063, Conclusion 1134). None of those edits changes a verdict in the claim ledger
+(§2.3) or a number in the drafts (§3): the DiD null and its confidence interval, 3.22 / 1.71, the
+three-fifths / none pairing, the fathers' gradient, the bootstrap qualification, the teaching
+reclassification and the marital checks all still read as quoted. One premise did change: the
+Abstract no longer ends on "which mothers benefit ... rather than mothers as a group"; since the
+2026-09-28 co-author pass it ends on the intensive-margin implication ("raises intensive-margin
+labor supply for mothers in teleworkable occupations specifically, rather than reducing the
+motherhood penalty across the board"). §2.2 item 5 and the matching §2.4 row therefore no longer
+describe a line the Abstract carries, and the closing sentence of Versions A, B and C now
+paraphrases the Discussion's policy reading rather than repeating the Abstract, which also
+retires the duplication concern in §6. The recommendation (Version A, C as fallback) stands.
+
+**Status at `6454bd0` (2026-10-03; paper text at `00dadf2`).** The Conclusion is still the
+co-author's text, verbatim, now at `paper.tex:1077-1091`. Twenty-seven commits have landed since
+`57d9452`: a restructure-and-polish pass over every other section (Introduction, Literature
+Review, Data, Descriptive Statistics, Empirical Strategy, Results, Discussion, Limitations, the
+appendices; `fd24db3` to `8f859dc`), then the four-phase pre-submission audit (`0148968`,
+`211135e`, `a8367f4`, `e546ff4`, `a7c8a09`, `60f682b`, `b969f31`, `00dadf2`), whose Phase 1 found
+no numeric error in the paper and whose Phase 4 copyedit excluded the Conclusion. Every line
+number in §2 and §3 was re-anchored to `00dadf2` on 2026-10-03 and each cell now also names the
+section label, so the next shift can be resolved by label. Re-verification of every quotation
+the ledger and the drafts rely on: all present, with three changes. (i) The DiD standard error no
+longer appears in prose (the Abstract dropped its SEs on 2026-09-28); Version A's "(SE $0.18$)"
+traces to Table 2, column (1), a generated table. (ii) The external index's estimate ($0.672$, SE
+$0.884$) moved from prose to Table 3; the prose says "positive and insignificant" and "about a
+fifth the size of the headline", which is what the drafts say. (iii) The Abstract's former "which
+mothers ... rather than mothers as a group" line is gone from the paper altogether; it now closes
+on "mothers in teleworkable occupations specifically, rather than reducing the motherhood penalty
+across the board" (197-199). Version C's closing sentence, which quoted the old line, is reworded
+to the current one; Versions A and B already paraphrased the Discussion's policy reading. One
+wording in Version A was tightened to match the paper: the supporting rows' bootstrap $p$-values
+"mostly" lie above 5% (Discussion 946-948), not uniformly. Separately, `harrington2025` now
+resolves to the 2026 *National Tax Journal* article (bib key unchanged), so Version A's citation
+prints "Harrington and Kahn, 2026". None of this changes a verdict in §2.3 or a number in §3. The
+recommendation (Version A, C as fallback) stands.
 
 **Bottom line.** Nothing in the Conclusion is wrong: all ten factual claims trace to a supported
 line in the paper (§2.3). The problems are of alignment and emphasis. The section was written
@@ -24,7 +65,7 @@ no number is added.
 
 ---
 
-## 1. Current text (verbatim, `paper.tex:1089-1103`)
+## 1. Current text (verbatim; `paper.tex:1089-1103` at `4802830`, `1077-1091` at `00dadf2`)
 
 ```latex
 Using Israeli survey data, we ask whether the expansion of remote work coincided with a change in
@@ -69,18 +110,18 @@ Axis codes: **T** = academic tone, **I** = impact, **F** = summary flow.
 
 | # | Axis | Observation | Evidence (`paper.tex` line) | Fix |
 |---|---|---|---|---|
-| 1 | F | Opens by restating the question ("we ask whether...") rather than answering it. A conclusion's first sentence should be the answer. | 1013 vs. the Introduction's own answer at 233-241 | Open with the answer: no on average, yes where the work can be done from home. |
-| 2 | F, I | Reports two of the "three findings" the Introduction (233) and the Results lead (602) promise. The fathers' opposite-signed gradient, which the Discussion calls the check that "rules out a shock common to all workers" (936), is absent. | 233-241, 602-607, 837, 936; nothing at 1013-1018 | Add the fathers' gradient to the findings sentence. |
-| 3 | I | No magnitude anywhere. "Small" and "increases with" are the only quantifiers; the reader leaves without 3.22 per unit, 1.71 between quartiles, or "three fifths of their penalty". | 233-236, 914-923 | State at least the quartile contrast and the three-fifths / none pairing. |
-| 4 | I | Does not close the loop with the Introduction: flexibility as the last driver of the gender gap (203-207), the Israeli fertility context (215-218), and the contrast with the US extensive-margin result (211-214, 249-252) are all absent. | 203-218, 249-254 | One sentence placing the result against Harrington & Kahn (intensive vs. extensive margin, different country). |
-| 5 | I | The Abstract's last sentence ("about *which* mothers benefit ... rather than about mothers as a group", 193-194) is the paper's one-line takeaway and the natural last line of the Conclusion; it does not appear. | 193-194, 949-953 | End on it. |
-| 6 | T | Paragraph 2 (1020-1024) is roughly 60% caveats that restate Limitations nearly verbatim: post-period calibration (961-964), weaker external score (964), pre-trend power (960-961), inference by procedure (972-973). The 2026-09-23 grade report deducted 2 points for exactly this: "the post-period calibration caveat, the forty-cluster caveat, and the 2023 caveat each appear three or more times". | 1020-1022 vs. 959-973 | Collapse to one sentence naming the two limitations that condition the reading, with `\ref{sec:limitations}`. |
-| 7 | T | "does not establish a universal benefit from remote work" rebuts a claim nobody made. | 1020 | Cut; "conditional" alone carries it. |
-| 8 | T, F | "The data also contain no earnings amount" is a data-description sentence, not a conclusion, and sits between the employment margin and the research agenda. | 1024; the fact belongs to §3.1 (header note, 25) | Cut; the agenda's "link hours with earnings" already implies it. |
-| 9 | T | Terminology drift: "mother/comparison gap" vs. the paper's "mother/childless gap"; "some already employed mothers" vs. "mothers who already hold *teleworkable* jobs". | 1015 vs. 604; 1018 vs. 950-951 | Use the paper's terms. |
-| 10 | I | The employment margin is "too imprecise here to settle the question"; the Results make the sharper point that the employment DDD is *uninformative*, "evidence neither for nor against", and that "the two nulls should not be read as one verdict". | 1022-1024 vs. 891-893 | Keep the sentence, add "either way" or point to `sec:res-extensive`. |
-| 11 | I | The Discussion's narrow policy reading (WFH matters for how intensively mothers in teleworkable jobs work, not for whether mothers work; access to those jobs is unequal, so the population-wide gain is smaller than the gradient) is the paper's practical takeaway and never reaches the Conclusion. | 949-953 | One sentence on the policy reading. |
-| 12 | F | Two paragraphs with no "so what" beat between summary and caveats; the interpretation is one clause ("consistent with greater scheduling flexibility"). | 1017-1018 | Give the interpretation its own sentences (mechanism signature, contribution). |
+| 1 | F | Opens by restating the question ("we ask whether...") rather than answering it. A conclusion's first sentence should be the answer. | Conclusion 1077 vs. the Introduction's own answer at 233-241 | Open with the answer: no on average, yes where the work can be done from home. |
+| 2 | F, I | Reports two of the "three findings" the Introduction (233) and the Results lead (608) promise. The fathers' opposite-signed gradient, which the Discussion calls the check that "rules out a shock common to all workers" (971-972), is absent. | Introduction 233-241; Results lead 608-613; `sec:res-childage` 873-874; Discussion 982-983; nothing at 1077-1082 | Add the fathers' gradient to the findings sentence. |
+| 3 | I | No magnitude anywhere. "Small" and "increases with" are the only quantifiers; the reader leaves without 3.22 per unit, 1.71 between quartiles, or "three fifths of their penalty". | Introduction 234-237; Discussion 955-964 | State at least the quartile contrast and the three-fifths / none pairing. |
+| 4 | I | Does not close the loop with the Introduction: flexibility as the last driver of the gender gap (207-210), the Israeli fertility context (221-223), and the contrast with the US extensive-margin result (216-220) are all absent. | Introduction 207-210 and 216-223 | One sentence placing the result against Harrington & Kahn (intensive vs. extensive margin, different country). |
+| 5 | I | The Abstract's last sentence (now: remote work raises intensive-margin labor supply for mothers in teleworkable occupations specifically, rather than reducing the penalty across the board, 197-199; until 2026-09-28 it was "about *which* mothers benefit ... rather than about mothers as a group") is the paper's one-line takeaway and the natural last line of the Conclusion; it does not appear. | Abstract 197-199; Discussion 996-1001 | End on it. |
+| 6 | T | Paragraph 2 (1084-1088) is roughly 60% caveats that restate Limitations nearly verbatim: post-period calibration (1009-1010), weaker external score (1011), pre-trend power (1008-1009), inference by procedure (1013-1015). The 2026-09-23 grade report deducted 2 points for exactly this: "the post-period calibration caveat, the forty-cluster caveat, and the 2023 caveat each appear three or more times". | Conclusion 1084-1086 vs. Limitations 1007-1018 | Collapse to one sentence naming the two limitations that condition the reading, with `\ref{sec:limitations}`. |
+| 7 | T | "does not establish a universal benefit from remote work" rebuts a claim nobody made. | 1084 | Cut; "conditional" alone carries it. |
+| 8 | T, F | "The data also contain no earnings amount" is a data-description sentence, not a conclusion, and sits between the employment margin and the research agenda. | 1088; the fact belongs to the Data section (`sec:data` 352: "the extract records how a wage is paid but not its amount") | Cut; the agenda's "link hours with earnings" already implies it. |
+| 9 | T | Terminology drift: "mother/comparison gap" vs. the paper's "mother/childless gap"; "some already employed mothers" vs. "mothers who already hold *teleworkable* jobs". | 1079 vs. Results lead 610; 1082 vs. Discussion 998 | Use the paper's terms. |
+| 10 | I | The employment margin is "too imprecise here to settle the question"; the Results make the sharper point that the employment DDD is *uninformative*, "evidence neither for nor against", and that "the two nulls should not be read as one verdict". | 1086-1088 vs. `sec:res-extensive` 931-933 | Keep the sentence, add "either way" or point to `sec:res-extensive`. |
+| 11 | I | The Discussion's narrow policy reading (WFH matters for how intensively mothers in teleworkable jobs work, not for whether mothers work; access to those jobs is unequal, so the population-wide gain is smaller than the gradient) is the paper's practical takeaway and never reaches the Conclusion. | Discussion 996-1001 | One sentence on the policy reading. |
+| 12 | F | Two paragraphs with no "so what" beat between summary and caveats; the interpretation is one clause ("consistent with greater scheduling flexibility"). | 1081-1082 | Give the interpretation its own sentences (mechanism signature, contribution). |
 
 ### 2.3 Claim ledger (current text)
 
@@ -88,16 +129,16 @@ Every factual claim in the Conclusion, and where the paper supports it.
 
 | # | Claim (line) | Supporting line(s) | Verdict |
 |---|---|---|---|
-| 1 | Average change among women observed working is small (1090-1091) | 217-218 (DiD 0.23, SE 0.18, "a null"); 606-609 (95% CI $[-0.13, 0.58]$; MDE ~0.51) | OK |
-| 2 | Post-2021 change in the gap increases with calibrated WFH exposure (1015-1016) | 235-236; 602-605 | OK (wording: "mother/comparison" is not the paper's term) |
-| 3 | Strongest contrast at the top of the exposure distribution (1016) | 238 ("concentrated in the most teleworkable quartile"); 914-923 | OK |
-| 4 | Strongest among mothers with younger children (1016-1017) | 239-240; 822 | OK |
-| 5 | Exposure score partly uses post-period WFH information (1020-1021) | 961-963 | OK |
-| 6 | Wholly external score yields a weaker result (1021-1022) | 964 ("positive and insignificant") | OK |
-| 7 | Pre-trend tests have limited power (1022) | 960-961 | OK |
-| 8 | Inference varies with the procedure (1022) | 188-190 (p = 0.003 / 0.032 / 0.056); 972-973 | OK |
-| 9 | Employment interaction too imprecise to settle the question (1022-1024) | 880-893 | OK, understated (see §2.2 #10) |
-| 10 | No earnings amount in the data (1024) | header note 25 (§3.1 sentence) | OK, misplaced (see §2.2 #8) |
+| 1 | Average change among women observed working is small (1078-1079) | Abstract 188 (DiD $0.23$, "did not change on average"); Table 2 col (1): $0.2280$ ($0.1809$); `sec:res-did` 625-627 (95% CI $[-0.13, 0.58]$; MDE $0.51$) | OK |
+| 2 | Post-2021 change in the gap increases with calibrated WFH exposure (1079-1080) | Introduction 235-236; `sec:res-ddd` 666-669 | OK (wording: "mother/comparison" is not the paper's term) |
+| 3 | Strongest contrast at the top of the exposure distribution (1080) | Results lead 611-612 ("concentrated in the most teleworkable quartile"); Discussion 955-964 | OK |
+| 4 | Strongest among mothers with younger children (1080-1081) | Introduction 239-240; `sec:res-childage` 859-862 | OK |
+| 5 | Exposure score partly uses post-period WFH information (1084-1085) | Limitations 1009-1010 | OK |
+| 6 | Wholly external score yields a weaker result (1085-1086) | Limitations 1011 ("positive and insignificant"); `sec:res-ddd-diag` 748-750; the estimate itself, $0.672$ ($0.884$), is Table 3's external-index row | OK |
+| 7 | Pre-trend tests have limited power (1086) | Limitations 1008-1009; `sec:res-ddd` 688-690 | OK |
+| 8 | Inference varies with the procedure (1086) | `sec:res-ddd` 692-697 (p = 0.003 / 0.032 / 0.056); Limitations 1013-1015 | OK |
+| 9 | Employment interaction too imprecise to settle the question (1086-1088) | `sec:res-extensive` 921-933 | OK, understated (see §2.2 #10) |
+| 10 | No earnings amount in the data (1088) | `sec:data` 352 ("records how a wage is paid but not its amount") | OK, misplaced (see §2.2 #8) |
 
 No claim is wrong; nothing needs a fix in place.
 
@@ -105,12 +146,12 @@ No claim is wrong; nothing needs a fix in place.
 
 | Section | What it commits the Conclusion to | Present now? |
 |---|---|---|
-| Abstract (178-195) | Three inference procedures reported side by side; "which mothers" closing line | Inference: yes (as a caveat). Closing line: no |
-| Introduction, "Three findings emerge" (233-241) | (1) precise null; (2) 3.22 / 1.71, concentrated in the top quartile; (3) child-age gradient **and** fathers' opposite gradient | (1) yes, no number; (2) yes, no number; (3) half |
-| Introduction, contribution (249-254) | Intensive margin vs. US extensive margin; Israeli-calibrated exposure; forty clusters as evidence | No |
-| Results lead (602-607) | Same three findings; employment margin "too imprecisely estimated to support a comparable conclusion" | Employment: yes |
-| Discussion (896-953) | Three-fifths / none magnitudes; mechanism "signature rather than proof"; narrow policy reading | None of the three |
-| Limitations (956-1007) | Already states every caveat in full | The Conclusion should point here, not repeat it |
+| Abstract (180-200) | Three inference procedures reported side by side; closing line on the intensive-margin takeaway (197-199; the "which mothers" line it replaced on 2026-09-28) | Inference: yes (as a caveat). Closing line: no |
+| Introduction, "Three findings emerge" (233-250) | (1) precise null; (2) 3.22 / 1.71, concentrated in the top quartile; (3) child-age gradient **and** fathers' opposite gradient | (1) yes, no number; (2) yes, no number; (3) half |
+| Introduction, contribution (216-223) | Intensive margin vs. US extensive margin; Israeli-calibrated exposure; first Israeli estimate in hours | No |
+| Results lead (608-613) | Same three findings; employment margin "too imprecisely estimated to support a comparable conclusion" | Employment: yes |
+| Discussion (936-1001) | Three-fifths / none magnitudes; mechanism "signature rather than proof"; narrow policy reading | None of the three |
+| Limitations (1004-1071) | Already states every caveat in full | The Conclusion should point here, not repeat it |
 
 ## 3. Alternative versions
 
@@ -121,27 +162,28 @@ sentence is kept, lightly edited; (iv) only existing macros, `\citep` keys (`gol
 `harrington2025`) and `\ref` labels (`sec:limitations`, `sec:res-extensive`) are used, so any
 version compiles as a drop-in replacement for lines 1089-1103.
 
-Shared number provenance (lines at `ca0eb93`):
+Shared number provenance (section label and line at `00dadf2`; first anchored at `ca0eb93`):
 
-| Literal | `paper.tex` line(s) |
+| Literal | `paper.tex` location |
 |---|---|
-| DiD 0.23 (SE 0.18), "a null"; 95% CI "excludes average gains above about half an hour a week" | 217-218; 606-609 |
-| 3.22 hours per unit of exposure | 219; 170 (SE 1.02) |
-| 1.71 hours between the top and bottom quartile means | 219-220; 171 |
-| "recovered roughly three fifths of their penalty" (top quartile) | 972 |
-| "recovered none of it" (bottom quartile) | 974 |
-| "behaves as a flexibility mechanism should"; largest for mothers of children under five; declines with age of youngest child | 222-224; 175-176 |
-| Fathers: gradient of the opposite sign | 224-225; 176 |
-| Forty occupation clusters; three inference procedures | 225-228; 172-174; 1037-1040 |
-| Supporting checks share the forty clusters; bootstrap $p$ above 5%, headline 0.056 | 946-957 |
-| Result requires reclassifying teaching; Israeli schools in person; US task content scores it teleworkable | 229-233; 748-752; 1022-1026 |
-| Pre-treatment external index: positive and insignificant | 231-233; 1024 |
-| Marital checks: gradient positive but only marginally significant | 1075-1076; 767-778 |
-| Employment DDD uninformative, "neither for nor against" | 932-934 |
-| US: WFH raised mothers' employment and income | 195-198 |
-| "signature rather than its proof" | 1002 |
-| Policy reading: which mothers, access unequally distributed | 1009-1012 |
-| "which mothers ... rather than mothers as a group" | 177-178 |
+| DiD 0.23, "did not change on average"; 95% CI "excludes average gains above about half an hour a week" | Abstract 188; `sec:res-did` 625-627 |
+| SE 0.18 on the DiD | Table 2 col (1), $0.2280$ ($0.1809$); no longer in prose since the Abstract dropped its SEs (2026-09-28) |
+| 3.22 hours per unit of exposure (SE 1.02) | Abstract 189; `sec:res-ddd` 666 |
+| 1.71 hours between the top and bottom quartile means | Abstract 190; `sec:res-ddd` 669, 679; Discussion 959 |
+| "recovered roughly three fifths of it" (top quartile) | Discussion 962; Introduction 236 |
+| "recovered none of it" (bottom quartile) | Discussion 963-964 |
+| "behaves as a flexibility mechanism should"; largest for mothers of children under five; declines with age of youngest child | Introduction 238-240; Abstract 196 |
+| Fathers: gradient of the opposite sign | Introduction 241; Abstract 196; `sec:res-childage` 873-874 |
+| Forty occupation clusters; three inference procedures | Abstract 190-192; Introduction 243-245; `sec:res-ddd` 692-697; Limitations 1013-1016 |
+| Supporting checks share the forty clusters; bootstrap $p$ "mostly" above 5%, headline 0.056 | Discussion 946-948; `sec:res-ddd` 696; Limitations 1016-1018 |
+| Result requires reclassifying teaching; Israeli schools in person; US task content scores it teleworkable | Abstract 193-195; Introduction 246-249; `sec:res-ddd-diag` 762-764; Limitations 1010 |
+| Pre-treatment external index: positive and insignificant | Limitations 1011; `sec:res-ddd-diag` 748-750 (the estimate, $0.672$ / $0.884$, is Table 3's external-index row) |
+| Marital checks: gradient positive but only marginally significant | Limitations 1060-1064 |
+| Employment DDD uninformative, "neither for nor against" | `sec:res-extensive` 931-933; Discussion 992-993 |
+| US: WFH reduced the penalty on employment and income | Introduction 216-217; Discussion 996 |
+| "signature rather than its proof" | Discussion 990 |
+| Policy reading: mothers who "already hold *teleworkable* jobs"; access "unequally distributed" | Discussion 996-1001 |
+| Abstract's close: intensive-margin labor supply "for mothers in teleworkable occupations specifically, rather than reducing the motherhood penalty across the board" (replaced "which mothers ... rather than mothers as a group" on 2026-09-28) | Abstract 197-199 |
 
 ### 3.A Version A: findings-forward (recommended)
 
@@ -169,8 +211,8 @@ occupations.
 
 We read this pattern as the signature of a relaxed time constraint \citep{goldin2014} rather than
 its proof: the supporting checks are estimated on the same forty occupation clusters as the
-headline, and where a wild cluster bootstrap $p$-value is available it lies above the 5\% level,
-the headline's own at $0.056$. Relative to the US evidence, where remote work raised mothers'
+headline, and where a wild cluster bootstrap $p$-value is available it mostly lies above the 5\%
+level, the headline's own at $0.056$. Relative to the US evidence, where remote work raised mothers'
 employment and income \citep{harrington2025}, the Israeli response appears on the intensive
 margin, in how much mothers who already hold teleworkable jobs work rather than in whether mothers
 hold jobs; the employment margin is estimated too imprecisely here to say either way
@@ -272,8 +314,8 @@ significant, and the headline's precision depends on the inference procedure
 exposure interaction is too imprecise here to settle the question either way. Stronger evidence
 would link hours with earnings and household time use, measure exposure before treatment in the
 Israeli setting, and estimate women's and men's responses together on a design that better
-separates access to WFH from occupation choice. The result is about which mothers benefit from
-remote work rather than about mothers as a group.
+separates access to WFH from occupation choice. The evidence is about mothers in teleworkable
+occupations specifically, not about the motherhood penalty across the board.
 ```
 
 **Length.** About 220 words. Two paragraphs.
@@ -297,8 +339,9 @@ remote work rather than about mothers as a group.
    gradient only marginally significant, and the headline's precision depends on the inference
    procedure (Section~\ref{sec:limitations})."
 6. L1100 "The data also contain no earnings amount." deleted; "either way" appended to the
-   employment sentence; closing sentence "The result is about which mothers benefit from remote
-   work rather than about mothers as a group." appended (from the Abstract, 193-194).
+   employment sentence; closing sentence "The evidence is about mothers in teleworkable
+   occupations specifically, not about the motherhood penalty across the board." appended
+   (paraphrasing the Abstract's close, 197-199).
 
 ## 4. Comparison matrix
 
@@ -312,7 +355,7 @@ remote work rather than about mothers as a group.
 | Repeats Limitations | Four caveats | One sentence + `\ref` | One sentence + `\ref` | One sentence + `\ref` |
 | Employment margin | Yes | Yes + `\ref` | Dropped (optional insert) | Yes |
 | Policy reading (access, unequal) | No | Yes | Yes, developed | No |
-| "Which mothers" close | No | Yes | Yes, paraphrased | Yes |
+| Closes on the Abstract's takeaway (teleworkable occupations specifically, not across the board) | No | Yes, via the Discussion's policy reading | Yes, paraphrased | Yes |
 | Words | 186 | ~400 | ~300 | ~220 |
 | Fidelity to co-author's voice | -- | Low | Low | High |
 
@@ -332,8 +375,8 @@ place of A's third.
 
 **To apply (not done here):**
 
-1. Replace `paper/paper.tex` lines 1089-1103 (the two paragraphs under `\section{Conclusion}`)
-   with the chosen block.
+1. Replace `paper/paper.tex` lines 1077-1091 at `00dadf2` (the two paragraphs under
+   `\section{Conclusion}`; 1089-1103 when this note was written) with the chosen block.
 2. Add a dated header comment line at the top of `paper.tex`, in the style of the
    2026-09-27 "INTRODUCTION AND ABSTRACT PASS" note (line 46), stating that the Conclusion was
    rewritten and that no number was added.
@@ -341,7 +384,7 @@ place of A's third.
    if the log warns that labels may have changed). Check the log for undefined references; the
    only new `\ref`s are `sec:limitations` and `sec:res-extensive`, both defined.
 4. Update `README.md`'s section summary if it paraphrases the Conclusion (it does not as of
-   `ca0eb93`; it only points to this note).
+   `6454bd0`; it names this note twice and paraphrases nothing).
 
 ## 6. Not done / open items
 
@@ -353,7 +396,14 @@ place of A's third.
   themselves; that rule is satisfied by any of the three versions only if the authors adopt and
   own the text. If the course constrains how much may be assisted, Version C is the one to
   prefer.
-- The Abstract's "which mothers" line is now used in A, B and C; if adopted, the Abstract and
-  Conclusion will end on the same sentence. That is conventional, but the authors may prefer to
-  vary one of them.
+- The Abstract's closing takeaway is now paraphrased in A, B and C (the "which mothers" wording
+  it replaced on 2026-09-28 appears in none of them); if adopted, the Abstract and Conclusion
+  will end on the same thought. That is conventional, but the authors may prefer to vary one of
+  them.
+- `harrington2025` prints "Harrington and Kahn, 2026" in-text since `00dadf2` (the published
+  *National Tax Journal* version); the drafts' `\citep` key is unchanged, so nothing in them
+  needs editing for it.
+- The referee review this note's header cites (2026-09-28) leaves version control in Phase 3 of
+  the 2026-10-03 repository clean-up, along with the design memos; the reference is plain
+  history and `README.md` carries the review's summary.
 

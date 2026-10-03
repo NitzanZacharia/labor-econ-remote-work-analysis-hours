@@ -18,6 +18,7 @@ Specification & Coefficient & SE & $p$ & $p$ (boot) & $N$ & Clusters \\
 \multicolumn{7}{l}{\emph{Sample}} \\
 \quad Unswapped occupations only & $4.309$\sym{**} & $1.192$ & $0.0011$ & $0.0201$ & 132{,}046 & 30 \\
 \quad Excluding survey year 2023 & $2.979$\sym{*} & $1.170$ & $0.0151$ & $0.0739$ & 208{,}833 & 39 \\
+\quad Absentees at usual hours, 2018--2023 & $3.076$\sym{***} & $0.861$ & $0.0010$ & $0.0694$ & 224{,}567 & 40 \\
 \quad Leave-one-occupation-out (40 refits): range & $[2.415,\ 3.580]$ &  & $[0.0007,\ 0.0167]$ &  &  & 39 \\
 \multicolumn{7}{l}{\emph{Occupational sorting}} \\
 \quad Pre-period cell exposure as regressor, per SD & $0.139$ & $0.159$ & $0.3823$ &  & 247{,}931 & 245 \\
@@ -27,6 +28,8 @@ Specification & Coefficient & SE & $p$ & $p$ (boot) & $N$ & Clusters \\
 \quad Irregular-hours codes dropped, not imputed & $3.056$\sym{**} & $1.059$ & $0.0064$ & $0.0573$ & 232{,}785 & 40 \\
 \quad Full-time indicator ($\geq 35$ hours) & $0.096$\sym{**} & $0.029$ & $0.0020$ & $0.0466$ & 246{,}326 & 40 \\
 \quad Long-hours indicator ($\geq 40$ hours) & $0.107$\sym{**} & $0.038$ & $0.0075$ & $0.0529$ & 246{,}326 & 40 \\
+\quad Top bin ($60+$) recoded to 60 hours & $2.589$\sym{**} & $0.917$ & $0.0074$ & $0.0625$ & 246{,}326 & 40 \\
+\quad Top-bin indicator ($60+$ hours) & $0.034$\sym{***} & $0.009$ & $0.0005$ & $0.0937$ & 246{,}326 & 40 \\
 \multicolumn{7}{l}{\emph{Inference on the primary estimate}} \\
 \quad Two-way clustering (ind., occ.) & $3.224$\sym{**} & $1.022$ & $0.0031$ &  & 246{,}326 & 40 $\times$ ind. \\
 \quad Wild cluster bootstrap ($B = 9{,}999$) & $3.224$ & $1.022$ & $0.0558$ &  & 246{,}326 & 40 \\
