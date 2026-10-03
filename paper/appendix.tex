@@ -8,58 +8,56 @@
 %======================================================================
 
 \paragraph{Hours coding.}
-The CBS records usual weekly hours in bins; each bin is assigned its median ($4$, $11$, $18$,
-$25.5$, $32$, $37$, $42$, $47$, $54.5$ and $78.5$ hours) and the two irregular-hours codes are
+The CBS records usual weekly hours in bins. Each bin is assigned its median ($4$, $11$, $18$,
+$25.5$, $32$, $37$, $42$, $47$, $54.5$ and $78.5$ hours). The two irregular-hours codes are
 imputed from observed medians within the same period. Mid-distribution bins are about five hours
-wide, so an effect smaller than one bin width, such as the headline estimate, is best read as a
-shift in the share of women crossing a bin boundary. In the 2017 file, employed respondents
-absent from work in the reference week had their usual hours recorded as zero, whereas from 2018
-onward the same respondents were assigned a real value; left uncorrected, this enters the
-pre-period as roughly $5{,}200$ spurious zeros, and because absence is more common among mothers
-($12.4\%$ of employed mothers against $7.3\%$ of childless women) they fall unevenly across the
-comparison the paper makes. Defining hours on the reference-week workers in \emph{every} year
-costs about $10\%$ of each year's employed sample, makes the hours population identical across
-years, and narrows the estimand to usual hours among women who were working.
+wide, so the headline estimate, smaller than one bin width, is best read as a shift in the share
+of women crossing a bin boundary. The 2017 file also codes reference-week absence differently.
+Employed respondents absent from work that week were recorded at zero usual hours in 2017 and at
+a real value from 2018 onward. Left uncorrected, this places roughly $5{,}200$ spurious zeros in
+the pre-period. Because absence is more common among mothers ($12.4\%$ of employed mothers
+against $7.3\%$ of childless women), the zeros fall unevenly across the two groups. Defining
+hours on reference-week workers in \emph{every} year removes them and makes the hours population
+identical across years, at a cost of about $10\%$ of each year's employed sample.
 
 \paragraph{Reference-week absence and exposure.}
-Absence is related to exposure. Among employed women with a matched occupation, by the quartiles
-of Figure~\ref{fig:dose-response}, the absence shares are $14.4\%$, $8.5\%$, $9.5\%$ and $9.6\%$.
-Among mothers the top-quartile share fell from $12.1\%$ to $10.4\%$ after 2021 and the
-bottom-quartile share rose from $15.5\%$ to $16.9\%$; among childless women the top-quartile
-share is $6.1\%$ in both periods. Movement across the absence margin is therefore part of what
-selection into the observed-hours sample means, which is why the bounds of
-Appendix~\ref{sec:app-lee} define selection on that sample.
+Absence is related to exposure. Among employed women with a matched occupation, the absence
+shares by the quartiles of Figure~\ref{fig:dose-response} are $14.4\%$, $8.5\%$, $9.5\%$ and
+$9.6\%$, highest in the least teleworkable quartile. After 2021 mothers' top-quartile share fell
+from $12.1\%$ to $10.4\%$ and their bottom-quartile share rose from $15.5\%$ to $16.9\%$, while
+childless women's top-quartile share is $6.1\%$ in both periods. Selection into the
+observed-hours sample therefore includes movement across the absence margin, which is why the
+bounds of Appendix~\ref{sec:app-lee} are defined on that sample.
 
 \paragraph{Panel structure.}
 The survey is a rotating panel. The $258{,}175$ reference-week workers of
 Table~\ref{tab:descriptives} come from $64{,}602$ distinct respondents, about four observations
-each and two to three within a single survey year, with $96\%$ of rows belonging to someone who
-appears more than once; the regressions use $251{,}857$ of those rows from $63{,}199$
-respondents, the difference being the $6{,}318$ rows whose education code is missing (education
-is the only control with missing values). Treating the observations as independent would
-understate standard errors by a factor of roughly $1.8$, which is why every DiD and every
-descriptive interval is clustered by individual. The panel does not support within-person
-identification: of the $80{,}560$ women in the full sample, $1.9\%$ are interviewed on both sides
-of the pre/post boundary, so an individual fixed-effects design was considered and rejected.
+each and two to three within a single survey year. Repeat respondents account for $96\%$ of
+rows. The regressions use $251{,}857$ of those rows from $63{,}199$ respondents; the $6{,}318$
+dropped rows have a missing education code, the only control with missing values. Treating the
+observations as independent would understate standard errors by a factor of roughly $1.8$, hence
+the individual clustering of every DiD and every descriptive interval. The panel does not
+support within-person identification. Of the $80{,}560$ women in the full sample, $1.9\%$ are
+interviewed on both sides of the pre/post boundary, too few for an individual fixed-effects
+design.
 % Provenance: 1,514 of 80,560 distinct individuals (1.88%) appear in both the pre- and post-period
 % (check_idpuf_panel_structure(), scripts/validation.R). The 6,318 rows with a missing education
 % code (TeudaGvoha 99 -> NA) are the only listwise deletions: confirmed on cleaned_df.rds,
 % 2026-09-23, with zero NAs in the other four controls on the hours sample.
 
 \paragraph{Hours year by year.}
-Panel~(a) of Figure~\ref{fig:hours-by-year} unpools the pre-period. The raw mother-minus-non-mother gap is
-$-1.37$ hours in 2017, $-1.48$ in 2018 and $-1.67$ in 2019, a widening of $0.3$ hours over two
-years that is monotone but within sampling error, each year lying inside the others' confidence
-bounds. The post-period path is $-1.37$, $-1.53$ and $-0.80$, not monotone and not
-individually distinguishable, so the timing reading in the Discussion rests on the event studies
-of Figure~\ref{fig:pretrend}, not on this series.
+Panel~(a) of Figure~\ref{fig:hours-by-year} unpools the pre-period. The raw mother-minus-non-mother
+gap widens monotonically across the three pre-period years, by $0.3$ hours in all, but each year
+lies inside the others' confidence bounds. The post-period path is neither monotone nor
+individually distinguishable. The timing reading in the Discussion therefore rests on the event
+studies of Figure~\ref{fig:pretrend}, not on this series.
 
 \paragraph{Commuting.}
-Mothers were the \emph{more} mobile group in every year, working outside their locality of
-residence $48.2\%$ of the time in 2019 against $46.1\%$ of childless women, and their commuting
-fell less in 2021 ($1.5$ against $3.9$ percentage points, a difference of $2.39$ points,
-SE $1.17$). This is consistent with remote work relaxing a time constraint for women who were
-already commuting; it is descriptive evidence only, and no specification uses locality of work as
+Mothers were the \emph{more} mobile group in every year. In 2019 they worked outside their
+locality of residence $48.2\%$ of the time, against $46.1\%$ of childless women. Their commuting
+also fell less in 2021: $1.5$ against $3.9$ percentage points, a difference of $2.39$ points
+(SE $1.17$). This is consistent with remote work relaxing a time constraint for women who were
+already commuting. It is descriptive evidence only, and no specification uses locality of work as
 an outcome.
 
 %======================================================================
