@@ -50,6 +50,16 @@ resolves to the 2026 *National Tax Journal* article (bib key unchanged), so Vers
 prints "Harrington and Kahn, 2026". None of this changes a verdict in §2.3 or a number in §3. The
 recommendation (Version A, C as fallback) stands.
 
+**Applied 2026-10-03 (committed on `main`).** Version A is now the paper's Conclusion,
+at `paper.tex:1084-1116`: the §3.A block pasted as is, with `\noindent` added at the start of its
+second and third paragraphs to match the paper's paragraph style (every section indents its first
+paragraph and prefixes the rest) and no other change. A dated `CONCLUSION 2026-10-03` line was
+added to the header comment block of `paper.tex`; the paper was recompiled (pdflatex, bibtex,
+pdflatex, pdflatex): 37 pages, up from 36, no undefined reference or citation, BibTeX clean, the
+reference list unchanged (both `\citep` keys were already cited). README's description of the
+Conclusion was updated. §5's four steps are therefore done. The co-author's text survives in §1
+below and in git history before this change.
+
 **Bottom line.** Nothing in the Conclusion is wrong: all ten factual claims trace to a supported
 line in the paper (§2.3). The problems are of alignment and emphasis. The section was written
 before the Introduction, Abstract and Results were rebuilt on 2026-09-27 around "three findings"
@@ -373,7 +383,7 @@ optional employment-margin insert in §3.B should then be used.
 A reasonable hybrid, if wanted: A's first two paragraphs followed by B's second paragraph in
 place of A's third.
 
-**To apply (not done here):**
+**To apply (done 2026-10-03; kept as the record of what was done):**
 
 1. Replace `paper/paper.tex` lines 1077-1091 at `00dadf2` (the two paragraphs under
    `\section{Conclusion}`; 1089-1103 when this note was written) with the chosen block.
@@ -388,7 +398,8 @@ place of A's third.
 
 ## 6. Not done / open items
 
-- `paper.tex`, `paper.pdf` and `README.md` are unchanged. No recompile was needed.
+- Superseded 2026-10-03: `paper.tex`, `paper.pdf` and `README.md` changed when Version A was
+  applied (see the status block at the top).
 - **Co-author sign-off.** The current text is the co-author's. Versions A and B replace it;
   Version C edits it. Which is acceptable is a decision between the authors, not one this note
   makes.
@@ -396,10 +407,12 @@ place of A's third.
   themselves; that rule is satisfied by any of the three versions only if the authors adopt and
   own the text. If the course constrains how much may be assisted, Version C is the one to
   prefer.
-- The Abstract's closing takeaway is now paraphrased in A, B and C (the "which mothers" wording
-  it replaced on 2026-09-28 appears in none of them); if adopted, the Abstract and Conclusion
-  will end on the same thought. That is conventional, but the authors may prefer to vary one of
-  them.
+- The Abstract's closing takeaway is paraphrased in A, B and C. Version A's last paragraph still
+  reads "which mothers can work more, not for mothers as a group", the Discussion's policy
+  reading rather than the Abstract's current "mothers in teleworkable occupations specifically,
+  rather than reducing the motherhood penalty across the board"; same thought, different words.
+  With A applied, the Abstract and Conclusion end on that one thought, which is conventional; the
+  authors may prefer to vary one of them.
 - `harrington2025` prints "Harrington and Kahn, 2026" in-text since `00dadf2` (the published
   *National Tax Journal* version); the drafts' `\citep` key is unchanged, so nothing in them
   needs editing for it.

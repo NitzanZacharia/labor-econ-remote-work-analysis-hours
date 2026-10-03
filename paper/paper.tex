@@ -60,6 +60,13 @@
 % "three checks at forty occupations" framing matches its list; and the Limitations claim that the
 % estimate "survives" the reweighted row was recalibrated against that row's MDE. No number changed
 % and none was added; every \citep, \ref and \label call is retained.
+% CONCLUSION 2026-10-03: the co-author's two-paragraph Conclusion (in git before this commit)
+% was replaced by Version A of paper/notes/conclusion-audit-2026-09-28.md: three paragraphs
+% (findings in the Results' order with their magnitudes; the mechanism reading, the US contrast
+% and the three limitations that condition it; the policy reading and the research agenda).
+% No number was added: 0.23, 0.18 (Table 2, col. 1), 3.22, 1.71 and 0.056 all appear elsewhere
+% in the paper. Two \citep calls (goldin2014, harrington2025, both already cited) and two \ref
+% calls (sec:res-extensive, sec:limitations) were added; no existing citation changed.
 % EVERY hours-derived figure below was re-verified 2026-09-21 against a full pipeline re-run after
 % the hours population was harmonized across survey years (docs/decisions/hours-population-
 % harmonization.md, Checkpoint 13) and the Lee-bounds selection rate was redefined on the
@@ -681,7 +688,7 @@ distribution more than a smooth gradient. That quartile holds six of the forty o
 the pooled and saturated columns use all forty and agree with it, and no single occupation drives
 it (Section~\ref{sec:res-robust}).
 
-\noindentPanel~(b) of Figure~\ref{fig:pretrend} is the event-study version of equation~\eqref{eq:ddd}, the
+\noindent Panel~(b) of Figure~\ref{fig:pretrend} is the event-study version of equation~\eqref{eq:ddd}, the
 pre-trend test the triple difference itself requires (Section~\ref{sec:diagnostics}). The
 pre-period coefficients are near zero and jointly insignificant on both the Wald test and the wild
 cluster bootstrap. The post-period path steps up in 2021 and rises through 2023, every year
@@ -1074,21 +1081,39 @@ statistics. The one exception is internal to constructing the cell-based exposur
 \section{Conclusion}\label{sec:conclusion}
 %======================================================================
 
-Using Israeli survey data, we ask whether the expansion of remote work coincided with a change in
-the motherhood penalty in usual weekly hours. The average change among women observed working is
-small, whereas the post-2021 change in the mother/comparison gap increases with an occupation's
-calibrated WFH exposure. The strongest contrast is at the top of the exposure distribution and
-among mothers with younger children. Those patterns are consistent with greater scheduling
-flexibility helping some already employed mothers supply more paid hours.
+Did remote work narrow the motherhood penalty in hours? On average, no: among employed Israeli
+women, the mother/childless gap in usual weekly hours did not change after 2021, a
+difference-in-differences of $0.23$ hours (SE $0.18$) whose 95\% confidence interval excludes
+average gains above about half an hour a week. Where the work can be done from home, yes: the
+post-2021 change in the gap rises with an occupation's WFH exposure, by $3.22$ hours per unit of
+exposure, or $1.71$ hours a week between the most and least teleworkable quartiles of
+occupations. Mothers in the most teleworkable jobs recovered roughly three fifths of their
+pre-period penalty; mothers in the least teleworkable jobs recovered none of it. And the gradient
+behaves as a flexibility mechanism should: it is largest for mothers of children under five,
+declines with the age of the youngest child, and has the opposite sign for fathers in the same
+occupations.
 
-\noindent The result is conditional and does not establish a universal benefit from remote work. The
-exposure score partly uses post-period WFH information; the wholly external score yields a weaker
-result, pre-trend tests have limited power, and inference varies with the procedure. Employment is
-an important separate margin, but its exposure interaction is too imprecise here to settle the
-question. The data also contain no earnings amount. Stronger evidence would link hours with
-earnings and household time use, measure exposure before treatment in the Israeli setting, and
-estimate women's and men's responses together on a design that better separates access to WFH
-from occupation choice.
+\noindent We read this pattern as the signature of a relaxed time constraint \citep{goldin2014} rather than
+its proof: the supporting checks are estimated on the same forty occupation clusters as the
+headline, and where a wild cluster bootstrap $p$-value is available it mostly lies above the 5\%
+level, the headline's own at $0.056$. Relative to the US evidence, where remote work raised mothers'
+employment and income \citep{harrington2025}, the Israeli response appears on the intensive
+margin, in how much mothers who already hold teleworkable jobs work rather than in whether mothers
+hold jobs; the employment margin is estimated too imprecisely here to say either way
+(Section~\ref{sec:res-extensive}). Three limitations condition the reading
+(Section~\ref{sec:limitations}). The result requires reclassifying teaching, which US task
+content scores as teleworkable and Israeli schools kept in person, and the one exposure measure
+built entirely from pre-treatment information yields a positive but insignificant estimate.
+Mothers and childless women differ in marital status in a way that tracks exposure, and the two
+marital checks leave the gradient positive but only marginally significant. And with forty
+occupation clusters the headline's precision is the range across three inference procedures
+rather than a single $p$-value.
+
+\noindent The policy implication is correspondingly narrow. Remote work matters for which mothers can work
+more, not for mothers as a group, and access to teleworkable jobs is itself unequally distributed.
+Stronger evidence would link hours with earnings and household time use, measure exposure before
+treatment in the Israeli setting, and estimate women's and men's responses together on a design
+that separates access to WFH from occupation choice.
 
 %======================================================================
 \newpage
