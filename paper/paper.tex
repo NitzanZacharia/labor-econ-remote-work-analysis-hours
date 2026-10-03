@@ -675,8 +675,8 @@ Columns~(3) and~(4) relax the functional form and tell the same story. With the 
 fixed effects of equation~\eqref{eq:ddd-sat} absorbing every lower-order term, the triple
 interaction falls by a tenth and remains significant at the $1\%$ level. With quartile indicators
 in place of the score, the second and third quartiles differ from the least teleworkable one by
-positive but insignificant amounts, and the top quartile by a significant amount close to the
-pooled model's $1.71$-hour contrast. The response is a step at the top of the exposure
+positive but insignificant amounts. The top quartile differs by a significant amount close to
+the pooled model's $1.71$-hour contrast. The response is a step at the top of the exposure
 distribution more than a smooth gradient. That quartile holds six of the forty occupations, but
 the pooled and saturated columns use all forty and agree with it, and no single occupation drives
 it (Section~\ref{sec:res-robust}).
@@ -710,7 +710,7 @@ column (1)'s sample less the rows with no matched two-digit occupation. Column (
 equation~\eqref{eq:ddd-sat}, whose three sets of fixed effects (occupation $\times$ year,
 occupation $\times$ mother, mother $\times$ year) absorb every lower-order term. Column (4)
 replaces the score with indicators for its pre-period quartile (Figure~\ref{fig:dose-response}'s
-bins); its lower-order quartile terms are estimated but not shown, and the number of occupations
+bins); its lower-order quartile terms are estimated but not shown. The number of occupations
 per bin is listed because occupation is the cluster, counted on the full 2017--2023 estimation
 sample (Appendix Table~\ref{tab:balance-quartile} counts pre-period rows only, so its bottom
 quartile shows one occupation fewer). Columns (2)--(4) use a $t$ reference
@@ -828,13 +828,13 @@ analytic $t(G-1)$ $p$-value and $p$ (boot) the wild cluster bootstrap $p$-value 
 coefficient (Rademacher weights, null imposed, $9{,}999$ draws), blank where the row is not a
 one-way occupation-clustered refit of a single model (the two-way-clustered, leave-one-out,
 sorting and cell-index rows). The men-only row calibrates the index on men's realized 2022--23 WFH
-shares; the teaching-only row moves ISCO 23 alone from its external score to its realized share
-and leaves the other thirty-nine at the external score; the married-only row drops marital
-status from the controls; the marital-interacted row adds marital status ${} \times \Post \times
-\WFH$ and its two-way terms; the swapped-occupation rows keep the external index as regressor on all forty occupations
-and add a Swapped indicator for the ten calibrated occupations with the full
-$\Mother \times \Post$ structure, showing both triple interactions from that one model; the
-unswapped-occupations row drops those ten; the absentees row adds employed women absent from
+shares. The teaching-only row moves ISCO 23 alone from its external score to its realized share
+and leaves the other thirty-nine at the external score. The married-only row drops marital
+status from the controls. The marital-interacted row adds marital status ${} \times \Post \times
+\WFH$ and its two-way terms. The swapped-occupation rows keep the external index as regressor
+on all forty occupations and add a Swapped indicator for the ten calibrated occupations with the
+full $\Mother \times \Post$ structure, showing both triple interactions from that one model. The
+unswapped-occupations row drops those ten. The absentees row adds employed women absent from
 work in the reference week at their reported usual hours, on 2018--2023 only, since the 2017
 file recorded absentees' hours as zero. The leave-one-occupation-out row gives the range of
 the forty refits with one occupation removed (Appendix Figure~\ref{fig:loo}) and the range of
@@ -860,7 +860,7 @@ Table~\ref{tab:childage} re-estimates the DiD and DDD for mothers whose youngest
 0--4, 5--9, 10--14 or 15--17, each against the same childless women. The average effect is a null
 in every group. The exposure gradient declines monotonically with the child's age; for mothers of
 15--17-year-olds it is half the size of the under-fives'. The four regressions share a control
-group and the same forty clusters, so their intervals overlap and are not independent, and on the
+group and the same forty clusters, so their intervals overlap and are not independent. On the
 wild cluster bootstrap none of the four is significant at the 5\% level. The pattern is a
 gradient consistent with the mechanism rather than a set of statistically separated effects, and
 the estimate is not carried by mothers of teenagers.
@@ -926,8 +926,8 @@ coefficients pass their joint test. The employment DDD with the cell-based index
 different kind. The smallest triple interaction the design could detect is about $2.0$ percentage
 points per tenth of a unit of exposure, given the index's standard deviation of $0.07$. Against
 the US estimate of $0.78$ percentage points per 10\% rise in WFH \citep{harrington2025} it is
-underpowered by a factor of about $2.6$. The shortfall is structural, a binary outcome and a
-regressor with little dispersion, and re-clustering, combining the two margins and refining the
+underpowered by a factor of about $2.6$. The shortfall is structural: a binary outcome and a
+regressor with little dispersion. Re-clustering, combining the two margins and refining the
 cell partition did not close it. The employment DDD is therefore
 \emph{uninformative}, evidence neither for nor against a WFH-mediated employment effect, and the
 two nulls should not be read as one verdict.
