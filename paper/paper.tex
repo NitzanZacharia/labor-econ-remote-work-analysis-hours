@@ -67,6 +67,11 @@
 % No number was added: 0.23, 0.18 (Table 2, col. 1), 3.22, 1.71 and 0.056 all appear elsewhere
 % in the paper. Two \citep calls (goldin2014, harrington2025, both already cited) and two \ref
 % calls (sec:res-extensive, sec:limitations) were added; no existing citation changed.
+% CONCLUSION EDIT 2026-10-03: Version A was condensed for readability (412 -> 352 words): long
+% sentences split, the Limitations restatement reduced to one pointer and a one-sentence
+% enumeration, the limitations moved to open the last paragraph. 0.23, 0.18, 3.22 and 0.056
+% were removed from the Conclusion (all remain in the Abstract, Results or Table 2); no number
+% was added. Both \citep and both \ref calls are retained on the same clauses.
 % EVERY hours-derived figure below was re-verified 2026-09-21 against a full pipeline re-run after
 % the hours population was harmonized across survey years (docs/decisions/hours-population-
 % harmonization.md, Checkpoint 13) and the Lee-bounds selection rate was redefined on the
@@ -1081,39 +1086,33 @@ statistics. The one exception is internal to constructing the cell-based exposur
 \section{Conclusion}\label{sec:conclusion}
 %======================================================================
 
-Did remote work narrow the motherhood penalty in hours? On average, no: among employed Israeli
-women, the mother/childless gap in usual weekly hours did not change after 2021, a
-difference-in-differences of $0.23$ hours (SE $0.18$) whose 95\% confidence interval excludes
-average gains above about half an hour a week. Where the work can be done from home, yes: the
-post-2021 change in the gap rises with an occupation's WFH exposure, by $3.22$ hours per unit of
-exposure, or $1.71$ hours a week between the most and least teleworkable quartiles of
-occupations. Mothers in the most teleworkable jobs recovered roughly three fifths of their
-pre-period penalty; mothers in the least teleworkable jobs recovered none of it. And the gradient
-behaves as a flexibility mechanism should: it is largest for mothers of children under five,
-declines with the age of the youngest child, and has the opposite sign for fathers in the same
-occupations.
+Did remote work narrow the motherhood penalty in hours? On average, no. Among employed Israeli
+women, the mother/childless gap in usual weekly hours did not change after 2021, and its 95\%
+confidence interval excludes average gains above about half an hour a week. Where the work can
+be done from home, yes. The post-2021 change in the gap rises with an occupation's WFH exposure,
+by $1.71$ hours a week between the most and least teleworkable quartiles of occupations. Mothers
+in the most teleworkable jobs recovered roughly three fifths of their pre-period penalty; mothers
+in the least teleworkable jobs recovered none of it. The gradient also behaves as a flexibility
+mechanism should. It is largest for mothers of children under five, declines with the age of the
+youngest child, and has the opposite sign for fathers in the same occupations.
 
-\noindent We read this pattern as the signature of a relaxed time constraint \citep{goldin2014} rather than
-its proof: the supporting checks are estimated on the same forty occupation clusters as the
-headline, and where a wild cluster bootstrap $p$-value is available it mostly lies above the 5\%
-level, the headline's own at $0.056$. Relative to the US evidence, where remote work raised mothers'
-employment and income \citep{harrington2025}, the Israeli response appears on the intensive
-margin, in how much mothers who already hold teleworkable jobs work rather than in whether mothers
-hold jobs; the employment margin is estimated too imprecisely here to say either way
-(Section~\ref{sec:res-extensive}). Three limitations condition the reading
-(Section~\ref{sec:limitations}). The result requires reclassifying teaching, which US task
-content scores as teleworkable and Israeli schools kept in person, and the one exposure measure
-built entirely from pre-treatment information yields a positive but insignificant estimate.
-Mothers and childless women differ in marital status in a way that tracks exposure, and the two
-marital checks leave the gradient positive but only marginally significant. And with forty
-occupation clusters the headline's precision is the range across three inference procedures
-rather than a single $p$-value.
+\noindent We read this pattern as the signature of a relaxed time constraint \citep{goldin2014}
+rather than its proof. The supporting checks are not independent confirmations: they share the
+headline's occupation clusters, and their wild cluster bootstrap $p$-values mostly lie above the
+5\% level. In the US, remote work raised mothers' employment and income \citep{harrington2025}.
+The Israeli response appears instead on the intensive margin: in how much mothers who already
+hold teleworkable jobs work, not in whether mothers hold jobs. The employment margin is estimated
+too imprecisely here to say either way (Section~\ref{sec:res-extensive}).
 
-\noindent The policy implication is correspondingly narrow. Remote work matters for which mothers can work
-more, not for mothers as a group, and access to teleworkable jobs is itself unequally distributed.
-Stronger evidence would link hours with earnings and household time use, measure exposure before
-treatment in the Israeli setting, and estimate women's and men's responses together on a design
-that separates access to WFH from occupation choice.
+\noindent Three limitations condition the reading (Section~\ref{sec:limitations}). The result
+depends on reclassifying teaching, which Israeli schools kept in person; on a marital-status
+imbalance between mothers and childless women that tracks exposure; and on inference across only
+forty occupation clusters, where precision is a range across procedures rather than a single
+$p$-value. The policy implication is correspondingly narrow. Remote work matters for which
+mothers can work more, not for mothers as a group, and access to teleworkable jobs is itself
+unequally distributed. Stronger evidence would link hours with earnings and household time use
+and measure exposure before treatment in the Israeli setting. It would also estimate women's and
+men's responses together on a design that separates access to WFH from occupation choice.
 
 %======================================================================
 \newpage

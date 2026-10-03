@@ -58,7 +58,11 @@ added to the header comment block of `paper.tex`; the paper was recompiled (pdfl
 pdflatex, pdflatex): 37 pages, up from 36, no undefined reference or citation, BibTeX clean, the
 reference list unchanged (both `\citep` keys were already cited). README's description of the
 Conclusion was updated. §5's four steps are therefore done. The co-author's text survives in §1
-below and in git history before this change.
+below and in git history before this change. Later the same day Version A was condensed in place
+(412 to 352 words; its long sentences split, the three-item Limitations restatement reduced to one
+pointer and a one-sentence enumeration that opens the last paragraph; 0.23, 0.18, 3.22 and 0.056
+removed from the Conclusion and none added; both citations and both cross-references kept on the
+same clauses); the body is now at `paper.tex:1089-1115`, and the PDF stays at 37 pages.
 
 **Bottom line.** Nothing in the Conclusion is wrong: all ten factual claims trace to a supported
 line in the paper (§2.3). The problems are of alignment and emphasis. The section was written
