@@ -90,7 +90,7 @@ because no 2020 extract exists, with a minimum of 200 observations per occupatio
 
 \paragraph{Masked occupation codes.}
 The CBS masks some two-digit occupation codes for disclosure control. Those rows carry no
-exposure score and drop out of the hours DDD. A partially masked code still identifies the
+exposure score and drop out of the hours DDD\@. A partially masked code still identifies the
 one-digit major group, so a proxy check compares realized WFH between masked and unmasked
 employed women within the same major group in 2022--23. Among professionals (major group 2),
 masked rows work from home at a share of $0.29$ against $0.16$ for unmasked ones, on $207$
@@ -120,7 +120,18 @@ score.
 \caption{External, realized and calibrated WFH exposure by two-digit occupation}\label{tab:exposure-scores}
 \renewcommand{\baselinestretch}{1}\scriptsize
 \setlength{\tabcolsep}{3pt}
+% Ragged-right paragraphs in the 5.2cm occupation column: justifying two-line names at 8pt gave
+% six underfull boxes. A p{} cell resets the paragraph shape on entry (\@arrayparboxrestore), so
+% \raggedright before the tabular has no effect; it is appended to that reset instead, scoped to
+% this group so the notes below stay justified. The generated column spec itself is the proper
+% place for this (>{\raggedright\arraybackslash}p{5.2cm} in build_paper_tables.R, next run).
+\begingroup
+\makeatletter
+\let\audit@parboxrestore\@arrayparboxrestore
+\def\@arrayparboxrestore{\audit@parboxrestore\raggedright\let\\\tabularnewline}
+\makeatother
 \input{tables/tab_exposure_scores.tex}
+\endgroup
 \begin{tablenotes}\footnotesize
 \item Ext.: the Dingel--Neiman teleworkability score \citep{dingel2020} at the two-digit ISCO-08
 level, via

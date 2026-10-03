@@ -100,7 +100,9 @@
 \setcounter{topnumber}{3}\setcounter{totalnumber}{4}
 \usepackage[authoryear,round]{natbib}
 \usepackage{hyperref}
-\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue,
+  pdftitle={Did Remote Work Narrow the Motherhood Penalty? Evidence on the Intensive Margin from Israeli Labor Force Survey Microdata, 2017-2023},
+  pdfauthor={Inbal Moryles and Nitzan Zacharia}}
 % hypertexnames=false gives every anchor a sequential internal name instead of one derived from
 % the float counter; the counter-derived names collided ("destination with the same identifier
 % table.1") for the first two tables and figures. Nothing visible changes.
@@ -507,7 +509,7 @@ mother/non-mother gap in high- versus low-exposure jobs would have evolved in pa
 shift to remote work. Insignificant pre-period coefficients are evidence about that assumption,
 not a verification of it. The hours DDD uses the calibrated occupation score, $\WFH_j$, on
 employed women matched to a two-digit occupation. The employment DDD uses the cell-based index on
-all women and adds a $\Mother \times$ age-group interaction for the pre-period age imbalance.
+all women and adds a $\Mother \times {}$ age-group interaction for the pre-period age imbalance.
 
 \noindent Equation~\eqref{eq:ddd} makes each lower-order occupation-level difference linear in exposure,
 an unnecessary restriction with forty occupations. A single slope also compares effects
@@ -566,7 +568,7 @@ assumptions.
 \subsection{Diagnostics, falsification, and the fathers' comparison}\label{sec:diagnostics}
 
 We estimate event-study versions of equation~\eqref{eq:did} for both outcomes, with
-$\Mother \times$ year interactions and 2019 as the reference year, and test the pre-period
+$\Mother \times {}$ year interactions and 2019 as the reference year, and test the pre-period
 coefficients jointly. That test bears on the difference-in-differences assumption, not the
 triple-differences one. We therefore also estimate the event-study version of
 equation~\eqref{eq:ddd}, with $\Post$ replaced by survey-year interactions at every level, and
@@ -626,11 +628,11 @@ unchanged. Nothing that follows rests on this average.
 \centering
 \begin{minipage}[t]{0.48\textwidth}\centering
 \includegraphics[width=\linewidth]{../outputs/figures/hours_event_study.pdf}\\
-{\small (a) DiD: $\Mother \times$ year}
+{\small (a) DiD: $\Mother \times \text{year}$}
 \end{minipage}\hfill
 \begin{minipage}[t]{0.48\textwidth}\centering
 \includegraphics[width=\linewidth]{../outputs/figures/hours_ddd_event_study.pdf}\\
-{\small (b) DDD: $\Mother \times$ year $\times \WFH$}
+{\small (b) DDD: $\Mother \times \text{year} \times \WFH$}
 \end{minipage}
 \caption{Event studies for weekly hours, reference year 2019}\label{fig:pretrend}
 \begin{minipage}{0.95\textwidth}\renewcommand{\baselinestretch}{1}\small
@@ -761,14 +763,14 @@ will read the headline as directionally supported rather than established.
 Two of the remaining checks in Table~\ref{tab:robust} matter, and both concern balance. Mothers
 and childless women differ in age, education and marital status, and the gap itself varies with
 exposure (Appendix Table~\ref{tab:balance-quartile}). Such a gap is exactly what the triple
-interaction is identified off. A $\Mother \times$ age-group interaction leaves the estimate
+interaction is identified off. A $\Mother \times {}$ age-group interaction leaves the estimate
 essentially unchanged. Reweighting to balance pre-period age groups attenuates it by about 19\%.
 The reweighted estimate is still significant at the 5\% level on the analytic test but now below
 the design's minimum detectable effect.
 
 Marital status is the imbalance the age checks do not touch. Most mothers are married and fewer
 than half of childless women are (Table~\ref{tab:descriptives}), and the gap widens with
-exposure. Restricting the sample to married women, or adding marital status $\times \Post \times
+exposure. Restricting the sample to married women, or adding marital status ${} \times \Post \times
 \WFH$, leaves the gradient positive but without conventional significance. Part of the headline
 may therefore come from the comparison group. Never-married childless women, a larger share of it
 at high exposure, may have worked fewer hours after 2021. Neither row is a clean test. The
@@ -821,7 +823,7 @@ one-way occupation-clustered refit of a single model (the two-way-clustered, lea
 sorting and cell-index rows). The men-only row calibrates the index on men's realized 2022--23 WFH
 shares; the teaching-only row moves ISCO 23 alone from its external score to its realized share
 and leaves the other thirty-nine at the external score; the married-only row drops marital
-status from the controls; the marital-interacted row adds marital status $\times \Post \times
+status from the controls; the marital-interacted row adds marital status ${} \times \Post \times
 \WFH$ and its two-way terms; the swapped-occupation rows keep the external index as regressor on all forty occupations
 and add a Swapped indicator for the ten calibrated occupations with the full
 $\Mother \times \Post$ structure, showing both triple interactions from that one model; the
@@ -856,7 +858,7 @@ wild cluster bootstrap none of the four is significant at the 5\% level. The pat
 gradient consistent with the mechanism rather than a set of statistically separated effects, and
 the estimate is not carried by mothers of teenagers.
 
-\label{sec:res-subgroup}Table~\ref{tab:subgroup} splits the sample by population group and
+Table~\ref{tab:subgroup} splits the sample by population group and
 re-estimates the models on men. Jewish women reproduce the pooled pattern. Arab women's gradient
 is nominally twice as large but statistically indistinguishable from it on a subsample nine times
 smaller: imprecise rather than a documented heterogeneous effect.
