@@ -50,15 +50,16 @@ resolves to the 2026 *National Tax Journal* article (bib key unchanged), so Vers
 prints "Harrington and Kahn, 2026". None of this changes a verdict in §2.3 or a number in §3. The
 recommendation (Version A, C as fallback) stands.
 
-**Applied 2026-10-03 (committed on `main`).** Version A is now the paper's Conclusion,
-at `paper.tex:1084-1116`: the §3.A block pasted as is, with `\noindent` added at the start of its
-second and third paragraphs to match the paper's paragraph style (every section indents its first
-paragraph and prefixes the rest) and no other change. A dated `CONCLUSION 2026-10-03` line was
-added to the header comment block of `paper.tex`; the paper was recompiled (pdflatex, bibtex,
-pdflatex, pdflatex): 37 pages, up from 36, no undefined reference or citation, BibTeX clean, the
-reference list unchanged (both `\citep` keys were already cited). README's description of the
-Conclusion was updated. §5's four steps are therefore done. The co-author's text survives in §1
-below and in git history before this change.
+**Applied 2026-10-03 (committed on branch `inbal`; `main` keeps Version A).** Version C is now the paper's Conclusion, at
+`paper.tex:1084-1101`: the §3.C block pasted as is, with `\noindent` added at the start of its
+second paragraph to match the paper's paragraph style (every section indents its first paragraph
+and prefixes the rest) and no other change. Version A was applied first the same day (`d673631`)
+and superseded on this branch by this commit so that the co-author's structure and voice are kept; both earlier
+texts are in git. The `CONCLUSION 2026-10-03` block in the header comment of `paper.tex` was
+rewritten; the paper was recompiled (pdflatex, bibtex, pdflatex, pdflatex): 36 pages, back from
+37, no undefined reference or citation, BibTeX clean, the reference list unchanged (Version C
+cites nothing; Version A's two keys remain cited elsewhere). README's description of the
+Conclusion was updated. §5's four steps are done. The co-author's text survives in §1 below.
 
 **Bottom line.** Nothing in the Conclusion is wrong: all ten factual claims trace to a supported
 line in the paper (§2.3). The problems are of alignment and emphasis. The section was written
@@ -398,8 +399,8 @@ place of A's third.
 
 ## 6. Not done / open items
 
-- Superseded 2026-10-03: `paper.tex`, `paper.pdf` and `README.md` changed when Version A was
-  applied (see the status block at the top).
+- Superseded 2026-10-03: `paper.tex`, `paper.pdf` and `README.md` changed when Version A and
+  then Version C were applied (see the status block at the top).
 - **Co-author sign-off.** The current text is the co-author's. Versions A and B replace it;
   Version C edits it. Which is acceptable is a decision between the authors, not one this note
   makes.
@@ -407,12 +408,11 @@ place of A's third.
   themselves; that rule is satisfied by any of the three versions only if the authors adopt and
   own the text. If the course constrains how much may be assisted, Version C is the one to
   prefer.
-- The Abstract's closing takeaway is paraphrased in A, B and C. Version A's last paragraph still
-  reads "which mothers can work more, not for mothers as a group", the Discussion's policy
-  reading rather than the Abstract's current "mothers in teleworkable occupations specifically,
-  rather than reducing the motherhood penalty across the board"; same thought, different words.
-  With A applied, the Abstract and Conclusion end on that one thought, which is conventional; the
-  authors may prefer to vary one of them.
+- The Abstract's closing takeaway is paraphrased in A, B and C. With C applied, the Conclusion
+  closes on the Abstract's wording ("mothers in teleworkable occupations specifically, not about
+  the motherhood penalty across the board", against the Abstract's "specifically, rather than
+  reducing the motherhood penalty across the board"), so the two end on the same thought in
+  near-identical words; the authors may prefer to vary one of them.
 - `harrington2025` prints "Harrington and Kahn, 2026" in-text since `00dadf2` (the published
   *National Tax Journal* version); the drafts' `\citep` key is unchanged, so nothing in them
   needs editing for it.
