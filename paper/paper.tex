@@ -311,13 +311,15 @@ task-based classification mapped to two-digit ISCO-08 codes and calibrates it ag
 Israeli remote work (Section~\ref{sec:exposure}), for which a pre-pandemic baseline exists
 \citep{madhala2020}. A continuous exposure score also places the design in the
 continuous-treatment difference-in-differences family, where a single slope compares outcomes
-across exposure levels and need not weight those comparisons positively \citep{callaway2024}.
+across exposure levels with weights that need not match the distribution of exposure
+\citep{callaway2024}.
 Section~\ref{sec:strategy} takes up the two results that bear on reading our coefficient.
 
 \paragraph{Israel, and the gap this paper fills.}
-The Israeli evidence concerns other margins and other shocks. The gender wage gap is driven
-mainly by women's sorting into lower-paying firms, even within industry, with pay differences
-within firms contributing little \citep{buzaglo2023}. An occupation-level exposure measure
+The Israeli evidence concerns other margins and other shocks. Nearly a third of the gender wage
+gap is a firm-premium gap, mostly from women's sorting into lower-paying industries and, to a
+lesser extent, lower-paying firms within industry, with pay differences within firms
+contributing little \citep{buzaglo2023}. An occupation-level exposure measure
 therefore captures only part of the relevant heterogeneity. Motherhood penalties in employment
 and earnings differ across ethno-religious groups \citep{budig2023}, and the 2020 lockdown
 reallocated paid and unpaid work within households in gender-unequal ways \citep{yaish2021}. To
@@ -515,7 +517,8 @@ all women and adds a $\Mother \times {}$ age-group interaction for the pre-perio
 an unnecessary restriction with forty occupations. A single slope also compares effects
 \emph{across} exposure levels. That requires the stronger condition that occupations at
 different exposure levels would have followed the same path under any common level of exposure,
-and the slope is a weighted average of such comparisons whose weights need not be positive
+and the slope is a weighted average of such comparisons whose weights differ from the
+distribution of exposure and, under some interpretations, are not all positive
 \citep{callaway2024}. We therefore estimate two relaxations alongside it. The
 \emph{saturated} specification replaces every lower-order term with fixed effects,
 \begin{equation}\label{eq:ddd-sat}
@@ -976,8 +979,8 @@ for everyone. The fathers' opposite-signed gradient rules out a shock common to 
 those occupations, but not one that fell on mothers alone. Third, usual hours are self-reported.
 If mothers working from home report the hours they are available while fathers report the hours
 they work, the two gradients would diverge as observed with no change in labor supplied. The
-child-age gradient does not separate the two readings. Teleworking mothers of young children
-report more interruptions to the workday \citep{pabilonia2022}. The gap between hours available
+child-age gradient does not separate the two readings. Teleworking mothers' workdays are more
+fragmented than fathers' or childless women's \citep{pabilonia2022}. The gap between hours available
 and hours worked would then itself be largest for mothers of infants, the pattern the gradient
 shows. None of the three is excluded by the design. We read the exposure gradient as the
 time-constraint mechanism's signature rather than its proof.
@@ -1013,7 +1016,7 @@ under its null.
 
 \paragraph{Exposure measurement.}
 Exposure is assigned at the two-digit occupation level, forty groups, whereas sorting across
-firms, even within the same industry, is a first-order driver of Israeli gender gaps
+industries and firms accounts for nearly a third of the Israeli gender wage gap
 \citep{buzaglo2023}. Assigning every woman her occupation's mean teleworkability is Berkson-type
 error, which does not by itself bias the slope. Error in the occupation score itself attenuates
 the triple interaction toward zero. If mothers sort into more or less teleworkable jobs
@@ -1046,8 +1049,9 @@ hours. The estimate survives dropping the year, and 2021 and 2022 are individual
 on the triple difference. The 2023 point should nonetheless be held more loosely. Early 2021
 likewise included a third lockdown, so the post-period is ``post-acute'' more cleanly in its
 later years than in its first. The comparison group includes women whose children are grown and
-women who become mothers within the window, as in the US study \citep{harrington2025}. If part
-of it responds to the treatment as mothers do, the DiD is biased toward zero. Mothers and
+women who become mothers within the window; the US study instead excludes women with older
+children \citep{harrington2025}. If part of it responds to the treatment as mothers do, the DiD
+is biased toward zero. Mothers and
 non-mothers are imbalanced on the categorical age code in a way that tracks exposure (Appendix
 Table~\ref{tab:balance-quartile}). The age-interacted and reweighted specifications of
 Section~\ref{sec:res-robust} address this. The estimate stays positive in both but, after
