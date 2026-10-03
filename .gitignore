@@ -45,3 +45,16 @@ paper/*.fdb_latexmk
 # hardcodes this machine's MiKTeX location (~/AppData/Local/Programs/MiKTeX/...), so it is not
 # portable to a co-author's machine and must not be committed.
 .claude/settings.local.json
+
+# Internal planning layer, kept outside version control from 2026-10-03: the design documents
+# (HLD, LLD, roadmap, original research plan), the decision memos, the referee review, the
+# results digest and the agent configuration. They stay on the authors' machines; git history
+# before that date holds every version, and README.md carries the conclusions a reader needs.
+docs/decisions/
+docs/HLD.md
+docs/LLD.md
+docs/ROADMAP.md
+docs/motherhood_penalty_wfh_research.md
+docs/admin/review.md
+paper/notes/results_digest.md
+CLAUDE.md
